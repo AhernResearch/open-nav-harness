@@ -1,9 +1,10 @@
 {
   "python_tests": {
-    "passed": 55,
+    "passed": 56,
     "subtests_passed": 4
   },
   "ruff": "passed",
+  "navigation_undefined_name_check": "passed: F821,F823 across navgpt",
   "mypy": "passed",
   "frontend_build": "passed",
   "playwright": {
@@ -26,7 +27,8 @@
     "changed": 0
   },
   "gpu_acceptance": {
-    "status": "running",
+    "status": "rerunning_after_tool_state_fix",
+    "invalidated_batch": "acceptance-v2: episode-local place state referenced as globals in map/annotation feedback; contaminated failures cannot rank planners",
     "split": "train",
     "unique_routes": 6,
     "unique_scenes": 6,

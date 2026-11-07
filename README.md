@@ -108,6 +108,7 @@ No training-ready SFT dataset is claimed by this platform.
 ```bash
 uv run pytest -q
 uv run ruff check nav_harness
+uv run ruff check --select F821,F823 navgpt
 uv run mypy nav_harness
 npm --prefix frontend run build
 # Or omit NAVH_CHROME after installing Playwright's Chromium:

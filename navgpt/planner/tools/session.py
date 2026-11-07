@@ -760,7 +760,7 @@ class NavigationSession:
         what a bare ``annotate_node("name")`` labels — see ``_label_target``.
         """
         ids = [p["id"] for p in payload.get("places") or []]
-        unnamed = [i for i in ids if i not in _place_labels]
+        unnamed = [i for i in ids if i not in self._place_labels]
         return max(unnamed) if unnamed else None
 
     def _label_target(self, payload: dict[str, Any]) -> int | None:
@@ -782,10 +782,10 @@ class NavigationSession:
         near = [
             p
             for p in places
-            if (p.get("straight_m") if p.get("straight_m") is not None else 99.0) <= LABEL_NEAR_M
+            if (p.get("straight_m") if p.get("straight_m") is not None else 99.0) <= self.LABEL_NEAR_M
         ]
         if near:
-            uncaptioned = [p for p in near if p["id"] not in _place_labels]
+            uncaptioned = [p for p in near if p["id"] not in self._place_labels]
             pool = uncaptioned or near
             return min(pool, key=lambda p: p.get("straight_m") or 0.0)["id"]
         return payload.get("nearest_place")

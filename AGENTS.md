@@ -14,6 +14,7 @@ neighboring repositories. Preserve inherited licenses and `provenance.json`.
 - Freeze configuration and source provenance. Never overwrite a completed attempt.
 - Add migrations rather than altering applied migration files.
 - Run `uv run pytest -q`, `uv run ruff check nav_harness`, `uv run mypy nav_harness`,
-  and `npm --prefix frontend run build`. Use Playwright for changed user workflows.
+  `uv run ruff check --select F821,F823 navgpt`, and `npm --prefix frontend run build`.
+  Use Playwright for changed user workflows.
 - GPU integration uses a separate deployment and training/dev manifest. Never start
   the original formal benchmark as a side effect of a unit/UI test.

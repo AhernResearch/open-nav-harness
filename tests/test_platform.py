@@ -271,6 +271,40 @@ def test_session_state_and_tool_contract_are_isolated(monkeypatch):
     assert set(a.mcp._tool_manager._tools) == set(expected_tools("planner_subtask"))
 
 
+def test_place_annotation_and_map_feedback_use_episode_local_labels(monkeypatch):
+    monkeypatch.setenv("NAVGPT_CONDITION", "planner_subtask")
+    from navgpt.planner.tools.session import NavigationSession
+
+    a, b = NavigationSession(), NavigationSession()
+    payload = {
+        "nearest_place": 0,
+        "you_are_at_xy": [0, 0],
+        "places": [
+            {
+                "id": i,
+                "xy": [distance, 0],
+                "straight_m": distance,
+                "route_m": distance,
+                "visits": 1,
+                "links": [],
+            }
+            for i, distance in [(0, 0), (1, 0.5), (2, 4)]
+        ],
+    }
+    for session in (a, b):
+        monkeypatch.setattr(session, "_fetch_places", lambda: payload)
+        monkeypatch.setattr(session, "_call", lambda *args: {"position": [0, 0, 0]})
+        monkeypatch.setattr(session, "_dump_labels", lambda: None)
+    first = a.add_place("kitchen", "by the island")
+    assert json.loads(first[0])["recorded_place"] == 0
+    assert '"kitchen"' in first[1]
+    assert '"kitchen"' in a._places_line()
+    assert a._pending_place(payload) == 2
+    assert a._label_target(payload) == 1  # Nearby unnamed node, not the farthest/newest one.
+    assert b._label_target(payload) == 0
+    assert '"kitchen"' not in b._format_places(payload)
+
+
 def test_lost_motion_response_blocks_even_if_metrics_written(db):
     eid, _ = experiment(db)
     db.enqueue(eid)
