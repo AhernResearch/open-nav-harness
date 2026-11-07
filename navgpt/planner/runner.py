@@ -453,7 +453,11 @@ def preflight(cfg: RunConfig) -> dict[str, Any]:
     # match the check that matters: a missing tool silently weakens the
     # condition, and an extra one silently strengthens it. Either way the run
     # would not measure the condition it is labelled with.
-    tools = _probe_mcp_tools(cfg)
+    if cfg.planner_runtime == "openai_compatible":
+        from .tools.session import NavigationSession
+        tools = list(NavigationSession(env=mcp_env_for(cfg, live_dir=None)).tools.definitions)
+    else:
+        tools = _probe_mcp_tools(cfg)
     from .tools.ablation import validate
     validate(cfg.interface_variant, cfg.capability_bundle, cfg.review_every)
     if (cfg.interface_variant != 'standard' or cfg.capability_bundle != 'full' or cfg.review_every):
@@ -492,7 +496,8 @@ def preflight(cfg: RunConfig) -> dict[str, Any]:
                 " unexpected={}".format(extra) if extra else "",
                 cfg.condition, MCP_TOOLS_MODULE)
         )
-    report["mcp_tools"] = sorted(tools)
+    report["navigation_tools"] = sorted(tools)
+    report["tool_transport"] = "direct" if cfg.planner_runtime == "openai_compatible" else "mcp"
 
     # 3. model actually authorized (cheap call)
     if cfg.planner_runtime == "openai_compatible":

@@ -21,6 +21,7 @@ class ContextWindow:
         self.policy, self.limit, self.reserve = policy, limit, reserve
         self.state = None
         self.max_images = max_images
+        self.start = 0
 
     def append(self, messages: list[dict], state=None):
         self.blocks.append(messages)
@@ -28,7 +29,8 @@ class ContextWindow:
             self.state = copy.deepcopy(state)
 
     async def build(self, counter, tools, journal):
-        start = 0
+        start = self.start
+        stride = 1
         while True:
             messages = list(self.prefix)
             if start and self.state:
@@ -50,6 +52,7 @@ class ContextWindow:
             except CounterLimit:
                 n = self.limit
             if n + self.reserve + 256 <= self.limit:
+                self.start = start
                 journal.emit(
                     "context_selection",
                     policy=self.policy,
@@ -66,4 +69,7 @@ class ContextWindow:
                 raise ContextOverflow(
                     f"Essential context ({n}) exceeds {self.limit - self.reserve - 256} input tokens"
                 )
-            start += 1
+            # Advance exponentially on overflow; never reintroduce discarded turns.
+            # The serving tokenizer remains authoritative for every selected input.
+            start = min(len(self.blocks) - 1, start + stride)
+            stride *= 2

@@ -469,7 +469,8 @@ After accepting any non-final subtask, immediately execute the next one in this 
 session. Continue autonomously until terminate_episode has actually stopped the robot.
 Never return a final answer merely reporting a pending task or a completed first subtask.
 Use the original instruction and shared plan for global reasoning; the VLA only gets
-its current local task. Your full Planner conversation remains available.
+its current local task. Older Planner turns may be removed to fit the context budget. Persist completed work,
+uncertainties and useful node IDs in your summary; current task state survives pruning.
 The episode has a global budget of {budget} low-level actions. No user can answer questions.
 """
 

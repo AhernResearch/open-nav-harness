@@ -268,7 +268,7 @@ def test_session_state_and_tool_contract_are_isolated(monkeypatch):
     a, b = NavigationSession(), NavigationSession()
     a._steps_taken = 9
     assert b._steps_taken == 0
-    assert set(a.mcp._tool_manager._tools) == set(expected_tools("planner_subtask"))
+    assert set(a.tools.definitions) == set(expected_tools("planner_subtask"))
 
 
 def test_place_annotation_and_map_feedback_use_episode_local_labels(monkeypatch):

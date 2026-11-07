@@ -1,14 +1,11 @@
-"""Managed model/tool loop, sharing the original MCP navigation tools."""
+"""Managed model/tool loop, using transport-neutral navigation tools."""
 
 import json
-import os
 import traceback
-from contextlib import AsyncExitStack
 import jsonschema
-from mcp import ClientSession, StdioServerParameters
-from mcp.client.stdio import stdio_client
 from navgpt.planner.contracts import SessionOutcome
-from navgpt.planner.runner import expected_tools, mcp_launch
+from navgpt.planner.runner import expected_tools
+from navgpt.planner.tools.transport import open_tools
 from nav_harness.core.artifacts import Journal
 from nav_harness.core.config import PlannerProfile
 from nav_harness.core.context import ContextWindow
@@ -70,24 +67,14 @@ class ManagedRuntime:
         error = None
         stopped = False
         try:
-            async with AsyncExitStack() as stack:
-                spec = mcp_launch(ctx.mcp_env)
-                transport = await stack.enter_async_context(
-                    stdio_client(
-                        StdioServerParameters(
-                            command=spec["command"], args=spec["args"], env={**os.environ, **spec["env"]}
-                        )
-                    )
-                )
-                session = await stack.enter_async_context(ClientSession(*transport))
-                await session.initialize()
-                listed = (await session.list_tools()).tools
+            async with open_tools(ctx.mcp_env) as session:
+                listed = await session.list_tools()
                 definitions = {t.name: t.inputSchema for t in listed}
                 want = expected_tools(
                     ctx.mcp_env["NAVGPT_CONDITION"], ctx.mcp_env.get("NAVGPT_CAPABILITY_BUNDLE", "full")
                 )
                 if set(definitions) != set(want):
-                    raise ModelProtocolError("MCP tool set differs from the configured contract")
+                    raise ModelProtocolError("Navigation tool set differs from the configured contract")
                 tools = [
                     {
                         "type": "function",

@@ -1,36 +1,4 @@
-"""MCP tool server — the agent's only channel to NavGPT Environment.
-
-Stdio MCP server (FastMCP) forwarding a condition-scoped toolset to a running
-navgpt.environment (``POST /call/{fn}``). Registration at the bottom of this
-file is the capability boundary. ``planner_basic`` sees two tools; the primary
-``planner_vla_memory`` profile sees the eight inspection, delegation, repair,
-return, annotation, and termination tools documented in the project README.
-
-Episode selection and metric collection stay driver-side. The agent never
-sees SR/SPL, reward, pose, depth, or the goal — that separation is what
-makes the eval honest, and it is why this file talks HTTP to the env rather
-than importing it.
-
-One MCP tool server process serves one agent session = one episode (the Agent SDK
-spawns a fresh stdio server per session), so per-episode step accounting
-lives in this NavigationSession instance.
-
-Runs in the AGENT-side interpreter (py>=3.10), not the habitat one — it
-needs only ``requests`` + ``pillow``. Note the SDK spawns this with
-``command=sys.executable``: if those two imports fail here, the MCP server
-dies, the model is handed zero tools, and the session still reports success
-while scoring SR=0. ``runner.preflight()`` exists to catch exactly that.
-
-Env vars:
-    NAVGPT_SERVER_URL     navgpt.environment base URL (default http://127.0.0.1:9200)
-    NAVGPT_VERB_PREFIX    verb namespace (default r2rce)
-    NAVGPT_STEP_BUDGET    advisory low-level step budget echoed to the agent
-                           (default 500 — the env's max_steps truncates
-                           authoritatively regardless)
-    NAVGPT_LIVE_DIR       optional dir for live spectating: every observed
-                           frame lands as obs_NNNN.png (+ latest.png) and every
-                           step call appends a line to actions.log
-"""
+"""Episode-local navigation tools shared by direct, RPC and MCP transports."""
 
 from __future__ import annotations
 import base64
@@ -44,7 +12,7 @@ import time
 from pathlib import Path
 from typing import Any
 import requests
-from mcp.server.fastmcp import FastMCP, Image
+from .registry import Image, ToolRegistry
 
 
 def _sibling(module_name, attr):
@@ -69,36 +37,38 @@ frame_exists = _sibling("frame_store", "frame_exists")
 class NavigationSession:
     """Episode-local navigation tool state. One instance per MCP session; no mutable module state."""
 
-    def __init__(self):
-        self.SERVER_URL = os.environ.get("NAVGPT_SERVER_URL", "http://127.0.0.1:9200")
-        self.VERB_PREFIX = os.environ.get("NAVGPT_VERB_PREFIX", "r2rce")
-        self.STEP_BUDGET = int(os.environ.get("NAVGPT_STEP_BUDGET", "500"))
-        self.LIVE_DIR = Path(os.environ["NAVGPT_LIVE_DIR"]) if os.environ.get("NAVGPT_LIVE_DIR") else None
-        self.CONDITION = os.environ.get("NAVGPT_CONDITION", "planner_basic")
+    def __init__(self, env=None, actor=None):
+        self.env = dict(os.environ if env is None else env)
+        self._actor = actor
+        self.SERVER_URL = self.env.get("NAVGPT_SERVER_URL", "http://127.0.0.1:9200")
+        self.VERB_PREFIX = self.env.get("NAVGPT_VERB_PREFIX", "r2rce")
+        self.STEP_BUDGET = int(self.env.get("NAVGPT_STEP_BUDGET", "500"))
+        self.LIVE_DIR = Path(self.env["NAVGPT_LIVE_DIR"]) if self.env.get("NAVGPT_LIVE_DIR") else None
+        self.CONDITION = self.env.get("NAVGPT_CONDITION", "planner_basic")
         self._SUBTASK = self.CONDITION == "planner_subtask"
-        self.VLA_URL = os.environ.get("NAVGPT_VLA_URL", "http://127.0.0.1:8000")
-        self.VLA_BACKEND = os.environ.get("NAVGPT_VLA_BACKEND", "navgpt")
-        self.VLA_MAX_STEPS = int(os.environ.get("NAVGPT_VLA_MAX_STEPS", "200"))
-        self.VLA_MAP = os.environ.get(
+        self.VLA_URL = self.env.get("NAVGPT_VLA_URL", "http://127.0.0.1:8000")
+        self.VLA_BACKEND = self.env.get("NAVGPT_VLA_BACKEND", "navgpt")
+        self.VLA_MAX_STEPS = int(self.env.get("NAVGPT_VLA_MAX_STEPS", "200"))
+        self.VLA_MAP = self.env.get(
             "NAVGPT_VLA_MAP", "1" if self.CONDITION in ("planner_vla_memory", "planner_subtask") else "0"
         ) not in ("0", "", "false")
-        self.PLACE_LISTING_MAX = int(os.environ.get("NAVGPT_PLACE_LISTING_MAX", "24"))
-        self.MOVE_ROUTES = os.environ.get("NAVGPT_MOVE_ROUTES", "1") not in ("0", "", "false")
-        self.MOVE_VIEW = os.environ.get("NAVGPT_MOVE_VIEW", "1") not in ("0", "", "false")
-        self.MAX_KEYFRAMES = int(os.environ.get("NAVGPT_MAX_KEYFRAMES", "8"))
+        self.PLACE_LISTING_MAX = int(self.env.get("NAVGPT_PLACE_LISTING_MAX", "24"))
+        self.MOVE_ROUTES = self.env.get("NAVGPT_MOVE_ROUTES", "1") not in ("0", "", "false")
+        self.MOVE_VIEW = self.env.get("NAVGPT_MOVE_VIEW", "1") not in ("0", "", "false")
+        self.MAX_KEYFRAMES = int(self.env.get("NAVGPT_MAX_KEYFRAMES", "8"))
         self._HAS_MOVE = self.CONDITION == "planner_motion"
         self._HAS_VLA = self.CONDITION in ("planner_vla_memory", "planner_subtask")
         self._HAS_PLACES = self.CONDITION in ("planner_memory", "planner_vla_memory", "planner_subtask")
         self._HAS_MOVE = self._HAS_MOVE or self._HAS_PLACES
         self._HAS_PANO = self._HAS_MOVE or self._HAS_VLA
-        self.INTERFACE = os.environ.get("NAVGPT_INTERFACE_VARIANT", "standard")
-        self.BUNDLE = os.environ.get("NAVGPT_CAPABILITY_BUNDLE", "full")
-        self.REVIEW_EVERY = int(os.environ.get("NAVGPT_REVIEW_EVERY", "0"))
+        self.INTERFACE = self.env.get("NAVGPT_INTERFACE_VARIANT", "standard")
+        self.BUNDLE = self.env.get("NAVGPT_CAPABILITY_BUNDLE", "full")
+        self.REVIEW_EVERY = int(self.env.get("NAVGPT_REVIEW_EVERY", "0"))
         self._ABLATION = self.INTERFACE != "standard"
         self._CAPABILITIES = _sibling("ablation", "CAPABILITIES")
         _sibling("ablation", "validate")(self.INTERFACE, self.BUNDLE, self.REVIEW_EVERY)
         self._scheduler = _sibling("ablation", "ReviewScheduler")(self.REVIEW_EVERY)
-        self.mcp = FastMCP("env")
+        self.tools = ToolRegistry()
         self._t0 = time.time()
         self._obs_count = 0
         self._steps_taken = 0
@@ -107,8 +77,8 @@ class NavigationSession:
         self._OBSERVE_DESC = "Look through the robot's forward-facing camera and return the RGB view."
         self._STEP_DESC = "Execute movement actions in order.\nActions: 0 = STOP (permanently ENDS the episode — issue it only when you believe you have reached the instruction's endpoint), 1 = move forward 0.25 m, 2 = turn left 15 degrees, 3 = turn right 15 degrees.\nExecutes sequentially and halts early if the episode ends. Returns how many low-level steps were taken and whether the episode is over."
         self._recent_frames: list[str] = []
-        self.LIVE_FORMAT = (os.environ.get("NAVGPT_LIVE_FORMAT") or "jpg").lower()
-        self.LIVE_JPEG_QUALITY = int(os.environ.get("NAVGPT_LIVE_JPEG_QUALITY") or "88")
+        self.LIVE_FORMAT = (self.env.get("NAVGPT_LIVE_FORMAT") or "jpg").lower()
+        self.LIVE_JPEG_QUALITY = int(self.env.get("NAVGPT_LIVE_JPEG_QUALITY") or "88")
         self._tool_ctx: dict[str, Any] = {"tool": None, "call": 0}
         self._tool_call_counts: dict[str, int] = {}
         self._vla = None
@@ -117,11 +87,11 @@ class NavigationSession:
         self._last_pose = None
         self._last_scan = None
         self._last_revisit = None
-        self._instruction = os.environ.get("NAVGPT_INSTRUCTION", "")
+        self._instruction = self.env.get("NAVGPT_INSTRUCTION", "")
         self._tasks = (
             _sibling("subtasks", "SubtaskManager")(
                 self._instruction,
-                os.environ.get("NAVGPT_SUBTASK_DIR")
+                self.env.get("NAVGPT_SUBTASK_DIR")
                 or (self.LIVE_DIR / "subtasks" if self.LIVE_DIR else None),
             )
             if self._SUBTASK
@@ -142,10 +112,10 @@ class NavigationSession:
             + "\nWHAT IT CANNOT DO: end the episode, and recognise arrival. vla_suggests_arrival only means it stopped producing movement — it is wrong in both directions, so never treat it as confirmation. Only your own STOP ends the episode, and judging whether you are actually at the endpoint the instruction describes is the part you cannot hand over.\n\nHOW TO USE IT: normally one call at the start. Then read the four returned views against the instruction, walk the last few metres yourself with navigate_relative() if it finished short or overshot, and STOP when the view matches the endpoint. The four views it returns are exactly what observe_panorama() gives, so do not spend a turn on observe_panorama straight afterwards."
         )
         self._place_labels: dict[int, dict[str, Any]] = {}
-        self.LABELS_PATH = os.environ.get("NAVGPT_PLACE_LABELS") or ""
+        self.LABELS_PATH = self.env.get("NAVGPT_PLACE_LABELS") or ""
         self._place_frames: dict[int, str] = {}
-        self.PLACE_FRAME_NEAR_M = float(os.environ.get("NAVGPT_PLACE_FRAME_NEAR_M", "1.5"))
-        self.LABEL_NEAR_M = float(os.environ.get("NAVGPT_LABEL_NEAR_M", "1.5"))
+        self.PLACE_FRAME_NEAR_M = float(self.env.get("NAVGPT_PLACE_FRAME_NEAR_M", "1.5"))
+        self.LABEL_NEAR_M = float(self.env.get("NAVGPT_LABEL_NEAR_M", "1.5"))
         self._ADD_PLACE_DESC = 'Record where you are as a named place, so you can come back to it.\n\nname is a short handle you will use later — "kitchen doorway", "pool corner". caption is one sentence that will let you recognise it when you have walked away and forgotten: what is around it, which way the exits go, what made you notice it. Keep the caption under about 120 characters.\n\nNew places appear on their own as you cover new ground, and the result of every move tells you when one has appeared without a name. Name it then, while you are standing there — a place called "place 7" is no use to you later, and the caption is the whole difference between a map and a memory.\n\nYou can also name somewhere the moment you decide it matters, without waiting to be asked: if you think you have arrived at the endpoint the instruction describes, name it BEFORE you look any further. Then, if the search turns out to be wrong, you can walk back to it and stop there.\n\nThe label describes WHERE YOU ARE STANDING. It attaches to the place nearest you, and the result says which and how far away it was.\n\nIt does not move the robot.'
         self._GO_DESC = 'Walk to somewhere you recorded earlier: navigate_to_node(2) by its number, or navigate_to_node("kitchen doorway") by its name. The robot retraces ground it has already walked, so the route is one it has proved is walkable.\nThis is for GOING BACK. To cover new ground use navigate_relative(turn_deg, distance_m), reading the bearing off the ruler burned under whatever you want to walk towards.\nNumbers last the whole episode. observe_map() lists every place with its coordinates, your name for it, and how far walking back would be.'
         self._trace: list[dict[str, Any]] = []
@@ -326,6 +296,8 @@ class NavigationSession:
         return {name: views[name] for name in names}
 
     def _lazy_vla(self):
+        if self._actor is not None:
+            return self._actor
         if self._vla is None:
             self._vla = _sibling("vla_client", "NavGPTVLAClient")(self.VLA_URL, backend=self.VLA_BACKEND)
         return self._vla
@@ -943,7 +915,7 @@ class NavigationSession:
         remaining = max(1, self.STEP_BUDGET - self._steps_taken)
         budget = remaining if self.VLA_MAX_STEPS <= 0 else max(1, min(self.VLA_MAX_STEPS, remaining))
         if self._SUBTASK:
-            budget = min(budget, int(os.environ.get("NAVGPT_SUBTASK_MAX_ACTIONS", "80")))
+            budget = min(budget, int(self.env.get("NAVGPT_SUBTASK_MAX_ACTIONS", "80")))
         spec = self._lazy_vla()
         grant = self._scheduler.begin(route) if self._ABLATION else None
         if self._ABLATION and self.VLA_MAX_STEPS > 0:
@@ -1089,14 +1061,14 @@ class NavigationSession:
                 break
             if self._SUBTASK and (
                 blocked_count >= 3
-                or travelled >= float(os.environ.get("NAVGPT_SUBTASK_MAX_DISTANCE", "3"))
-                or turned >= float(os.environ.get("NAVGPT_SUBTASK_MAX_TURN", "180"))
+                or travelled >= float(self.env.get("NAVGPT_SUBTASK_MAX_DISTANCE", "3"))
+                or turned >= float(self.env.get("NAVGPT_SUBTASK_MAX_TURN", "180"))
             ):
                 subtask_return = (
                     "blocked"
                     if blocked_count >= 3
                     else "distance_budget"
-                    if travelled >= float(os.environ.get("NAVGPT_SUBTASK_MAX_DISTANCE", "3"))
+                    if travelled >= float(self.env.get("NAVGPT_SUBTASK_MAX_DISTANCE", "3"))
                     else "turn_budget"
                 )
                 break
@@ -1616,7 +1588,7 @@ class NavigationSession:
     def _instruction_id(self) -> str:
         """Episode id for NavGPT VLA's per-episode bookkeeping. It only labels
         the server's debug GIF, so a stable per-process value is enough."""
-        return os.environ.get("NAVGPT_EPISODE_ID", "episode")
+        return self.env.get("NAVGPT_EPISODE_ID", "episode")
 
     def _bump_obs(self, png: bytes, label: str | None = None, kind: str = "view") -> None:
         self._obs_count += 1
@@ -1640,12 +1612,12 @@ class NavigationSession:
                     result.append(json.dumps({"subtask_state": self._tasks.snapshot()}))
                     return result
 
-            self.mcp.tool(name=name, description=description)(task_call)
+            self.tools.register(name, description, task_call)
             return
         if self._ABLATION and name not in self._CAPABILITIES[self.BUNDLE]:
             return
         if not self._ABLATION:
-            self.mcp.tool(name=name, description=description)(fn)
+            self.tools.register(name, description, fn)
             return
         import functools
 
@@ -1690,7 +1662,7 @@ class NavigationSession:
             description = (
                 "Inspect the observed route map, stable node IDs and its stated coordinate convention."
             )
-        self.mcp.tool(name=name, description=description)(serial)
+        self.tools.register(name, description, serial)
 
     def update_plan(self, subtasks: list[dict], reason: str, reopen_ids: list[int] | None = None) -> list:
         """Submit 1-8 local goals, each with id, source_quote, instruction and completion_criterion.

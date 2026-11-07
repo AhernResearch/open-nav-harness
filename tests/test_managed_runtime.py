@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 import pytest
-from mcp.types import CallToolResult, TextContent, ImageContent
+from navgpt.planner.tools.registry import ToolResult as CallToolResult, TextContent, ImageContent
 from nav_harness.core.config import PlannerProfile
 from nav_harness.providers import runtime as module
 from nav_harness.providers.runtime import ManagedRuntime, tool_feedback
@@ -45,8 +45,7 @@ async def run_fake(tmp_path, monkeypatch, responses):
             pass
 
         async def list_tools(self):
-            return SimpleNamespace(
-                tools=[
+            return [
                     SimpleNamespace(
                         name=name,
                         description=name,
@@ -54,7 +53,6 @@ async def run_fake(tmp_path, monkeypatch, responses):
                     )
                     for name in ["observe_panorama", "terminate_episode"]
                 ]
-            )
 
         async def call_tool(self, name, args):
             executed.append(name)
@@ -67,11 +65,10 @@ async def run_fake(tmp_path, monkeypatch, responses):
 
     @asynccontextmanager
     async def transport(*_):
-        yield (None, None)
+        yield Session()
 
     monkeypatch.setattr(module, "CompatibleClient", Client)
-    monkeypatch.setattr(module, "ClientSession", Session)
-    monkeypatch.setattr(module, "stdio_client", transport)
+    monkeypatch.setattr(module, "open_tools", transport)
     monkeypatch.setattr(module, "expected_tools", lambda *_: ["observe_panorama", "terminate_episode"])
     ctx = EpisodeContext(
         "system",
