@@ -38,7 +38,9 @@ templates accordingly. CPU-only bridges use `gpu_ids=[]`, `reserve_mib=0`.
 - **Blocked attempt:** read its error/logs. Stop its owned environment and VLA through
   the service page; then select **校验并释放资源锁** in replay. Restart the services and
   resume the job. Reconciliation verifies the attempt process is gone and both motion
-  services have recorded stopped states. Old evidence is retained.
+  services have recorded stopped states. A committed episode result (including a
+  timeout failure) is kept as completed and will not rerun; an attempt without a
+  committed result remains interrupted. Old evidence is retained.
 - **Unknown service:** inspect its owned systemd logs and retry stop. Only after confirmed
   stop should it start again. Do not adopt a process that merely happens to answer on
   the configured port. A startup deadline never silently kills unrelated services.

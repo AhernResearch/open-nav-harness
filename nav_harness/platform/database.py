@@ -358,8 +358,14 @@ class Database:
                         "Stop all platform-owned environment and VLA services before reconciliation; external resources require operator recovery"
                     )
             c.execute(
-                text("UPDATE attempts SET status='interrupted',updated=:t WHERE id=:id"),
-                {"id": aid, "t": time.time()},
+                text("UPDATE attempts SET status=:s,updated=:t WHERE id=:id"),
+                {
+                    "id": aid,
+                    "t": time.time(),
+                    # A committed episode result remains a measured outcome,
+                    # including a timeout. Cleanup must not silently repeat it.
+                    "s": "completed" if a["result"] else "interrupted",
+                },
             )
             c.execute(text("DELETE FROM leases WHERE attempt_id=:id"), {"id": aid})
             c.execute(

@@ -52,8 +52,8 @@ export function ComparePage({ jobs, perform, openAttempt }: WorkspaceProps) {
               ? "—"
               : (c.aggregate.sr * 100).toFixed(1) + "%"}{" "}
             · 平均 NE {c.aggregate.ne?.toFixed(2) ?? "—"} m · 平均耗时{" "}
-            {c.aggregate.wall_s?.toFixed(1) ?? "—"} s · 接口错误{" "}
-            {c.aggregate.protocol_errors}
+            {c.aggregate.wall_s?.toFixed(1) ?? "—"} s · 执行错误（含超时）{" "}
+            {c.aggregate.execution_errors}
           </p>
           <Attempts
             rows={c.rows}

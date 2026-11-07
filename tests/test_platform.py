@@ -330,3 +330,53 @@ def test_reconciliation_finishes_pending_cancellation(db):
     db.release_reconciled(a["id"])
     assert db.rows("SELECT status FROM jobs WHERE id=:id", id=jid)[0]["status"] == "cancelled"
     assert not db.rows("SELECT * FROM leases")
+
+
+def test_comparison_counts_completed_errors_without_metrics_as_failures():
+    from nav_harness.platform.results import aggregate
+
+    rows = [
+        {"episode": 0, "status": "completed", "success": 1, "error": None},
+        {"episode": 1, "status": "completed", "success": None, "error": "protocol error"},
+        {"episode": 1, "status": "completed", "success": 1, "error": None},
+        {"episode": 2, "status": "interrupted", "success": None, "error": "worker exited"},
+    ]
+    result = aggregate(rows)
+    assert result["routes_completed"] == 2
+    assert result["execution_errors"] == 1
+    assert result["sr"] == 0.5
+
+
+def test_reconciliation_preserves_committed_timeout_as_completed(db):
+    eid, _ = experiment(db, managed=True)
+    with db.transaction() as c:
+        rows = c.execute(text("SELECT id,spec FROM services")).mappings().all()
+        for row in rows:
+            spec = json.loads(row["spec"])
+            if spec["kind"] in ("environment", "vla"):
+                spec.update(managed=True, template="test")
+                c.execute(
+                    text("UPDATE services SET spec=:s,status='ready' WHERE id=:id"),
+                    {"s": json.dumps(spec), "id": row["id"]},
+                )
+    jid = db.enqueue(eid)
+    a = db.claim()
+    from nav_harness.platform.worker import Worker
+    from nav_harness.core.config import PlatformSettings
+
+    Worker(db, PlatformSettings()).complete(
+        a, {"error": "episode_timeout", "task_success": 0, "resource_state": "unknown"}
+    )
+    with db.transaction() as c:
+        c.execute(
+            text(
+                "UPDATE services SET status='stopped' WHERE json_extract(spec,'$.kind') IN ('environment','vla')"
+            )
+        )
+    db.release_reconciled(a["id"])
+    assert db.rows("SELECT status FROM attempts WHERE id=:id", id=a["id"])[0]["status"] == "completed"
+    with db.transaction() as c:
+        c.execute(text("UPDATE services SET status='ready'"))
+    db.control(jid, "resume")
+    next_attempt = db.claim()
+    assert next_attempt is None or next_attempt["episode"] != a["episode"]

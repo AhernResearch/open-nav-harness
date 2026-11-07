@@ -87,8 +87,9 @@ navigation score. Output folders cannot overwrite earlier probes.
 Movement calls are **never automatically retried**. If an episode dies or a movement
 reply is missing, its resource leases remain blocked. Stop its owned environment
 and VLA, use the replay page to reconcile the attempt, then restart the services and
-resume the job. Recovery creates a new attempt; it does not overwrite prior evidence
-or rerun completed episodes. External uncertain resources require operator recovery;
+resume the job. Recovery creates a new attempt only if no episode result was committed;
+completed outcomes, including timeout failures, are retained without rerunning them.
+Recovery never overwrites prior evidence. External uncertain resources require operator recovery;
 the platform will not kill an external process to free a lease.
 
 `completed` is an execution status, not navigation success. Metrics retain explicit

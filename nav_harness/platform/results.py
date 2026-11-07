@@ -83,7 +83,6 @@ def aggregate(rows):
         if row["status"] == "completed":
             first.setdefault(row["episode"], row)
     values = list(first.values())
-    measured = [r for r in values if r["success"] is not None]
 
     def average(key):
         numbers = [r[key] for r in values if isinstance(r.get(key), (int, float))]
@@ -92,13 +91,15 @@ def aggregate(rows):
     return {
         "attempts": len(rows),
         "routes_completed": len(values),
-        "sr": sum(bool(r["success"]) for r in measured) / len(measured) if measured else None,
+        "sr": sum(bool(r["success"]) and not r.get("error") for r in values) / len(values)
+        if values
+        else None,
         "ne": average("ne"),
         "spl": average("spl"),
         "wall_s": average("wall_s"),
         "tool_calls": average("tool_calls"),
         "vla_calls": average("vla_calls"),
-        "protocol_errors": sum(bool(r.get("error")) for r in values),
+        "execution_errors": sum(bool(r.get("error")) for r in values),
         "cost_usd": sum(r["cost_usd"] for r in values)
         if values and all(r.get("cost_usd") is not None for r in values)
         else None,
