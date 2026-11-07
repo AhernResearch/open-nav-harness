@@ -201,7 +201,20 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
 
     @app.post("/api/experiments", status_code=201)
     def experiment(body: ExperimentSpec):
-        return {"id": db.create_experiment(body)}
+        deployments = {}
+        for sid in (body.planner_service, body.environment_service, body.vla_service):
+            if not sid:
+                continue
+            service = db.service(sid)
+            template = settings.service_templates.get(service.template)
+            if template:
+                deployments[sid] = {
+                    "host": template.host,
+                    "argv": template.argv,
+                    "working_directory": template.working_directory,
+                    "environment_names": sorted(template.environment),
+                }
+        return {"id": db.create_experiment(body, deployments)}
 
     @app.get("/api/jobs")
     def jobs():

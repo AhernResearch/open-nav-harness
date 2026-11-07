@@ -67,6 +67,9 @@ The two initial A100 profiles are Qwen3.6-27B and Qwen3.6-35B-A3B NVFP4. Their o
 vLLM services use `qwen3_coder` tool parsing and `qwen3` reasoning parsing. The
 installed vLLM 0.19.1 requires `--mm-processor-cache-gb 0` when using `/tokenize`
 before multimodal generation; the default cache caused a reproducible cache miss.
+The NVFP4 export also embeds a 4096-token truncation setting in `tokenizer.json`.
+Its serving template overrides this with `--mm-processor-kwargs '{"truncation":false}'`,
+without editing the shared checkpoint. A 30-image probe verifies inputs beyond that cap.
 Validate a deployment before navigation:
 
 ```bash

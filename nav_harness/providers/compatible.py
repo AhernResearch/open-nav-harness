@@ -13,8 +13,9 @@ class ModelProtocolError(RuntimeError):
 
 
 class CompatibleClient:
-    def __init__(self, profile: PlannerProfile):
+    def __init__(self, profile: PlannerProfile, journal=None):
         self.profile = profile
+        self.journal = journal
         headers = {}
         if profile.credential_env:
             key = os.environ.get(profile.credential_env)
@@ -41,6 +42,15 @@ class CompatibleClient:
                 "chat_template_kwargs": {"enable_thinking": p.thinking},
             },
         )
+        if self.journal:
+            body = r.json() if "json" in r.headers.get("content-type", "") else {"error": r.text}
+            self.journal.emit(
+                "token_count",
+                status=r.status_code,
+                count=body.get("count"),
+                max_model_len=body.get("max_model_len"),
+                error=body.get("error"),
+            )
         if r.status_code == 400 and any(
             phrase in r.text.lower()
             for phrase in (
@@ -51,7 +61,8 @@ class CompatibleClient:
             )
         ):
             raise CounterLimit(r.text)
-        r.raise_for_status()
+        if r.is_error:
+            raise ModelProtocolError(f"Tokenizer HTTP {r.status_code}: {r.text[:4000]}")
         body = r.json()
         count = body.get("count")
         if not isinstance(count, int) or count < 0:

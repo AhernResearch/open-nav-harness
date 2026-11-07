@@ -1,6 +1,8 @@
 """Provider-neutral session contracts; no runner or SDK dependencies."""
+
 from dataclasses import dataclass, field
 from pathlib import Path
+
 
 @dataclass
 class EpisodeContext:
@@ -25,5 +27,3 @@ class SessionOutcome:
     error: str | None = None
     subtype: str | None = None
     extra: dict = field(default_factory=dict)
-
-

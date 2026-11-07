@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "model": "navh-qwen35b",
+  "counted_tokens": 4703,
+  "actual_prompt_tokens": 4703,
+  "image_count": 30,
+  "image_size": 400,
+  "schema_tool_call": true
+}

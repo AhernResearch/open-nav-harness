@@ -8,8 +8,11 @@ from pathlib import Path
 def implementation_digest() -> str:
     root = Path(__file__).resolve().parents[2]
     digest = sha256()
-    for package in ("nav_harness", "navgpt"):
-        for path in sorted((root / package).rglob("*.py")):
-            digest.update(path.relative_to(root).as_posix().encode())
-            digest.update(path.read_bytes())
+    paths = set((root / "navgpt").rglob("*.py"))
+    for package in ("core", "providers"):
+        paths.update((root / "nav_harness" / package).rglob("*.py"))
+    paths.add(root / "nav_harness/platform/episode.py")
+    for path in sorted(paths):
+        digest.update(path.relative_to(root).as_posix().encode())
+        digest.update(path.read_bytes())
     return digest.hexdigest()

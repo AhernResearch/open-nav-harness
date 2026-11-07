@@ -293,3 +293,13 @@ def test_motion_recovery_requires_acknowledged_result():
         resource_state(events + [{"kind": "tool_result", "call_id": "a", "is_error": False}], wire=True)
         == "idle"
     )
+
+
+def test_paused_job_can_cancel_without_a_free_worker_slot(db):
+    eid, _ = experiment(db)
+    jid = db.enqueue(eid)
+    db.control(jid, "pause")
+    assert db.rows("SELECT status FROM jobs WHERE id=:id", id=jid)[0]["status"] == "paused"
+    db.control(jid, "cancel")
+    assert db.rows("SELECT status FROM jobs WHERE id=:id", id=jid)[0]["status"] == "cancelled"
+    assert db.claim() is None

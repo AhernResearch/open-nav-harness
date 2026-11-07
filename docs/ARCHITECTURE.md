@@ -74,7 +74,9 @@ SQLite uses WAL, foreign keys and `BEGIN IMMEDIATE` for claims and lifecycle fen
 An attempt owns its environment, actor and one Planner slot. One active attempt per job
 preserves route order; independent jobs may run concurrently when resources permit.
 Completed episodes are not automatically repeated. Failure recovery receives a new
-attempt ordinal and directory. Configuration and source fingerprints are frozen.
+attempt ordinal and directory. Configuration, launch-template snapshots and execution-source fingerprints are frozen.
+The execution fingerprint covers navigation, providers, context and the episode executor;
+control-plane/UI changes do not invalidate navigation configurations.
 
 The worker lock prevents multiple schedulers. Each episode writes a process receipt
 before execution. After a restart the worker verifies PID, Linux start ticks and the

@@ -1,4 +1,5 @@
 """MCP transport entry point; all tool logic lives in NavigationSession."""
+
 from pathlib import Path
 import sys
 

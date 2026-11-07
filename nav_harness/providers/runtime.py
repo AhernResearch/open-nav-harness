@@ -64,7 +64,7 @@ class ManagedRuntime:
             self.profile.output_tokens,
             self.profile.max_images,
         )
-        client = CompatibleClient(self.profile)
+        client = CompatibleClient(self.profile, journal=journal)
         usage = {"input_tokens": 0, "cached_input_tokens": 0, "output_tokens": 0}
         seen_ids = set()
         error = None
@@ -180,7 +180,14 @@ class ManagedRuntime:
                 if not stopped:
                     error = "planner_turn_budget_exhausted"
         except Exception as exc:
-            error = f"{type(exc).__name__}: {exc}"
+
+            def describe(error):
+                nested = getattr(error, "exceptions", None)
+                return (
+                    "; ".join(describe(e) for e in nested) if nested else f"{type(error).__name__}: {error}"
+                )
+
+            error = describe(exc)
             journal.emit("session_error", error=error, traceback="".join(traceback.format_exception(exc)))
         finally:
             await client.close()

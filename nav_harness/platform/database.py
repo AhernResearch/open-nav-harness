@@ -78,7 +78,7 @@ class Database:
             raise KeyError("Unknown service")
         return ServiceSpec.model_validate_json(rows[0]["spec"])
 
-    def create_experiment(self, spec: ExperimentSpec):
+    def create_experiment(self, spec: ExperimentSpec, deployments: dict | None = None):
         from navgpt.settings import Settings, _validate
 
         services = {
@@ -126,6 +126,7 @@ class Database:
         from nav_harness.core.version import implementation_digest
 
         frozen["implementation_digest"] = implementation_digest()
+        frozen["deployment_templates"] = deployments or {}
         frozen["services"] = {k: v.model_dump() for k, v in services.items()}
         eid = ident()
         with self.transaction() as c:
@@ -180,6 +181,16 @@ class Database:
                 c.execute(
                     text(f"UPDATE jobs SET {key}=1,updated=:t WHERE id=:id"), {"id": jid, "t": time.time()}
                 )
+            if action in ("pause", "cancel"):
+                active = c.execute(
+                    text("SELECT 1 FROM attempts WHERE job_id=:id AND status='running'"), {"id": jid}
+                ).first()
+                if not active:
+                    status = "cancelled" if action == "cancel" else "paused"
+                    c.execute(
+                        text("UPDATE jobs SET status=:s,updated=:t WHERE id=:id"),
+                        {"s": status, "t": time.time(), "id": jid},
+                    )
             self.emit(c, "job_" + action, jid, {})
 
     def claim(self):

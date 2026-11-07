@@ -19,7 +19,7 @@ async def run_fake(tmp_path, monkeypatch, responses):
     executed = []
 
     class Client:
-        def __init__(self, _):
+        def __init__(self, _, journal=None):
             pass
 
         async def count(self, *_):
