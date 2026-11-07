@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nav-harness"
+version = "0.1.0"
+description = "NavGPT-3 simulator harness with Planner, Environment, and NavGPT3 VLA"
+readme = "README.md"
+license = "Apache-2.0 AND MIT"
+license-files = ["LICENSE", "NOTICE", "navgpt/vla/LICENSE"]
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi==0.162.0", "uvicorn==0.54.0", "sqlalchemy==2.1.8",
+    "alembic==1.20.1", "httpx==0.28.1", "jsonschema==4.26.0",
+    "claude-agent-sdk==0.2.179",
+    "mcp==1.30.0",
+    "openai-codex==0.147.0",
+    "tomli>=2; python_version < '3.11'",
+    "pillow>=10.0.0",
+    "pyyaml>=6.0",
+    "requests>=2.28.0",
+]
+
+# One source distribution, three runtime environments: these are the Planner's
+# dependencies; the Environment uses the Habitat environment and the VLA uses
+# requirements-vla.txt.
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["navgpt*", "nav_harness*"]
+
+[tool.setuptools.package-data]
+"nav_harness" = ["web/**/*"]
+"nav_harness.platform" = ["migrations/*.py", "migrations/versions/*.py"]
+"navgpt.vla" = ["LICENSE"]
+
+[project.scripts]
+nav-harness = "nav_harness.cli:main"
+navgpt = "navgpt.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest==9.2.0", "pytest-asyncio==1.4.1.post1", "ruff==0.17.4", "mypy==2.4.1"]
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+
+[tool.mypy]
+ignore_missing_imports = true
+follow_imports = "skip"
+check_untyped_defs = true

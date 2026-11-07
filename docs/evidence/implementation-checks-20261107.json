@@ -1,0 +1,36 @@
+{
+  "python_tests": {
+    "passed": 51,
+    "subtests_passed": 4
+  },
+  "ruff": "passed",
+  "mypy": "passed",
+  "frontend_build": "passed",
+  "playwright": {
+    "passed": 1,
+    "coverage": [
+      "login",
+      "service registration",
+      "experiment freeze",
+      "enqueue",
+      "pause request",
+      "comparison",
+      "mobile navigation",
+      "logout"
+    ]
+  },
+  "wheel_and_sdist": "built",
+  "sqlite_backup_integrity": "ok",
+  "upstream_source_audit": {
+    "checked": 112,
+    "changed": 0
+  },
+  "gpu_acceptance": {
+    "status": "running",
+    "split": "train",
+    "unique_routes": 6,
+    "unique_scenes": 6,
+    "expected_cells": 24,
+    "formal50_started": false
+  }
+}

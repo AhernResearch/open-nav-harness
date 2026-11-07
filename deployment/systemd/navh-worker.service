@@ -1,0 +1,14 @@
+[Unit]
+Description=Nav Harness durable scheduler
+After=network-online.target
+
+[Service]
+WorkingDirectory=/srv/nav-harness
+ExecStart=/srv/nav-harness/.venv/bin/nav-harness --state /srv/nav-harness/state --settings /srv/nav-harness/state/platform.json worker
+KillMode=process
+Restart=on-failure
+RestartSec=5
+UMask=0077
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,47 @@
+gpus:
+- 2
+- 3
+- 4
+dataset:
+  name: r2r
+  split: val_unseen
+  episodes: 0-9
+environment:
+  url: http://127.0.0.1:19200
+  max_steps: 500
+  forward_view_px: 512
+  panorama_view_px: 512
+  turn_angle_deg: 15
+  step_size_m: 0.25
+  allow_sliding: true
+vla:
+  url: http://127.0.0.1:18000
+  checkpoint: navgpt3-8b
+  visual_token_budget: 3072
+  frame_cache: precompute
+  seed: 20260910
+planner:
+  runtime: codex
+  model: gpt-5.6-sol
+  effort: high
+  max_turns: 200
+  episode_timeout_s: 2400
+  max_budget_usd: null
+  tools:
+  - observe_forward
+  - observe_panorama
+  - observe_map
+  - navigate_by_instruction
+  - navigate_relative
+  - navigate_to_node
+  - annotate_node
+  - terminate_episode
+harness:
+  interface: standard
+  review_every: 0
+  route_finding: true
+  vla_steps_per_call: 200
+output:
+  dir: outputs/eval
+  save_frames: true
+name: r2r_val_unseen_first10_gpt56sol
