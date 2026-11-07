@@ -130,3 +130,60 @@ def test_nonmotion_rpc_failure_still_retains_the_actor_lease():
         )
         == "idle"
     )
+
+
+async def test_real_mcp_stdio_to_rpc_closes_remote_ownership(tmp_path, unused_tcp_port, monkeypatch):
+    import asyncio
+    import multiprocessing
+    import sys
+    import httpx
+    from mcp import ClientSession, StdioServerParameters
+    from mcp.client.stdio import stdio_client
+    from navgpt.vla import worker as module
+
+    real_session = module.NavigationSession
+
+    def session(*args, **kwargs):
+        value = real_session(*args, **kwargs)
+        value.tools.functions["observe_forward"] = lambda: ["real MCP/RPC transport"]
+        return value
+
+    monkeypatch.setattr(module, "NavigationSession", session)
+    actor = Mock()
+    actor.info.return_value = {"backend": "lightnav"}
+    worker = ActorWorker(actor, "lightnav", tmp_path / "worker", "http://unused-env")
+    process = multiprocessing.get_context("fork").Process(
+        target=module.serve, args=(worker, "127.0.0.1", unused_tcp_port), daemon=True
+    )
+    process.start()
+    url = f"http://127.0.0.1:{unused_tcp_port}"
+    try:
+        async with httpx.AsyncClient(trust_env=False, timeout=2) as http:
+            for _ in range(40):
+                try:
+                    (await http.get(url + "/info")).raise_for_status()
+                    break
+                except httpx.HTTPError:
+                    await asyncio.sleep(0.05)
+            env = {
+                "NAVGPT_CONDITION": "planner_agentic",
+                "NAVGPT_VLA_BACKEND": "lightnav",
+                "NAVGPT_EXECUTION_URL": url,
+                "NAVGPT_LIVE_DIR": str(tmp_path / "live"),
+                "NAVGPT_PLACE_LABELS": str(tmp_path / "labels.json"),
+            }
+            params = StdioServerParameters(
+                command=sys.executable, args=["-m", "navgpt.planner.tools.mcp_tools"], env=env
+            )
+            async with stdio_client(params) as (read, write):
+                async with ClientSession(read, write) as client:
+                    await client.initialize()
+                    assert len((await client.list_tools()).tools) == 11
+                    assert (await http.get(url + "/info")).json()["session_id"] is None
+                    result = await client.call_tool("observe_forward", {})
+                    assert result.content[0].text == "real MCP/RPC transport"
+                    assert (await http.get(url + "/info")).json()["session_id"] is not None
+            assert (await http.get(url + "/info")).json()["session_id"] is None
+    finally:
+        process.terminate()
+        process.join(timeout=5)
