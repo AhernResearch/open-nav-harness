@@ -14,8 +14,9 @@ has no VPN fallback. Do not configure an A100 reverse proxy to the workstation V
 The current local deployment configuration is under `state/deployment/`, excluded
 from version control. Remote code and extracted train annotations live under the new
 `/data/nav_storage/nav-harness/` tree. Existing model weights and scene assets are shared
-read-only. The LightNav bridge uses its own WebSocket session on the existing policy
-server; it does not restart that server.
+read-only. The owned LightNav worker loads its inference engine in-process. The legacy
+bridge remains available with its own WebSocket session on the existing policy server;
+neither deployment takes ownership of that neighboring server.
 
 Use the systemd templates in `deployment/systemd/` after substituting absolute paths.
 The worker unit uses `KillMode=process`: restarting the scheduler leaves owned episode
@@ -107,3 +108,18 @@ An incomplete RPC session is a fence even if its TCP connection disappears. Stop
 owned actor/environment, reconcile the blocked attempt, restart, then use a new attempt.
 Remote `artifact_dir/<session_id>/calls.jsonl` preserves receipts if a response was lost;
 this directory belongs in evidence backups alongside local `state/runs`.
+
+## Development acceptance, 2026-11-07
+
+[Recorded results](evidence/lightweight-harness-20261107.json) contain the two owned-worker
+pilots, all eight runs of the two-route train-split matrix, per-route tool/inference/token
+counts, replay checks and final direct/MCP GPU probes. The formal 50-route benchmark was
+not started. Matrix source `9fdb040` precedes the final schema/trace optimization; final
+worker source `6a32b07` was checked with explicit one-action integration probes.
+
+Both 27B pairings and the 35B/LightNav pairing succeeded on 2/2 routes. The 35B/native
+pairing succeeded on 0/2: its timed-out route never delegated to the VLA and used 46
+short-motion calls. These are development observations, not a model ranking. All traces
+remain evaluation-only. LightNav's owned and legacy runtime profiles produced identical
+outputs on two of three replay frames, but differed on the third; do not claim bitwise
+equivalence or attribute all end-to-end timing differences to transport.

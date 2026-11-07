@@ -1,0 +1,892 @@
+{
+  "generated_utc": "2026-11-07T12:37:22Z",
+  "formal50": "on_hold",
+  "split": "train",
+  "purpose": "development",
+  "route_indices": [
+    0,
+    3
+  ],
+  "limitations": [
+    "Only two distinct training routes; not a benchmark model ranking.",
+    "Initial transport pilots and baseline runs made different Planner decisions; wall-time differences are not isolated transport speedups.",
+    "LightNav legacy and owned profiles are not bitwise equivalent: 2/3 replay frames had identical tokens/waypoints; the third differed. Engine concurrency/compilation profiles differ.",
+    "All these development results remain evaluation_only and are not automatically admitted to training."
+  ],
+  "owned_worker_pilots": [
+    {
+      "planner": "qwen27b",
+      "actor": "lightnav",
+      "experiment_id": "4ee615b20c3f46f8891f3cee666d9737",
+      "job_id": "581c8e208d67413ebfde0686fb88a0b1",
+      "job_state": {
+        "status": "completed",
+        "error": null
+      },
+      "aggregate": {
+        "attempts": 1,
+        "routes_completed": 1,
+        "sr": 1.0,
+        "ne": 1.1957,
+        "spl": 1.0,
+        "wall_s": 130.9,
+        "tool_calls": 7.0,
+        "vla_calls": 45.0,
+        "execution_errors": 0,
+        "cost_usd": null,
+        "selection_rule": "first completed attempt per episode; errors count as failures; interruptions shown separately"
+      },
+      "outcomes": [
+        {
+          "attempt_id": "91ed99040d284e2084f2dde54aeac923",
+          "episode": 0,
+          "attempt": 1,
+          "status": "completed",
+          "success": 1.0,
+          "ne": 1.1957,
+          "spl": 1.0,
+          "ndtw": 0.8919,
+          "distance_m": 6.1445,
+          "wall_s": 130.9,
+          "tool_calls": 7,
+          "turns": 7,
+          "vla_calls": 45,
+          "input_tokens": 57119,
+          "cached_input_tokens": 0,
+          "output_tokens": 1174,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/7y3sRwLe3Va/7y3sRwLe3Va.glb",
+          "episode_id": "1",
+          "training_status": "evaluation_only",
+          "model_requests": 7,
+          "tokenizer_requests": 10,
+          "model_http_s": 101.491,
+          "acknowledged_tool_wall_s": 23.418,
+          "argument_repairs": 0,
+          "implementation_digest": "3da32e89c145639d8f4a42975c6fbb45e75193a30b5b7ae4d713ea8b4973afb0",
+          "tool_breakdown": {
+            "observe_panorama": 1,
+            "update_plan": 1,
+            "execute_subtask": 2,
+            "review_subtask": 2,
+            "terminate_episode": 1
+          },
+          "actor_worker_idle": null
+        }
+      ]
+    },
+    {
+      "planner": "qwen27b",
+      "actor": "navgpt",
+      "experiment_id": "a59de2b6213048348eb5d43d46aa2e96",
+      "job_id": "f38bdebcdeaf4cfe954c95984d296253",
+      "job_state": {
+        "status": "completed",
+        "error": null
+      },
+      "aggregate": {
+        "attempts": 1,
+        "routes_completed": 1,
+        "sr": 1.0,
+        "ne": 1.0194,
+        "spl": 1.0,
+        "wall_s": 164.7,
+        "tool_calls": 7.0,
+        "vla_calls": 34.0,
+        "execution_errors": 0,
+        "cost_usd": null,
+        "selection_rule": "first completed attempt per episode; errors count as failures; interruptions shown separately"
+      },
+      "outcomes": [
+        {
+          "attempt_id": "09c20df3d6d04818bd61417815959842",
+          "episode": 0,
+          "attempt": 1,
+          "status": "completed",
+          "success": 1.0,
+          "ne": 1.0194,
+          "spl": 1.0,
+          "ndtw": 0.9506,
+          "distance_m": 6.0595,
+          "wall_s": 164.7,
+          "tool_calls": 7,
+          "turns": 7,
+          "vla_calls": 34,
+          "input_tokens": 57523,
+          "cached_input_tokens": 0,
+          "output_tokens": 1083,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/7y3sRwLe3Va/7y3sRwLe3Va.glb",
+          "episode_id": "1",
+          "training_status": "evaluation_only",
+          "model_requests": 7,
+          "tokenizer_requests": 9,
+          "model_http_s": 95.141,
+          "acknowledged_tool_wall_s": 64.579,
+          "argument_repairs": 0,
+          "implementation_digest": "3da32e89c145639d8f4a42975c6fbb45e75193a30b5b7ae4d713ea8b4973afb0",
+          "tool_breakdown": {
+            "observe_panorama": 1,
+            "update_plan": 1,
+            "execute_subtask": 2,
+            "review_subtask": 2,
+            "terminate_episode": 1
+          },
+          "actor_worker_idle": null
+        }
+      ]
+    }
+  ],
+  "agentic_matrix_9fdb040": [
+    {
+      "planner": "qwen27b",
+      "actor": "lightnav",
+      "experiment_id": "bb67989ee72e4eee9c1eb64158259054",
+      "job_id": "c4a892425cf14224aa6ecc05d8b16121",
+      "job_state": {
+        "status": "completed",
+        "error": null
+      },
+      "aggregate": {
+        "attempts": 2,
+        "routes_completed": 2,
+        "sr": 1.0,
+        "ne": 1.11585,
+        "spl": 0.9258,
+        "wall_s": 150.25,
+        "tool_calls": 9.5,
+        "vla_calls": 34.5,
+        "execution_errors": 0,
+        "cost_usd": null,
+        "selection_rule": "first completed attempt per episode; errors count as failures; interruptions shown separately"
+      },
+      "outcomes": [
+        {
+          "attempt_id": "5b60881f04f34bf08f104e8f72e0c4f4",
+          "episode": 0,
+          "attempt": 1,
+          "status": "completed",
+          "success": 1.0,
+          "ne": 1.9455,
+          "spl": 1.0,
+          "ndtw": 0.8622,
+          "distance_m": 5.0021,
+          "wall_s": 149.8,
+          "tool_calls": 10,
+          "turns": 10,
+          "vla_calls": 35,
+          "input_tokens": 96836,
+          "cached_input_tokens": 0,
+          "output_tokens": 1226,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/7y3sRwLe3Va/7y3sRwLe3Va.glb",
+          "episode_id": "1",
+          "training_status": "evaluation_only",
+          "model_requests": 10,
+          "tokenizer_requests": 13,
+          "model_http_s": 121.998,
+          "acknowledged_tool_wall_s": 19.771,
+          "argument_repairs": 0,
+          "implementation_digest": "d8844ac04082dcc34f5ae88638d0e20dfe9cd6a69ae7df0c966c22d86a44b0e3",
+          "tool_breakdown": {
+            "observe_panorama": 1,
+            "update_plan": 1,
+            "execute_subtask": 2,
+            "review_subtask": 2,
+            "observe_forward": 2,
+            "navigate_relative": 1,
+            "terminate_episode": 1
+          },
+          "actor_worker_idle": true
+        },
+        {
+          "attempt_id": "083bfd204a814c43ab961b522d823866",
+          "episode": 3,
+          "attempt": 1,
+          "status": "completed",
+          "success": 1.0,
+          "ne": 0.2862,
+          "spl": 0.8516,
+          "ndtw": 0.8907,
+          "distance_m": 6.3873,
+          "wall_s": 150.7,
+          "tool_calls": 9,
+          "turns": 9,
+          "vla_calls": 34,
+          "input_tokens": 81759,
+          "cached_input_tokens": 0,
+          "output_tokens": 1314,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/5LpN3gDmAk7/5LpN3gDmAk7.glb",
+          "episode_id": "4",
+          "training_status": "evaluation_only",
+          "model_requests": 9,
+          "tokenizer_requests": 10,
+          "model_http_s": 124.678,
+          "acknowledged_tool_wall_s": 20.185,
+          "argument_repairs": 0,
+          "implementation_digest": "d8844ac04082dcc34f5ae88638d0e20dfe9cd6a69ae7df0c966c22d86a44b0e3",
+          "tool_breakdown": {
+            "observe_panorama": 1,
+            "update_plan": 1,
+            "execute_subtask": 2,
+            "review_subtask": 1,
+            "navigate_relative": 3,
+            "terminate_episode": 1
+          },
+          "actor_worker_idle": true
+        }
+      ]
+    },
+    {
+      "planner": "qwen35b",
+      "actor": "navgpt",
+      "experiment_id": "76714069e9a644f09970e779d45a473d",
+      "job_id": "af3fdaef821244329820cb708fdb08db",
+      "job_state": {
+        "status": "completed",
+        "error": null
+      },
+      "aggregate": {
+        "attempts": 2,
+        "routes_completed": 2,
+        "sr": 0.0,
+        "ne": 7.37485,
+        "spl": 0.0,
+        "wall_s": 567.75,
+        "tool_calls": 32.5,
+        "vla_calls": 1.0,
+        "execution_errors": 1,
+        "cost_usd": null,
+        "selection_rule": "first completed attempt per episode; errors count as failures; interruptions shown separately"
+      },
+      "outcomes": [
+        {
+          "attempt_id": "a44f59499ecb4dc68d4725d19754acbe",
+          "episode": 0,
+          "attempt": 1,
+          "status": "completed",
+          "success": 0.0,
+          "ne": 3.8913,
+          "spl": 0.0,
+          "ndtw": 0.5268,
+          "distance_m": 9.5962,
+          "wall_s": 235.1,
+          "tool_calls": 13,
+          "turns": 13,
+          "vla_calls": 2,
+          "input_tokens": 128262,
+          "cached_input_tokens": 0,
+          "output_tokens": 2288,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/7y3sRwLe3Va/7y3sRwLe3Va.glb",
+          "episode_id": "1",
+          "training_status": "evaluation_only",
+          "model_requests": 13,
+          "tokenizer_requests": 17,
+          "model_http_s": 213.231,
+          "acknowledged_tool_wall_s": 12.69,
+          "argument_repairs": 0,
+          "implementation_digest": "d8844ac04082dcc34f5ae88638d0e20dfe9cd6a69ae7df0c966c22d86a44b0e3",
+          "tool_breakdown": {
+            "observe_panorama": 1,
+            "annotate_node": 1,
+            "update_plan": 2,
+            "execute_subtask": 1,
+            "navigate_relative": 6,
+            "observe_map": 1,
+            "terminate_episode": 1
+          },
+          "actor_worker_idle": true
+        },
+        {
+          "attempt_id": "685b782e88ff443090967a1ec9d23af8",
+          "episode": 3,
+          "attempt": 1,
+          "status": "completed",
+          "success": 0.0,
+          "ne": 10.8584,
+          "spl": 0.0,
+          "ndtw": 0.0016,
+          "distance_m": 24.6942,
+          "wall_s": 900.4,
+          "tool_calls": 52,
+          "turns": 52,
+          "vla_calls": 0,
+          "input_tokens": null,
+          "cached_input_tokens": null,
+          "output_tokens": null,
+          "cost_usd": null,
+          "error": "episode_timeout after 900s",
+          "scene_id": "mp3d/5LpN3gDmAk7/5LpN3gDmAk7.glb",
+          "episode_id": "4",
+          "training_status": "evaluation_only",
+          "model_requests": 53,
+          "tokenizer_requests": 96,
+          "model_http_s": 771.459,
+          "acknowledged_tool_wall_s": 57.777,
+          "argument_repairs": 0,
+          "implementation_digest": "d8844ac04082dcc34f5ae88638d0e20dfe9cd6a69ae7df0c966c22d86a44b0e3",
+          "tool_breakdown": {
+            "observe_panorama": 1,
+            "annotate_node": 1,
+            "update_plan": 1,
+            "navigate_relative": 46,
+            "observe_map": 2,
+            "navigate_to_node": 1
+          },
+          "actor_worker_idle": true
+        }
+      ]
+    },
+    {
+      "planner": "qwen27b",
+      "actor": "navgpt",
+      "experiment_id": "6f555890a1894f67834ae56593e167b4",
+      "job_id": "a28c32bce2d54b159209a2917c71fe78",
+      "job_state": {
+        "status": "completed",
+        "error": null
+      },
+      "aggregate": {
+        "attempts": 2,
+        "routes_completed": 2,
+        "sr": 1.0,
+        "ne": 0.8492999999999999,
+        "spl": 0.9956499999999999,
+        "wall_s": 203.64999999999998,
+        "tool_calls": 10.0,
+        "vla_calls": 35.0,
+        "execution_errors": 0,
+        "cost_usd": null,
+        "selection_rule": "first completed attempt per episode; errors count as failures; interruptions shown separately"
+      },
+      "outcomes": [
+        {
+          "attempt_id": "0a42b3cd53b743c1aedf1a645acd97b6",
+          "episode": 0,
+          "attempt": 1,
+          "status": "completed",
+          "success": 1.0,
+          "ne": 1.2083,
+          "spl": 0.9913,
+          "ndtw": 0.9137,
+          "distance_m": 6.666,
+          "wall_s": 193.1,
+          "tool_calls": 10,
+          "turns": 10,
+          "vla_calls": 30,
+          "input_tokens": 94930,
+          "cached_input_tokens": 0,
+          "output_tokens": 1423,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/7y3sRwLe3Va/7y3sRwLe3Va.glb",
+          "episode_id": "1",
+          "training_status": "evaluation_only",
+          "model_requests": 10,
+          "tokenizer_requests": 13,
+          "model_http_s": 134.09,
+          "acknowledged_tool_wall_s": 51.107,
+          "argument_repairs": 0,
+          "implementation_digest": "d8844ac04082dcc34f5ae88638d0e20dfe9cd6a69ae7df0c966c22d86a44b0e3",
+          "tool_breakdown": {
+            "observe_panorama": 1,
+            "update_plan": 1,
+            "execute_subtask": 2,
+            "review_subtask": 2,
+            "observe_forward": 2,
+            "navigate_relative": 1,
+            "terminate_episode": 1
+          },
+          "actor_worker_idle": true
+        },
+        {
+          "attempt_id": "0791e8b19dc14ea28641fd5567b312f5",
+          "episode": 3,
+          "attempt": 1,
+          "status": "completed",
+          "success": 1.0,
+          "ne": 0.4903,
+          "spl": 1.0,
+          "ndtw": 0.9536,
+          "distance_m": 5.0193,
+          "wall_s": 214.2,
+          "tool_calls": 10,
+          "turns": 10,
+          "vla_calls": 40,
+          "input_tokens": 95018,
+          "cached_input_tokens": 0,
+          "output_tokens": 1510,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/5LpN3gDmAk7/5LpN3gDmAk7.glb",
+          "episode_id": "4",
+          "training_status": "evaluation_only",
+          "model_requests": 10,
+          "tokenizer_requests": 12,
+          "model_http_s": 142.165,
+          "acknowledged_tool_wall_s": 64.66,
+          "argument_repairs": 0,
+          "implementation_digest": "d8844ac04082dcc34f5ae88638d0e20dfe9cd6a69ae7df0c966c22d86a44b0e3",
+          "tool_breakdown": {
+            "observe_panorama": 1,
+            "annotate_node": 1,
+            "update_plan": 1,
+            "execute_subtask": 3,
+            "review_subtask": 3,
+            "terminate_episode": 1
+          },
+          "actor_worker_idle": true
+        }
+      ]
+    },
+    {
+      "planner": "qwen35b",
+      "actor": "lightnav",
+      "experiment_id": "983c88a956fc489b825a55b26698661f",
+      "job_id": "15e035d688794147a1af027532a37e9a",
+      "job_state": {
+        "status": "completed",
+        "error": null
+      },
+      "aggregate": {
+        "attempts": 2,
+        "routes_completed": 2,
+        "sr": 1.0,
+        "ne": 0.61475,
+        "spl": 0.77425,
+        "wall_s": 205.05,
+        "tool_calls": 12.0,
+        "vla_calls": 30.5,
+        "execution_errors": 0,
+        "cost_usd": null,
+        "selection_rule": "first completed attempt per episode; errors count as failures; interruptions shown separately"
+      },
+      "outcomes": [
+        {
+          "attempt_id": "a9040257d4f2470baf9009121ace7ce3",
+          "episode": 0,
+          "attempt": 1,
+          "status": "completed",
+          "success": 1.0,
+          "ne": 0.6682,
+          "spl": 0.5485,
+          "ndtw": 0.1236,
+          "distance_m": 12.0475,
+          "wall_s": 286.5,
+          "tool_calls": 17,
+          "turns": 17,
+          "vla_calls": 21,
+          "input_tokens": 181153,
+          "cached_input_tokens": 0,
+          "output_tokens": 2687,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/7y3sRwLe3Va/7y3sRwLe3Va.glb",
+          "episode_id": "1",
+          "training_status": "evaluation_only",
+          "model_requests": 17,
+          "tokenizer_requests": 25,
+          "model_http_s": 248.507,
+          "acknowledged_tool_wall_s": 22.448,
+          "argument_repairs": 0,
+          "implementation_digest": "d8844ac04082dcc34f5ae88638d0e20dfe9cd6a69ae7df0c966c22d86a44b0e3",
+          "tool_breakdown": {
+            "observe_panorama": 1,
+            "annotate_node": 2,
+            "update_plan": 2,
+            "execute_subtask": 1,
+            "navigate_relative": 9,
+            "observe_map": 1,
+            "terminate_episode": 1
+          },
+          "actor_worker_idle": true
+        },
+        {
+          "attempt_id": "16170a06c16c4c0a803080f07f55519d",
+          "episode": 3,
+          "attempt": 1,
+          "status": "completed",
+          "success": 1.0,
+          "ne": 0.5613,
+          "spl": 1.0,
+          "ndtw": 0.9454,
+          "distance_m": 5.055,
+          "wall_s": 123.6,
+          "tool_calls": 7,
+          "turns": 7,
+          "vla_calls": 40,
+          "input_tokens": 57106,
+          "cached_input_tokens": 0,
+          "output_tokens": 1062,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/5LpN3gDmAk7/5LpN3gDmAk7.glb",
+          "episode_id": "4",
+          "training_status": "evaluation_only",
+          "model_requests": 7,
+          "tokenizer_requests": 8,
+          "model_http_s": 98.01,
+          "acknowledged_tool_wall_s": 21.101,
+          "argument_repairs": 0,
+          "implementation_digest": "d8844ac04082dcc34f5ae88638d0e20dfe9cd6a69ae7df0c966c22d86a44b0e3",
+          "tool_breakdown": {
+            "observe_panorama": 1,
+            "annotate_node": 1,
+            "update_plan": 1,
+            "execute_subtask": 2,
+            "navigate_relative": 1,
+            "terminate_episode": 1
+          },
+          "actor_worker_idle": true
+        }
+      ]
+    }
+  ],
+  "tool_schema_token_probe": {
+    "before": 3338,
+    "after": 1991
+  },
+  "evaluator_field_audit": {
+    "model_requests_checked": 90,
+    "private_evaluator_field_hits": []
+  },
+  "lightnav_replay_probe": [
+    {
+      "frame_id": "frame-000000",
+      "same_raw_text": true,
+      "same_waypoints": true,
+      "same_action": true,
+      "same_stop": true
+    },
+    {
+      "frame_id": "frame-000001",
+      "same_raw_text": true,
+      "same_waypoints": true,
+      "same_action": true,
+      "same_stop": true
+    },
+    {
+      "frame_id": "frame-000002",
+      "same_raw_text": false,
+      "same_waypoints": false,
+      "same_action": false,
+      "same_stop": true
+    }
+  ],
+  "artifact_integrity_audit": {
+    "completed_attempts_only": true,
+    "planner_media_files": 536,
+    "actor_observation_files": 1128,
+    "missing_or_corrupt": [],
+    "model_requests_checked": 143,
+    "private_evaluator_field_hits": []
+  },
+  "final_release": {
+    "git_commit": "a66bb70",
+    "actor_release_directory": "6a32b07",
+    "note": "a66bb70 adds transport tests only; executable source equals 6a32b07. Matrix was frozen at 9fdb040 before final schema/trace optimization.",
+    "integration_probes": [
+      {
+        "purpose": "integration_only_not_benchmark_or_training",
+        "backend": "lightnav",
+        "transport": "direct_rpc",
+        "initial_worker": {
+          "model_name": "lightnav-0",
+          "model_version": "LightNav-0",
+          "backend": "lightnav",
+          "policy_url": null,
+          "execution": "owned_vllm",
+          "context_replace": true,
+          "max_context_groups": 16,
+          "history_observe": true,
+          "seeded_reset": false,
+          "control": {
+            "control_dt_s": 0.1,
+            "max_linear_mps": 2.5,
+            "max_angular_dps": 300.0
+          },
+          "waypoint_count": 10,
+          "policy_camera": {
+            "width": 480,
+            "height": 270,
+            "height_m": 0.88,
+            "hfov": 120.0
+          },
+          "tool_execution": "in_process",
+          "protocol_version": 1,
+          "implementation_digest": "06e3e714ae6d320b1d63e0e211bef9aef9c7125f313b379f1d0b18339a7043f1",
+          "environment_url": "http://127.0.0.1:19450",
+          "session_id": null,
+          "failed": false
+        },
+        "final_worker": {
+          "model_name": "lightnav-0",
+          "model_version": "LightNav-0",
+          "backend": "lightnav",
+          "policy_url": null,
+          "execution": "owned_vllm",
+          "context_replace": true,
+          "max_context_groups": 16,
+          "history_observe": true,
+          "seeded_reset": false,
+          "control": {
+            "control_dt_s": 0.1,
+            "max_linear_mps": 2.5,
+            "max_angular_dps": 300.0
+          },
+          "waypoint_count": 10,
+          "policy_camera": {
+            "width": 480,
+            "height": 270,
+            "height_m": 0.88,
+            "hfov": 120.0
+          },
+          "tool_execution": "in_process",
+          "protocol_version": 1,
+          "implementation_digest": "06e3e714ae6d320b1d63e0e211bef9aef9c7125f313b379f1d0b18339a7043f1",
+          "environment_url": "http://127.0.0.1:19450",
+          "session_id": null,
+          "failed": false
+        },
+        "prediction_events": [
+          {
+            "event": 5,
+            "kind": "policy_context",
+            "context_key": "task-1-frame-0",
+            "prediction_id": 1,
+            "frame_ids": [
+              "frame-000000"
+            ],
+            "instruction": "Go around the right side of the center unit.\nStop this local operation when: Make one local movement toward the right side.",
+            "summary": ""
+          },
+          {
+            "event": 6,
+            "kind": "policy_prediction",
+            "prediction_id": 1,
+            "policy_backend": "lightnav",
+            "frame_id": "frame-000000",
+            "context_key": "task-1-frame-0",
+            "instruction": "Go around the right side of the center unit.\nStop this local operation when: Make one local movement toward the right side.",
+            "waypoint_frame": "agent_relative_forward_left_ccw",
+            "waypoint_units": [
+              "metres",
+              "metres",
+              "radians"
+            ],
+            "waypoint_count": 10,
+            "resampled": false,
+            "inference_and_context_s": 0.237338
+          },
+          {
+            "event": 7,
+            "kind": "policy_execution_dispatch",
+            "prediction_id": 1,
+            "policy_backend": "lightnav",
+            "pose_before": {
+              "position": [
+                -16.267200469970703,
+                0.1518409252166748,
+                0.7207760214805603
+              ],
+              "rotation_wxyz": [
+                -0.7071067690849304,
+                -0.0,
+                0.7071067690849304,
+                -0.0
+              ],
+              "heading_rad": -1.5707963267948966
+            },
+            "velocity": {
+              "linear_mps": 0.004894000594504178,
+              "angular_rps": -3.140410184860229,
+              "dt_s": 0.1
+            },
+            "target_position": null,
+            "target_rotation_xyzw": null
+          },
+          {
+            "event": 8,
+            "kind": "policy_execution_result",
+            "prediction_id": 1,
+            "policy_backend": "lightnav",
+            "feedback": {
+              "pose": {
+                "position": [
+                  -16.26671028137207,
+                  0.1518409252166748,
+                  0.7207760214805603
+                ],
+                "rotation_wxyz": [
+                  -0.587833046913147,
+                  0.0,
+                  0.808982253074646,
+                  0.0
+                ],
+                "heading_rad": -1.8848374179837832
+              },
+              "step_count": 1,
+              "navigable": true,
+              "terminated": false,
+              "truncated": false,
+              "error": null
+            }
+          }
+        ]
+      },
+      {
+        "purpose": "integration_only_not_benchmark_or_training",
+        "backend": "navgpt",
+        "transport": "mcp_stdio_rpc",
+        "initial_worker": {
+          "model_name": "navgpt-vla",
+          "backend": "navgpt",
+          "model_version": "/home/sari/lx_workspace/NavGPT-3/checkpoints/NavGPT3-8B",
+          "context_replace": true,
+          "max_context_groups": 16,
+          "history_observe": true,
+          "seeded_reset": true,
+          "execution": "owned_pytorch",
+          "tool_execution": "in_process",
+          "protocol_version": 1,
+          "implementation_digest": "06e3e714ae6d320b1d63e0e211bef9aef9c7125f313b379f1d0b18339a7043f1",
+          "environment_url": "http://127.0.0.1:19451",
+          "session_id": null,
+          "failed": false
+        },
+        "final_worker": {
+          "model_name": "navgpt-vla",
+          "backend": "navgpt",
+          "model_version": "/home/sari/lx_workspace/NavGPT-3/checkpoints/NavGPT3-8B",
+          "context_replace": true,
+          "max_context_groups": 16,
+          "history_observe": true,
+          "seeded_reset": true,
+          "execution": "owned_pytorch",
+          "tool_execution": "in_process",
+          "protocol_version": 1,
+          "implementation_digest": "06e3e714ae6d320b1d63e0e211bef9aef9c7125f313b379f1d0b18339a7043f1",
+          "environment_url": "http://127.0.0.1:19451",
+          "session_id": null,
+          "failed": false
+        },
+        "prediction_events": [
+          {
+            "event": 5,
+            "kind": "policy_context",
+            "context_key": "task-1-frame-0",
+            "prediction_id": 1,
+            "frame_ids": [
+              "frame-000000"
+            ],
+            "instruction": "Go around the right side of the center unit.\nStop this local operation when: Make one local movement toward the right side.",
+            "summary": ""
+          },
+          {
+            "event": 6,
+            "kind": "policy_prediction",
+            "prediction_id": 1,
+            "policy_backend": "navgpt",
+            "frame_id": "frame-000000",
+            "context_key": "task-1-frame-0",
+            "instruction": "Go around the right side of the center unit.\nStop this local operation when: Make one local movement toward the right side.",
+            "waypoint_frame": "agent_relative_forward_left_ccw",
+            "waypoint_units": [
+              "metres",
+              "metres",
+              "radians"
+            ],
+            "waypoint_count": 8,
+            "resampled": false,
+            "inference_and_context_s": 1.446784
+          },
+          {
+            "event": 7,
+            "kind": "policy_execution_dispatch",
+            "prediction_id": 1,
+            "policy_backend": "navgpt",
+            "pose_before": {
+              "position": [
+                -16.267200469970703,
+                0.1518409252166748,
+                0.7207760214805603
+              ],
+              "rotation_wxyz": [
+                -0.7071067690849304,
+                -0.0,
+                0.7071067690849304,
+                -0.0
+              ],
+              "heading_rad": -1.5707963267948966
+            },
+            "velocity": null,
+            "target_position": [
+              -16.26900863647461,
+              0.1518409252166748,
+              0.7218133292198181
+            ],
+            "target_rotation_xyzw": [
+              0.0,
+              0.8572023977512359,
+              0.0,
+              -0.5149796258697913
+            ]
+          },
+          {
+            "event": 8,
+            "kind": "policy_execution_result",
+            "prediction_id": 1,
+            "policy_backend": "navgpt",
+            "feedback": {
+              "pose": {
+                "position": [
+                  -16.26900863647461,
+                  0.1518409252166748,
+                  0.7218133211135864
+                ],
+                "rotation_wxyz": [
+                  -0.5149796009063721,
+                  0.0,
+                  0.857202410697937,
+                  0.0
+                ],
+                "heading_rad": -2.059624927333103
+              },
+              "step_count": 1,
+              "navigable": true,
+              "terminated": false,
+              "truncated": false,
+              "error": null
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "validation": {
+    "pytest_passed": 75,
+    "pytest_subtests_passed": 4,
+    "ruff_nav_harness": "passed",
+    "ruff_navgpt_F821_F823": "passed",
+    "mypy": "passed, 20 source files",
+    "frontend_build": "passed",
+    "playwright": "passed, 1 UI workflow test using system Chrome",
+    "core_without_sdk_imports": "passed with MCP/Codex/Claude imports blocked",
+    "fresh_offline_install": "not verified: Pillow 13 wheel unavailable in local cache"
+  },
+  "findings": [
+    "All four Planner/actor pairings completed the two-route development matrix. Six of eight routes succeeded; one of two failures timed out at 900 seconds.",
+    "The failed Qwen35B/native episode 3 used 46 navigate_relative calls and no execute_subtask calls. Its failure is not evidence that the native VLA itself failed to execute the route.",
+    "The final schema-only tokenizer probe fell from 3338 to 1991 tokens (40.35%); this is not a claim about full-request or end-to-end speedup.",
+    "Final GPU probes verified one LightNav action through direct RPC and one native action through an MCP subprocess/RPC. Both recorded aligned context/prediction/dispatch/result IDs and released remote ownership.",
+    "Final actor predictions retain their native 10-point and 8-point horizons; no resampling or time-spacing claim is introduced.",
+    "These development traces contain failures and remain evaluation_only until reviewed for training admission."
+  ]
+}

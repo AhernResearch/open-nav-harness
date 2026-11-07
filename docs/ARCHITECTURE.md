@@ -155,7 +155,7 @@ resent to the counter. The complete trace remains available for supervision and 
 Actor supervision records preserve native horizons: each `policy_context`,
 `policy_prediction`, `policy_execution_dispatch`, and `policy_execution_result` shares
 an episode-local `prediction_id`. Predictions contain the original waypoints and
-controller advice; execution results contain observed pose, step count and collision
+controller advice; execution results contain observed pose, step count and navigation
 status. An unacknowledged dispatch has no fabricated result. LightNav's 10 points are
 not silently converted to the native VLA's 8 points or relabelled with a time interval.
 Dataset resampling and training admission are separate, reviewed operations.
