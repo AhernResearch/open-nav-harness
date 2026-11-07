@@ -1,0 +1,270 @@
+{
+  "generated_utc": "2026-11-07T17:52:14.783880+00:00",
+  "release": "9cda52c",
+  "tool_contract": "plan_memory_v1",
+  "implementation_digest": "3c4523ba0b0a7db65316c25cac3ae332e617b51dfff4a07717702f86fe5a96a4",
+  "purpose": "integration_only_not_benchmark_or_training",
+  "formal50": "not_started",
+  "schemas": {
+    "update_plan": {
+      "$defs": {
+        "PlanItem": {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "title": "Id",
+              "type": "integer"
+            },
+            "instruction": {
+              "title": "Instruction",
+              "type": "string"
+            },
+            "completion_criterion": {
+              "title": "Completion Criterion",
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "pending",
+                "in_progress",
+                "completed"
+              ],
+              "title": "Status",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "instruction",
+            "completion_criterion",
+            "status"
+          ],
+          "title": "PlanItem",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "subtasks": {
+          "items": {
+            "$ref": "#/$defs/PlanItem"
+          },
+          "title": "Subtasks",
+          "type": "array"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "subtasks",
+        "reason"
+      ],
+      "title": "update_planArguments",
+      "type": "object"
+    },
+    "update_memory": {
+      "additionalProperties": false,
+      "properties": {
+        "node_id": {
+          "title": "Node Id",
+          "type": "integer"
+        },
+        "caption": {
+          "title": "Caption",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node_id",
+        "caption"
+      ],
+      "title": "update_memoryArguments",
+      "type": "object"
+    }
+  },
+  "validation": {
+    "pytest": 87,
+    "subtests": 4,
+    "ruff": "passed",
+    "mypy": "passed, 20 files",
+    "frontend_build": "passed"
+  },
+  "integration": [
+    {
+      "backend": "lightnav",
+      "transport": "direct_rpc",
+      "memory_checks": [
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "observe_panorama",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_plan",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "execute_subtask",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "terminate_episode",
+          "expected_rejection": false,
+          "passed": true
+        }
+      ],
+      "worker_info": {
+        "model_name": "lightnav-0",
+        "model_version": "LightNav-0",
+        "backend": "lightnav",
+        "policy_url": null,
+        "execution": "owned_vllm",
+        "context_replace": true,
+        "max_context_groups": 16,
+        "history_observe": true,
+        "seeded_reset": false,
+        "control": {
+          "control_dt_s": 0.1,
+          "max_linear_mps": 2.5,
+          "max_angular_dps": 300.0
+        },
+        "waypoint_count": 10,
+        "policy_camera": {
+          "width": 480,
+          "height": 270,
+          "height_m": 0.88,
+          "hfov": 120.0
+        },
+        "tool_execution": "in_process",
+        "protocol_version": 1,
+        "implementation_digest": "3c4523ba0b0a7db65316c25cac3ae332e617b51dfff4a07717702f86fe5a96a4",
+        "environment_url": "http://127.0.0.1:19450",
+        "session_id": null,
+        "failed": false
+      },
+      "native_waypoint_count": 10
+    },
+    {
+      "backend": "navgpt",
+      "transport": "mcp_stdio_rpc",
+      "memory_checks": [
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "observe_panorama",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_plan",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "execute_subtask",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "terminate_episode",
+          "expected_rejection": false,
+          "passed": true
+        }
+      ],
+      "worker_info": {
+        "model_name": "navgpt-vla",
+        "backend": "navgpt",
+        "model_version": "/home/sari/lx_workspace/NavGPT-3/checkpoints/NavGPT3-8B",
+        "context_replace": true,
+        "max_context_groups": 16,
+        "history_observe": true,
+        "seeded_reset": true,
+        "execution": "owned_pytorch",
+        "tool_execution": "in_process",
+        "protocol_version": 1,
+        "implementation_digest": "3c4523ba0b0a7db65316c25cac3ae332e617b51dfff4a07717702f86fe5a96a4",
+        "environment_url": "http://127.0.0.1:19451",
+        "session_id": null,
+        "failed": false
+      },
+      "native_waypoint_count": 8
+    }
+  ],
+  "limitations": [
+    "No navigation success-rate evaluation in this change.",
+    "Managed loop rejects map-read and memory-write calls generated in the same response. MCP enforces completed read before write but SDK model-turn boundaries are not visible.",
+    "Memory is bounded node captions, not an automatic history summarizer."
+  ]
+}
