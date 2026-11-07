@@ -115,9 +115,9 @@
     "reproduction/run_subtask_paired.py": "be9b4d6222b7db891f09c772c012b5e55fb965848678da4ab44c1c35f5df8802",
     "reproduction/analyze_subtask_paired.py": "27f0dd66184a8d24f10dc14456a0e60957eddf21ba6ebc0a58b28b280afcc705",
     "reproduction/freeze_subtask_evaluation.py": "3925e36b07c694560f4e0bddf0841182d612955efad851eadd6778bb448cee46",
-    "deployment/direct_lan_socket.py": {
-      "source": "reproduction/direct_lan_socket.py",
-      "sha256": "b35bbd0102bffb949dce0c26329648907850eb13cb3758c8c9f6a83344d7d618"
-    }
+    "deployment/direct_lan_socket.py": "b35bbd0102bffb949dce0c26329648907850eb13cb3758c8c9f6a83344d7d618"
+  },
+  "source_aliases": {
+    "deployment/direct_lan_socket.py": "reproduction/direct_lan_socket.py"
   }
 }

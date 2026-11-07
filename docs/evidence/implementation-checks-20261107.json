@@ -1,6 +1,6 @@
 {
   "python_tests": {
-    "passed": 52,
+    "passed": 53,
     "subtests_passed": 4
   },
   "ruff": "passed",

@@ -121,4 +121,7 @@ running a different implementation after a code edit.
 See [architecture](docs/ARCHITECTURE.md), [operations](docs/OPERATIONS.md), and the
 [inherited CLI/tool reference](docs/USAGE.md). `provenance.json` records the upstream
 commit and hashes of the inherited working tree, including the prior experiment fixes.
-This project has no runtime dependency on the original source checkout.
+Navigation and control-plane source are self-contained in this repository. The current
+A100 deployment reuses existing model weights, scene assets and Python environments;
+some of those environments still live beneath the original checkout. Their paths are
+explicit deployment configuration, and those shared assets are not modified.

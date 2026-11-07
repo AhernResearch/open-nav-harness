@@ -303,3 +303,30 @@ def test_paused_job_can_cancel_without_a_free_worker_slot(db):
     db.control(jid, "cancel")
     assert db.rows("SELECT status FROM jobs WHERE id=:id", id=jid)[0]["status"] == "cancelled"
     assert db.claim() is None
+
+
+def test_reconciliation_finishes_pending_cancellation(db):
+    eid, _ = experiment(db, managed=True)
+    with db.transaction() as c:
+        rows = c.execute(text("SELECT id,spec FROM services")).mappings().all()
+        for row in rows:
+            spec = json.loads(row["spec"])
+            if spec["kind"] in ("environment", "vla"):
+                spec.update(managed=True, template="test")
+                c.execute(
+                    text("UPDATE services SET spec=:s,status='ready' WHERE id=:id"),
+                    {"s": json.dumps(spec), "id": row["id"]},
+                )
+    jid = db.enqueue(eid)
+    a = db.claim()
+    db.control(jid, "cancel")
+    db.block(a["id"], "uncertain motion")
+    with db.transaction() as c:
+        c.execute(
+            text(
+                "UPDATE services SET status='stopped' WHERE json_extract(spec,'$.kind') IN ('environment','vla')"
+            )
+        )
+    db.release_reconciled(a["id"])
+    assert db.rows("SELECT status FROM jobs WHERE id=:id", id=jid)[0]["status"] == "cancelled"
+    assert not db.rows("SELECT * FROM leases")

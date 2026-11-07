@@ -362,6 +362,12 @@ class Database:
                 {"id": aid, "t": time.time()},
             )
             c.execute(text("DELETE FROM leases WHERE attempt_id=:id"), {"id": aid})
+            c.execute(
+                text(
+                    "UPDATE jobs SET status=CASE WHEN cancel_requested=1 THEN 'cancelled' ELSE 'interrupted' END, updated=:t WHERE id=:id"
+                ),
+                {"id": a["job_id"], "t": time.time()},
+            )
             self.emit(
                 c,
                 "attempt_reconciled",
