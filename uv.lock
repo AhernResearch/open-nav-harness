@@ -952,13 +952,11 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "alembic" },
-    { name = "claude-agent-sdk" },
     { name = "fastapi" },
     { name = "httpx" },
     { name = "jsonschema" },
-    { name = "mcp" },
-    { name = "openai-codex" },
     { name = "pillow" },
+    { name = "pydantic" },
     { name = "pyyaml" },
     { name = "requests" },
     { name = "sqlalchemy" },
@@ -967,23 +965,31 @@ dependencies = [
 
 [package.optional-dependencies]
 dev = [
+    { name = "mcp" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "ruff" },
 ]
+sdk = [
+    { name = "claude-agent-sdk" },
+    { name = "mcp" },
+    { name = "openai-codex" },
+]
 
 [package.metadata]
 requires-dist = [
     { name = "alembic", specifier = "==1.20.1" },
-    { name = "claude-agent-sdk", specifier = "==0.2.179" },
+    { name = "claude-agent-sdk", marker = "extra == 'sdk'", specifier = "==0.2.179" },
     { name = "fastapi", specifier = "==0.162.0" },
     { name = "httpx", specifier = "==0.28.1" },
     { name = "jsonschema", specifier = "==4.26.0" },
-    { name = "mcp", specifier = "==1.30.0" },
+    { name = "mcp", marker = "extra == 'dev'", specifier = "==1.30.0" },
+    { name = "mcp", marker = "extra == 'sdk'", specifier = "==1.30.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = "==2.4.1" },
-    { name = "openai-codex", specifier = "==0.147.0" },
+    { name = "openai-codex", marker = "extra == 'sdk'", specifier = "==0.147.0" },
     { name = "pillow", specifier = ">=10.0.0" },
+    { name = "pydantic", specifier = ">=2.14,<3" },
     { name = "pytest", marker = "extra == 'dev'", specifier = "==9.2.0" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = "==1.4.1.post1" },
     { name = "pyyaml", specifier = ">=6.0" },
@@ -993,7 +999,7 @@ requires-dist = [
     { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2" },
     { name = "uvicorn", specifier = "==0.54.0" },
 ]
-provides-extras = ["dev"]
+provides-extras = ["sdk", "dev"]
 
 [[package]]
 name = "openai-codex"

@@ -232,7 +232,7 @@ class SubtaskManager:
         self.aborted = status == 'abort'
         self._event('finish', status=status)
 
-    def record_context(self, frames, instruction):
-        self._event('policy_context', context_key=self.context_key,
+    def record_context(self, frames, instruction, prediction_id=None):
+        self._event('policy_context', context_key=self.context_key, prediction_id=prediction_id,
                     frame_ids=[f['id'] for f in frames], instruction=instruction,
                     summary=self.summary)

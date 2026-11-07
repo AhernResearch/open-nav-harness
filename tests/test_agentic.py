@@ -98,11 +98,69 @@ def test_repair_is_not_blocked_by_task_lifecycle_and_limits_restore(monkeypatch)
 
 
 def test_protocol_feedback_does_not_swallow_failure_after_motion_dispatch(monkeypatch):
-    s = NavigationSession(env={'NAVGPT_CONDITION': 'planner_agentic'})
+    s = NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic"})
+
     def bad_reply(*args):
         s._motion_epoch += 1
-        raise ValueError('invalid movement response')
+        raise ValueError("invalid movement response")
+
     # Wrappers resolve the captured bound function; force its environment call to fail.
-    monkeypatch.setattr(s, '_call', bad_reply)
-    with pytest.raises(RuntimeError, match='after dispatching movement'):
-        s.tools.invoke('navigate_relative', {'turn_deg': 0.0, 'distance_m': 1.0})
+    monkeypatch.setattr(s, "_call", bad_reply)
+    with pytest.raises(RuntimeError, match="after dispatching movement"):
+        s.tools.invoke("navigate_relative", {"turn_deg": 0.0, "distance_m": 1.0})
+
+
+@pytest.mark.parametrize("backend,horizon", [("navgpt", 8), ("lightnav", 10)])
+def test_rollout_records_actor_output_before_dispatch_and_matches_execution(
+    tmp_path, monkeypatch, backend, horizon
+):
+    from types import SimpleNamespace
+
+    navigation = [[float(i), 0.0, 0.0] for i in range(horizon)]
+    advice = {
+        "navigation": navigation,
+        "should_stop": False,
+        "position": [1.0, 0.0, 0.0],
+        "rotation_xyzw": [0.0, 0.0, 0.0, 1.0],
+    }
+    if backend == "lightnav":
+        advice["velocity"] = {"linear_mps": 1.0, "angular_rps": 0.0, "dt_s": 0.1}
+    actor = SimpleNamespace(replace_context=lambda *args: None, act=lambda **kwargs: advice)
+    s = NavigationSession(
+        env={
+            "NAVGPT_CONDITION": "planner_agentic",
+            "NAVGPT_VLA_BACKEND": backend,
+            "NAVGPT_LIVE_DIR": str(tmp_path),
+            "NAVGPT_VLA_MAP": "0",
+        },
+        actor=actor,
+    )
+    s._tasks.observe({"policy_front": "Zg=="}, {}, 0)
+    s._tasks.update_plan(tasks(), "Observed scene")
+    pose = {"position": [0.0, 0.0, 0.0], "rotation_wxyz": [1.0, 0.0, 0.0, 0.0]}
+    monkeypatch.setattr(s, "_pano", lambda: {"views": {}, "raw_views": {}, "pose": pose})
+    monkeypatch.setattr(s, "_clearance_summary", lambda *args: {})
+    monkeypatch.setattr(s, "_pano_frames", lambda *args: [])
+    monkeypatch.setattr(s, "_frame_here", lambda: None)
+
+    def events():
+        return [json.loads(line) for line in (tmp_path / "subtasks/events.jsonl").read_text().splitlines()]
+
+    def move(name, inputs):
+        assert events()[-1]["kind"] == "policy_execution_dispatch"
+        assert events()[-2]["advice"]["navigation"] == navigation
+        assert name.endswith("__step_velocity" if backend == "lightnav" else "__teleport")
+        return {"pose": pose, "step_count": 1, "navigable": True}
+
+    monkeypatch.setattr(s, "_call", move)
+    s.execute_agentic_task(1, max_actions=1)
+    step = [e for e in events() if e.get("prediction_id") == 1]
+    assert [e["kind"] for e in step] == [
+        "policy_context",
+        "policy_prediction",
+        "policy_execution_dispatch",
+        "policy_execution_result",
+    ]
+    assert step[1]["advice"]["navigation"] == navigation
+    assert step[1]["waypoint_count"] == horizon and step[1]["resampled"] is False
+    assert step[-1]["feedback"]["step_count"] == 1

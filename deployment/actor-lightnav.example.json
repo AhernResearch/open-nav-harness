@@ -1,0 +1,10 @@
+{
+  "backend": "lightnav",
+  "port": 18271,
+  "environment_url": "http://127.0.0.1:19450",
+  "model_path": "/srv/models/LightNav-0",
+  "artifact_dir": "/srv/nav-harness/state/actor-artifacts/lightnav",
+  "model_options": {
+    "gpu_memory_utilization": 0.35
+  }
+}

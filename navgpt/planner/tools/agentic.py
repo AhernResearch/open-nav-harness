@@ -45,7 +45,9 @@ class AgenticTasks(SubtaskManager):
                 if not isinstance(value, str) or not value.strip():
                     raise ValueError("Task needs " + key)
                 task[key] = value.strip()
-            task["source_quote"] = source.get("source_quote", "")
+            task["source_quote"] = source.get("source_quote") or ""
+            if not isinstance(task["source_quote"], str):
+                raise ValueError("source_quote must be text when supplied")
             if task["source_quote"] and task["source_quote"] not in self.instruction:
                 raise ValueError("An optional source_quote must match the original instruction")
             task["status"] = source.get("status", old.get(ident, {}).get("status", "pending"))
@@ -126,3 +128,38 @@ class AgenticTasks(SubtaskManager):
         self.aborted = status == "abort"
         self.completion_claim = status
         self._event("finish", status=status)
+
+
+TOOL_DESCRIPTIONS = {
+    "observe_forward": "Inspect the current forward RGB view at full resolution. Does not move.",
+    "observe_panorama": (
+        "Inspect four simultaneous camera views: ahead, right, behind, left. Does not move. "
+        "Each image has direction, approximate clearance, a relative-bearing ruler and map orientation. "
+        "For navigate_relative, positive degrees turn left. Read the ruler for object bearings; "
+        "the whole image spans a field of view, not a single direction."
+    ),
+    "observe_map": (
+        "Inspect the observed top-down colour map, travelled path, current pose and numbered visited nodes. "
+        "Unknown cells are unobserved, not free space. Path colour runs blue (start) to red (recent); "
+        "the red arrow is current pose. The map keeps a fixed world orientation but its crop can change. "
+        "The result supplies scale, coordinates, bearings and node distances. Does not move or reveal the goal."
+    ),
+    "navigate_relative": (
+        "Turn by turn_deg (positive left, negative right) and attempt distance_m metres of walking. "
+        "Short obstacle detours use the simulator floor plan; long detours are refused. "
+        "Walking charges roughly one action per 0.25 m; turning is included. "
+        "Read actual walked_m, requested_m and blocked: sliding can reduce displacement even when not blocked. "
+        "Returns endpoint views and observed node information. Clearance is a rough depth cue, not a guarantee."
+    ),
+    "navigate_to_node": (
+        "Retrace already travelled ground to a visited node by ID or your recorded name. "
+        "Node IDs remain stable. Use observe_map for node geometry and available destinations. "
+        "This does not find unvisited goals."
+    ),
+    "annotate_node": (
+        "Name and describe a visited place for later recall or retracing. By default attaches to the "
+        "nearest current node; place can select a known node explicitly. caption should distinguish "
+        "its visible surroundings. Optional clause associates an instruction clause. Does not move."
+    ),
+    "observe_node": "Retrieve the image recorded at a visited node by ID or name. Does not move.",
+}

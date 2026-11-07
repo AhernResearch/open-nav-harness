@@ -151,3 +151,11 @@ a formatting mistake from being confused with failed navigation or unsafe retry.
 Bounded Planner context retains a pruning cursor and uses exponential advancement on
 overflow, followed by an authoritative tokenizer check. Discarded turns are not repeatedly
 resent to the counter. The complete trace remains available for supervision and replay.
+
+Actor supervision records preserve native horizons: each `policy_context`,
+`policy_prediction`, `policy_execution_dispatch`, and `policy_execution_result` shares
+an episode-local `prediction_id`. Predictions contain the original waypoints and
+controller advice; execution results contain observed pose, step count and collision
+status. An unacknowledged dispatch has no fabricated result. LightNav's 10 points are
+not silently converted to the native VLA's 8 points or relabelled with a time interval.
+Dataset resampling and training admission are separate, reviewed operations.

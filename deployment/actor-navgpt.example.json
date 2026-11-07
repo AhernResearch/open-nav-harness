@@ -1,0 +1,13 @@
+{
+  "backend": "navgpt",
+  "port": 18261,
+  "environment_url": "http://127.0.0.1:19451",
+  "model_path": "/srv/models/NavGPT3-8B",
+  "artifact_dir": "/srv/nav-harness/state/actor-artifacts/navgpt",
+  "model_options": {
+    "max_nav_vis_tokens": 3072,
+    "max_sample_size": 16,
+    "frame_cache": "precompute",
+    "robot_type": "habitat_nav"
+  }
+}

@@ -101,6 +101,7 @@ class NavigationSession:
             else None
         )
         self._vla_calls = 0
+        self._policy_step = 0
         self._presentation_by_hash = {}
         self._LOOK_DESC = "Scan the surroundings in ONE call. Returns four camera views — ahead, right, behind, left.\n\nEVERY LABEL IS PAINTED ON THE PICTURE ITSELF, so you never have to work out which text belongs to which view:\n  * the direction word on each view, with how far you would actually get walking that way (measured on the floor plan, sliding along walls exactly as a real move does — so a small number means genuinely blocked, not just 'something is close');\n  * a ruler along the bottom of each view giving the BEARING of each column, written as the exact number navigate_relative() takes (positive = left). This is how you turn 'the doorway is in the left third of the AHEAD view' into a move: read the tick under it. A 120-degree view has no single direction, so the word AHEAD alone cannot tell you where in it to go;\n  * VIEW n, your position as X and Y in metres from where the episode started, and MAP-UP — the turn that faces the top of the map. LEFT and AHEAD mean different world directions after you turn, so MAP-UP is what lets a view you saw twenty turns ago still be placed;\n\nThe cameras render simultaneously, so this does not move the robot and does not change where you stand or which way you face. Use it freely at any junction or whenever you are unsure — turning to look is never necessary.\n\nFor IDENTIFYING a particular object — is that a fire extinguisher, is that chair the one described — use observe_forward() instead: it returns the forward view alone at full size, and detail is what it is for."
         self._MOVE_DESC = "Turn to a relative bearing and walk. turn_deg: 0 = straight ahead, POSITIVE = LEFT, negative = right. distance_m: how far to try to walk.\nThe turn does not use the movement budget; the walking does, one step per 0.25 m budget, so it costs the same as stepping that far, not less.\nIt walks the floor-plan route to the point you asked for when that route is nearly the straight line — so a chair or a door frame in the way is walked around rather than stopped at, and detoured tells you when that happened. If the only route is a long way round, it does NOT take it: it walks straight and stops, because that means the way you asked for is genuinely blocked and you need to know.\nThe result ENDS WITH THE FOUR VIEWS from where you arrive, so you never need a observe_panorama straight after moving.\nReturns walked_m against requested_m, and blocked. walked_m is your ACTUAL displacement: it is often less than you asked for even when blocked is false, because the robot slides along walls and furniture rather than stopping dead. blocked=true means genuinely obstructed, never out-of-budget.\nnearest_obstacle_before_m is a depth measurement along that bearing, and it is a ROUGH GUIDE ONLY — it is the nearest surface in a 20-degree cone, so a single chair leg or door frame in that cone reads as a tiny clearance even though you can walk straight past it; and it is measured at camera height, so a low step or a bed frame does not appear at all. Do not let a small value stop you asking for a longer distance: ask, then read walked_m to learn what actually happened."
@@ -223,6 +224,12 @@ class NavigationSession:
         self.LIVE_DIR.mkdir(parents=True, exist_ok=True)
         with (self.LIVE_DIR / "actions.log").open("a") as fh:
             fh.write(json.dumps({"t": round(time.time() - self._t0, 1), **entry}) + "\n")
+
+    def _policy_event(self, kind, **fields):
+        payload = {"prediction_id": self._policy_step, "policy_backend": self.VLA_BACKEND, **fields}
+        self._live_log({"kind": kind, **payload})
+        if self._tasks is not None:
+            self._tasks._event(kind, **payload)
 
     def _feed_passive_history(self, frames):
         for frame in frames:
@@ -968,12 +975,14 @@ class NavigationSession:
                         else {},
                     }
                 )
+            self._policy_step += 1
+            inference_started = time.monotonic()
             try:
                 self._prepare_policy_observation(pano)
                 if self._SUBTASK:
                     selected = self._tasks.selected_frames()
                     spec.replace_context(self._tasks.context_key, selected[:-1])
-                    self._tasks.record_context(selected, route)
+                    self._tasks.record_context(selected, route, prediction_id=self._policy_step)
                 advice = spec.act(
                     views=pano.get("raw_views") or {},
                     instruction=route,
@@ -983,19 +992,18 @@ class NavigationSession:
                     is_stuck=stuck,
                     **{"frame_id": selected[-1]["id"]} if self._SUBTASK else {},
                 )
-                if self.VLA_BACKEND == "lightnav":
-                    self._last_policy_inference_id = pano.get("policy_frame_id")
-                    self._live_log(
-                        {
-                            "policy_backend": "lightnav",
-                            "policy_frame_id": self._last_policy_inference_id,
-                            "navigation": advice.get("navigation"),
-                            "velocity": advice.get("velocity"),
-                            "should_stop": advice.get("should_stop"),
-                            "raw_text": (advice.get("raw_action") or {}).get("raw_text"),
-                            "latency_ms": (advice.get("raw_action") or {}).get("latency_ms"),
-                        }
-                    )
+                self._last_policy_inference_id = pano.get("policy_frame_id")
+                self._policy_event(
+                    "policy_prediction",
+                    frame_id=selected[-1]["id"] if self._SUBTASK else None,
+                    context_key=self._tasks.context_key if self._SUBTASK else None,
+                    instruction=route, advice=advice,
+                    waypoint_frame="agent_relative_forward_left_ccw",
+                    waypoint_units=["metres", "metres", "radians"],
+                    waypoint_count=len(advice.get("navigation") or []),
+                    resampled=False,
+                    inference_and_context_s=round(time.monotonic() - inference_started, 6),
+                )
             except Exception as exc:
                 if self._SUBTASK:
                     self._tasks.aborted = True
@@ -1030,6 +1038,8 @@ class NavigationSession:
                     handoff = self._scheduler.finish(grant)
                 break
             before = pose.get("position") or [0.0, 0.0, 0.0]
+            self._policy_event("policy_execution_dispatch", pose_before=pose,
+                               velocity=velocity, target_position=target, target_rotation_xyzw=rot)
             if velocity is not None:
                 res = self._call("{}__step_velocity".format(self.VERB_PREFIX), velocity)
             else:
@@ -1042,6 +1052,9 @@ class NavigationSession:
                         "is_stuck": stuck,
                     },
                 )
+            self._policy_event("policy_execution_result",
+                               feedback={k: res.get(k) for k in ("pose", "step_count", "navigable",
+                                                                 "terminated", "truncated", "error")})
             stuck = pose_unchanged(prev_pose, res.get("pose"))
             prev_pose = res.get("pose")
             executed += 1
@@ -1609,6 +1622,8 @@ class NavigationSession:
         self._live_frame(png, label, kind)
 
     def _register(self, name, description, fn):
+        if self._AGENTIC:
+            description = _sibling("agentic", "TOOL_DESCRIPTIONS").get(name, description)
         if self.VLA_BACKEND == "lightnav":
             description = description.replace("NavGPT VLA", "LightNav-0")
         if self._SUBTASK:

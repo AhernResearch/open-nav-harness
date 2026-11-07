@@ -35,6 +35,11 @@ uv run nav-harness --settings deployment/platform.example.json serve
 uv run nav-harness --settings deployment/platform.example.json worker
 ```
 
+For Codex/Claude planners, additionally install `uv sync --locked --extra dev --extra sdk`
+and use `uv run --extra sdk ...` (or that environment's Python interpreter) when launching.
+Local API planners do not import MCP or either model SDK; the development extra includes
+MCP only to test adapter compatibility.
+
 Open `http://127.0.0.1:8878`. The generated administrator password is in
 `state/admin-password` (mode 0600). `serve --host 0.0.0.0` enables LAN access.
 Use an HTTPS reverse proxy when transport confidentiality is required.

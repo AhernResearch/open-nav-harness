@@ -13,10 +13,8 @@ requires-python = ">=3.11"
 dependencies = [
     "fastapi==0.162.0", "uvicorn==0.54.0", "sqlalchemy==2.1.8",
     "alembic==1.20.1", "httpx==0.28.1", "jsonschema==4.26.0",
-    "claude-agent-sdk==0.2.179",
-    "mcp==1.30.0",
-    "openai-codex==0.147.0",
     "tomli>=2; python_version < '3.11'",
+    "pydantic>=2.14,<3",
     "pillow>=10.0.0",
     "pyyaml>=6.0",
     "requests>=2.28.0",
@@ -39,7 +37,8 @@ nav-harness = "nav_harness.cli:main"
 navgpt = "navgpt.cli:main"
 
 [project.optional-dependencies]
-dev = ["pytest==9.2.0", "pytest-asyncio==1.4.1.post1", "ruff==0.17.4", "mypy==2.4.1"]
+sdk = ["claude-agent-sdk==0.2.179", "mcp==1.30.0", "openai-codex==0.147.0"]
+dev = ["pytest==9.2.0", "pytest-asyncio==1.4.1.post1", "ruff==0.17.4", "mypy==2.4.1", "mcp==1.30.0"]
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
