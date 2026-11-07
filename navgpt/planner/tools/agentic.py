@@ -7,7 +7,20 @@ model choices rather than movement permissions.
 
 from __future__ import annotations
 
+from pydantic import ConfigDict
+from typing import Literal
+from typing_extensions import TypedDict
+
 from .subtasks import SubtaskManager
+
+
+class PlanItem(TypedDict):
+    __pydantic_config__ = ConfigDict(extra="forbid")
+
+    id: int
+    instruction: str
+    completion_criterion: str
+    status: Literal["pending", "in_progress", "completed"]
 
 
 class AgenticTasks(SubtaskManager):
@@ -15,23 +28,30 @@ class AgenticTasks(SubtaskManager):
         super().__init__(*args, **kwargs)
         self.active_id = None
         self.completion_claim = None
+        self.memories = {}
+        self.memory_revision = 0
 
     def snapshot(self):
+        state = super().snapshot()
+        for key in ("needs_review", "needs_replan", "last_review"):
+            state.pop(key)
         return {
-            **super().snapshot(),
+            **state,
             "active_id": self.active_id,
             "completion_claim": self.completion_claim,
             "workflow": "model_owned",
+            "tool_contract": "plan_memory_v1",
+            "memory_revision": self.memory_revision,
+            "memories": [dict(value) for value in self.memories.values()],
         }
 
-    def update_plan(self, subtasks, reason, reopen_ids=None):
+    def update_plan(self, subtasks, reason):
         if not self.frames:
             raise ValueError("Observe the initial scene before planning")
         if not isinstance(reason, str) or not reason.strip():
             raise ValueError("Explain the plan revision")
         if not isinstance(subtasks, list) or not 1 <= len(subtasks) <= 128:
             raise ValueError("Plan must contain 1-128 tasks")
-        old = {task["id"]: task for task in self.tasks}
         updated = []
         ids = set()
         for source in subtasks:
@@ -45,18 +65,14 @@ class AgenticTasks(SubtaskManager):
                 if not isinstance(value, str) or not value.strip():
                     raise ValueError("Task needs " + key)
                 task[key] = value.strip()
-            task["source_quote"] = source.get("source_quote") or ""
-            if not isinstance(task["source_quote"], str):
-                raise ValueError("source_quote must be text when supplied")
-            if task["source_quote"] and task["source_quote"] not in self.instruction:
-                raise ValueError("An optional source_quote must match the original instruction")
-            task["status"] = source.get("status", old.get(ident, {}).get("status", "pending"))
-            if ident in (reopen_ids or []):
-                task["status"] = "pending"
-            if task["status"] not in ("pending", "active", "accepted"):
-                raise ValueError("Task status must be pending, active or accepted")
+            task["status"] = source.get("status", "pending")
+            if task["status"] not in ("pending", "in_progress", "completed"):
+                raise ValueError("Task status must be pending, in_progress or completed")
             updated.append(task)
+        if sum(t["status"] == "in_progress" for t in updated) > 1:
+            raise ValueError("At most one task may be in_progress")
         self.tasks = updated
+        self.active_id = next((t["id"] for t in updated if t["status"] == "in_progress"), None)
         self.revision += 1
         self.needs_replan = False
         self._event("plan", reason=reason, plan=self.snapshot())
@@ -66,8 +82,8 @@ class AgenticTasks(SubtaskManager):
         if self.aborted:
             raise ValueError("Episode was aborted")
         task = next((t for t in self.tasks if t["id"] == self.active_id), None)
-        if task is None or task["status"] == "accepted":
-            task = next((t for t in self.tasks if t["status"] != "accepted"), None)
+        if task is None or task["status"] == "completed":
+            task = next((t for t in self.tasks if t["status"] != "completed"), None)
         if task is None:
             raise ValueError("Choose or add a remaining task before delegating to the VLA")
         return task
@@ -78,10 +94,11 @@ class AgenticTasks(SubtaskManager):
         if task_id is not None:
             if not any(t["id"] == task_id for t in self.tasks):
                 raise ValueError("Unknown task ID")
-            self.active_id = task_id
             task = next(t for t in self.tasks if t["id"] == task_id)
         else:
             task = self.current()
+        if task["status"] == "completed":
+            raise ValueError("Reopen the task with update_plan before executing it")
         self.active_id = task["id"]
         if instruction.strip():
             task["instruction"] = instruction.strip()
@@ -89,7 +106,10 @@ class AgenticTasks(SubtaskManager):
             self.anchor = len(self.frames) - 1
             self.anchor_task_id = task["id"]
             self.context_key = f"task-{task['id']}-frame-{self.anchor}"
-        task["status"] = "active"
+        for other in self.tasks:
+            if other["id"] != task["id"] and other["status"] == "in_progress":
+                other["status"] = "pending"
+        task["status"] = "in_progress"
         self._event(
             "begin",
             task_id=task["id"],
@@ -98,29 +118,40 @@ class AgenticTasks(SubtaskManager):
         )
         return task
 
-    def review(self, outcome, evidence_refs, summary, reason):
-        if outcome not in ("accepted", "continue", "replan"):
-            raise ValueError("outcome must be accepted, continue or replan")
-        if not isinstance(summary, str) or not summary.strip() or len(summary) > 2400:
-            raise ValueError("Write a nonempty work summary of at most 2400 characters")
-        known = {f["id"] for f in self.frames} | {"map-" + f["id"].split("-", 1)[1] for f in self.frames}
-        if not set(evidence_refs or []) <= known:
-            raise ValueError("Unknown evidence reference")
-        task = self.current()
-        task["status"] = "accepted" if outcome == "accepted" else "active"
+    def returned(self, reason):
+        self._event("return", reason=reason)
+
+    def remember(self, node_id, caption, evidence):
+        """One bounded caption per map node. Task status belongs only to update_plan."""
+        if type(node_id) is not int or node_id < 0:
+            raise ValueError("node_id must be a nonnegative integer")
+        if not isinstance(caption, str) or not caption.strip() or len(caption) > 800:
+            raise ValueError("caption must contain 1-800 characters")
+        entry = {"node_id": node_id, "caption": caption.strip(), **evidence}
+        updated = {**self.memories, node_id: entry}
+        if sum(len(m["caption"]) for m in updated.values()) > 4000:
+            raise ValueError("Memory exceeds 4000 characters; shorten existing node captions first")
+        previous = self.memories.get(node_id)
+        self.memories = updated
+        self.memory_revision += 1
+        self.summary = f"Node {node_id}: {caption.strip()}"
         self.needs_review = False
-        self.needs_replan = outcome == "replan"
-        self.summary = summary
-        self.last_review = {
-            "task_id": task["id"],
-            "outcome": outcome,
-            "evidence_refs": evidence_refs or [],
-            "reason": reason,
-            "camera_frame": self.frames[-1]["id"] if self.frames else None,
-            "map_fresh": self.map_version == self.motion_version,
-        }
-        self._event("review", **self.last_review, summary=summary)
-        return self.snapshot()
+        self._event("memory_update", previous=previous, memory=entry, memory_revision=self.memory_revision)
+        return entry
+
+    def policy_instruction(self):
+        task = self.current()
+        background = (
+            ("\nLatest observed-place memory (may contain uncertainty; not an action): " + self.summary)
+            if self.summary
+            else ""
+        )
+        return (
+            task["instruction"]
+            + "\nStop this local operation when: "
+            + task["completion_criterion"]
+            + background
+        )
 
     def finish(self, status):
         if status not in ("complete", "abort"):
@@ -152,14 +183,9 @@ TOOL_DESCRIPTIONS = {
         "Returns endpoint views and observed node information. Clearance is a rough depth cue, not a guarantee."
     ),
     "navigate_to_node": (
-        "Retrace already travelled ground to a visited node by ID or your recorded name. "
+        "Retrace already travelled ground to a visited node by its map ID. "
         "Node IDs remain stable. Use observe_map for node geometry and available destinations. "
         "This does not find unvisited goals."
     ),
-    "annotate_node": (
-        "Name and describe a visited place for later recall or retracing. By default attaches to the "
-        "nearest current node; place can select a known node explicitly. caption should distinguish "
-        "its visible surroundings. Optional clause associates an instruction clause. Does not move."
-    ),
-    "observe_node": "Retrieve the image recorded at a visited node by ID or name. Does not move.",
+    "observe_node": "Retrieve the image recorded at a visited node by its map ID. Does not move.",
 }

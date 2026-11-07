@@ -15,7 +15,8 @@ def call(ident, name):
     return {"id": ident, "type": "function", "function": {"name": name, "arguments": "{}"}}
 
 
-async def run_fake(tmp_path, monkeypatch, responses):
+async def run_fake(tmp_path, monkeypatch, responses, names=None):
+    names = names or ["observe_panorama", "terminate_episode"]
     executed = []
 
     class Client:
@@ -51,7 +52,7 @@ async def run_fake(tmp_path, monkeypatch, responses):
                     description=name,
                     inputSchema={"type": "object", "properties": {}, "additionalProperties": False},
                 )
-                for name in ["observe_panorama", "terminate_episode"]
+                for name in names
             ]
 
         async def call_tool(self, name, args):
@@ -69,7 +70,7 @@ async def run_fake(tmp_path, monkeypatch, responses):
 
     monkeypatch.setattr(module, "CompatibleClient", Client)
     monkeypatch.setattr(module, "open_tools", transport)
-    monkeypatch.setattr(module, "expected_tools", lambda *_: ["observe_panorama", "terminate_episode"])
+    monkeypatch.setattr(module, "expected_tools", lambda *_: names)
     ctx = EpisodeContext(
         "system",
         "first",
@@ -130,3 +131,21 @@ def test_multimodal_tool_feedback_preserves_call_provenance():
     assert feedback["tool_call_id"] == "call-7"
     assert "call-7" in images[0]["text"]
     assert images[1]["image_url"]["url"] == "data:image/png;base64,aGVsbG8="
+
+
+async def test_map_and_memory_cannot_be_precomputed_in_one_model_response(tmp_path, monkeypatch):
+    executed, outcome = await run_fake(
+        tmp_path,
+        monkeypatch,
+        [
+            [call("1", "observe_map"), call("2", "update_memory")],
+            [call("3", "observe_map")],
+            [call("4", "update_memory")],
+            [call("5", "terminate_episode")],
+        ],
+        names=["observe_map", "update_memory", "terminate_episode"],
+    )
+    assert executed == ["observe_map", "update_memory", "terminate_episode"]
+    assert outcome.error is None
+    events = [json.loads(line) for line in (tmp_path / "trace/requests.jsonl").read_text().splitlines()]
+    assert any("separate model turns" in str(e) for e in events if e["kind"] == "tool_validation_error")

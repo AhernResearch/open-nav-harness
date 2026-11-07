@@ -12,7 +12,8 @@ import time
 from pathlib import Path
 from typing import Any
 import requests
-from .registry import Image, ToolRegistry
+from .registry import Image, TextContent, ToolRegistry, ToolResult
+from .agentic import PlanItem
 
 
 def _sibling(module_name, attr):
@@ -75,6 +76,7 @@ class NavigationSession:
         self._obs_count = 0
         self._steps_taken = 0
         self._motion_epoch = 0
+        self._memory_map_read = None
         self._episode_over = False
         self._end_reason = ""
         self._OBSERVE_DESC = "Look through the robot's forward-facing camera and return the RGB view."
@@ -142,13 +144,14 @@ class NavigationSession:
             self._register("navigate_relative", self._MOVE_DESC, self.move)
         if self._HAS_PLACES:
             self._register("navigate_to_node", self._GO_DESC, self.go)
-            self._register("annotate_node", self._ADD_PLACE_DESC, self.add_place)
+            if not self._AGENTIC:
+                self._register("annotate_node", self._ADD_PLACE_DESC, self.add_place)
         if self._HAS_PLACES and (not self._HAS_VLA or self._AGENTIC):
             self._register("observe_node", self._RECALL_DESC, self.recall)
         if self._AGENTIC:
             self._register("update_plan", self.update_agentic_plan.__doc__, self.update_agentic_plan)
             self._register("execute_subtask", self.execute_agentic_task.__doc__, self.execute_agentic_task)
-            self._register("review_subtask", self.review_agentic_task.__doc__, self.review_agentic_task)
+            self._register("update_memory", self.update_memory.__doc__, self.update_memory)
         elif self._SUBTASK:
             self._register("update_plan", self.update_plan.__doc__, self.update_plan)
             self._register("execute_subtask", self.execute_subtask.__doc__, self.execute_subtask)
@@ -284,6 +287,7 @@ class NavigationSession:
             inputs = dict(inputs, capture_history=True)
         if motion in ("step_hightolow", "retrace_to", "retrace_path", "step_discrete", "step_velocity", "teleport"):
             self._motion_epoch += 1
+            self._memory_map_read = None
         resp = requests.post(
             "{}/call/{}".format(self.SERVER_URL, function_name), json={"inputs": inputs}, timeout=300
         )
@@ -636,6 +640,8 @@ class NavigationSession:
         ):
             if out.get(src) is not None:
                 fields[key] = out[src]
+        if self._AGENTIC:
+            fields["places_px"] = out.get("places_px", {})
         if self._ABLATION:
             for key in (
                 "places_px",
@@ -828,6 +834,8 @@ class NavigationSession:
         if payload.get("note"):
             lines.append("       {}".format(payload["note"]))
         pending = self._pending_place(payload)
+        if self._AGENTIC:
+            return "\n".join(lines)
         if pending is not None and (not self._ABLATION):
             lines.append(
                 '       place {} still has no name — annotate_node("name", "caption") records it'.format(
@@ -862,7 +870,7 @@ class NavigationSession:
         pending = self._pending_place(payload)
         if pending is not None and pending != pl["id"]:
             line += " · place {} is new and unnamed".format(pending)
-        elif pending is not None:
+        elif pending is not None and not self._AGENTIC:
             line += ' · unnamed: annotate_node("name", "caption")'
         return line
 
@@ -884,6 +892,7 @@ class NavigationSession:
         agent outside its own coverage.
         """
         self._tool_enter("observe_map")
+        self._memory_map_read = None
         self._pano()
         if self._last_pose is None:
             return ["no pose available yet"]
@@ -906,6 +915,17 @@ class NavigationSession:
                 "revisiting": status["revisiting_earlier_position"],
             }
         )
+        if self._AGENTIC:
+            # Only this explicit tool grants write access, never an automatic rollout map.
+            self._memory_map_read = {
+                "motion_epoch": self._motion_epoch,
+                "map_call": self._tool_call_counts["observe_map"],
+                "map_sha256": hashlib.sha256(png).hexdigest(),
+                "node_ids": sorted(int(n) for n in status.get("places_px", {})),
+                "frame_id": self._tasks.frames[-1]["id"] if self._tasks.frames else None,
+            }
+            self._tasks._event("memory_map_read", **self._memory_map_read)
+            status["memory_read"] = dict(self._memory_map_read)
         out: list[Any] = [Image(data=png, format="png"), json.dumps(status)]
         if table:
             out.append(table)
@@ -1312,6 +1332,8 @@ class NavigationSession:
         known = [pl["id"] for pl in payload["places"]]
         inputs: dict[str, Any] = {}
         if place is None:
+            if self._AGENTIC:
+                return ["navigate_to_node requires a node ID from observe_map"]
             return [
                 "navigate_to_node needs a place: a number ({}), a name you gave with annotate_node, or [x, y] in metres from your start".format(
                     ", ".join((str(i) for i in known))
@@ -1569,7 +1591,9 @@ class NavigationSession:
             "" if len(places) <= limit else "\n  ... and {} more, all on the map".format(len(places) - limit)
         )
         return (
-            "places you have recorded, in the order you reached them — terminate_episode(n) goes back to one and stops there:\n"
+            ("visited map nodes; navigate_to_node(id) returns there; terminate_episode stops here:\n"
+             if self._AGENTIC else
+             "places you have recorded, in the order you reached them — terminate_episode(n) goes back to one and stops there:\n")
             + "\n".join(out)
             + extra
         )
@@ -1640,6 +1664,11 @@ class NavigationSession:
                     except ValueError as exc:
                         if self._motion_epoch != before_motion:
                             raise RuntimeError("Tool failed after dispatching movement; retain the lease") from exc
+                        if self._AGENTIC:
+                            return ToolResult(isError=True, content=[
+                                TextContent(text=json.dumps({"protocol_error": str(exc)})),
+                                TextContent(text=json.dumps({"subtask_state": self._tasks.snapshot()})),
+                            ])
                         result = [json.dumps({"protocol_error": str(exc)})]
                     result.append(json.dumps({"subtask_state": self._tasks.snapshot()}))
                     return result
@@ -1726,11 +1755,12 @@ class NavigationSession:
         self._tasks.finish(status)
         return self.arrive("here")
 
-    def update_agentic_plan(self, subtasks: list[dict], reason: str) -> list:
+    def update_agentic_plan(self, subtasks: list[PlanItem], reason: str) -> list:
         """Write or revise your plan. Each task needs id, instruction and completion_criterion.
 
-        Optional status: pending, active, accepted. Preserve IDs when refining a task.
-        source_quote is optional. Previous revisions remain in the trace. This does not move.
+        Replace the full plan, preserving IDs for retained tasks and explaining the change.
+        Each status is pending, in_progress or completed; at most one is in_progress.
+        Reopen incorrect completions here. This records task state; it does not execute movement.
         """
         self._tasks.update_plan(subtasks, reason)
         return []
@@ -1756,6 +1786,7 @@ class NavigationSession:
         if not 1 <= history_frames <= 16 or not 0 <= boundary_frames <= min(4, history_frames - 1):
             raise ValueError('Invalid actor history budget')
         self._tasks.begin(task_id, instruction, reset_context)
+        self._memory_map_read = None
         self._tasks.max_frames, self._tasks.boundary_frames = history_frames, boundary_frames
         self._rollout_limits = {'max_actions': max_actions, 'max_distance_m': max_distance_m,
                                 'max_turn_deg': max_turn_deg}
@@ -1768,17 +1799,35 @@ class NavigationSession:
         finally:
             self._rollout_limits = None
 
-    def review_agentic_task(self, summary: str, outcome: str = "continue", reason: str = "",
-                           evidence_refs: list[str] | None = None) -> list:
-        """Persist your work summary (up to 2400 characters) and progress judgment.
+    def update_memory(self, node_id: int, caption: str) -> list:
+        """Write or replace the caption of a numbered map node (1-800 characters).
 
-        outcome: continue, accepted or replan. Include completed transitions, counts,
-        useful node IDs and uncertainties. Evidence IDs are optional but must exist if
-        supplied. A fresh map is not a permission requirement; inspect it when useful.
-        The summary survives Planner pruning and provides background to the next VLA call.
+        First call observe_map and read its returned image in a preceding model turn.
+        The node must appear on that map. Movement, rotation or VLA execution invalidates
+        the read: call observe_map again. Automatically returned maps do not grant access.
+        Describe this place, observed progress, failed attempts and uncertainty together.
+        Replaces this node's previous caption; preserve still-relevant facts. Total memory
+        is limited to 4000 characters. Does not change node geometry or task status.
+        Use update_plan for task completion. Memory survives Planner pruning and the latest
+        caption is background for the next VLA delegation.
         """
-        self._tasks.review(outcome, evidence_refs, summary, reason)
-        return []
+        self._tool_enter("update_memory")
+        read = self._memory_map_read
+        if not read or read["motion_epoch"] != self._motion_epoch:
+            raise ValueError("Call observe_map and read its image after the latest movement before update_memory")
+        if node_id not in read["node_ids"]:
+            raise ValueError("node_id must be present on the last explicitly observed map")
+        evidence = {key: value for key, value in read.items() if key != "node_ids"}
+        entry = self._tasks.remember(node_id, caption, evidence)
+        # Keep existing geometric anchors and node photographs. Never attach the current
+        # robot pose/image to an arbitrary historical node when changing its caption.
+        label = dict(self._place_labels.get(node_id) or {})
+        label.setdefault("name", f"node {node_id}")
+        label["caption"] = entry["caption"]
+        self._place_labels[node_id] = label
+        self._dump_labels()
+        self._live_log({"update_memory": node_id, "memory_revision": self._tasks.memory_revision})
+        return [json.dumps({"updated_memory": entry, "memory_revision": self._tasks.memory_revision})]
 
     def finish_agentic_episode(self, status: str = "complete", reason: str = "") -> list:
         """Permanently STOP here. Declare complete or abort and explain the endpoint evidence.

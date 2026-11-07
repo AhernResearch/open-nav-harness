@@ -125,6 +125,10 @@ class ManagedRuntime:
                             validation_errors.append(name + ": " + getattr(exc, "message", str(exc)))
                     if any(name == "terminate_episode" for _, name, _ in prepared[:-1]):
                         validation_errors.append("STOP must be the last tool in a response")
+                    if {"observe_map", "update_memory"} <= {name for _, name, _ in prepared}:
+                        validation_errors.append(
+                            "observe_map and update_memory require separate model turns: read the map first"
+                        )
                     block = [{"role": "assistant", "content": message.get("content"), "tool_calls": calls}]
                     if validation_errors:
                         # Reject the ENTIRE batch before any movement, then let the model

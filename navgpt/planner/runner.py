@@ -337,9 +337,9 @@ def parse_episodes(spec: str) -> list[int]:
 # The frozen basic profile stops through primitive action 0; other profiles
 # expose terminate_episode. The rest follow the capability flags in mcp_tools.py.
 EXPECTED_TOOLS = {
-    "planner_agentic": ["annotate_node", "execute_subtask", "navigate_relative",
-                        "navigate_to_node", "observe_forward", "observe_map", "observe_node",
-                        "observe_panorama", "review_subtask", "terminate_episode", "update_plan"],
+    "planner_agentic": ["execute_subtask", "navigate_relative", "navigate_to_node",
+                        "observe_forward", "observe_map", "observe_node", "observe_panorama",
+                        "terminate_episode", "update_memory", "update_plan"],
     "planner_subtask": ["annotate_node", "execute_subtask", "navigate_relative",
                         "navigate_to_node", "observe_forward", "observe_map",
                         "observe_panorama", "review_subtask", "terminate_episode", "update_plan"],
@@ -861,7 +861,7 @@ async def run_episode(adapter, cfg: RunConfig, index: int, run_dir: Path) -> dic
     promised_but_absent = sorted(
         named & {"navigate_relative", "navigate_to_node", "annotate_node",
                  "observe_panorama", "observe_map", "observe_forward", "navigate_primitive",
-                 "navigate_by_instruction", "observe_node", "update_plan", "execute_subtask", "review_subtask",
+                 "navigate_by_instruction", "observe_node", "update_plan", "execute_subtask", "review_subtask", "update_memory",
                  "terminate_episode"} - want)
     if promised_but_absent:
         raise RuntimeError(
@@ -1014,6 +1014,7 @@ async def run_episode(adapter, cfg: RunConfig, index: int, run_dir: Path) -> dic
             "places_named": places_named,
             "clauses_bound": clauses_bound,
             "annotate_node_calls": sink.tool_calls.get("annotate_node", 0),
+            "update_memory_calls": sink.tool_calls.get("update_memory", 0),
             "navigate_to_node_calls": sink.tool_calls.get("navigate_to_node", 0),
             "terminate_episode_calls": sink.tool_calls.get("terminate_episode", 0),
             "observe_node_calls": sink.tool_calls.get("observe_node", 0),

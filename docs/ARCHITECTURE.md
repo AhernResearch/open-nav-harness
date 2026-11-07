@@ -143,6 +143,51 @@ images, and stop independently of plan checkboxes. Initial observation/decomposi
 and evidence-based handoff review are prompting guidance. `subtask` preserves the
 previous strict workflow for comparisons; `global` preserves full-route delegation.
 
+### Plan/memory tool contract v1
+
+Agentic mode exposes ten tools. `update_plan` and `update_memory` replace the previous
+plan/review/annotation surface; `annotate_node` and `review_subtask` remain only in legacy
+profiles. Existing frozen experiments require a new configuration/source fingerprint.
+The state records `tool_contract: plan_memory_v1`.
+
+`update_plan(subtasks, reason)` replaces the complete ordered plan. Each item requires
+`id` (positive integer), `instruction`, `completion_criterion`, and `status`:
+`pending`, `in_progress`, or `completed`. IDs must be unique, with at most one item
+in progress. Fields outside this schema are rejected. Retained tasks keep their IDs;
+incorrect completions can be reopened through a new plan. Validation precedes mutation.
+The old `active`/`accepted` statuses are not silently accepted in this contract.
+Executing a selected unfinished task marks it in progress; only a plan update can
+mark it completed. The plan never starts movement by itself.
+
+`update_memory(node_id, caption)` takes exactly those two required fields. `node_id`
+is the existing integer map-node ID. `caption` combines spatial description, execution
+review, failed attempts and uncertainty. It replaces only that node's previous caption,
+without changing task status, node geometry, return anchors or recorded photographs.
+Captions contain 1–800 characters, with a 4000-character total budget. An overflow is a
+recoverable error asking the model to shorten existing captions, never silent truncation.
+
+Only a successful **explicit** `observe_map` grants memory-write access. The session
+records its call number, image SHA-256, shown node IDs, motion epoch and camera frame.
+The target must be among that map's node IDs. Failed reads revoke access. Any dispatched
+movement/rotation or new VLA execution invalidates the receipt, even if the VLA immediately
+stops. Automatically returned rollout/retrace maps do not grant access. Several nodes
+may be annotated from one valid read. Rejections change no captions or task state and
+return tool-error feedback; unknown movement outcomes still retain ownership.
+
+The managed loop rejects an entire response containing both `observe_map` and
+`update_memory` before executing it: the model must receive the image in a preceding
+turn. The shared session gate applies equally to direct, RPC and MCP calls. MCP alone
+does not expose the SDK's model-request boundaries; it verifies a completed map read
+before a write, while the preceding-model-turn check is enforced by the managed loop.
+Do not describe SDK-only traces as proof of exact model-input visibility.
+
+Memory updates keep previous captions in the event journal, write current captions to
+the same node-label store, and include the latest memory catalog in task state. That
+catalog survives bounded context pruning. The most recently updated caption, including
+its node ID and uncertainty, is passed as background to the next VLA call. There is no
+hidden summarizer or automatic claim of task completion. Tool schemas, state transition
+rules, map gating and transport behavior are covered by contract tests.
+
 Malformed tool arguments reject the whole unexecuted batch and return repair feedback.
 The next model call can correct them. A repeated call ID, uncertain movement, truncated
 response or missing explicit STOP remains an execution error. This distinction prevents

@@ -15,8 +15,18 @@ from navgpt.settings import Settings, SettingsError
 
 def tasks():
     return [
-        {"id": 1, "instruction": "Cross the doorway", "completion_criterion": "Beyond the door"},
-        {"id": 2, "instruction": "Turn left into the hall", "completion_criterion": "Facing the hall"},
+        {
+            "id": 1,
+            "instruction": "Cross the doorway",
+            "completion_criterion": "Beyond the door",
+            "status": "pending",
+        },
+        {
+            "id": 2,
+            "instruction": "Turn left into the hall",
+            "completion_criterion": "Facing the hall",
+            "status": "pending",
+        },
     ]
 
 
@@ -38,11 +48,11 @@ def test_model_can_continue_repair_reorder_and_stop_without_review_gates():
     m.update_plan(tasks(), "Refined local landmarks")
     m.begin(2)
     assert m.current()["id"] == 2
-    m.review("continue", [], "Door crossing remains uncertain.", "Need another view")
-    assert m.last_review["map_fresh"] is False
+    m.remember(0, "Door crossing remains uncertain.", {"map_call": 1})
+    assert "uncertain" in m.policy_instruction()
     m.finish("complete")
     assert m.snapshot()["completion_claim"] == "complete"
-    assert any(t["status"] != "accepted" for t in m.tasks)
+    assert any(t["status"] != "completed" for t in m.tasks)
 
 
 @pytest.mark.parametrize("budget,boundary", [(1, 0), (2, 1), (4, 3), (16, 2)])

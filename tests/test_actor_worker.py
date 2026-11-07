@@ -178,7 +178,7 @@ async def test_real_mcp_stdio_to_rpc_closes_remote_ownership(tmp_path, unused_tc
             async with stdio_client(params) as (read, write):
                 async with ClientSession(read, write) as client:
                     await client.initialize()
-                    assert len((await client.list_tools()).tools) == 11
+                    assert len((await client.list_tools()).tools) == 10
                     assert (await http.get(url + "/info")).json()["session_id"] is None
                     result = await client.call_tool("observe_forward", {})
                     assert result.content[0].text == "real MCP/RPC transport"

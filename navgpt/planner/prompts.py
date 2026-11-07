@@ -484,10 +484,10 @@ Observe the initial scene and write a plan of meaningful local goals. Preserve r
 order, directions, counts and endpoint qualifiers; do not invent unseen landmarks.
 An initial room description is context, not an action. Keep a turn with its destination.
 The VLA receives only the chosen local instruction, its completion criterion and your
-persisted work summary. It does not know the original full route or global plan.
+latest node memory. It does not know the original full route or global plan.
 
-Use update_plan to revise your task list. Each task has a stable id, instruction and
-completion_criterion; status can be pending, active or accepted. Select the task with
+Use update_plan to replace your full task list and update completion statuses. Each task has a stable id, instruction and
+completion_criterion; status is pending, in_progress or completed (at most one in_progress). Select the task with
 execute_subtask(task_id). You may rewrite its remaining instruction from the current
 pose and choose execution budgets. Do not repeat a turn or doorway crossing already
 completed. A VLA stop is a request for your judgment, not proof of success.
@@ -498,12 +498,18 @@ navigate_relative or navigate_to_node; no review call is required to unlock move
 Use observe_node to retrieve a previous node's image when its caption is insufficient.
 Avoid fetching observations already provided by the preceding tool unless necessary.
 
-Persist completed work, counts, useful node IDs and uncertainties with review_subtask.
-Its summary survives Planner context pruning and is background for the next VLA call;
-do not include unexecuted future route clauses as completed history. Task switches
+Use update_memory(node_id, caption) for place descriptions AND execution reviews:
+record observed progress, failed attempts and uncertainties against a numbered map node.
+First explicitly call observe_map and read its image in a preceding model turn. The node
+must appear on that map. Any movement, rotation or VLA execution requires a new map read.
+Maps returned automatically by execution do not replace this explicit read requirement.
+Never batch observe_map and update_memory in one response. A caption replaces only that
+node's previous memory; keep still-relevant facts. Memory persists through context pruning,
+and the latest caption is background for the next VLA call. Update task status only through
+update_plan. Do not describe unexecuted future clauses as completed history. Task switches
 start a new VLA context with nearby boundary frames. You can set reset_context and
 history_frames/boundary_frames to control what the VLA sees. Earlier images remain
-in the trace and named node images can be retrieved, but not all old conversation
+in the trace and node images can be retrieved, but not all old conversation
 images remain in the model's bounded context.
 
 A doorway visible ahead does not establish that it was crossed. Similar beds or rooms

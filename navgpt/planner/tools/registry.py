@@ -66,6 +66,8 @@ class ToolRegistry:
             raise ValueError("Unknown navigation tool: " + name)
         args = self.arguments[name].model_validate(arguments, strict=True).model_dump()
         values = self.functions[name](**args)
+        if isinstance(values, ToolResult):
+            return values
         return ToolResult(
             content=[
                 ImageContent(data=base64.b64encode(v.data).decode(), mimeType="image/" + v.format)
