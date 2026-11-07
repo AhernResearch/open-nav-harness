@@ -46,13 +46,13 @@ async def run_fake(tmp_path, monkeypatch, responses):
 
         async def list_tools(self):
             return [
-                    SimpleNamespace(
-                        name=name,
-                        description=name,
-                        inputSchema={"type": "object", "properties": {}, "additionalProperties": False},
-                    )
-                    for name in ["observe_panorama", "terminate_episode"]
-                ]
+                SimpleNamespace(
+                    name=name,
+                    description=name,
+                    inputSchema={"type": "object", "properties": {}, "additionalProperties": False},
+                )
+                for name in ["observe_panorama", "terminate_episode"]
+            ]
 
         async def call_tool(self, name, args):
             executed.append(name)
@@ -100,10 +100,13 @@ async def test_multi_call_response_counts_once_and_stops(tmp_path, monkeypatch):
 
 async def test_invalid_batch_never_partially_executes(tmp_path, monkeypatch):
     executed, outcome = await run_fake(
-        tmp_path, monkeypatch, [[call("1", "observe_panorama"), call("2", "unknown")]]
+        tmp_path,
+        monkeypatch,
+        [[call("1", "observe_panorama"), call("2", "unknown")], [call("3", "terminate_episode")]],
     )
-    assert executed == []
-    assert outcome.error and "Unknown navigation tool" in outcome.error
+    assert executed == ["terminate_episode"]
+    assert outcome.error is None
+    assert outcome.turns == 2
 
 
 async def test_repeated_id_never_repeats_side_effect(tmp_path, monkeypatch):

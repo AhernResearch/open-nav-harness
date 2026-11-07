@@ -130,6 +130,7 @@ ALL_TOOLS = ["observe_forward", "observe_panorama", "observe_map", "navigate_by_
              "navigate_relative", "navigate_to_node", "annotate_node", "terminate_episode"]
 SUBTASK_TOOLS = [tool for tool in ALL_TOOLS if tool != 'navigate_by_instruction'] + [
     'update_plan', 'execute_subtask', 'review_subtask']
+AGENTIC_TOOLS = SUBTASK_TOOLS + ['observe_node']
 
 
 def tool_set(tools) -> tuple[str, str]:
@@ -242,10 +243,10 @@ class Settings:
         cfg.execution_url = str(harness.get('execution_url', ''))
         if cfg.execution_url:
             _url(cfg.execution_url)
-        if cfg.harness_mode not in ('global', 'subtask'):
-            raise SettingsError('harness.mode must be global or subtask')
+        if cfg.harness_mode not in ('global', 'subtask', 'agentic'):
+            raise SettingsError('harness.mode must be global, subtask or agentic')
         if not self.has_planner:
-            if cfg.harness_mode == 'subtask':
+            if cfg.harness_mode in ('subtask', 'agentic'):
                 raise SettingsError('Subtask mode requires a Planner to manage local goals')
             cfg.condition = VLA_ONLY
             if cfg.vla_backend == 'lightnav':
@@ -271,11 +272,12 @@ class Settings:
         cfg.episode_timeout = int(planner.get("episode_timeout_s", cfg.episode_timeout))
         budget = planner.get("max_budget_usd", 5.0 if runtime == "claude" else None)
         cfg.max_budget_usd = float(budget) if budget else None
-        default_tools = SUBTASK_TOOLS if cfg.harness_mode == 'subtask' else ALL_TOOLS
+        default_tools = {'subtask': SUBTASK_TOOLS, 'agentic': AGENTIC_TOOLS}.get(cfg.harness_mode, ALL_TOOLS)
         cfg.tools = list(planner.get("tools") or default_tools)
         cfg.condition, cfg.capability_bundle = tool_set(cfg.tools)
-        if (cfg.condition == 'planner_subtask') != (cfg.harness_mode == 'subtask'):
-            raise SettingsError('Subtask mode requires exactly its task-management tool set')
+        for mode in ('subtask', 'agentic'):
+            if (cfg.condition == 'planner_' + mode) != (cfg.harness_mode == mode):
+                raise SettingsError(mode + ' mode requires exactly its task-management tool set')
         for key in ('subtask_max_distance_m', 'subtask_max_turn_deg', 'subtask_max_actions'):
             value = harness.get(key, getattr(cfg, key))
             if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0:

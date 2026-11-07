@@ -171,7 +171,11 @@ class SubtaskManager:
     def selected_frames(self):
         if self.anchor is None:
             raise ValueError('No active subtask context')
-        boundary = list(range(max(0, self.anchor - self.boundary_frames), self.anchor))
+        if self.max_frames == 1:
+            return self.frames[-1:]
+        essential = 1 if self.anchor == len(self.frames) - 1 else 2
+        boundary_count = min(self.boundary_frames, self.max_frames - essential)
+        boundary = list(range(max(0, self.anchor - boundary_count), self.anchor))
         capacity = self.max_frames - len(boundary)
         active = [self.anchor]
         active += list(range(max(self.anchor + 1, len(self.frames) - capacity + 1), len(self.frames)))

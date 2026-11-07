@@ -1,5 +1,12 @@
 # LightNav-0 backend for the NavGPT-3 harness
 
+The owned worker path is now available through `python -m navgpt.vla.worker --config
+<worker.json>`. It imports LightNav inference directly with the `vllm_local` backend;
+it does not start or connect to the upstream WebSocket server. It shares the same
+context/controller implementation below. See [architecture](ARCHITECTURE.md#lightweight-execution-path)
+for direct tools, remote tool execution and MCP compatibility. The bridge described
+below remains available for parity checks and existing deployments.
+
 This local extension retains the Planner's eight tools, observed map, place memory,
 recovery and final-stop authority, and replaces NavGPT VLA with an existing LightNav-0
 service. All observations and motion belong to **one NavGPT Environment**. The existing

@@ -17,7 +17,7 @@ export function ExperimentsPage({
     [backend, setBackend] = useState("lightnav"),
     [episodes, setEpisodes] = useState("0,1,2"),
     [split, setSplit] = useState("train"),
-    [mode, setMode] = useState("subtask");
+    [mode, setMode] = useState("agentic");
   const choices = (k: string) =>
     services
       .filter((s) => s.spec.kind === k)
@@ -100,8 +100,9 @@ export function ExperimentsPage({
           </label>
           <label>
             模式
-            <select value={mode} onChange={(e) => setMode(e.target.value)}>
-              <option value="subtask">子任务闭环</option>
+            <select aria-label="模式" value={mode} onChange={(e) => setMode(e.target.value)}>
+              <option value="agentic">自主规划与上下文管理</option>
+              <option value="subtask">严格子任务闭环（基线）</option>
               <option value="global">全局委托</option>
             </select>
           </label>

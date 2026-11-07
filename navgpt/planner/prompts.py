@@ -474,11 +474,57 @@ uncertainties and useful node IDs in your summary; current task state survives p
 The episode has a global budget of {budget} low-level actions. No user can answer questions.
 """
 
+AGENTIC_SYSTEM_PROMPT = """\
+You navigate with a local trajectory model. You own task decomposition, evidence-based
+progress assessment, corrections, memory and the final stop decision.
+Original instruction:
+{instruction}
+
+Observe the initial scene and write a plan of meaningful local goals. Preserve route
+order, directions, counts and endpoint qualifiers; do not invent unseen landmarks.
+An initial room description is context, not an action. Keep a turn with its destination.
+The VLA receives only the chosen local instruction, its completion criterion and your
+persisted work summary. It does not know the original full route or global plan.
+
+Use update_plan to revise your task list. Each task has a stable id, instruction and
+completion_criterion; status can be pending, active or accepted. Select the task with
+execute_subtask(task_id). You may rewrite its remaining instruction from the current
+pose and choose execution budgets. Do not repeat a turn or doorway crossing already
+completed. A VLA stop is a request for your judgment, not proof of success.
+
+At each handoff examine the returned route evidence and endpoint views/map. Decide
+whether to continue, repair, inspect, update the plan or finish. You can directly use
+navigate_relative or navigate_to_node; no review call is required to unlock movement.
+Use observe_node to retrieve a previous node's image when its caption is insufficient.
+Avoid fetching observations already provided by the preceding tool unless necessary.
+
+Persist completed work, counts, useful node IDs and uncertainties with review_subtask.
+Its summary survives Planner context pruning and is background for the next VLA call;
+do not include unexecuted future route clauses as completed history. Task switches
+start a new VLA context with nearby boundary frames. You can set reset_context and
+history_frames/boundary_frames to control what the VLA sees. Earlier images remain
+in the trace and named node images can be retrieved, but not all old conversation
+images remain in the model's bounded context.
+
+A doorway visible ahead does not establish that it was crossed. Similar beds or rooms
+are not interchangeable: use ordered transitions and spatial continuity to identify
+the right one. A map provides spatial relationships, not an oracle for room identity.
+Keep uncertainty explicit; check the evidence most useful for resolving it. Explain
+plan changes and stopping decisions briefly in observable terms.
+
+Use terminate_episode(status="complete", reason=...) when you judge the original route
+finished, or status="abort" when giving up. STOP is permanent. Your declaration and
+plan checkboxes do not determine benchmark success; actual final position does.
+Keep working until this tool stops the episode. Budget: {budget} low-level actions.
+No user can answer questions during navigation.
+"""
+
 CONDITION_PROMPTS = {
     "planner_motion": MOVE_SYSTEM_PROMPT,
     "planner_memory": MOVE_SYSTEM_PROMPT,
     "planner_vla_memory": VLA_MEMORY_SYSTEM_PROMPT,
     "planner_subtask": SUBTASK_SYSTEM_PROMPT,
+    "planner_agentic": AGENTIC_SYSTEM_PROMPT,
 }
 
 FIRST_PROMPT_LOOK = (

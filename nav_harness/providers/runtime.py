@@ -108,20 +108,58 @@ class ManagedRuntime:
                     if not calls:
                         raise ModelProtocolError("Planner ended without an explicit successful STOP tool")
                     prepared = []
+                    validation_errors = []
                     for call in calls:
                         ident, fn = call["id"], call["function"]
                         name = fn["name"]
                         if ident in seen_ids:
                             raise ModelProtocolError("Repeated tool call id; refusing duplicate execution")
                         seen_ids.add(ident)
-                        arguments = json.loads(fn["arguments"])
-                        if name not in definitions:
-                            raise ModelProtocolError("Unknown navigation tool: " + name)
-                        jsonschema.validate(arguments, definitions[name])
-                        prepared.append((ident, name, arguments))
+                        try:
+                            arguments = json.loads(fn["arguments"])
+                            if name not in definitions:
+                                raise ValueError("Unknown navigation tool: " + name)
+                            jsonschema.validate(arguments, definitions[name])
+                            prepared.append((ident, name, arguments))
+                        except (ValueError, jsonschema.ValidationError) as exc:
+                            validation_errors.append(name + ": " + getattr(exc, "message", str(exc)))
                     if any(name == "terminate_episode" for _, name, _ in prepared[:-1]):
-                        raise ModelProtocolError("STOP must be the last tool in a response")
+                        validation_errors.append("STOP must be the last tool in a response")
                     block = [{"role": "assistant", "content": message.get("content"), "tool_calls": calls}]
+                    if validation_errors:
+                        # Reject the ENTIRE batch before any movement, then let the model
+                        # repair its arguments in a new call. Never replay an executed call.
+                        text = "No tools in this batch were executed. Correct the request: " + "; ".join(
+                            validation_errors
+                        )
+                        journal.emit("tool_validation_error", errors=validation_errors)
+                        for call in calls:
+                            sink.emit(
+                                "tool_use",
+                                {
+                                    "id": call["id"],
+                                    "name": call["function"]["name"],
+                                    "input": call["function"]["arguments"],
+                                },
+                            )
+                        for call in calls:
+                            ident, fn = call["id"], call["function"]
+                            feedback = {"role": "tool", "tool_call_id": ident, "content": text}
+                            block.append(feedback)
+                            journal.emit(
+                                "tool_result",
+                                call_id=ident,
+                                name=fn["name"],
+                                is_error=True,
+                                executed=False,
+                                feedback=feedback,
+                                images=[],
+                            )
+                            sink.emit(
+                                "tool_result", {"tool_use_id": ident, "texts": [text], "is_error": True}
+                            )
+                        window.append(block)
+                        continue
                     observations = []
                     state = None
                     for ident, name, arguments in prepared:

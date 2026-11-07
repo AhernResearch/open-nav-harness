@@ -18,6 +18,7 @@ PLANNER_MOTION = "planner_motion"
 PLANNER_MEMORY = "planner_memory"
 PLANNER_VLA_MEMORY = "planner_vla_memory"
 PLANNER_SUBTASK = "planner_subtask"
+PLANNER_AGENTIC = "planner_agentic"
 VLA_ONLY = "vla_only"
 
 CONDITIONS = (
@@ -26,6 +27,7 @@ CONDITIONS = (
     PLANNER_MEMORY,
     PLANNER_VLA_MEMORY,
     PLANNER_SUBTASK,
+    PLANNER_AGENTIC,
 )
 
 # How spatial information is drawn for the Planner. "standard" is the regular
@@ -124,7 +126,7 @@ class RunConfig:
     def vla_map_enabled(self) -> bool:
         """Resolve `vla_returns_map`, whose None means "follow the condition"."""
         if self.vla_returns_map is None:
-            return self.condition in (PLANNER_VLA_MEMORY, PLANNER_SUBTASK)
+            return self.condition in (PLANNER_VLA_MEMORY, PLANNER_SUBTASK, PLANNER_AGENTIC)
         return bool(self.vla_returns_map)
 
     def resolved_run_name(self) -> str:
@@ -139,9 +141,9 @@ class RunConfig:
 
 
 def needs_vla(condition: str) -> bool:
-    return condition in (PLANNER_VLA_MEMORY, PLANNER_SUBTASK)
+    return condition in (PLANNER_VLA_MEMORY, PLANNER_SUBTASK, PLANNER_AGENTIC)
 
 
 def has_places(condition: str) -> bool:
     """Conditions carrying the place graph. Must agree with mcp_tools._HAS_PLACES."""
-    return condition in (PLANNER_MEMORY, PLANNER_VLA_MEMORY, PLANNER_SUBTASK)
+    return condition in (PLANNER_MEMORY, PLANNER_VLA_MEMORY, PLANNER_SUBTASK, PLANNER_AGENTIC)

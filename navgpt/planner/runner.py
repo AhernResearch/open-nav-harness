@@ -337,6 +337,9 @@ def parse_episodes(spec: str) -> list[int]:
 # The frozen basic profile stops through primitive action 0; other profiles
 # expose terminate_episode. The rest follow the capability flags in mcp_tools.py.
 EXPECTED_TOOLS = {
+    "planner_agentic": ["annotate_node", "execute_subtask", "navigate_relative",
+                        "navigate_to_node", "observe_forward", "observe_map", "observe_node",
+                        "observe_panorama", "review_subtask", "terminate_episode", "update_plan"],
     "planner_subtask": ["annotate_node", "execute_subtask", "navigate_relative",
                         "navigate_to_node", "observe_forward", "observe_map",
                         "observe_panorama", "review_subtask", "terminate_episode", "update_plan"],
@@ -554,7 +557,7 @@ def preflight(cfg: RunConfig) -> dict[str, Any]:
                 raise PreflightError("Actor worker environment differs from the leased environment endpoint")
             if info.get("session_id") or info.get("failed"):
                 raise PreflightError("Actor worker has an unresolved session; reconcile before running")
-        if cfg.harness_mode == 'subtask' and (not info.get('context_replace')
+        if cfg.harness_mode in ('subtask', 'agentic') and (not info.get('context_replace')
                                              or info.get('max_context_groups') != 16):
             raise PreflightError('Subtask mode requires a VLA with 16-group context replacement')
         if cfg.vla_backend == 'lightnav':
@@ -804,7 +807,7 @@ def mcp_env_for(cfg: RunConfig, live_dir: Path | None,
         env["NAVGPT_INSTRUCTION"] = str(instruction)
     if live_dir is not None:
         env["NAVGPT_LIVE_DIR"] = str(live_dir)
-    if cfg.harness_mode == 'subtask' and labels_path is not None:
+    if cfg.harness_mode in ('subtask', 'agentic') and labels_path is not None:
         env['NAVGPT_SUBTASK_DIR'] = str(live_dir/'subtasks' if live_dir else
                                        labels_path.parent/'subtasks'/labels_path.stem)
     return env
@@ -993,13 +996,13 @@ async def run_episode(adapter, cfg: RunConfig, index: int, run_dir: Path) -> dic
 
     last = sink.last_step_result or {}
     task_fields = {}
-    if cfg.harness_mode == 'subtask':
+    if cfg.harness_mode in ('subtask', 'agentic'):
         state_path = Path(ctx.mcp_env['NAVGPT_SUBTASK_DIR'])/'state.json'
         task_state = json.loads(state_path.read_text()) if state_path.exists() else None
         task_success = bool(metrics.get('success') and metrics.get('stop_called')
                             and task_state and not task_state.get('aborted')
-                            and task_state['tasks']
-                            and all(t['status']=='accepted' for t in task_state['tasks'])
+                            and (cfg.harness_mode == 'agentic' or
+                                 (task_state['tasks'] and all(t['status']=='accepted' for t in task_state['tasks'])))
                             and not outcome.error and not sink.api_error)
         task_fields = {'subtasks': task_state, 'task_success': float(task_success)}
     place_stats = {}

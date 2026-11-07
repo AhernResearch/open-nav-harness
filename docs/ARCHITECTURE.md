@@ -21,9 +21,9 @@ flowchart LR
     Worker --> Episode[Isolated episode process]
     Episode --> Planner[Planner adapter]
     Planner --> Loop[Managed API loop or SDK]
-    Loop --> MCP[Episode NavigationSession]
-    MCP --> Env[A100 Habitat]
-    MCP --> VLA[A100 actor]
+    Loop --> Tools[Shared navigation tools]
+    Tools --> Env[A100 Habitat]
+    Tools --> VLA[A100 actor]
     Loop --> Trace[Requests + content-addressed images]
     Episode --> Results[Evaluation artifacts]
     API --> Replay[Read-only replay and export]
@@ -39,7 +39,7 @@ Existing Codex/Claude runtimes retain their SDK-driven tool transport and local 
 They are marked `sdk_observable_events_only`; SDK messages cannot be reconstructed
 as exact model input. Managed API sessions record `exact_wire_requests`.
 
-The MCP file is a transport entry point that creates one `NavigationSession`.
+The MCP file is an optional transport entry point over the same tool registry.
 Navigation rules exist on the session instance. Two instances do not share mutable
 plan, observation, map, budget or VLA state. Per-episode subprocess isolation additionally
 keeps SDK state and crash handling separate.
@@ -98,3 +98,56 @@ are deliberate choices. There is no multi-tenant RBAC, cluster autoscaler, arbit
 plugin execution, automatic trace training admission, or model-quality guarantee.
 External endpoints can participate in experiments, but the platform cannot safely
 reconcile their uncertain effects through process ownership it does not hold.
+
+## Lightweight execution path
+
+`ToolRegistry` owns schemas, strict argument validation and text/image results without
+importing MCP. `ManagedRuntime` calls it directly; Codex/Claude use the thin MCP adapter.
+`open_tools` selects direct Python or the leased actor worker's RPC transport. There is
+one `NavigationSession`, not separate implementations for each transport or model.
+
+```mermaid
+flowchart LR
+    Local[Local Planner API] --> Loop[ManagedRuntime]
+    Codex[Codex SDK / local login] --> MCP[Thin MCP adapter]
+    Loop --> Tools[Shared tool registry]
+    MCP --> Tools
+    Tools --> RPC[One tool invocation over SSH-forwarded HTTP]
+    RPC --> Session[A100 NavigationSession]
+    Session --> Actor[In-process actor]
+    Session --> Habitat[Loopback Habitat service]
+    Actor --> Light[LightNav pinned inference library + vLLM]
+    Actor --> Native[NavGPT custom action head + PyTorch]
+```
+
+The actor worker owns weights for its process lifetime, and one episode at a time.
+A session ID fences other clients and legacy actor mutations. Duplicate request IDs
+are rejected. Dispatch/result receipts are flushed to disk before responding. Unknown
+movement outcomes retain ownership; no transport retries movement. Artifacts synchronize
+at tool boundaries with an acknowledgment cursor; local paths are rewritten for replay.
+Codex credentials remain on Holo. Worker ports bind to A100 loopback and use direct-LAN
+SSH forwarding. Habitat remains a separate interpreter because its dependencies differ.
+
+An actor's executable source fingerprint and configured environment endpoint must match
+preflight. Deploy immutable release directories; changing code requires new experiments
+and a worker restart after current episodes finish. A failed session requires explicit
+owned-service recovery, not an implicit model reset.
+
+## Model-owned workflow
+
+`harness.mode: agentic` keeps plan/state/history provenance but removes strict review
+permissions. The model selects the task, remaining instruction, segment budgets, and
+actor history window (1–16 groups with 0–4 boundary groups). The current frame is always
+retained. It can repair or revise without first calling a review tool, retrieve node
+images, and stop independently of plan checkboxes. Initial observation/decomposition
+and evidence-based handoff review are prompting guidance. `subtask` preserves the
+previous strict workflow for comparisons; `global` preserves full-route delegation.
+
+Malformed tool arguments reject the whole unexecuted batch and return repair feedback.
+The next model call can correct them. A repeated call ID, uncertain movement, truncated
+response or missing explicit STOP remains an execution error. This distinction prevents
+a formatting mistake from being confused with failed navigation or unsafe retry.
+
+Bounded Planner context retains a pruning cursor and uses exponential advancement on
+overflow, followed by an authoritative tokenizer check. Discarded turns are not repeatedly
+resent to the counter. The complete trace remains available for supervision and replay.

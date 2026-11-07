@@ -23,6 +23,7 @@ test('login, register services, freeze experiment, queue and logout',async({page
  await page.getByRole('button',{name:'注册服务',exact:true}).click();
  await expect(page.getByRole('heading',{name:'test-vla'})).toBeVisible();
  await page.getByRole('button',{name:'03 实验配置'}).click();
+ await expect(page.getByLabel('模式',{exact:true})).toHaveValue('agentic');
  await page.getByLabel('Planner',{exact:true}).selectOption({label:'test-planner'});
  await page.getByLabel('Environment',{exact:true}).selectOption({label:'test-env'});
  await page.getByLabel('VLA',{exact:true}).selectOption({label:'test-vla'});

@@ -48,8 +48,9 @@ templates accordingly. CPU-only bridges use `gpu_ids=[]`, `reserve_mib=0`.
   deliberately has no force-unlock button for unowned movement services.
 
 Model HTTP generation may retry transport errors/429/502/503/504 up to three times.
-No tool dispatch is retried. Unknown tool names, duplicate call IDs, invalid arguments,
-truncated responses and model termination without explicit STOP are recorded failures.
+No tool dispatch is retried. Unknown tools and invalid arguments reject the entire
+unexecuted batch and return feedback for a new model decision. Duplicate call IDs,
+truncated responses and model termination without explicit STOP remain recorded failures.
 Protocol probes should be run before collecting expensive navigation traces.
 
 ## Backup and restore
@@ -83,3 +84,26 @@ Service logs and attempt logs are for local administrators. Keep deployment cred
 in environment variables instead of command-line arguments; never paste secrets into
 experiment metadata. Rotate the admin password by replacing `admin-password` and
 restarting the API; existing cookies then become invalid.
+
+## Owned actor worker deployment
+
+Use a trusted service template invoking `python -m navgpt.vla.worker --config FILE`.
+Register it as a managed `vla` service with metadata `{"tool_execution": true}`; experiment
+freezing then sets `harness.execution_url` to that leased endpoint automatically.
+Both the planner host and the worker must run the same source release. The worker JSON
+contains `backend`, `model_path`, `model_options`, `environment_url`, `artifact_dir`, and
+`port`; it always binds to `127.0.0.1`. The configured environment URL must match the
+experiment's environment URL, with the same port forwarded to Holo.
+
+LightNav `model_options` accepts `gpu_memory_utilization` (default 0.35); use its existing
+pinned vLLM 0.19.1 inference environment. Native VLA accepts its existing model options
+such as `max_nav_vis_tokens`, `frame_cache` and `max_sample_size`. The worker additionally
+needs Pydantic v2, requests and Pillow. Install these in an owned dependency overlay or
+owned environment; do not alter a neighboring project's environment in place.
+
+The two workers can coexist when explicit GPU reservations fit. Preserve the original
+LightNav and native VLA services: do not take over their ports or stop their processes.
+An incomplete RPC session is a fence even if its TCP connection disappears. Stop the
+owned actor/environment, reconcile the blocked attempt, restart, then use a new attempt.
+Remote `artifact_dir/<session_id>/calls.jsonl` preserves receipts if a response was lost;
+this directory belongs in evidence backups alongside local `state/runs`.
