@@ -53,6 +53,7 @@ class RunConfig:
     vla_url: str = "http://127.0.0.1:8000"
     vla_backend: str = 'navgpt'
     harness_mode: str = 'global'
+    execution_url: str = ''
     subtask_max_distance_m: float = 3.0
     subtask_max_turn_deg: float = 180.0
     subtask_max_actions: int = 80

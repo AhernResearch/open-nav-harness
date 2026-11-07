@@ -139,8 +139,9 @@ class NavGPTVLAClient:
     appends and corrupt the model's temporal context.
     """
 
-    def __init__(self, base_url: str, timeout: float = 300.0, backend: str = 'navgpt'):
+    def __init__(self, base_url: str, timeout: float = 300.0, backend: str = 'navgpt', transport=None):
         self.base_url = base_url.rstrip("/")
+        self.transport = transport
         self.timeout = timeout
         if backend not in ('navgpt', 'lightnav'):
             raise ValueError('unknown VLA backend: '+backend)
@@ -151,28 +152,27 @@ class NavGPTVLAClient:
         self._context_key = None
         self._context_ids = set()
 
-    # ── lifecycle ──
-
-    def info(self) -> dict[str, Any]:
-        r = requests.get(self.base_url + "/info", timeout=30)
+    def _request(self, method, path, data=None):
+        if self.transport is not None:
+            return self.transport(method, path, data)
+        r = getattr(requests, method.lower())(self.base_url + path, **({"json": data} if method != "GET" else {}), timeout=self.timeout)
         r.raise_for_status()
         return r.json()
 
+    # ── lifecycle ──
+
+    def info(self) -> dict[str, Any]:
+        return self._request("GET", "/info")
+
     def audit_state(self):
         with self._lock:
-            r = requests.get(self.base_url + "/state", timeout=self.timeout)
-            r.raise_for_status()
-            return r.json()
+            return self._request("GET", "/state")
 
     def observe_history(self, views):
         with self._lock:
             payload = ({'rgb_policy': views['policy_front']} if self.backend == 'lightnav'
                        else {'rgb_' + k: views[k] for k in ('front', 'right', 'back', 'left')})
-            r = requests.post(self.base_url + '/observe',
-                              json=payload,
-                              timeout=self.timeout)
-            r.raise_for_status()
-            return r.json()
+            return self._request('POST', '/observe', payload)
 
     def replace_context(self, context_key, frames):
         """Replace past observations, leaving the current one to /act exactly once."""
@@ -180,9 +180,7 @@ class NavGPTVLAClient:
             payload = {'context_key': context_key,
                        'frames': [({'id': f['id']} if f['id'] in self._context_ids
                                    else {'id': f['id'], 'views': f['views']}) for f in frames]}
-            r = requests.post(self.base_url + '/context', json=payload, timeout=self.timeout)
-            r.raise_for_status()
-            state = r.json()
+            state = self._request('POST', '/context', payload)
             if state.get('frame_ids') != [f['id'] for f in frames]:
                 raise RuntimeError('Backend context acknowledgment mismatch')
             if self._context_key != context_key:
@@ -197,10 +195,7 @@ class NavGPTVLAClient:
             self._arrival_streak = 0
             self._context_key = None
             self._context_ids = set()
-            r = requests.post(self.base_url + "/reset",
-                              json={"success": success}, timeout=self.timeout)
-            r.raise_for_status()
-            return r.json()
+            return self._request("POST", "/reset", {"success": success})
 
     # ── inference ──
 
@@ -238,9 +233,7 @@ class NavGPTVLAClient:
             payload['frame_id'] = frame_id
             payload['context_key'] = self._context_key
         with self._lock:
-            r = requests.post(self.base_url + "/act", json=payload, timeout=self.timeout)
-            r.raise_for_status()
-            body = r.json()
+            body = self._request("POST", "/act", payload)
             action, navigation = _parse_act(body)
             if frame_id is not None:
                 self._context_ids.add(frame_id)

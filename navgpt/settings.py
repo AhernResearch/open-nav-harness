@@ -37,7 +37,7 @@ KEYS = {
     "planner": {"runtime", "model", "effort", "service_tier", "tools", "max_turns",
                 "episode_timeout_s", "max_budget_usd", "profile"},
     "harness": {"interface", "review_every", "route_finding", "vla_steps_per_call",
-                "mode", "subtask_max_distance_m", "subtask_max_turn_deg", "subtask_max_actions"},
+                "mode", "execution_url", "subtask_max_distance_m", "subtask_max_turn_deg", "subtask_max_actions"},
     "output": {"dir", "save_frames"},
 }
 DOCS = "docs/USAGE.md#experiment-configs"
@@ -239,6 +239,9 @@ class Settings:
         if cfg.vla_backend not in ('navgpt', 'lightnav'):
             raise SettingsError('vla.backend must be navgpt or lightnav')
         cfg.harness_mode = str(harness.get('mode', 'global'))
+        cfg.execution_url = str(harness.get('execution_url', ''))
+        if cfg.execution_url:
+            _url(cfg.execution_url)
         if cfg.harness_mode not in ('global', 'subtask'):
             raise SettingsError('harness.mode must be global or subtask')
         if not self.has_planner:

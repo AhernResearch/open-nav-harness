@@ -100,6 +100,8 @@ class Database:
         cfg["environment"] = {**cfg.get("environment", {}), "url": services["environment_service"].url}
         if "vla_service" in services:
             cfg["vla"] = {**cfg.get("vla", {}), "url": services["vla_service"].url}
+            if services["vla_service"].metadata.get("tool_execution"):
+                cfg["harness"] = {**cfg.get("harness", {}), "execution_url": services["vla_service"].url}
         if "planner_service" in services:
             profile = services["planner_service"].planner
             cfg["planner"] = {

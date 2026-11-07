@@ -38,13 +38,14 @@ def velocity_action(waypoints, stop, dt=0.1, max_linear=2.5, max_angular_dps=300
 
 
 class LightNavBridge:
-    def __init__(self, policy_url, control_dt_s=0.1, max_linear_mps=2.5,
-                 max_angular_dps=300.0, connect=None):
-        if not policy_url.startswith(('ws://', 'wss://')):
+    def __init__(self, policy_url=None, control_dt_s=0.1, max_linear_mps=2.5,
+                 max_angular_dps=300.0, connect=None, inference=None):
+        if inference is None and not (policy_url or '').startswith(('ws://', 'wss://')):
             raise ValueError('policy_url must use ws:// or wss://')
         for value in (control_dt_s, max_linear_mps, max_angular_dps):
             if type(value) not in (float, int) or not math.isfinite(value) or value <= 0:
                 raise ValueError('velocity configuration must be positive and finite')
+        self.inference = inference
         self.policy_url = policy_url
         self.control = {'control_dt_s': control_dt_s, 'max_linear_mps': max_linear_mps,
                         'max_angular_dps': max_angular_dps}
@@ -58,6 +59,8 @@ class LightNavBridge:
 
     def _call(self, action, data):
         try:
+            if self.inference is not None:
+                return self.inference(action, data)
             if self.ws is None:
                 if self.connect is None:
                     from websockets.sync.client import connect
@@ -82,10 +85,11 @@ class LightNavBridge:
             if self.failed:
                 raise RuntimeError('LightNav session failed; reset required')
             # A connection/login is a readiness probe, without appending an image.
-            if self.ws is None:
+            if self.ws is None and self.inference is None:
                 self._call('reset', {})
             return {'model_name': 'lightnav-0', 'model_version': 'LightNav-0',
                     'backend': 'lightnav', 'policy_url': self.policy_url,
+                    'execution': 'owned_vllm' if self.inference is not None else 'websocket_bridge',
                     'context_replace': True, 'max_context_groups': 16,
                     'history_observe': True, 'seeded_reset': False,
                     'control': self.control, 'waypoint_count': 10,

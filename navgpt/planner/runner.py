@@ -497,7 +497,7 @@ def preflight(cfg: RunConfig) -> dict[str, Any]:
                 cfg.condition, MCP_TOOLS_MODULE)
         )
     report["navigation_tools"] = sorted(tools)
-    report["tool_transport"] = "direct" if cfg.planner_runtime == "openai_compatible" else "mcp"
+    report["tool_transport"] = ("rpc" if cfg.execution_url else "direct") if cfg.planner_runtime == "openai_compatible" else "mcp"
 
     # 3. model actually authorized (cheap call)
     if cfg.planner_runtime == "openai_compatible":
@@ -544,6 +544,16 @@ def preflight(cfg: RunConfig) -> dict[str, Any]:
                     cfg.condition, cfg.vla_url, exc)
             ) from exc
         report["vla"] = info
+        if cfg.execution_url:
+            from nav_harness.core.version import implementation_digest
+            if cfg.execution_url.rstrip("/") != cfg.vla_url.rstrip("/"):
+                raise PreflightError("Tool execution must use the leased VLA worker endpoint")
+            if info.get("implementation_digest") != implementation_digest():
+                raise PreflightError("Actor worker source differs from the frozen local implementation")
+            if info.get("environment_url") != cfg.env_url:
+                raise PreflightError("Actor worker environment differs from the leased environment endpoint")
+            if info.get("session_id") or info.get("failed"):
+                raise PreflightError("Actor worker has an unresolved session; reconcile before running")
         if cfg.harness_mode == 'subtask' and (not info.get('context_replace')
                                              or info.get('max_context_groups') != 16):
             raise PreflightError('Subtask mode requires a VLA with 16-group context replacement')
@@ -779,6 +789,8 @@ def mcp_env_for(cfg: RunConfig, live_dir: Path | None,
         "NAVGPT_MAX_KEYFRAMES": str(cfg.max_keyframes),
         "NAVGPT_LABEL_NEAR_M": str(cfg.label_near_m),
     }
+    if cfg.execution_url:
+        env["NAVGPT_EXECUTION_URL"] = cfg.execution_url
     if labels_path is not None:
         # The MCP tool server holds the place names; the NavGPT Environment service has never seen one. Without
         # this, episode_places records the geometry and drops every name and caption.

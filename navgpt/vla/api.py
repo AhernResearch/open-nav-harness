@@ -36,6 +36,7 @@ class NavGPTVLAService:
 
     def act(self, rgb_front, rgb_right, rgb_back, rgb_left, text,
             global_gps, global_compass, is_stuck):
+        from .navigation import add_is_stuck, update_agent_state
         state = {"position": global_gps, "orientation": global_compass}
 
         # Run inference every step (matching NaVid behavior — no action buffering)
