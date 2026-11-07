@@ -53,7 +53,19 @@ async def execute(path):
     trace_path = root / "episode" / "work" / f"ep{data['episode']:04d}" / "trace" / "requests.jsonl"
     wire = trace_path.exists()
     events = read_jsonl(trace_path if wire else root / "episode" / f"episode_{data['episode']}.jsonl")
-    result["resource_state"] = resource_state(events, wire=wire)
+    worker_info = None
+    if cfg.execution_url:
+        import httpx
+
+        try:
+            async with httpx.AsyncClient(trust_env=False, timeout=5) as client:
+                response = await client.get(cfg.execution_url.rstrip("/") + "/info")
+                response.raise_for_status()
+                worker_info = response.json()
+        except (httpx.HTTPError, ValueError) as exc:
+            worker_info = {"error": str(exc)}
+        result["actor_worker_status"] = worker_info
+    result["resource_state"] = resource_state(events, wire=wire, worker_info=worker_info)
     result["vla_calls"] = sum(e.get("kind") == "policy_context" for e in task_events) if task_events else None
     result["implementation_digest"] = spec["implementation_digest"]
     result["attempt_id"] = data["id"]

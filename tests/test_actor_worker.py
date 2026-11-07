@@ -112,3 +112,21 @@ def test_owned_lightnav_reuses_controller_without_connecting_websocket():
     assert result[0]["action_args"]["linear_mps"] == 1.0
     assert result[0]["raw_text"] == "decoded"
     assert bridge.ws is None
+
+
+def test_nonmotion_rpc_failure_still_retains_the_actor_lease():
+    from nav_harness.core.recovery import resource_state
+
+    # No movement was dispatched, but the remote process still owns a session.
+    for info in (
+        {"protocol_version": 1, "session_id": "orphan"},
+        {"protocol_version": 1, "failed": True},
+        {"error": "connection lost"},
+    ):
+        assert resource_state([], wire=True, worker_info=info) == "unknown"
+    assert (
+        resource_state(
+            [], wire=True, worker_info={"protocol_version": 1, "session_id": None, "failed": False}
+        )
+        == "idle"
+    )

@@ -12,7 +12,12 @@ MOTION_TOOLS = frozenset(
 )
 
 
-def resource_state(events: list[dict], *, wire: bool) -> str:
+def resource_state(events: list[dict], *, wire: bool, worker_info: dict | None = None) -> str:
+    # RPC ownership can survive even a failed observation or lost session-open reply.
+    if worker_info is not None and (
+        worker_info.get("protocol_version") != 1 or worker_info.get("session_id") or worker_info.get("failed")
+    ):
+        return "unknown"
     pending = set()
     for e in events:
         if e["kind"] == ("tool_dispatch" if wire else "tool_use"):
