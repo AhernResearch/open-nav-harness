@@ -50,6 +50,11 @@ picker, plan, tool timeline, memory and map; `/workbench` manages services, expe
 comparisons. Put text copies of environment episode files in `<state>/catalog/<dataset>_<split>.json.gz`
 to enable the picker.
 
+The composer's model menu lists registered Planner profiles with live availability.
+Select a model before sending; its endpoint and budgets are frozen into the experiment.
+Unavailable models remain visible. Register additional running endpoints as external services
+in Workbench; replicas behind one endpoint use one profile.
+
 In the Workbench:
 
 1. Register an existing endpoint, or select an administrator-defined launch template.

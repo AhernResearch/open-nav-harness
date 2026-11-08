@@ -260,3 +260,11 @@ of environment episode files from `<state>/catalog/<dataset>_<split>.json.gz`, w
 is the environment's episode index. Starting a run freezes a one-episode `development` experiment
 and enqueues it through the normal queue and leases. Custom instruction text is not supported yet:
 it would change the executed instruction and therefore the implementation fingerprint.
+
+The composer reads `GET /api/harness/services` every ten seconds. Read-only probes check
+endpoint health and verify that an API Planner advertises its registered model ID. SDK model
+access is checked at preflight. Managed services must also be `ready`; probing never adopts
+processes or changes service states. The model menu retains unavailable entries, and an explicit
+selection is preserved if its endpoint goes offline. Sending requires an available Planner,
+environment and VLA. Model choice is the registered service ID: normal experiment freezing
+copies that service's complete Planner profile, including endpoint and context budgets.

@@ -4,14 +4,55 @@ import json
 import struct
 import time
 from pathlib import Path
+from unittest.mock import AsyncMock
 
 import pytest
 from fastapi.testclient import TestClient
+from nav_harness.core.config import PlannerProfile, ServiceSpec
 
 from nav_harness.platform.api import create_app
 from nav_harness.platform.harness import Feed, JsonlTail, fit_map
 
 EP = 7
+
+
+def test_harness_choices_probe_models_without_changing_ownership_or_status(tmp_path):
+    app = create_app(tmp_path)
+    db = app.state.db
+    ids = {}
+    for name in ("fp4", "other", "offline", "stopped"):
+        url = f"http://{name}:18000/v1"
+        ids[name] = db.register_service(ServiceSpec(
+            name=name, kind="planner", url=url, planner=PlannerProfile(model=name, base_url=url),
+            managed=name == "stopped", template="trusted" if name == "stopped" else None,
+        ))
+    ids["sdk"] = db.register_service(ServiceSpec(
+        name="sdk", kind="planner", url="http://sdk:18000",
+        planner=PlannerProfile(model="sdk", base_url="http://sdk:18000", runtime="claude", context_policy="full"),
+    ))
+    health = {
+        ids["fp4"]: {"ok": True, "details": {"data": [{"id": "fp4"}]}},
+        ids["other"]: {"ok": True, "details": {"data": [{"id": "wrong-model"}]}},
+        ids["offline"]: {"ok": False, "error": "connection refused"},
+        ids["stopped"]: {"ok": True, "details": {"data": [{"id": "stopped"}]}},
+        ids["sdk"]: {"ok": None},
+    }
+    app.state.services.health = AsyncMock(side_effect=lambda sid: health[sid])
+    app.state.services.ssh = AsyncMock()
+    before = db.rows("SELECT id,status FROM services ORDER BY id")
+    with TestClient(app) as client:
+        response = client.get("/api/harness/services")
+        assert response.status_code == 200
+        rows = {r["spec"]["name"]: r for r in response.json()}
+        assert rows["fp4"]["available"] is True  # external status is not a readiness gate
+        assert rows["sdk"]["available"] is True  # SDK access is checked at preflight
+        assert rows["other"]["available"] is False
+        assert rows["other"]["unavailable_reason"] == "服务未提供此模型"
+        assert rows["offline"]["available"] is False
+        assert rows["stopped"]["available"] is False  # do not adopt an answering process
+        assert before == db.rows("SELECT id,status FROM services ORDER BY id")
+        assert db.rows("SELECT * FROM jobs") == []
+    app.state.services.ssh.assert_not_called()
 
 
 def write_jsonl(path: Path, records, mode="a"):

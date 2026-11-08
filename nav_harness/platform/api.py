@@ -394,6 +394,26 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
             stream(), media_type="text/event-stream", headers={"X-Accel-Buffering": "no"}
         )
 
+    @app.get("/api/harness/services")
+    async def harness_services():
+        """Probe registered choices without adopting processes or changing scheduler state."""
+        async def choice(row):
+            spec = row["spec"]
+            health = await manager.health(row["id"])
+            profile = spec.get("planner")
+            sdk = profile and profile["runtime"] != "openai_compatible"
+            available = health["ok"] is True or bool(sdk and health["ok"] is None)
+            reason = "" if available else "服务暂不可用"
+            if available and profile and not sdk:
+                advertised = health.get("details", {}).get("data", [])
+                if not any(m.get("id") == profile["model"] for m in advertised):
+                    available, reason = False, "服务未提供此模型"
+            if spec["managed"] and row["status"] != "ready":
+                available, reason = False, "请先在 Workbench 启动服务"
+            return {**row, "available": available, "unavailable_reason": reason}
+
+        return await asyncio.gather(*(choice(row) for row in services()))
+
     @app.get("/api/harness/attempts")
     def harness_attempts():
         rows = db.rows(
