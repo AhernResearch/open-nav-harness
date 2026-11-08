@@ -268,3 +268,7 @@ processes or changes service states. The model menu retains unavailable entries,
 selection is preserved if its endpoint goes offline. Sending requires an available Planner,
 environment and VLA. Model choice is the registered service ID: normal experiment freezing
 copies that service's complete Planner profile, including endpoint and context budgets.
+For shared VLA inference the composer limits environment choices to registered execution
+bindings for that VLA, selects a matching worker, and freezes a one-lane `execution_pool`.
+Legacy owned actors continue using `environment_service`; pool admission and leases remain
+owned by the control plane.

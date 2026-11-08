@@ -88,3 +88,48 @@ test('empty model list and missing actor keep click and Enter from creating a ru
   await expect(page.getByRole('menu', { name: '模型列表' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '选择模型' })).toBeFocused();
 });
+
+test('shared VLA selects a matching execution lane and freezes the pool binding', async ({ page, request }) => {
+  const rows = await setup(page, request);
+  const prefix = `shared-${Date.now()}`;
+  const register = async (spec: any) => {
+    const response = await request.post('/api/services', { data: spec });
+    expect(response.status()).toBe(201);
+    const { id } = await response.json();
+    const row = { id, spec, status: 'registered', available: true };
+    rows.push(row);
+    return row;
+  };
+  const vla = await register({ name: `${prefix}-vla`, kind: 'vla', url: `http://${prefix}:18381`, metadata: { shared_inference: true }, max_concurrency: 4 });
+  const lanes = [];
+  for (let i = 0; i < 2; i++) {
+    const env = await register({ name: `${prefix}-env-${i}`, kind: 'environment', url: `http://${prefix}:1958${i}` });
+    const worker = await register({ name: `${prefix}-worker-${i}`, kind: 'execution', url: `http://${prefix}:1968${i}`, metadata: { environment_url: env.spec.url, inference_url: vla.spec.url } });
+    lanes.push({ env, worker });
+  }
+  await page.route('**/api/jobs', route => route.fulfill({ json: { id: 'shared-picker-job' } }));
+  await page.route('**/api/jobs/shared-picker-job/attempts', route => route.fulfill({ json: [] }));
+  await page.goto('/harness');
+  await page.getByLabel('VLA', { exact: true }).selectOption(vla.id);
+  await expect(page.getByLabel('环境', { exact: true })).toHaveValue(lanes[0].env.id);
+  await expect(page.getByLabel('执行器', { exact: true })).toHaveValue(lanes[0].worker.id);
+  await expect(page.getByLabel('环境', { exact: true }).locator('option')).toHaveCount(2);
+  await page.getByLabel('环境', { exact: true }).selectOption(lanes[1].env.id);
+  await expect(page.getByLabel('执行器', { exact: true })).toHaveValue(lanes[1].worker.id);
+  await page.getByRole('button', { name: 'Walk up the stairs.' }).click();
+  await expect(page.getByRole('button', { name: '开始运行' })).toBeEnabled();
+  const frozen = page.waitForResponse(response => response.url().endsWith('/api/experiments') && response.request().method() === 'POST');
+  await page.getByRole('button', { name: '开始运行' }).click();
+  const response = await frozen;
+  expect(response.status()).toBe(201);
+  const { id } = await response.json();
+  const experiments = await (await request.get('/api/experiments')).json();
+  const spec = experiments.find((experiment: any) => experiment.id === id).spec;
+  expect(spec.environment_service).toBeNull();
+  expect(spec.vla_service).toBe(vla.id);
+  expect(spec.execution_pool).toHaveLength(1);
+  expect(spec.execution_pool[0].environment_service).toBe(lanes[1].env.id);
+  expect(spec.execution_pool[0].execution_service).toBe(lanes[1].worker.id);
+  expect(spec.config.harness.execution_url).toBe(lanes[1].worker.spec.url);
+  expect(spec.config.environment.url).toBe(lanes[1].env.spec.url);
+});

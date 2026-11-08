@@ -5,6 +5,15 @@ import { ModelPicker } from "./ModelPicker";
 
 type Pick = { index: number; episode_id: number; scene: string; instruction: string };
 
+function bindings(services: Row[], vla: string) {
+  const inference = services.find((s) => s.id === vla);
+  return services.filter((s) => s.spec.kind === "execution" && s.spec.metadata?.inference_url === inference?.spec.url)
+    .flatMap((worker) => {
+      const environment = services.find((s) => s.spec.kind === "environment" && s.spec.url === worker.spec.metadata?.environment_url);
+      return environment ? [{ worker, environment }] : [];
+    });
+}
+
 function Pill({ label, value, options, onChange }: { label: string; value: string; options: [string, string, boolean?][]; onChange: (v: string) => void }) {
   return (
     <label className="pill">
@@ -64,6 +73,12 @@ export function Composer({ onStarted }: { onStarted: (job: string) => void }) {
               const initial = options.find((s) => s.available) ?? options[0];
               if (initial) next[kind] = initial.id;
             }
+            if (rows.find((s) => s.id === next.vla)?.spec.metadata?.shared_inference && next.execution === undefined) {
+              const pool = bindings(rows, next.vla);
+              const first = pool.find((b) => b.worker.available && b.environment.available) ?? pool[0];
+              next.environment = first?.environment.id ?? "";
+              next.execution = first?.worker.id ?? "";
+            }
             return next;
           });
           setServicesError("");
@@ -95,10 +110,24 @@ export function Composer({ onStarted }: { onStarted: (job: string) => void }) {
   const environment = pickService("environment");
   const vla = pickService("vla");
   const planner = pickService("planner");
+  const execution = pickService("execution");
+  const shared = services.find((s) => s.id === vla)?.spec.metadata?.shared_inference === true;
+  const pool = bindings(services, vla);
+  const environments = choices("environment").filter((s) => !shared || pool.some((b) => b.environment.id === s.id));
+  const workers = pool.filter((b) => b.environment.id === environment).map((b) => b.worker);
+  const serviceOptions = (rows: Row[]): [string, string, boolean][] => rows.map((s) => [s.id, s.spec.name + (s.available ? "" : " · 不可用"), !s.available]);
+  const selectVla = (id: string) => {
+    const first = bindings(services, id).find((b) => b.worker.available && b.environment.available) ?? bindings(services, id)[0];
+    const isShared = services.find((s) => s.id === id)?.spec.metadata?.shared_inference;
+    setChosen({ ...chosen, vla: id, ...(isShared ? { environment: first?.environment.id ?? "", execution: first?.worker.id ?? "" } : {}) });
+  };
   // Reuse the latest frozen configuration for the same environment and actor when available.
-  const base = experiments.find((e) => e.spec.environment_service === environment && e.spec.vla_service === vla)?.spec.config;
+  const base = experiments.find((e) => e.spec.vla_service === vla && (shared
+    ? e.spec.execution_pool?.some((b: Row) => b.environment_service === environment && b.execution_service === execution)
+    : e.spec.environment_service === environment))?.spec.config;
   const backend = chosen.backend ?? base?.vla?.backend ?? "lightnav";
-  const canStart = !!pick && [environment, vla, planner].every((id) => services.some((s) => s.id === id && s.available)) && !busy;
+  const canStart = !!pick && [environment, vla, planner, ...(shared ? [execution] : [])].every((id) => services.some((s) => s.id === id && s.available))
+    && (!shared || workers.some((s) => s.id === execution)) && !busy;
 
   const start = async () => {
     if (!canStart || !pick || !catalog || submitting.current) return;
@@ -118,7 +147,8 @@ export function Composer({ onStarted }: { onStarted: (job: string) => void }) {
       const { id } = await api<Row>("/experiments", {
         name: `Harness · ${pick.scene} · ${pick.index}`,
         planner_service: planner || null,
-        environment_service: environment,
+        environment_service: shared ? null : environment,
+        execution_pool: shared ? [{ environment_service: environment, execution_service: execution }] : [],
         vla_service: vla || null,
         episodes: [pick.index],
         purpose: "development",
@@ -180,8 +210,12 @@ export function Composer({ onStarted }: { onStarted: (job: string) => void }) {
             }}
           />
           <ModelPicker services={choices("planner")} value={planner} onChange={(value) => setChosen({ ...chosen, planner: value })} />
-          <Pill label="环境" value={environment} options={options("environment")} onChange={(v) => setChosen({ ...chosen, environment: v })} />
-          <Pill label="VLA" value={vla} options={options("vla")} onChange={(v) => setChosen({ ...chosen, vla: v })} />
+          <Pill label="环境" value={environment} options={serviceOptions(environments)} onChange={(id) => {
+            const first = pool.find((b) => b.environment.id === id && b.worker.available) ?? pool.find((b) => b.environment.id === id);
+            setChosen({ ...chosen, environment: id, ...(shared ? { execution: first?.worker.id ?? "" } : {}) });
+          }} />
+          <Pill label="VLA" value={vla} options={options("vla")} onChange={selectVla} />
+          {shared && <Pill label="执行器" value={execution} options={serviceOptions(workers)} onChange={(id) => setChosen({ ...chosen, execution: id })} />}
           <Pill label="动作模型" value={backend} options={[["lightnav", "LightNav"], ["navgpt", "NavGPT"]]} onChange={(v) => setChosen({ ...chosen, backend: v })} />
           <span className="spacer" />
           <button className="send" aria-label="开始运行" disabled={!canStart} onClick={start}>

@@ -28,7 +28,7 @@ test('open workspace, register services, freeze experiment and queue',async({pag
  await page.locator('article').filter({has:page.getByRole('heading',{name:'Local Planner comparison',exact:true})}).getByRole('button',{name:'加入队列'}).click();
  await expect(page.getByRole('button',{name:'Local Planner comparison'})).toBeVisible();
  await expect(page.getByText('0 / 3')).toBeVisible();
- await page.getByRole('button',{name:'完成当前条后暂停'}).click();
+ await page.getByRole('button',{name:'完成在途路线后暂停'}).click();
  await page.getByRole('button',{name:'05 结果比较'}).click();
  await page.getByRole('checkbox').check();
  await page.getByRole('button',{name:'配对查看'}).click();
