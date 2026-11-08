@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 
 test('open workspace, register services, freeze experiment and queue',async({page,request})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');
+ await page.goto('/workbench');
  await expect(page.getByRole('heading',{name:'任务队列',exact:true})).toBeVisible();
  await page.getByRole('button',{name:'02 模型与服务'}).click();
  await page.getByLabel('名称',{exact:true}).fill('test-planner');
@@ -25,10 +25,10 @@ test('open workspace, register services, freeze experiment and queue',async({pag
  await page.getByLabel('VLA',{exact:true}).selectOption({label:'test-vla'});
  await page.getByRole('button',{name:'校验并冻结配置'}).click();
  await expect(page.getByText('实验配置已冻结，可以加入队列。')).toBeVisible();
- await page.getByRole('button',{name:'加入队列'}).click();
+ await page.locator('article').filter({has:page.getByRole('heading',{name:'Local Planner comparison',exact:true})}).getByRole('button',{name:'加入队列'}).click();
  await expect(page.getByRole('button',{name:'Local Planner comparison'})).toBeVisible();
  await expect(page.getByText('0 / 3')).toBeVisible();
- await page.getByRole('button',{name:'完成在途路线后暂停'}).click();
+ await page.getByRole('button',{name:'完成当前条后暂停'}).click();
  await page.getByRole('button',{name:'05 结果比较'}).click();
  await page.getByRole('checkbox').check();
  await page.getByRole('button',{name:'配对查看'}).click();
@@ -55,7 +55,7 @@ test('trace deep link opens without login and shows model text, calls, rejection
    {event:3,kind:'policy_execution_result',prediction_id:1,feedback:{step_count:1}}
   ]};
  await page.route('**/api/attempts/trace-test',route=>route.fulfill({json:detail}));
- await page.goto('/?attempt=trace-test');
+ await page.goto('/workbench?attempt=trace-test');
  await expect(page.getByRole('heading',{name:'完整流程 · 1 次模型响应'})).toBeVisible();
  await expect(page.getByText('I crossed the doorway and will record the passage.',{exact:true})).toBeVisible();
  await expect(page.getByRole('heading',{name:'update_memory · 返回错误'})).toBeVisible();
@@ -81,7 +81,7 @@ test('shared inference experiment selects independent execution lanes and shows 
   await register({name:`pool-worker-${i}`,kind:'execution',url:`http://127.0.0.1:${19680+i}`,metadata:{environment_url:`http://127.0.0.1:${19580+i}`,inference_url:'http://127.0.0.1:18380'}});
  }
  await page.route('**/api/inference/status',route=>route.fulfill({json:[{service_id:vla,name:'shared-lightnav',ok:true,details:{sessions:4,pending_requests:3,waiting_requests:2}}]}));
- await page.goto('/');
+ await page.goto('/workbench');
  await expect(page.getByLabel('共享推理状态')).toContainText('会话 4 · 在途 3 · 等待 2');
  await page.getByRole('button',{name:'03 实验配置'}).click();
  await page.getByLabel('实验名称').fill('shared-pool-test');
@@ -111,7 +111,7 @@ test('clicking an experiment opens records in the viewport and returns to the li
  await page.route('**/api/jobs/job-1/attempts',route=>route.fulfill({status:502,json:{detail:'temporary failure'}}));
  await page.route('**/api/attempts/nav-attempt',route=>route.fulfill({json:{id:'nav-attempt',episode:7648,ordinal:1,status:'completed',result:{metrics:{}},requests:[],events:[],subtask_events:[]}}));
  await page.setViewportSize({width:1280,height:800});
- await page.goto('/');
+ await page.goto('/workbench');
  await page.getByRole('button',{name:'Navigation run 0',exact:true}).click();
  await expect(page.getByRole('heading',{name:'Navigation run 0 · 逐条记录'})).toBeInViewport();
  await expect(page.getByRole('status')).toHaveText('正在加载执行记录…');
@@ -126,5 +126,53 @@ test('clicking an experiment opens records in the viewport and returns to the li
  await page.getByRole('button',{name:'Navigation run 0',exact:true}).click();
  await page.getByRole('button',{name:'7648 / 1',exact:true}).click();
  await expect(page.getByRole('heading',{name:'Episode 7648 / Attempt 1'})).toBeVisible();
+ expect(errors).toEqual([]);
+});
+
+const sse=(events:object[])=>`id: 10.4\ndata: ${JSON.stringify(events)}\n\nevent: end\ndata: {"status":"completed","job_id":"j","job_status":"completed"}\n\n`;
+
+test('legacy links open the Harness and the live view shows plan, tool rows, memory and map', async ({page}) => {
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ let streams=0;
+ const state={tasks:[{id:1,instruction:'Climb the stairs',status:'completed'},{id:2,instruction:'Turn left at the landing',status:'in_progress'}]};
+ const events=[
+  {type:'session.started',instruction:'Walk up the stairs and turn left.',scene_id:'mp3d/S1/S1.glb'},
+  {type:'turn.completed',t:1,text:'I will climb first.',usage:null,elapsed_s:1},
+  {type:'item.started',t:2,item:{id:'m',type:'motion',name:'execute_subtask',arguments:{instruction:'Climb the stairs'},status:'in_progress'}},
+  {type:'item.updated',item:{id:'m',pose:{position:[1,0,0],heading_rad:0}}},
+  {type:'item.completed',t:3,item:{id:'m',status:'completed',result:['ok'],state,images:[]}},
+  {type:'item.started',t:4,item:{id:'w',type:'memory_write',name:'update_memory',arguments:{start_node_id:0,end_node_id:1,caption:'Reached the landing.'},status:'in_progress'}},
+  {type:'item.completed',t:5,item:{id:'w',status:'completed',result:[],state,images:[]}},
+  {type:'item.started',t:6,item:{id:'p',type:'map',name:'observe_map',arguments:{},status:'in_progress'}},
+  {type:'item.completed',t:7,item:{id:'p',status:'completed',result:[],state,images:[]}},
+  {type:'item.updated',item:{id:'p',map:{artifact:'a'.repeat(64),size:[400,300],places_px:{'0':[100,100],'1':[150,100]},transform:{matrix:[50,0,100,0,50,100],ppm:50,residual_px:0,nodes:2}}}},
+  {type:'attempt.status',status:'completed',job_id:'j',job_status:'completed'},
+ ];
+ await page.route('**/api/attempts/h-test/stream**',route=>{streams++;return route.fulfill({status:200,headers:{'content-type':'text/event-stream'},body:sse(events)});});
+ await page.route('**/api/attempts/h-test/artifact/**',route=>route.fulfill({status:404}));
+ await page.goto('/?attempt=h-test');
+ await expect(page).toHaveURL(/\/harness\?attempt=h-test$/);
+ await expect(page.getByText('Walk up the stairs and turn left.')).toBeVisible();
+ await expect(page.getByText('1/2')).toBeVisible();
+ await expect(page.getByText('Turn left at the landing')).toBeVisible();
+ await expect(page.getByRole('button',{name:/记住 0 → 1/})).toBeVisible();
+ await expect(page.getByText('Reached the landing.')).toBeVisible();
+ await expect(page.getByRole('img',{name:'记忆地图'})).toBeVisible();
+ await expect(page.locator('.overlay .pose')).toHaveCount(1);
+ await page.waitForTimeout(1500);
+ expect(streams).toBe(1);
+ await page.getByRole('button',{name:/Climb the stairs/}).first().click();
+ await expect(page.getByRole('button',{name:'回到实时'})).toBeVisible();
+ expect(errors).toEqual([]);
+});
+
+test('reduced motion and an empty composer render without errors', async ({page}) => {
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.goto('/harness');
+ await expect(page.getByRole('heading',{name:'今天让机器人去哪里？'})).toBeVisible();
+ await expect(page.getByRole('button',{name:'开始运行'})).toBeDisabled();
+ await page.getByRole('link',{name:'Workbench'}).click();
+ await expect(page.getByRole('heading',{name:'任务队列',exact:true})).toBeVisible();
  expect(errors).toEqual([]);
 });

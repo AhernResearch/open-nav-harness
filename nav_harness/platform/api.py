@@ -15,6 +15,8 @@ from sqlalchemy import text
 from nav_harness.core.config import ExperimentSpec, PlatformSettings, ServiceSpec
 from .database import Database, ident
 from .services import ServiceManager
+from .catalog import Catalog
+from .harness import Feed, episode_meta
 from .results import attempt_detail, csv_export, metrics, aggregate, read_jsonl
 
 
@@ -63,7 +65,7 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         if request.url.path.startswith("/api/"):
-            response.headers["Cache-Control"] = "no-store"
+            response.headers.setdefault("Cache-Control", "no-store")
         return response
 
     @app.exception_handler(ValueError)
@@ -252,6 +254,8 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
             else "image/webp"
             if raw.startswith(b"RIFF")
             else "image/jpeg",
+            # Content-addressed and verified above, so it can never change under this URL.
+            headers={"Cache-Control": "private, max-age=31536000, immutable"},
         )
 
     def image_file(directory: Path, relative: str):
@@ -390,7 +394,77 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
             stream(), media_type="text/event-stream", headers={"X-Accel-Buffering": "no"}
         )
 
+    @app.get("/api/harness/attempts")
+    def harness_attempts():
+        rows = db.rows(
+            "SELECT a.id,a.job_id,a.episode,a.ordinal,a.status,a.created,a.updated,a.output,e.spec FROM attempts a "
+            "JOIN jobs j ON j.id=a.job_id JOIN experiments e ON e.id=j.experiment_id "
+            "ORDER BY a.status='running' DESC, a.created DESC LIMIT 20"
+        )
+        for row in rows:
+            row["name"] = json.loads(row.pop("spec"))["name"]
+            row["meta"] = episode_meta(Path(row.pop("output")), row["episode"])
+        return rows
+
+    catalog = Catalog(root / "catalog")
+
+    @app.get("/api/catalog")
+    def catalogs():
+        return catalog.datasets()
+
+    @app.get("/api/catalog/{name}/episodes")
+    def catalog_episodes(name: str, scene: str, q: str = "", limit: int = 50):
+        return catalog.episodes(name, scene, q, min(limit, 200))
+
+    @app.get("/api/attempts/{aid}/stream")
+    async def attempt_stream(aid: str, request: Request, after: str = ""):
+        """Item lifecycle events of one attempt; a replay is the same stream read from zero."""
+        a = get_attempt(aid)
+        feed = Feed(Path(a["output"]), a["episode"], request.headers.get("last-event-id") or after)
+
+        def attempt_status():
+            return db.rows(
+                "SELECT a.status,a.error,a.job_id,j.status AS job_status FROM attempts a "
+                "JOIN jobs j ON j.id=a.job_id WHERE a.id=:id",
+                id=aid,
+            )[0]
+
+        async def stream():
+            yield "retry: 3000\n\n"
+            status, quiet = None, 0
+            while not await request.is_disconnected():
+                events = await asyncio.to_thread(feed.poll)
+                if events is None:
+                    yield "event: reset\ndata: {}\n\n"
+                    return
+                quiet = 0 if events else quiet + 1
+                current = await asyncio.to_thread(attempt_status)
+                if current != status:
+                    status = current
+                    events.append({"type": "attempt.status", **current})
+                if events:
+                    yield f"id: {feed.cursor}\ndata: {json.dumps(events, ensure_ascii=False)}\n\n"
+                elif current["status"] != "running" and quiet >= 2:
+                    yield f"event: end\ndata: {json.dumps(current)}\n\n"
+                    return
+                else:
+                    yield ": heartbeat\n\n"
+                await asyncio.sleep(1)
+
+        return StreamingResponse(
+            stream(), media_type="text/event-stream", headers={"X-Accel-Buffering": "no"}
+        )
+
     dist = Path(__file__).resolve().parents[1] / "web"
+
+    def page():
+        index = dist / "index.html"
+        if not index.is_file():
+            raise HTTPException(404)
+        return FileResponse(index)
+
+    for route in ("/harness", "/workbench"):
+        app.get(route, include_in_schema=False)(page)
     if dist.exists():
         app.mount("/", StaticFiles(directory=dist, html=True), name="frontend")
     return app

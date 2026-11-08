@@ -1,0 +1,142 @@
+import { useEffect, useRef, useState } from "react";
+import { Icon } from "./icons";
+import type { Entry, Item, Trace } from "./trace";
+
+/** What a row says in plain words; raw arguments stay behind the expander. */
+function describe(item: Item): { icon: string; label: string } {
+  const a = item.arguments ?? {};
+  switch (item.name) {
+    case "observe":
+      return { icon: "eye", label: "观察四周" };
+    case "observe_map":
+      return { icon: "map", label: "查看地图" };
+    case "update_plan":
+      return { icon: "list", label: `更新计划 · ${a.subtasks?.length ?? 0} 项` };
+    case "execute_subtask":
+      return { icon: "route", label: a.instruction || `执行任务 ${a.task_id}` };
+    case "navigate_relative":
+      return { icon: "route", label: `转向 ${a.turn_deg ?? 0}°，前进 ${a.distance_m ?? 0} 米` };
+    case "navigate_to_node":
+      return { icon: "route", label: `返回地点 ${a.node_id}` };
+    case "update_memory":
+      return { icon: "pencil", label: `记住 ${a.start_node_id} → ${a.end_node_id}` };
+    case "read_memory":
+      return { icon: "book", label: a.other_node_id == null ? `回忆地点 ${a.node_id}` : `回忆 ${a.node_id} → ${a.other_node_id}` };
+    case "terminate_episode":
+      return { icon: "flag", label: a.status === "abort" ? "放弃任务" : "宣布到达" };
+    default:
+      return { icon: "tool", label: item.name };
+  }
+}
+
+export function PlanCard({ tasks }: { tasks: Record<string, any>[] }) {
+  const [open, setOpen] = useState(true);
+  if (!tasks.length) return null;
+  const done = tasks.filter((t) => t.status === "completed").length;
+  return (
+    <div className="plan-card">
+      <button className="plan-head" onClick={() => setOpen(!open)} aria-expanded={open}>
+        <Icon name="list" />
+        <span>计划</span>
+        <span className="plan-count">
+          {done}/{tasks.length}
+        </span>
+        <span className="progress">
+          <i style={{ width: `${(100 * done) / tasks.length}%` }} />
+        </span>
+        <Icon name="chevron" />
+      </button>
+      {open && (
+        <ol>
+          {tasks.map((t) => (
+            <li key={t.id} className={t.status}>
+              <span className="check">{t.status === "completed" && <Icon name="check" size={12} />}</span>
+              <span className={t.status === "in_progress" ? "shimmer" : ""}>{t.instruction}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  );
+}
+
+/** The conversation: the instruction, model messages and one row per tool call. */
+export function Thread({ trace, upto, live, select, attempt }: { trace: Trace; upto: number; live: boolean; select: (i: number) => void; attempt: string }) {
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const current = el.querySelector<HTMLElement>(".current");
+    el.scrollTop = live || !current ? el.scrollHeight : current.offsetTop - el.clientHeight / 2;
+  }, [live, upto, trace.entries.length]);
+  const working = !trace.ended && trace.status?.status === "running";
+  return (
+    <div className="thread" ref={box}>
+      <div className="thread-col">
+        {trace.meta && (
+          <div className="user-msg">
+            <p>{trace.meta.instruction}</p>
+            <span className="scene-chip">{String(trace.meta.scene_id ?? "").split("/").at(-1)?.replace(".glb", "")}</span>
+          </div>
+        )}
+        {trace.entries.map((e, i) => (
+          <Row key={i} entry={e} trace={trace} attempt={attempt} state={i === upto ? "current" : i > upto ? "future" : ""} onSelect={() => select(i)} />
+        ))}
+        {working && live && trace.entries.at(-1)?.kind !== "item" && <p className="thinking shimmer">正在思考…</p>}
+        {trace.session && (
+          <p className="ended">{trace.session.explicit_stop ? "智能体已停止" : trace.session.error ? "会话异常结束" : "会话结束"}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Row({ entry, trace, attempt, state, onSelect }: { entry: Entry; trace: Trace; attempt: string; state: string; onSelect: () => void }) {
+  const [open, setOpen] = useState(false);
+  if (entry.kind === "turn") {
+    if (!entry.text && !entry.reasoning) return null;
+    return (
+      <div className={"agent-msg " + state} onClick={onSelect}>
+        {entry.text || <span className="muted">{entry.reasoning}</span>}
+      </div>
+    );
+  }
+  if (entry.kind === "error") return <div className={"tool-row failed " + state}>出现错误：{String(entry.source)}</div>;
+  const item = trace.items.get(entry.id)!;
+  const { icon, label } = describe(item);
+  const steps = item.type === "motion" && item.poses.length ? `${item.poses.length} 步` : "";
+  return (
+    <div className={`tool ${item.type} ${state}`}>
+      <button
+        className={"tool-row " + item.status}
+        onClick={() => {
+          onSelect();
+          setOpen(!open);
+        }}
+        aria-expanded={open}
+      >
+        <Icon name={icon} />
+        <span className={"label " + (item.status === "in_progress" ? "shimmer" : "")}>{label}</span>
+        {steps && <span className="meta">{steps}</span>}
+        <span className="status">
+          {item.status === "in_progress" ? <i className="spinner" /> : <Icon name={item.status === "failed" ? "x" : "check"} size={14} />}
+        </span>
+      </button>
+      {item.name === "update_memory" && item.status !== "failed" && <blockquote className="memory-quote">{item.arguments?.caption}</blockquote>}
+      {open && (
+        <div className="tool-detail">
+          {(item.result ?? []).filter(Boolean).map((line, i) => (
+            <div key={i}>{line}</div>
+          ))}
+          {!!item.images?.length && (
+            <div className="thumbs">
+              {item.images.map((d) => (
+                <img key={d} alt="工具返回的图像" src={`/api/attempts/${attempt}/artifact/${d}`} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

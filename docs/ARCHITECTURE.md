@@ -5,6 +5,8 @@
 | Layer | Responsibility | Must not own |
 |---|---|---|
 | `frontend/src/pages` | Forms, status and evidence presentation | Navigation or scheduling decisions |
+| `frontend/src/harness` | Live, read-only run view (`/harness`): chat thread, plan, memory, map; may pause/cancel a job | Queue or experiment rules |
+| `nav_harness/platform/harness.py` | Incremental projection of one attempt's trace into item events | Any write to run files; evaluation data |
 | `nav_harness/platform` | Auth, immutable experiments, queue, leases, service lifecycle, exports | Model-specific prompting logic |
 | `nav_harness/core` | Validated contracts, artifacts, context budget, recovery evidence | GPU model loading |
 | `nav_harness/providers` | Wire protocol and managed model/tool loop | Environment state or navigation tools |
@@ -233,3 +235,28 @@ controller advice; execution results contain observed pose, step count and navig
 status. An unacknowledged dispatch has no fabricated result. LightNav's 10 points are
 not silently converted to the native VLA's 8 points or relabelled with a time interval.
 Dataset resampling and training admission are separate, reviewed operations.
+
+## Harness view and Workbench
+
+The console has two views in one app. `/workbench` is the management console (services,
+experiments, queue, comparison, legacy replay). `/harness` is a live, read-only view of one
+attempt: a session list, a chat-like thread with a docked plan, a map and the robot's view.
+`/` opens the Harness; `/?attempt=ID` redirects to `/harness?attempt=ID`.
+
+`GET /api/attempts/{id}/stream` is the only live source. It tails exactly three files:
+`trace/requests.jsonl` (model turns and tool calls, in exact order), `subtasks/events.jsonl`
+(movement progress) and `subtasks/topology.json` (node positions for the map). Events use item
+lifecycle types (`item.started/updated/completed`, `turn.completed`, `attempt.status`); a
+finished attempt replays through the same stream. The cursor is `<journal_offset>.<events_offset>`
+and is sent as the SSE `id`. Movement progress is assigned by construction: each executed movement
+call owns one segment that ends with `execution_memory`; rejected calls own none. Evaluation
+data (goals, reference paths, metrics) is never read. Only the first line of `episode_<n>.jsonl`
+(the executed instruction) is used from the episode log.
+
+The map image is the `observe_map` result the model saw. Live overlays are drawn in that image's
+pixels using a similarity fitted from the labelled memory nodes (`fit_map`); with fewer than two
+nodes, or inconsistent labels, no overlay is drawn. The instruction picker reads text-only copies
+of environment episode files from `<state>/catalog/<dataset>_<split>.json.gz`, whose list position
+is the environment's episode index. Starting a run freezes a one-episode `development` experiment
+and enqueues it through the normal queue and leases. Custom instruction text is not supported yet:
+it would change the executed instruction and therefore the implementation fingerprint.

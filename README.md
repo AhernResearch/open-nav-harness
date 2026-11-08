@@ -45,7 +45,12 @@ Open `http://127.0.0.1:8878`; the console and API require no login.
 Use an HTTPS reverse proxy when transport confidentiality is required.
 Credentials are environment-variable references, never experiment fields.
 
-In the console:
+The console has two views: `/harness` (default) is a live, read-only run view with an instruction
+picker, plan, tool timeline, memory and map; `/workbench` manages services, experiments, queue and
+comparisons. Put text copies of environment episode files in `<state>/catalog/<dataset>_<split>.json.gz`
+to enable the picker.
+
+In the Workbench:
 
 1. Register an existing endpoint, or select an administrator-defined launch template.
 2. Start and check owned services. Select the Planner, environment and actor.

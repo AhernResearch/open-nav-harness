@@ -110,8 +110,11 @@ export function ReplayPage({
           >
             逐事件检查
           </button>
-          <a href={`/?attempt=${encodeURIComponent(detail.id)}`}>
+          <a href={`/workbench?attempt=${encodeURIComponent(detail.id)}`}>
             本次运行直达链接
+          </a>
+          <a href={`/harness?attempt=${encodeURIComponent(detail.id)}`}>
+            在 Harness 中打开
           </a>
         </div>
       )}
