@@ -1,9 +1,20 @@
+import { useRef, useState } from "react";
 import type { Trace } from "./trace";
 
-/** The latest map the model saw, framed on where the robot has been, with live overlays. */
+type Box = [number, number, number, number];
+
+/** Fit the entire observed map and any movement since that map was recorded. */
 export function MapView({ trace, upto, attempt }: { trace: Trace; upto: number; attempt: string }) {
   const found = trace.map(upto);
   if (!found?.item.map?.size) return <div className="map-empty">智能体查看地图后会显示在这里</div>;
+  return <MapCanvas key={`${attempt}:${found.item.map.artifact}`} trace={trace} upto={upto} attempt={attempt} />;
+}
+
+function MapCanvas({ trace, upto, attempt }: { trace: Trace; upto: number; attempt: string }) {
+  const [viewport, setViewport] = useState<Box | null>(null);
+  const svg = useRef<SVGSVGElement>(null);
+  const drag = useRef<{ id: number; x: number; y: number; box: Box } | null>(null);
+  const found = trace.map(upto)!;
   const { item, index } = found;
   const map = item.map!;
   const [w, h] = map.size!;
@@ -15,17 +26,38 @@ export function MapView({ trace, upto, attempt }: { trace: Trace; upto: number; 
   const pose = m ? current?.poses.at(-1) : undefined;
   const places = Object.entries(map.places_px);
   const focus = memoryFocus(trace, upto);
-  // Frame what matters (visited places and paths), not the whole observed footprint.
-  const points = [...places.map(([, p]) => p), ...trail, ...live];
+  const points = [[0, 0], [w, h], ...places.map(([, p]) => p), ...trail, ...live];
   const xs = points.map((p) => p[0]), ys = points.map((p) => p[1]);
-  const span = Math.max(260, Math.max(...xs) - Math.min(...xs) + 160, Math.max(...ys) - Math.min(...ys) + 160);
-  const cx = points.length ? (Math.max(...xs) + Math.min(...xs)) / 2 : w / 2;
-  const cy = points.length ? (Math.max(...ys) + Math.min(...ys)) / 2 : h / 2;
-  const box = [cx - span / 2, cy - span / 2, span, span];
+  const fit: Box = [Math.min(...xs) - 32, Math.min(...ys) - 32, Math.max(...xs) - Math.min(...xs) + 64, Math.max(...ys) - Math.min(...ys) + 64];
+  const box = viewport ?? fit;
+  const zoom = (factor: number) => {
+    const scale = box[2] / fit[2];
+    const next = Math.min(4, Math.max(0.125, scale * factor)) / scale;
+    setViewport([box[0] + (box[2] - box[2] * next) / 2, box[1] + (box[3] - box[3] * next) / 2, box[2] * next, box[3] * next]);
+  };
   const at = (id: string) => map.places_px[id];
   return (
-    <svg className="map-svg" viewBox={box.join(" ")} role="img" aria-label="记忆地图">
-      <rect className="map-void" x={box[0]} y={box[1]} width={span} height={span} />
+    <div className="map-view">
+    <div className="map-stage">
+    <svg ref={svg} className={"map-svg" + (viewport ? " zoomed" : "")} viewBox={box.join(" ")} preserveAspectRatio="xMidYMid meet" role="img" aria-label="记忆地图"
+      onPointerDown={(event) => {
+        if (event.button !== 0) return;
+        drag.current = { id: event.pointerId, x: event.clientX, y: event.clientY, box };
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }}
+      onPointerMove={(event) => {
+        const start = drag.current;
+        const matrix = svg.current?.getScreenCTM();
+        if (!start || start.id !== event.pointerId || !matrix) return;
+        setViewport([start.box[0] - (event.clientX - start.x) / matrix.a, start.box[1] - (event.clientY - start.y) / matrix.d, start.box[2], start.box[3]]);
+      }}
+      onPointerUp={(event) => {
+        if (drag.current?.id === event.pointerId) drag.current = null;
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+      }}
+      onPointerCancel={() => { drag.current = null; }}
+      onLostPointerCapture={() => { drag.current = null; }}>
+      <rect className="map-void" x={box[0]} y={box[1]} width={box[2]} height={box[3]} />
       <image key={map.artifact} className="map-image" href={`/api/attempts/${attempt}/artifact/${map.artifact}`} width={w} height={h} />
       {m && (
         <g className="overlay">
@@ -39,6 +71,13 @@ export function MapView({ trace, upto, attempt }: { trace: Trace; upto: number; 
         </g>
       )}
     </svg>
+    </div>
+    <div className="map-controls" role="group" aria-label="地图视图">
+      <button type="button" aria-label="缩小地图" title="缩小地图" onClick={() => zoom(1.4)}>−</button>
+      <button type="button" aria-label="放大地图" title="放大地图" onClick={() => zoom(1 / 1.4)}>＋</button>
+      <button type="button" className="map-fit" onClick={() => setViewport(null)}>显示全图</button>
+    </div>
+    </div>
   );
 }
 
