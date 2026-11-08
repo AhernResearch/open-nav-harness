@@ -543,3 +543,36 @@ footer {
     align-items: flex-start;
   }
 }
+
+
+.trace-switch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+.trace-switch button[aria-pressed="false"] {
+  background: white;
+  color: #166e60;
+}
+.trace-turn {
+  border-top: 1px solid #dce5e0;
+  padding: 24px 0;
+}
+.trace-turn .model-text {
+  max-height: none;
+  white-space: pre-wrap;
+  background: #eef5f1;
+}
+.trace-tool {
+  border-left: 3px solid #b4ccc2;
+  padding-left: 16px;
+  margin: 16px 0;
+}
+.trace-turn details {
+  margin: 12px 0;
+}
+.trace-turn pre {
+  overflow-wrap: anywhere;
+}

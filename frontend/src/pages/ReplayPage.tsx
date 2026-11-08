@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { api, type Row } from "../api";
 import { pretty, Empty } from "../components";
+import { TraceFlow, TraceImages, artifactImages } from "./TraceFlow";
 export function ReplayPage({
   detail,
   refresh,
@@ -17,18 +18,7 @@ export function ReplayPage({
   const sourceEvents = detail?.requests?.length
     ? detail.requests
     : (detail?.events || []).map((e: Row, i: number) => ({ ...e, seq: i + 1 }));
-  const traceEvents = sourceEvents.filter((e: Row) =>
-    [
-      "tool_result",
-      "model_request",
-      "model_response",
-      "context_selection",
-      "session_error",
-      "tool_use",
-      "assistant_text",
-      "session_inputs",
-    ].includes(e.kind),
-  );
+  const traceEvents = sourceEvents;
   const current = traceEvents[eventIndex];
   const [recoveryError, setRecoveryError] = useState("");
   let taskState: Row | null = null;
@@ -36,10 +26,11 @@ export function ReplayPage({
     if (event.seq > (current?.seq ?? 0)) break;
     if (event.task_state) taskState = event.task_state;
     if (event.feedback?.content) {
-      try {
-        taskState =
-          JSON.parse(event.feedback.content).subtask_state || taskState;
-      } catch {}
+      for (const line of event.feedback.content.split("\n")) {
+        try {
+          taskState = JSON.parse(line).subtask_state || taskState;
+        } catch {}
+      }
     }
   }
   const policyEvents = (detail?.subtask_events || []).filter(
@@ -54,20 +45,17 @@ export function ReplayPage({
   const trajectory = (detail?.events || []).find(
     (e: Row) => e.kind === "episode_trajectory",
   );
-  const images: Row[] = [];
-  function collect(v: any) {
-    if (!v || typeof v !== "object") return;
-    if (v.artifact) {
-      images.push(v);
-      return;
-    }
-    Object.values(v).forEach((x) =>
-      Array.isArray(x) ? x.forEach(collect) : collect(x),
-    );
-  }
-  if (current) collect(current);
-  const uniqueImages = images.filter(
-    (x, i, a) => a.findIndex((y) => y.artifact === x.artifact) === i,
+  const uniqueImages = artifactImages(current);
+  const [view, setView] = useState("flow");
+  const predictionEvents = (detail?.subtask_events || []).filter(
+    (e: Row) =>
+      policy?.prediction_id != null &&
+      e.prediction_id === policy.prediction_id &&
+      [
+        "policy_prediction",
+        "policy_execution_dispatch",
+        "policy_execution_result",
+      ].includes(e.kind),
   );
 
   return !detail ? (
@@ -108,62 +96,75 @@ export function ReplayPage({
       {!detail.requests?.length && (
         <p>SDK／历史记录：仅能展示运行时公开的事件。</p>
       )}
-      <div className="replay-grid">
-        <section className="timeline">
-          <h3>事件时间线</h3>
-          {traceEvents.map((e: Row, i: number) => (
-            <button
-              key={e.seq}
-              className={i === eventIndex ? "selected" : ""}
-              onClick={() => setEventIndex(i)}
-            >
-              <span>{String(e.seq).padStart(3, "0")}</span>
-              {e.kind}
-              <small>{e.name || ""}</small>
-            </button>
-          ))}
-        </section>
-        <section>
-          <div className="section-head">
-            <h2>{current?.kind || "执行记录"}</h2>
-            <span>
-              {eventIndex + 1} / {traceEvents.length}
-            </span>
-          </div>
-          {taskState && (
-            <article>
-              <h3>该时刻的计划 · r{taskState.revision}</h3>
-              <p>{taskState.summary}</p>
-              <ol>
-                {(taskState.tasks || []).map((t: Row) => (
-                  <li key={t.id}>
-                    {t.instruction}{" "}
-                    <small>
-                      {t.status} · {t.completion_criterion}
-                    </small>
-                  </li>
-                ))}
-              </ol>
-            </article>
-          )}
-          <div className="images">
-            {uniqueImages.map((im) => (
-              <figure key={im.artifact}>
-                <img
-                  src={
-                    "/api/attempts/" + detail.id + "/artifact/" + im.artifact
-                  }
-                />
-                <figcaption>{im.artifact.slice(0, 12)}</figcaption>
-              </figure>
+      {detail.requests?.length > 0 && (
+        <div className="trace-switch">
+          <button
+            aria-pressed={view === "flow"}
+            onClick={() => setView("flow")}
+          >
+            完整流程
+          </button>
+          <button
+            aria-pressed={view === "events"}
+            onClick={() => setView("events")}
+          >
+            逐事件检查
+          </button>
+          <a href={`/?attempt=${encodeURIComponent(detail.id)}`}>
+            本次运行直达链接
+          </a>
+        </div>
+      )}
+      {view === "flow" && detail.requests?.length > 0 && (
+        <TraceFlow detail={detail} />
+      )}
+      {(view === "events" || !detail.requests?.length) && (
+        <div className="replay-grid">
+          <section className="timeline">
+            <h3>事件时间线</h3>
+            {traceEvents.map((e: Row, i: number) => (
+              <button
+                key={e.seq}
+                className={i === eventIndex ? "selected" : ""}
+                onClick={() => setEventIndex(i)}
+              >
+                <span>{String(e.seq).padStart(3, "0")}</span>
+                {e.kind}
+                <small>{e.name || ""}</small>
+              </button>
             ))}
-          </div>
-          <pre>{pretty(current || detail.result)}</pre>
-        </section>
-      </div>
+          </section>
+          <section>
+            <div className="section-head">
+              <h2>{current?.kind || "执行记录"}</h2>
+              <span>
+                {eventIndex + 1} / {traceEvents.length}
+              </span>
+            </div>
+            {taskState && (
+              <article>
+                <h3>该时刻的计划 · r{taskState.revision}</h3>
+                <p>{taskState.summary}</p>
+                <ol>
+                  {(taskState.tasks || []).map((t: Row) => (
+                    <li key={t.id}>
+                      {t.instruction}{" "}
+                      <small>
+                        {t.status} · {t.completion_criterion}
+                      </small>
+                    </li>
+                  ))}
+                </ol>
+              </article>
+            )}
+            <TraceImages images={uniqueImages} attempt={detail.id} />
+            <pre>{pretty(current || detail.result)}</pre>
+          </section>
+        </div>
+      )}
       {policy && (
         <section>
-          <h2>VLA 实际上下文</h2>
+          <h2>VLA 输入、轨迹输出与实际执行</h2>
           <label>
             策略请求
             <select
@@ -178,6 +179,20 @@ export function ReplayPage({
             </select>
           </label>
           <p>{policy.instruction}</p>
+          {predictionEvents.map((e: Row) => (
+            <details key={e.event}>
+              <summary>
+                {
+                  {
+                    policy_prediction: "模型输出：原始轨迹点与动作",
+                    policy_execution_dispatch: "实际下发的动作",
+                    policy_execution_result: "仿真执行反馈",
+                  }[e.kind as string]
+                }
+              </summary>
+              <pre>{pretty(e)}</pre>
+            </details>
+          ))}
           <div className="images">
             {observedFrames.map((f: Row) => {
               const names = f.images.policy_front

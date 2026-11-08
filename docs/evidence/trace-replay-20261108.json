@@ -1,0 +1,34 @@
+{
+  "checks": {
+    "pytest": "89 passed; 4 subtests passed",
+    "ruff": "passed",
+    "mypy": "20 source files passed",
+    "frontend_build": "passed",
+    "playwright": "2 passed"
+  },
+  "actual_attempt_browser_checks": [
+    {
+      "backend": "lightnav",
+      "attempt_id": "70184e2e58aa4292bb39a3074aa857d2",
+      "planner_responses": 16,
+      "tool_calls": 16,
+      "vla_predictions": 42,
+      "images_loaded": true,
+      "deep_link_reload": true,
+      "export_bytes": 17010325,
+      "page_errors": []
+    },
+    {
+      "backend": "navgpt",
+      "attempt_id": "a72dbee121e642c0806de97426d92af6",
+      "planner_responses": 17,
+      "tool_calls": 17,
+      "vla_predictions": 55,
+      "images_loaded": true,
+      "deep_link_reload": true,
+      "export_bytes": 39891141,
+      "page_errors": []
+    }
+  ],
+  "scope": "Read-only replay and export of completed attempts; no navigation rerun; original traces unchanged."
+}

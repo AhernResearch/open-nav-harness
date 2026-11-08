@@ -47,6 +47,10 @@ function App() {
   useEffect(() => {
     if (!logged) return;
     refresh().catch((e) => setError(String(e)));
+    const requested = new URLSearchParams(window.location.search).get(
+      "attempt",
+    );
+    if (requested) openAttempt(requested).catch((e) => setError(String(e)));
     const source = new EventSource("/api/events");
     source.onmessage = () => refresh().catch(() => {});
     const timer = setInterval(() => refresh().catch(() => {}), 5000);
@@ -58,6 +62,9 @@ function App() {
   const openAttempt = async (id: string) => {
     setDetail(await api("/attempts/" + id));
     setPage("replay");
+    const url = new URL(window.location.href);
+    url.searchParams.set("attempt", id);
+    window.history.replaceState(null, "", url);
   };
   const props = {
     services,
