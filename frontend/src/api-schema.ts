@@ -436,6 +436,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/harness/jobs/{jid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Harness Job
+         * @description Read-only queue feedback; resource admission stays in the scheduler.
+         */
+        get: operations["harness_job_api_harness_jobs__jid__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/harness/attempts": {
         parameters: {
             query?: never;
@@ -1491,6 +1511,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+        };
+    };
+    harness_job_api_harness_jobs__jid__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                jid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

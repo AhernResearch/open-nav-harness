@@ -414,6 +414,40 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
 
         return await asyncio.gather(*(choice(row) for row in services()))
 
+    @app.get("/api/harness/jobs/{jid}")
+    def harness_job(jid: str):
+        """Read-only queue feedback; resource admission stays in the scheduler."""
+        rows = db.rows("SELECT * FROM jobs WHERE id=:id", id=jid)
+        if not rows:
+            raise KeyError("Unknown job")
+        job = rows[0]
+        spec = json.loads(db.rows("SELECT spec FROM experiments WHERE id=:id", id=job["experiment_id"])[0]["spec"])
+        attempts = db.rows("SELECT id FROM attempts WHERE job_id=:id ORDER BY created DESC LIMIT 1", id=jid)
+        reason, blocked = "queued", None
+        if job["status"] == "queued":
+            pool = spec.get("execution_pool") or []
+            groups = [[b["environment_service"], b["execution_service"]] for b in pool] if pool else [
+                [spec["environment_service"], *([spec["vla_service"]] if spec.get("vla_service") else [])]
+            ]
+            services = {r["id"]: r for r in db.rows("SELECT id,status,spec FROM services")}
+            def ready(sid):
+                row = services[sid]
+                return not json.loads(row["spec"])["managed"] or row["status"] == "ready"
+
+            shared = [spec[k] for k in ("planner_service", "vla_service") if spec.get(k)]
+            ready_groups = [group for group in groups if all(ready(sid) for sid in group)]
+            leases = {r["resource"]: r for r in db.rows(
+                "SELECT l.resource,a.id,a.status FROM leases l JOIN attempts a ON a.id=l.attempt_id"
+            )}
+            if not ready_groups or not all(ready(sid) for sid in shared):
+                reason = "services_unavailable"
+            elif not any(all(sid not in leases for sid in group) for group in ready_groups):
+                blocked = next((leases[sid]["id"] for group in ready_groups for sid in group
+                                if sid in leases and leases[sid]["status"] == "blocked"), None)
+                reason = "needs_reconciliation" if blocked else "resources_busy"
+        return {**job, "attempt_id": attempts[0]["id"] if attempts else None,
+                "waiting_reason": reason, "blocked_attempt_id": blocked}
+
     @app.get("/api/harness/attempts")
     def harness_attempts():
         rows = db.rows(

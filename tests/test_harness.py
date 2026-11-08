@@ -8,12 +8,38 @@ from unittest.mock import AsyncMock
 
 import pytest
 from fastapi.testclient import TestClient
-from nav_harness.core.config import PlannerProfile, ServiceSpec
+from nav_harness.core.config import ExperimentSpec, PlannerProfile, ServiceSpec
 
 from nav_harness.platform.api import create_app
 from nav_harness.platform.harness import Feed, JsonlTail, fit_map
 
 EP = 7
+
+
+def test_pending_job_explains_retained_leases_without_releasing_or_retrying(tmp_path):
+    app = create_app(tmp_path)
+    db = app.state.db
+    env = db.register_service(ServiceSpec(name="queue-env", kind="environment", url="http://queue-env:19000"))
+    vla = db.register_service(ServiceSpec(name="queue-vla", kind="vla", url="http://queue-vla:18000"))
+    planner = db.register_service(ServiceSpec(name="queue-planner", kind="planner", url="http://queue-planner:18001/v1",
+        planner=PlannerProfile(model="test", base_url="http://queue-planner:18001/v1")))
+    experiment = db.create_experiment(ExperimentSpec(name="queue test", environment_service=env, vla_service=vla,
+        planner_service=planner, episodes=[0], config={"dataset": {"name": "r2r", "split": "train"}, "harness": {"mode": "agentic"}}))
+    old = db.enqueue(experiment)
+    attempt = db.claim()
+    db.block(attempt["id"], "Uncertain movement; preserve leases")
+    pending = db.enqueue(experiment)
+    before = db.rows("SELECT * FROM leases")
+    with TestClient(app) as client:
+        response = client.get(f"/api/harness/jobs/{pending}")
+        assert response.status_code == 200
+        assert response.json()["waiting_reason"] == "needs_reconciliation"
+        assert response.json()["blocked_attempt_id"] == attempt["id"]
+        assert response.json()["attempt_id"] is None
+        assert client.get(f"/api/harness/jobs/{old}").json()["attempt_id"] == attempt["id"]
+        assert client.get("/api/harness/jobs/missing").status_code == 404
+        assert db.rows("SELECT * FROM leases") == before
+        assert len(db.rows("SELECT * FROM attempts")) == 1
 
 
 def test_harness_choices_probe_models_without_changing_ownership_or_status(tmp_path):

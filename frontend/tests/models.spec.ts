@@ -35,6 +35,7 @@ test('choose a model and freeze its exact registered profile with the run', asyn
     : route.continue());
   await page.route('**/api/jobs', route => route.fulfill({ json: { id: 'model-picker-job' } }));
   await page.route('**/api/jobs/model-picker-job/attempts', route => route.fulfill({ json: [] }));
+  await page.route('**/api/harness/jobs/model-picker-job', route => route.fulfill({ json: { status: 'queued', waiting_reason: 'queued' } }));
   await page.goto('/harness');
   await expect(page.getByRole('button', { name: '选择模型' })).toContainText('Qwen 27B FP4');
   await page.getByRole('button', { name: '选择模型' }).click();
@@ -60,6 +61,7 @@ test('choose a model and freeze its exact registered profile with the run', asyn
   expect(spec.config.planner.tools).not.toContain('navigate_relative');
   expect(spec.config.planner.tools).toContain('navigate_to_node');
   await expect(page.getByText('已加入队列，等待环境和 VLA 资源…')).toBeVisible();
+  await expect(page).toHaveURL(/\/harness\?job=model-picker-job$/);
   expect(errors).toEqual([]);
 });
 
@@ -122,6 +124,7 @@ test('shared VLA selects a matching execution lane and freezes the pool binding'
   }
   await page.route('**/api/jobs', route => route.fulfill({ json: { id: 'shared-picker-job' } }));
   await page.route('**/api/jobs/shared-picker-job/attempts', route => route.fulfill({ json: [] }));
+  await page.route('**/api/harness/jobs/shared-picker-job', route => route.fulfill({ json: { status: 'queued', waiting_reason: 'queued' } }));
   await page.goto('/harness');
   await page.getByLabel('VLA', { exact: true }).selectOption(vla.id);
   await expect(page.getByLabel('环境', { exact: true })).toHaveValue(lanes[0].env.id);

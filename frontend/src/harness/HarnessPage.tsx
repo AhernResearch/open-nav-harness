@@ -14,6 +14,7 @@ const statusText: Record<string, string> = {
   blocked: "待处理",
   cancelled: "已取消",
   queued: "排队中",
+  paused: "已暂停",
 };
 
 function useTheme(): [string, () => void] {
@@ -30,7 +31,7 @@ export function HarnessPage() {
   const [theme, toggleTheme] = useTheme();
   const [attempts, setAttempts] = useState<Row[]>([]);
   const [attempt, setAttempt] = useState<string | null>(new URLSearchParams(location.search).get("attempt"));
-  const [job, setJob] = useState<string | null>(null);
+  const [job, setJob] = useState<string | null>(new URLSearchParams(location.search).get("job"));
   const [cursor, setCursor] = useState<number | null>(null);
   const trace = useTrace(attempt);
   const refresh = () => api<Row[]>("/harness/attempts").then(setAttempts).catch(() => {});
@@ -45,10 +46,24 @@ export function HarnessPage() {
     setCursor(null);
     history.replaceState(null, "", id ? "/harness?attempt=" + encodeURIComponent(id) : "/harness");
   };
-  usePendingJob(job, (id) => {
+  const pending = usePendingJob(job, (id) => {
     open(id);
     refresh();
   });
+  const enqueue = (id: string) => {
+    setJob(id);
+    history.replaceState(null, "", "/harness?job=" + encodeURIComponent(id));
+  };
+  const waitingText: Record<string, string> = {
+    needs_reconciliation: "上次运行已中断，资源仍被锁定，需核验后释放。",
+    services_unavailable: "等待环境、VLA 或执行器服务就绪。",
+    resources_busy: "其他运行正在使用环境和执行器，释放后会自动开始。",
+    queued: "已加入队列，等待环境和 VLA 资源…",
+  };
+  const pendingText = pending?.connection_error ? "暂时无法读取运行状态，正在重新连接…"
+    : pending && !["queued", "running"].includes(pending.status) ? `运行${statusText[pending.status] ?? pending.status}。${pending.error ?? ""}`
+    : pending?.status === "running" ? "已开始调度，正在打开运行记录…"
+    : waitingText[pending?.waiting_reason ?? "queued"] ?? waitingText.queued;
   const last = trace.entries.length - 1;
   const upto = cursor ?? last;
   const s = trace.status;
@@ -95,10 +110,13 @@ export function HarnessPage() {
         {!attempt ? (
           job ? (
             <div className="hero">
-              <p className="thinking shimmer">已加入队列，等待环境和 VLA 资源…</p>
+              <p role="status" className="thinking">{pendingText}</p>
+              <a className="ghost-link" href={pending?.blocked_attempt_id ? `/workbench?attempt=${encodeURIComponent(pending.blocked_attempt_id)}` : "/workbench"}>
+                {pending?.blocked_attempt_id ? "查看中断运行" : "查看工作台"}
+              </a>
             </div>
           ) : (
-            <Composer onStarted={setJob} />
+            <Composer onStarted={enqueue} />
           )
         ) : (
           <>

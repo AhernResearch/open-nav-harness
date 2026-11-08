@@ -272,3 +272,10 @@ For shared VLA inference the composer limits environment choices to registered e
 bindings for that VLA, selects a matching worker, and freezes a one-lane `execution_pool`.
 Legacy owned actors continue using `environment_service`; pool admission and leases remain
 owned by the control plane.
+
+Pending Harness runs keep their job ID in `?job=ID`. The read-only
+`GET /api/harness/jobs/{id}` reports the latest attempt and distinguishes occupied
+resources, services awaiting startup, and retained leases from interrupted attempts.
+The view also displays paused, terminal and connection-error states instead of an
+unconditional waiting message. Polling never releases leases or resubmits a job;
+recovery uses the existing ownership-checked stop and reconciliation workflow.

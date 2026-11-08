@@ -244,12 +244,26 @@ export function Composer({ onStarted }: { onStarted: (job: string) => void }) {
 }
 
 export function usePendingJob(job: string | null, onAttempt: (id: string) => void) {
+  const [pending, setPending] = useState<Row | null>(null);
   useEffect(() => {
+    setPending(null);
     if (!job) return;
-    const timer = setInterval(async () => {
-      const rows = await api<Row[]>(`/jobs/${job}/attempts`).catch(() => []);
-      if (rows[0]) onAttempt(rows[0].attempt_id);
-    }, 1500);
-    return () => clearInterval(timer);
+    let active = true;
+    let timer: ReturnType<typeof setTimeout>;
+    const poll = async () => {
+      try {
+        const row = await api<Row>(`/harness/jobs/${encodeURIComponent(job)}`);
+        if (!active) return;
+        setPending(row);
+        if (row.attempt_id) { onAttempt(row.attempt_id); return; }
+        if (["cancelled", "failed", "interrupted", "completed"].includes(row.status)) return;
+      } catch {
+        if (active) setPending({ connection_error: true });
+      }
+      if (active) timer = setTimeout(poll, 1500);
+    };
+    void poll();
+    return () => { active = false; clearTimeout(timer); };
   }, [job]);
+  return pending;
 }
