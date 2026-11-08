@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { api, type Row } from "../api";
 import { Icon } from "./icons";
 import { ModelPicker } from "./ModelPicker";
+import { agenticPlanner } from "../run-profile";
 
 type Pick = { index: number; episode_id: number; scene: string; instruction: string };
 
@@ -144,6 +145,8 @@ export function Composer({ onStarted }: { onStarted: (job: string) => void }) {
             planner: { max_turns: 100, episode_timeout_s: 1200 },
             environment: { max_steps: 500 },
           };
+      config.harness = { ...config.harness, mode: "agentic" };
+      config.planner = agenticPlanner(config.planner);
       const { id } = await api<Row>("/experiments", {
         name: `Harness · ${pick.scene} · ${pick.index}`,
         planner_service: planner || null,

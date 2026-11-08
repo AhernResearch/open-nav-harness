@@ -2,6 +2,7 @@ import { useState } from "react";
 import { api, type ExperimentSpec } from "../api";
 import { pretty } from "../components";
 import type { WorkspaceProps } from "../workspace";
+import { agenticPlanner } from "../run-profile";
 export function ExperimentsPage({
   services,
   experiments,
@@ -32,6 +33,7 @@ export function ExperimentsPage({
         </option>
       ));
   const createExperiment = async () => {
+    const plannerConfig = { max_turns: 100, episode_timeout_s: 1200 };
     const spec: ExperimentSpec = {
       name: expName,
       planner_service: planner || null,
@@ -49,7 +51,7 @@ export function ExperimentsPage({
         dataset: { name: "r2r", split },
         harness: { mode },
         vla: { backend },
-        planner: { max_turns: 100, episode_timeout_s: 1200 },
+        planner: mode === "agentic" ? agenticPlanner(plannerConfig) : plannerConfig,
         environment: { max_steps: 500 },
       },
     };

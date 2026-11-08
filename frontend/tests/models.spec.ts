@@ -25,6 +25,14 @@ test('choose a model and freeze its exact registered profile with the run', asyn
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   const rows = await setup(page, request);
+  // A reused configuration must not restore the old nine-tool surface or mode.
+  await page.route('**/api/experiments', route => route.request().method() === 'GET'
+    ? route.fulfill({ json: [{ spec: {
+      environment_service: rows[3].id, vla_service: rows[4].id,
+      config: { harness: { mode: 'global' }, vla: { backend: 'lightnav' },
+        planner: { max_turns: 70, tools: ['observe', 'terminate_episode', 'observe_map', 'navigate_relative', 'navigate_to_node', 'update_plan', 'execute_subtask', 'update_memory', 'read_memory'] } },
+    } }] })
+    : route.continue());
   await page.route('**/api/jobs', route => route.fulfill({ json: { id: 'model-picker-job' } }));
   await page.route('**/api/jobs/model-picker-job/attempts', route => route.fulfill({ json: [] }));
   await page.goto('/harness');
@@ -46,6 +54,11 @@ test('choose a model and freeze its exact registered profile with the run', asyn
   expect(spec.config.planner.profile.base_url).toBe(rows[1].spec.url);
   expect(spec.config.planner.profile.context_limit).toBe(32768);
   expect(spec.episodes).toEqual([7]);
+  expect(spec.config.harness.mode).toBe('agentic');
+  expect(spec.config.planner.max_turns).toBe(70);
+  expect(spec.config.planner.tools).toHaveLength(8);
+  expect(spec.config.planner.tools).not.toContain('navigate_relative');
+  expect(spec.config.planner.tools).toContain('navigate_to_node');
   await expect(page.getByText('已加入队列，等待环境和 VLA 资源…')).toBeVisible();
   expect(errors).toEqual([]);
 });
@@ -132,4 +145,6 @@ test('shared VLA selects a matching execution lane and freezes the pool binding'
   expect(spec.execution_pool[0].execution_service).toBe(lanes[1].worker.id);
   expect(spec.config.harness.execution_url).toBe(lanes[1].worker.spec.url);
   expect(spec.config.environment.url).toBe(lanes[1].env.spec.url);
+  expect(spec.config.planner.tools).toHaveLength(8);
+  expect(spec.config.planner.tools).not.toContain('navigate_relative');
 });

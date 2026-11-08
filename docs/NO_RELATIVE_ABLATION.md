@@ -4,6 +4,12 @@ The planner can use `planner.tools` to select the existing agentic surface with
 `navigate_relative` omitted. This is a supported explicit configuration, not a
 new navigation implementation. The default tool surface is unchanged.
 
+The interactive Harness launcher and Workbench's agentic mode explicitly freeze
+the eight-tool list below for new runs. Reusing a past configuration in the
+Harness does not re-enable `navigate_relative`. Generic CLI/API configurations
+retain their original defaults for comparisons; already frozen experiments and
+active attempts keep their recorded inventory.
+
 The same frozen list reaches local tools and the execution worker. An omitted
 tool is not registered and cannot be dispatched. Preflight verifies that exact
 surface. The agentic briefing replaces the direct-movement sentence with guidance
