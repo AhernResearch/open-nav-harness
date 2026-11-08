@@ -215,3 +215,18 @@ async def test_mcp_rpc_gate_and_history_do_not_fence_recoverable_rejections(tmp_
     assert (tmp_path / "local/subtasks/topology.json").is_file()
     remote.close()
     assert worker.session_id is None
+
+
+def test_motion_path_preserves_return_bends_without_repeating_camera_history(session, monkeypatch):
+    m = session._tasks.memory
+    m.begin(pose(), 'frame-000000', 'navigate_to_node')
+    path = [[0, 0, 0], [1, 0, 0], [1, 0, 1], [2, 0, 1]]
+    reply = {'pose': {'position': path[-1]}, 'motion_path': path,
+             'motion_history': [{'views': {'front': 'Zg==', 'right': 'Zg==', 'back': 'Zg==', 'left': 'Zg=='},
+                                 'pose': {'position': p}, 'step_count': i} for i, p in enumerate(path)]}
+    monkeypatch.setattr('navgpt.planner.tools.session.requests.post', lambda *a, **k:
+                        SimpleNamespace(status_code=200, json=lambda: {'outputs': reply}))
+    session._call('r2rce__retrace_path', {'position': path[-1], 'match_3d': True})
+    m.finish({'position': path[-1]}, session._tasks.frames[-1]['id'], 'returned')
+    assert m.edges[-1]['trajectory'] == path
+    assert m.read(0)['records'][0]['distance_m'] == 3.0

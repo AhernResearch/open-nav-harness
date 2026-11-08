@@ -75,7 +75,10 @@ class TopologyMemory:
 
     def observe(self, pose, frame_id):
         self.initialize(pose, frame_id)
-        self.record(pose, frame_id)
+        if self.active is not None:
+            refs = self.edges[self.active]["frame_refs"]
+            if frame_id not in refs:
+                refs.append(frame_id)
         if self.active is None and self.current_node_id is not None:
             node = self.nodes[self.current_node_id]
             if math.dist(self.position(pose), node["position"]) <= 0.25 and frame_id not in node["observation_refs"]:

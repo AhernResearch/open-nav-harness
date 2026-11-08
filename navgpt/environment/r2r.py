@@ -1118,12 +1118,16 @@ class R2RCEEnv:
         self._rot = self._rot * turn
 
     @on_sim_thread
-    def call_with_motion_history(self, handler, inputs):
-        self._capture_motion_history = True
+    def call_with_motion_history(self, handler, inputs, capture_frames=True, capture_path=False):
+        self._capture_motion_history = capture_frames
         self._motion_history = []
+        path_start = max(0, len(self._agent_path) - 1)
         try:
             result = handler(self, inputs)
-            result['motion_history'] = self._motion_history
+            if capture_frames:
+                result['motion_history'] = self._motion_history
+            if capture_path:
+                result['motion_path'] = [list(map(float, p)) for p in self._agent_path[path_start:]]
             return result
         finally:
             self._capture_motion_history = False
@@ -2735,7 +2739,7 @@ class R2RCEEnv:
                 if math.hypot(float(n["position"][0]) - float(here[0]),
                               float(n["position"][2]) - float(here[2])) < 0.7:
                     cy_px -= 0.62 * ppm            # just outside the ring
-                if _INTERFACE_VARIANT != "text_labels":
+                if memory_nodes is None and _INTERFACE_VARIANT != "text_labels":
                     _digits(img, str(n["id"]), cx_px, cy_px, glyph, EDGE)
 
             # Where "up the map" is, expressed as a turn — the one number that ties
@@ -2767,6 +2771,36 @@ class R2RCEEnv:
                 direction_cues[shown] = [float(tpx), float(tpy)]
                 if _INTERFACE_VARIANT != "text_labels":
                     _digits(img, shown, tpx, tpy, gl, (255, 255, 255))
+
+            if memory_nodes is not None:
+                # Boundary nodes can be close or share x/z across floors. Use
+                # high-contrast displaced labels with leader lines, avoiding
+                # the heading arrow and body-direction cues where possible.
+                ax, ay = to_px(here)
+                occupied = [(ax - 0.55 * ppm, ay - 0.55 * ppm,
+                             ax + 0.55 * ppm, ay + 0.55 * ppm)]
+                occupied += [(x - 10, y - 10, x + 10, y + 10) for x, y in direction_cues.values()]
+                for node in graph["nodes"]:
+                    x, y = to_px(node["position"])
+                    label = str(node["id"])
+                    half_w, half_h = _text_width(label, 2) / 2 + 3, _GLYPH_H + 3
+                    chosen = None
+                    for radius in (22, 38, 58, 82, 110):
+                        for angle in (-135, -45, 135, 45, 180, 0, -90, 90):
+                            cx = min(W - half_w - 1, max(half_w + 1, x + radius * math.cos(math.radians(angle))))
+                            cy = min(H - half_h - 1, max(half_h + 1, y + radius * math.sin(math.radians(angle))))
+                            box = (cx - half_w, cy - half_h, cx + half_w, cy + half_h)
+                            if not any(box[0] < b[2] + 3 and box[2] > b[0] - 3 and
+                                       box[1] < b[3] + 3 and box[3] > b[1] - 3 for b in occupied):
+                                chosen = (cx, cy, box)
+                                break
+                        if chosen:
+                            break
+                    cx, cy, box = chosen or (cx, cy, box)
+                    stroke((x, y), (cx, cy), 0.8, PLACE)
+                    img[int(box[1]):int(box[3]) + 1, int(box[0]):int(box[2]) + 1] = EDGE
+                    _digits(img, label, cx, cy, 2, PLACE)
+                    occupied.append(box)
 
             # A bar APPENDED below the picture, never painted over it: the view
             # number so a map from twenty turns ago can be placed in the sequence,

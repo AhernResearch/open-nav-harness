@@ -106,8 +106,11 @@ class Handler(BaseHTTPRequestHandler):
                 # Ablation runs also collect the panoramas passed during charged
                 # motion, so the VLA's visual history matches what the robot saw.
                 capture = inputs.pop('capture_history', False)
-                if capture and fn.rsplit('__', 1)[-1] in ('step_hightolow', 'retrace_to', 'retrace_path', 'step_discrete'):
-                    outputs = ENV.call_with_motion_history(handler, inputs)
+                capture_path = inputs.pop('capture_path', False)
+                if (capture or capture_path) and fn.rsplit('__', 1)[-1] in (
+                        'step_hightolow', 'retrace_to', 'retrace_path', 'step_discrete', 'step_velocity', 'teleport'):
+                    outputs = ENV.call_with_motion_history(handler, inputs,
+                                                           capture_frames=capture, capture_path=capture_path)
                 else:
                     outputs = handler(ENV, inputs)
                 self._send({"outputs": outputs})

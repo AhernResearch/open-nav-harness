@@ -286,6 +286,9 @@ class NavigationSession:
         )
         if capture:
             inputs = dict(inputs, capture_history=True)
+        if self._AGENTIC and motion in ("step_hightolow", "retrace_to", "retrace_path",
+                                        "step_discrete", "step_velocity", "teleport"):
+            inputs = dict(inputs, capture_path=True)
         if motion in ("step_hightolow", "retrace_to", "retrace_path", "step_discrete", "step_velocity", "teleport"):
             self._motion_epoch += 1
             self._memory_map_read = None
@@ -310,15 +313,14 @@ class NavigationSession:
             and (not (motion == "step_discrete" and inputs.get("action") == 0))
         ):
             self._tasks.mark_motion()
+        if capture:
+            self._feed_passive_history(output.pop("motion_history", []))
         if self._AGENTIC:
-            for frame in output.get("motion_history", []):
-                if frame.get("pose", {}).get("position"):
-                    self._tasks.memory.record(frame["pose"])
+            for position in output.pop("motion_path", []):
+                self._tasks.memory.record({"position": position})
             if output.get("pose", {}).get("position"):
                 self._last_pose = output["pose"]
                 self._tasks.memory.record(output["pose"])
-        if capture:
-            self._feed_passive_history(output.pop("motion_history", []))
         return output
 
     def _policy_views(self, views):
