@@ -1,0 +1,432 @@
+{
+  "generated_utc": "2026-11-08T03:29:06.544404+00:00",
+  "baseline_commit": "b281792",
+  "implementation_commit": "afd1b5a",
+  "implementation_digest": "81497d7af9dc335d69fea85d513ef5909aadbe06dbece68c7878e9781b2a9f20",
+  "formal50": "on_hold",
+  "checks": {
+    "pytest": "89 passed; 4 subtests passed",
+    "ruff_nav_harness": "passed",
+    "ruff_F821_F823_navgpt": "passed",
+    "mypy": "20 source files passed",
+    "frontend_build": "passed",
+    "map_visual_inspection": "passed; displaced numbered labels visible"
+  },
+  "scripted_gpu_integration": [
+    {
+      "purpose": "scripted_integration_only_not_navigation_quality_or_training",
+      "backend": "lightnav",
+      "transport": "direct_rpc",
+      "checks": [
+        {
+          "tool": "observe_panorama",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "update_plan",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "navigate_relative",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "execute_subtask",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "navigate_to_node",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "read_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "read_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "terminate_episode",
+          "expected_rejection": false,
+          "passed": true
+        }
+      ],
+      "nodes": 2,
+      "edges": 3,
+      "model_predictions": 2,
+      "initial_worker": {
+        "model_name": "lightnav-0",
+        "model_version": "LightNav-0",
+        "backend": "lightnav",
+        "policy_url": null,
+        "execution": "owned_vllm",
+        "context_replace": true,
+        "max_context_groups": 16,
+        "history_observe": true,
+        "seeded_reset": false,
+        "control": {
+          "control_dt_s": 0.1,
+          "max_linear_mps": 2.5,
+          "max_angular_dps": 300.0
+        },
+        "waypoint_count": 10,
+        "policy_camera": {
+          "width": 480,
+          "height": 270,
+          "height_m": 0.88,
+          "hfov": 120.0
+        },
+        "tool_execution": "in_process",
+        "protocol_version": 1,
+        "implementation_digest": "81497d7af9dc335d69fea85d513ef5909aadbe06dbece68c7878e9781b2a9f20",
+        "environment_url": "http://127.0.0.1:19450",
+        "session_id": null,
+        "failed": false
+      },
+      "final_worker": {
+        "model_name": "lightnav-0",
+        "model_version": "LightNav-0",
+        "backend": "lightnav",
+        "policy_url": null,
+        "execution": "owned_vllm",
+        "context_replace": true,
+        "max_context_groups": 16,
+        "history_observe": true,
+        "seeded_reset": false,
+        "control": {
+          "control_dt_s": 0.1,
+          "max_linear_mps": 2.5,
+          "max_angular_dps": 300.0
+        },
+        "waypoint_count": 10,
+        "policy_camera": {
+          "width": 480,
+          "height": 270,
+          "height_m": 0.88,
+          "hfov": 120.0
+        },
+        "tool_execution": "in_process",
+        "protocol_version": 1,
+        "implementation_digest": "81497d7af9dc335d69fea85d513ef5909aadbe06dbece68c7878e9781b2a9f20",
+        "environment_url": "http://127.0.0.1:19450",
+        "session_id": null,
+        "failed": false
+      },
+      "source": "/home/holo/robots/nav-harness/state/probes/memory-v2-verified-20261108/lightnav"
+    },
+    {
+      "purpose": "scripted_integration_only_not_navigation_quality_or_training",
+      "backend": "navgpt",
+      "transport": "mcp_stdio_rpc",
+      "checks": [
+        {
+          "tool": "observe_panorama",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "update_plan",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "navigate_relative",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "execute_subtask",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "navigate_to_node",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "read_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "read_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "terminate_episode",
+          "expected_rejection": false,
+          "passed": true
+        }
+      ],
+      "nodes": 2,
+      "edges": 3,
+      "model_predictions": 2,
+      "initial_worker": {
+        "model_name": "navgpt-vla",
+        "backend": "navgpt",
+        "model_version": "/home/sari/lx_workspace/NavGPT-3/checkpoints/NavGPT3-8B",
+        "context_replace": true,
+        "max_context_groups": 16,
+        "history_observe": true,
+        "seeded_reset": true,
+        "execution": "owned_pytorch",
+        "tool_execution": "in_process",
+        "protocol_version": 1,
+        "implementation_digest": "81497d7af9dc335d69fea85d513ef5909aadbe06dbece68c7878e9781b2a9f20",
+        "environment_url": "http://127.0.0.1:19451",
+        "session_id": null,
+        "failed": false
+      },
+      "final_worker": {
+        "model_name": "navgpt-vla",
+        "backend": "navgpt",
+        "model_version": "/home/sari/lx_workspace/NavGPT-3/checkpoints/NavGPT3-8B",
+        "context_replace": true,
+        "max_context_groups": 16,
+        "history_observe": true,
+        "seeded_reset": true,
+        "execution": "owned_pytorch",
+        "tool_execution": "in_process",
+        "protocol_version": 1,
+        "implementation_digest": "81497d7af9dc335d69fea85d513ef5909aadbe06dbece68c7878e9781b2a9f20",
+        "environment_url": "http://127.0.0.1:19451",
+        "session_id": null,
+        "failed": false
+      },
+      "source": "/home/holo/robots/nav-harness/state/probes/memory-v2-verified-20261108/navgpt"
+    }
+  ],
+  "autonomous_development": [
+    {
+      "planner": "qwen27b",
+      "actor": "lightnav",
+      "experiment_id": "482e8e05c4944c56a48afc7fb69341c6",
+      "job_id": "f2d0e41d2b40476ea2315b834426ca3e",
+      "source": "/home/holo/robots/nav-harness/state/runs/f2d0e41d2b40476ea2315b834426ca3e/70184e2e58aa4292bb39a3074aa857d2/episode/work/ep0000/trace/requests.jsonl",
+      "attempt_id": "70184e2e58aa4292bb39a3074aa857d2",
+      "status": "completed",
+      "success": 1.0,
+      "ne": 0.7741,
+      "wall_s": 293.9,
+      "error": null,
+      "nodes": 4,
+      "executions": 3,
+      "captioned_executions": 2,
+      "tools": {
+        "observe_panorama": 1,
+        "update_plan": 3,
+        "execute_subtask": 3,
+        "update_memory": 4,
+        "observe_map": 3,
+        "observe_forward": 1,
+        "terminate_episode": 1
+      },
+      "memory_writes": {
+        "attempted": 4,
+        "accepted": 2
+      },
+      "memory_reads": 0,
+      "single_current_context_per_request": true,
+      "model_requests": 16,
+      "captions": [
+        {
+          "start_node_id": 0,
+          "end_node_id": 1,
+          "caption": "Moved forward 3.15m along the right side of the kitchen island from node 0 to node 1. The kitchen island remained on my right, counters with windows on my left. I've now reached the end of the island and can see ahead toward an opening leading to a dining area with a table and chairs visible.",
+          "termination_reason": "distance_budget"
+        },
+        {
+          "start_node_id": 1,
+          "end_node_id": 2,
+          "caption": null,
+          "termination_reason": "distance_budget"
+        },
+        {
+          "start_node_id": 2,
+          "end_node_id": 3,
+          "caption": "Moved from node 2 to node 3, approaching the doorway opening to the dining area. I can now see through the doorway into the dining area where there's a dining table with chairs and a large mirror on the right wall. I'm positioned at the threshold of this doorway, which is the right side doorway as specified in the instruction.",
+          "termination_reason": "vla_stop"
+        }
+      ]
+    },
+    {
+      "planner": "qwen27b",
+      "actor": "navgpt",
+      "experiment_id": "896ab3c9e4a54d5181657add40567246",
+      "job_id": "7bf9896fe50d4d1a9c68b3f09f261259",
+      "source": "/home/holo/robots/nav-harness/state/runs/7bf9896fe50d4d1a9c68b3f09f261259/a72dbee121e642c0806de97426d92af6/episode/work/ep0000/trace/requests.jsonl",
+      "attempt_id": "a72dbee121e642c0806de97426d92af6",
+      "status": "completed",
+      "success": 1.0,
+      "ne": 1.7957,
+      "wall_s": 443.1,
+      "error": null,
+      "nodes": 4,
+      "executions": 3,
+      "captioned_executions": 3,
+      "tools": {
+        "observe_panorama": 1,
+        "update_plan": 4,
+        "execute_subtask": 3,
+        "update_memory": 4,
+        "observe_map": 3,
+        "observe_forward": 1,
+        "terminate_episode": 1
+      },
+      "memory_writes": {
+        "attempted": 4,
+        "accepted": 3
+      },
+      "memory_reads": 0,
+      "single_current_context_per_request": true,
+      "model_requests": 17,
+      "captions": [
+        {
+          "start_node_id": 0,
+          "end_node_id": 1,
+          "caption": "Moved forward 3m along the kitchen corridor, keeping the island on the right. Reached the end of the kitchen corridor near the doorway/opening. The island ends ahead and I can see the dining area beyond.",
+          "termination_reason": "distance_budget"
+        },
+        {
+          "start_node_id": 1,
+          "end_node_id": 2,
+          "caption": "Turned right and went around the right end of the kitchen island. Now positioned in the open area between the kitchen and dining room. Can see the dining area ahead with a dining table and mirror visible through the opening.",
+          "termination_reason": "vla_stop"
+        },
+        {
+          "start_node_id": 2,
+          "end_node_id": 3,
+          "caption": "Moved forward from node 2 toward the dining area. Now positioned near the doorway to the dining room. The dining room with table and mirror is visible to my left. I'm at the right side of the kitchen island area, near the doorway leading to the dining room.",
+          "termination_reason": "distance_budget"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Two actor configurations on one train route; not a benchmark ranking.",
+    "Development runs remain evaluation_only, not automatically training data.",
+    "MCP verifies tool-read-before-write; exact prompt snapshot replacement is managed-runtime-only.",
+    "Node reuse is conservative 0.25 m geometric matching, not semantic place recognition.",
+    "History selection uses topology, task association and time, not a failure classifier."
+  ]
+}
