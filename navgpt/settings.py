@@ -37,7 +37,7 @@ KEYS = {
     "planner": {"runtime", "model", "effort", "service_tier", "tools", "max_turns",
                 "episode_timeout_s", "max_budget_usd", "profile"},
     "harness": {"interface", "review_every", "route_finding", "vla_steps_per_call",
-                "mode", "execution_url", "subtask_max_distance_m", "subtask_max_turn_deg", "subtask_max_actions"},
+                "mode", "execution_url", "allow_context_reset", "actor_history_policy", "subtask_max_distance_m", "subtask_max_turn_deg", "subtask_max_actions"},
     "output": {"dir", "save_frames"},
 }
 DOCS = "docs/USAGE.md#experiment-configs"
@@ -130,8 +130,8 @@ ALL_TOOLS = ["observe_forward", "observe_panorama", "observe_map", "navigate_by_
              "navigate_relative", "navigate_to_node", "annotate_node", "terminate_episode"]
 SUBTASK_TOOLS = [tool for tool in ALL_TOOLS if tool != 'navigate_by_instruction'] + [
     'update_plan', 'execute_subtask', 'review_subtask']
-AGENTIC_TOOLS = [t for t in SUBTASK_TOOLS if t not in ('annotate_node', 'review_subtask')] + [
-    'observe_node', 'update_memory', 'read_memory']
+AGENTIC_TOOLS = [t for t in SUBTASK_TOOLS if t not in ('annotate_node', 'review_subtask', 'observe_forward', 'observe_panorama')] + [
+    'observe', 'update_memory', 'read_memory']
 
 
 def tool_set(tools) -> tuple[str, str]:
@@ -141,6 +141,9 @@ def tool_set(tools) -> tuple[str, str]:
     from .planner.tools.ablation import CAPABILITIES
 
     known: dict = {frozenset(v): (k, "full") for k, v in EXPECTED_TOOLS.items()}
+    # Agentic movement ablation: preserve task/memory semantics and remove only
+    # direct metric movement. The explicit tool list is frozen in the experiment.
+    known[frozenset(AGENTIC_TOOLS) - {"navigate_relative"}] = ("planner_agentic", "full")
     for bundle, names in CAPABILITIES.items():
         known.setdefault(frozenset(names), ("planner_vla_memory", bundle))
     every = sorted(set().union(*known))
@@ -242,6 +245,16 @@ class Settings:
             raise SettingsError('vla.backend must be navgpt or lightnav')
         cfg.harness_mode = str(harness.get('mode', 'global'))
         cfg.execution_url = str(harness.get('execution_url', ''))
+        cfg.allow_context_reset = harness.get('allow_context_reset', True)
+        if type(cfg.allow_context_reset) is not bool:
+            raise SettingsError('allow_context_reset must be boolean')
+        cfg.actor_history_policy = harness.get('actor_history_policy', 'episode')
+        if cfg.actor_history_policy not in ('episode', 'completed_subtask'):
+            raise SettingsError('actor_history_policy must be episode or completed_subtask')
+        if cfg.actor_history_policy == 'completed_subtask' and (
+            cfg.harness_mode != 'agentic' or cfg.vla_backend != 'lightnav'
+        ):
+            raise SettingsError('completed_subtask history requires agentic LightNav')
         if cfg.execution_url:
             _url(cfg.execution_url)
         if cfg.harness_mode not in ('global', 'subtask', 'agentic'):
@@ -273,6 +286,10 @@ class Settings:
         cfg.episode_timeout = int(planner.get("episode_timeout_s", cfg.episode_timeout))
         budget = planner.get("max_budget_usd", 5.0 if runtime == "claude" else None)
         cfg.max_budget_usd = float(budget) if budget else None
+        cfg.history_frames = int(harness.get("history_frames", 16))
+        cfg.boundary_frames = int(harness.get("boundary_frames", 2))
+        if not 1 <= cfg.history_frames <= 16 or not 0 <= cfg.boundary_frames <= min(4, cfg.history_frames - 1):
+            raise SettingsError("Invalid actor history frame budgets")
         default_tools = {'subtask': SUBTASK_TOOLS, 'agentic': AGENTIC_TOOLS}.get(cfg.harness_mode, ALL_TOOLS)
         cfg.tools = list(planner.get("tools") or default_tools)
         cfg.condition, cfg.capability_bundle = tool_set(cfg.tools)

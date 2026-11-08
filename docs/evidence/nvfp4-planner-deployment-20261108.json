@@ -1,0 +1,255 @@
+{
+  "time": 1794147359.093185,
+  "gpu_csv": "0, GPU-8d125b98-6a5e-ca7d-f09b-fb317fb6dbbb, 54191, 0\n1, GPU-616657cd-fa6f-1077-18dd-78629f267b31, 72829, 0\n2, GPU-59364f40-d54b-8d1c-79e4-afac236ab7f5, 14529, 0\n3, GPU-e468797e-43a4-ee83-480f-70bba65f6022, 57346, 0\n4, GPU-d8869872-102f-77b7-3cea-1c4eabf5b3f1, 54284, 0\n5, GPU-c27a2df0-3968-8e78-ae07-cde6c714d96d, 72745, 100\n",
+  "processes": "323594, GPU-8d125b98-6a5e-ca7d-f09b-fb317fb6dbbb, 54182 MiB, VLLM::Worker\n265847, GPU-616657cd-fa6f-1077-18dd-78629f267b31, 72820 MiB, VLLM::EngineCore\n255766, GPU-59364f40-d54b-8d1c-79e4-afac236ab7f5, 14426 MiB, /data/nav_storage/lightnav/venv/bin/python\n323593, GPU-e468797e-43a4-ee83-480f-70bba65f6022, 54164 MiB, VLLM::Worker\n323588, GPU-d8869872-102f-77b7-3cea-1c4eabf5b3f1, 54182 MiB, VLLM::Worker\n2429621, GPU-c27a2df0-3968-8e78-ae07-cde6c714d96d, 72736 MiB, VLLM::EngineCore\n",
+  "protected_processes": "    PID                  STARTED COMMAND\n 265160 Wed Oct  7 14:48:06 2026 vllm\n2429405 Sun Oct 25 19:05:42 2026 vllm\n",
+  "old_runtime_versions": "0.19.1 2.10.0\n",
+  "health": {
+    "protected_gpu1": {
+      "http_status": 200
+    },
+    "protected_gpu5": {
+      "http_status": 200
+    },
+    "planner_pool": {
+      "http_status": 200
+    },
+    "lightnav": {
+      "http_status": 200
+    }
+  },
+  "allocation": {
+    "lightnav_gpu": 2,
+    "environment_gpus": [
+      2
+    ],
+    "planner_gpus": [
+      0,
+      3,
+      4
+    ],
+    "protected_services": [
+      {
+        "gpu": 1,
+        "pid": 265160,
+        "url": "http://192.168.80.49:8001"
+      },
+      {
+        "gpu": 5,
+        "pid": 2429405,
+        "url": "http://127.0.0.1:8897"
+      }
+    ],
+    "authorization": "User clarified: use 0,2,3,4 only; keep longstanding services on 1,5 untouched",
+    "updated": 1794144464.767049
+  },
+  "planner_service": {
+    "name": "qwen27b-nvfp4-pool",
+    "kind": "planner",
+    "url": "http://127.0.0.1:18103/v1",
+    "managed": true,
+    "template": "qwen27b-nvfp4-pool",
+    "gpu_ids": [
+      0,
+      3,
+      4
+    ],
+    "reserve_mib": 55000,
+    "planner": {
+      "runtime": "openai_compatible",
+      "model": "navh-qwen27b-nvfp4",
+      "base_url": "http://127.0.0.1:18103/v1",
+      "credential_env": null,
+      "context_limit": 16384,
+      "output_tokens": 2048,
+      "max_images": 32,
+      "context_policy": "bounded",
+      "thinking": false,
+      "effort": null,
+      "temperature": 0.0,
+      "request_timeout_s": 120,
+      "tokenizer_path": null,
+      "token_count_url": null,
+      "max_concurrency": 12
+    },
+    "metadata": {
+      "checkpoint_source": "nv-community/Qwen3.6-27B-NVFP4",
+      "phase": "three_gpu_pool",
+      "quantization": "NVFP4 / Marlin on A100",
+      "compatibility": "Official vLLM modelopt_mixed SM75+ Marlin support; unmodified checkpoint",
+      "upstream": "nvidia/Qwen3.6-27B-NVFP4",
+      "runtime_version": "vllm==0.25.0",
+      "data_parallel_size": 3
+    },
+    "max_concurrency": 12
+  },
+  "planner_template": {
+    "host": "navh-a100",
+    "argv": [
+      "/data/nav_storage/nav-harness/venvs/planner-vllm025/bin/vllm",
+      "serve",
+      "/data/nav_storage/models/NVIDIA-Qwen3.6-27B-NVFP4",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "18103",
+      "--served-model-name",
+      "navh-qwen27b-nvfp4",
+      "--quantization",
+      "modelopt",
+      "--max-model-len",
+      "16384",
+      "--max-num-seqs",
+      "4",
+      "--max-num-batched-tokens",
+      "8192",
+      "--gpu-memory-utilization",
+      "0.65",
+      "--enable-auto-tool-choice",
+      "--tool-call-parser",
+      "qwen3_coder",
+      "--reasoning-parser",
+      "qwen3",
+      "--limit-mm-per-prompt",
+      "{\"image\":32}",
+      "--mm-processor-cache-gb",
+      "4",
+      "--enable-prefix-caching",
+      "--kv-cache-dtype",
+      "bfloat16",
+      "--data-parallel-size",
+      "3"
+    ],
+    "working_directory": "/data/nav_storage/nav-harness",
+    "environment": {
+      "HF_HUB_OFFLINE": "1",
+      "TRANSFORMERS_OFFLINE": "1",
+      "PYTHONUNBUFFERED": "1",
+      "PATH": "/data/nav_storage/nav-harness/venvs/planner-vllm025/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin"
+    },
+    "startup_timeout_s": 1200
+  },
+  "services": [
+    {
+      "id": "457941e1ef2448f28537209c16de106e",
+      "spec": "{\"name\":\"lightnav-async-d3cc8172\",\"kind\":\"vla\",\"url\":\"http://127.0.0.1:18381\",\"managed\":true,\"template\":\"lightnav\",\"gpu_ids\":[2],\"reserve_mib\":26000,\"planner\":null,\"metadata\":{\"shared_inference\":true},\"max_concurrency\":8}",
+      "status": "ready"
+    },
+    {
+      "id": "e0802796122642d9b19f9ae9c39ba1f8",
+      "spec": "{\"name\":\"async-env-0\",\"kind\":\"environment\",\"url\":\"http://127.0.0.1:19580\",\"managed\":true,\"template\":\"env-0\",\"gpu_ids\":[2],\"reserve_mib\":2500,\"planner\":null,\"metadata\":{},\"max_concurrency\":1}",
+      "status": "ready"
+    },
+    {
+      "id": "2e7bd465f9ac473ba75313fa3c5afc4d",
+      "spec": "{\"name\":\"async-lightnav-worker-0\",\"kind\":\"execution\",\"url\":\"http://127.0.0.1:19680\",\"managed\":true,\"template\":\"execute-lightnav-0\",\"gpu_ids\":[],\"reserve_mib\":0,\"planner\":null,\"metadata\":{\"environment_url\":\"http://127.0.0.1:19580\",\"inference_url\":\"http://127.0.0.1:18381\"},\"max_concurrency\":1}",
+      "status": "ready"
+    },
+    {
+      "id": "ba97ba0f106f47d983d2b9ecff4a07d8",
+      "spec": "{\"name\":\"async-env-1\",\"kind\":\"environment\",\"url\":\"http://127.0.0.1:19581\",\"managed\":true,\"template\":\"env-1\",\"gpu_ids\":[2],\"reserve_mib\":2500,\"planner\":null,\"metadata\":{},\"max_concurrency\":1}",
+      "status": "ready"
+    },
+    {
+      "id": "20d3792f5f7c45f587d77fac6f19b9b0",
+      "spec": "{\"name\":\"async-lightnav-worker-1\",\"kind\":\"execution\",\"url\":\"http://127.0.0.1:19681\",\"managed\":true,\"template\":\"execute-lightnav-1\",\"gpu_ids\":[],\"reserve_mib\":0,\"planner\":null,\"metadata\":{\"environment_url\":\"http://127.0.0.1:19581\",\"inference_url\":\"http://127.0.0.1:18381\"},\"max_concurrency\":1}",
+      "status": "ready"
+    },
+    {
+      "id": "5e54bafdfe224410b5c1720ba63601f4",
+      "spec": "{\"name\":\"async-env-2\",\"kind\":\"environment\",\"url\":\"http://127.0.0.1:19582\",\"managed\":true,\"template\":\"env-2\",\"gpu_ids\":[2],\"reserve_mib\":2500,\"planner\":null,\"metadata\":{},\"max_concurrency\":1}",
+      "status": "ready"
+    },
+    {
+      "id": "339b2b74985a4b0aba3144eea9705249",
+      "spec": "{\"name\":\"async-lightnav-worker-2\",\"kind\":\"execution\",\"url\":\"http://127.0.0.1:19682\",\"managed\":true,\"template\":\"execute-lightnav-2\",\"gpu_ids\":[],\"reserve_mib\":0,\"planner\":null,\"metadata\":{\"environment_url\":\"http://127.0.0.1:19582\",\"inference_url\":\"http://127.0.0.1:18381\"},\"max_concurrency\":1}",
+      "status": "ready"
+    },
+    {
+      "id": "37bbdb5e0dcb4dae8a2c905f5aba1955",
+      "spec": "{\"name\":\"async-env-3\",\"kind\":\"environment\",\"url\":\"http://127.0.0.1:19583\",\"managed\":true,\"template\":\"env-3\",\"gpu_ids\":[2],\"reserve_mib\":2500,\"planner\":null,\"metadata\":{},\"max_concurrency\":1}",
+      "status": "ready"
+    },
+    {
+      "id": "e950bb08bcd540d795fac907cdbf6194",
+      "spec": "{\"name\":\"async-lightnav-worker-3\",\"kind\":\"execution\",\"url\":\"http://127.0.0.1:19683\",\"managed\":true,\"template\":\"execute-lightnav-3\",\"gpu_ids\":[],\"reserve_mib\":0,\"planner\":null,\"metadata\":{\"environment_url\":\"http://127.0.0.1:19583\",\"inference_url\":\"http://127.0.0.1:18381\"},\"max_concurrency\":1}",
+      "status": "ready"
+    },
+    {
+      "id": "24ba1a1a4b8046f99f03f21c1f44f258",
+      "spec": "{\"name\":\"async-qwen27b\",\"kind\":\"planner\",\"url\":\"http://127.0.0.1:18101/v1\",\"managed\":false,\"template\":null,\"gpu_ids\":[],\"reserve_mib\":0,\"planner\":{\"runtime\":\"openai_compatible\",\"model\":\"navh-qwen27b\",\"base_url\":\"http://127.0.0.1:18101/v1\",\"credential_env\":null,\"context_limit\":16384,\"output_tokens\":2048,\"max_images\":32,\"context_policy\":\"bounded\",\"thinking\":false,\"effort\":null,\"temperature\":0.0,\"request_timeout_s\":120,\"tokenizer_path\":null,\"token_count_url\":null,\"max_concurrency\":8},\"metadata\":{\"server_max_num_seqs\":8},\"max_concurrency\":1}",
+      "status": "stopped"
+    },
+    {
+      "id": "f2d65a20d6564aae84a55ffffed16e2e",
+      "spec": "{\"name\":\"async-official-vla\",\"kind\":\"vla\",\"url\":\"http://127.0.0.1:18382\",\"managed\":true,\"template\":\"navgpt\",\"gpu_ids\":[2],\"reserve_mib\":26000,\"planner\":null,\"metadata\":{\"shared_inference\":true},\"max_concurrency\":4}",
+      "status": "stopped"
+    },
+    {
+      "id": "c69513b79c3a4db791e756a7fe3699a0",
+      "spec": "{\"name\":\"async-official-worker-0\",\"kind\":\"execution\",\"url\":\"http://127.0.0.1:19684\",\"managed\":true,\"template\":\"execute-navgpt-0\",\"gpu_ids\":[],\"reserve_mib\":0,\"planner\":null,\"metadata\":{\"environment_url\":\"http://127.0.0.1:19580\",\"inference_url\":\"http://127.0.0.1:18382\"},\"max_concurrency\":1}",
+      "status": "stopped"
+    },
+    {
+      "id": "9f30633f585a48dab309d626809b7b96",
+      "spec": "{\"name\":\"async-official-worker-1\",\"kind\":\"execution\",\"url\":\"http://127.0.0.1:19685\",\"managed\":true,\"template\":\"execute-navgpt-1\",\"gpu_ids\":[],\"reserve_mib\":0,\"planner\":null,\"metadata\":{\"environment_url\":\"http://127.0.0.1:19581\",\"inference_url\":\"http://127.0.0.1:18382\"},\"max_concurrency\":1}",
+      "status": "stopped"
+    },
+    {
+      "id": "3e255372d6a54ca28d1836f2bb580c78",
+      "spec": "{\"name\":\"async-official-worker-2\",\"kind\":\"execution\",\"url\":\"http://127.0.0.1:19686\",\"managed\":true,\"template\":\"execute-navgpt-2\",\"gpu_ids\":[],\"reserve_mib\":0,\"planner\":null,\"metadata\":{\"environment_url\":\"http://127.0.0.1:19582\",\"inference_url\":\"http://127.0.0.1:18382\"},\"max_concurrency\":1}",
+      "status": "stopped"
+    },
+    {
+      "id": "9a9ee7eb821b4714a3dcb50a893d06c0",
+      "spec": "{\"name\":\"async-official-worker-3\",\"kind\":\"execution\",\"url\":\"http://127.0.0.1:19687\",\"managed\":true,\"template\":\"execute-navgpt-3\",\"gpu_ids\":[],\"reserve_mib\":0,\"planner\":null,\"metadata\":{\"environment_url\":\"http://127.0.0.1:19583\",\"inference_url\":\"http://127.0.0.1:18382\"},\"max_concurrency\":1}",
+      "status": "stopped"
+    },
+    {
+      "id": "506a59f66fbd4988a81c20c00dcb074c",
+      "spec": "{\"name\":\"async-env-4\",\"kind\":\"environment\",\"url\":\"http://127.0.0.1:19584\",\"managed\":true,\"template\":\"env-4\",\"gpu_ids\":[2],\"reserve_mib\":2500,\"planner\":null,\"metadata\":{},\"max_concurrency\":1}",
+      "status": "ready"
+    },
+    {
+      "id": "d1fdc31244874534a5c8299aeaf1d742",
+      "spec": "{\"name\":\"async-lightnav-worker-4\",\"kind\":\"execution\",\"url\":\"http://127.0.0.1:19688\",\"managed\":true,\"template\":\"execute-lightnav-4\",\"gpu_ids\":[],\"reserve_mib\":0,\"planner\":null,\"metadata\":{\"environment_url\":\"http://127.0.0.1:19584\",\"inference_url\":\"http://127.0.0.1:18381\"},\"max_concurrency\":1}",
+      "status": "ready"
+    },
+    {
+      "id": "7c9024ce60574f8c87f6adab5b0326b0",
+      "spec": "{\"name\":\"async-env-5\",\"kind\":\"environment\",\"url\":\"http://127.0.0.1:19585\",\"managed\":true,\"template\":\"env-5\",\"gpu_ids\":[2],\"reserve_mib\":2500,\"planner\":null,\"metadata\":{},\"max_concurrency\":1}",
+      "status": "ready"
+    },
+    {
+      "id": "c10b40fb9e9140f3b9444521fc788b1e",
+      "spec": "{\"name\":\"async-lightnav-worker-5\",\"kind\":\"execution\",\"url\":\"http://127.0.0.1:19689\",\"managed\":true,\"template\":\"execute-lightnav-5\",\"gpu_ids\":[],\"reserve_mib\":0,\"planner\":null,\"metadata\":{\"environment_url\":\"http://127.0.0.1:19585\",\"inference_url\":\"http://127.0.0.1:18381\"},\"max_concurrency\":1}",
+      "status": "ready"
+    },
+    {
+      "id": "4aeca142cfde48fe95a540edd017ed37",
+      "spec": "{\"name\":\"async-env-6\",\"kind\":\"environment\",\"url\":\"http://127.0.0.1:19586\",\"managed\":true,\"template\":\"env-6\",\"gpu_ids\":[2],\"reserve_mib\":2500,\"planner\":null,\"metadata\":{},\"max_concurrency\":1}",
+      "status": "ready"
+    },
+    {
+      "id": "c09ae78998624a99b962333d6a275c4b",
+      "spec": "{\"name\":\"async-lightnav-worker-6\",\"kind\":\"execution\",\"url\":\"http://127.0.0.1:19690\",\"managed\":true,\"template\":\"execute-lightnav-6\",\"gpu_ids\":[],\"reserve_mib\":0,\"planner\":null,\"metadata\":{\"environment_url\":\"http://127.0.0.1:19586\",\"inference_url\":\"http://127.0.0.1:18381\"},\"max_concurrency\":1}",
+      "status": "ready"
+    },
+    {
+      "id": "d7ba8de177134722b3bc31a0d295156d",
+      "spec": "{\"name\":\"async-env-7\",\"kind\":\"environment\",\"url\":\"http://127.0.0.1:19587\",\"managed\":true,\"template\":\"env-7\",\"gpu_ids\":[2],\"reserve_mib\":2500,\"planner\":null,\"metadata\":{},\"max_concurrency\":1}",
+      "status": "ready"
+    },
+    {
+      "id": "2c84605389974f618def4e68baaf3216",
+      "spec": "{\"name\":\"async-lightnav-worker-7\",\"kind\":\"execution\",\"url\":\"http://127.0.0.1:19691\",\"managed\":true,\"template\":\"execute-lightnav-7\",\"gpu_ids\":[],\"reserve_mib\":0,\"planner\":null,\"metadata\":{\"environment_url\":\"http://127.0.0.1:19587\",\"inference_url\":\"http://127.0.0.1:18381\"},\"max_concurrency\":1}",
+      "status": "ready"
+    },
+    {
+      "id": "eaa85c5c908141f6b57e16a231cdc511",
+      "spec": "{\"name\":\"qwen27b-nvfp4-pool\",\"kind\":\"planner\",\"url\":\"http://127.0.0.1:18103/v1\",\"managed\":true,\"template\":\"qwen27b-nvfp4-pool\",\"gpu_ids\":[0,3,4],\"reserve_mib\":55000,\"planner\":{\"runtime\":\"openai_compatible\",\"model\":\"navh-qwen27b-nvfp4\",\"base_url\":\"http://127.0.0.1:18103/v1\",\"credential_env\":null,\"context_limit\":16384,\"output_tokens\":2048,\"max_images\":32,\"context_policy\":\"bounded\",\"thinking\":false,\"effort\":null,\"temperature\":0.0,\"request_timeout_s\":120,\"tokenizer_path\":null,\"token_count_url\":null,\"max_concurrency\":12},\"metadata\":{\"checkpoint_source\":\"nv-community/Qwen3.6-27B-NVFP4\",\"phase\":\"three_gpu_pool\",\"quantization\":\"NVFP4 / Marlin on A100\",\"compatibility\":\"Official vLLM modelopt_mixed SM75+ Marlin support; unmodified checkpoint\",\"upstream\":\"nvidia/Qwen3.6-27B-NVFP4\",\"runtime_version\":\"vllm==0.25.0\",\"data_parallel_size\":3},\"max_concurrency\":12}",
+      "status": "ready"
+    }
+  ],
+  "running_attempts": []
+}

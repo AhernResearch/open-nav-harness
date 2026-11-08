@@ -62,7 +62,7 @@ def test_schema_and_plan_validation(session):
         with pytest.raises(ValidationError):
             session.tools.invoke("update_memory", bad)
     assert "annotate_node" not in session.tools.definitions and "review_subtask" not in session.tools.definitions
-    plan = [{"id": 1, "instruction": "Enter", "completion_criterion": "Beyond door", "status": "in_progress"}]
+    plan = [{"id": 1, "instruction": "Enter", "status": "in_progress"}]
     session.tools.invoke("update_plan", {"subtasks": plan, "reason": "Observed doorway"})
     before = copy.deepcopy(session._tasks.snapshot())
     for bad in [{**plan[0], "status": "active"}, {**plan[0], "unexpected": 1}]:
@@ -152,7 +152,7 @@ def test_context_budget_pagination_and_omission_index():
 
 
 def test_real_tool_boundary_zero_motion_rejection_and_lost_response(session, monkeypatch):
-    session._tasks.update_plan([{"id": 1, "instruction": "Enter", "completion_criterion": "Beyond door"}], "Plan")
+    session._tasks.update_plan([{"id": 1, "instruction": "Enter"}], "Plan")
     monkeypatch.setattr(session, "vla_navigate", lambda instruction: [json.dumps({"subtask_return": "vla_stop"})])
     session.tools.invoke("observe_map", {})
     assert not session.tools.invoke("execute_subtask", {"task_id": 1}).isError
@@ -194,13 +194,39 @@ async def test_current_context_replaces_old_snapshots_without_erasing_trace(sess
     assert sum("Current persisted" in m["content"] for m in messages) == 1
 
 
+async def test_memory_write_guidance_tracks_actual_map_gate_and_preserves_original(session, tmp_path):
+    segment(session._tasks.memory, pose(), pose(2))
+    window = ContextWindow("system", "Walk down the steps, then enter the room.", "bounded", 1500, 100)
+
+    async def counter(messages, _):
+        return 1400 if any(m.get("content") == "old" for m in messages) else 300
+
+    window.append([{"role": "user", "content": "old"}], session._tasks.snapshot())
+    for read_map in (False, True):
+        if read_map:
+            session.tools.invoke("observe_map", {})
+        state = session._tasks.snapshot()
+        # The transport attaches the live map-read gate to task snapshots.
+        state["map_read_valid"] = bool(session._memory_map_read)
+        window.append([{"role": "tool", "content": json.dumps({"subtask_state": state})}], state)
+        messages = await window.build(counter, [], Journal(tmp_path / str(read_map)))
+        assert messages[1]["content"] == "Walk down the steps, then enter the room."
+        assert "not verified completion" in messages[-1]["content"]
+        projection = json.loads(messages[-1]["content"].split("\n", 1)[1])
+        assert projection["map_read_valid"] is read_map
+        assert ("update_memory is unavailable" in projection["memory_write_hint"]) is not read_map
+        assert not any(m.get("content") == "old" for m in messages)
+    assert window.blocks[0][0]["content"] == "old"
+
+
 async def test_mcp_rpc_gate_and_history_do_not_fence_recoverable_rejections(tmp_path, monkeypatch):
-    worker = ActorWorker(SimpleNamespace(info=lambda: {"backend": "lightnav"}), "lightnav",
+    worker = ActorWorker(SimpleNamespace(info=lambda: {"backend": "lightnav"}, close=lambda: None, reset=lambda _: None), "lightnav",
                          tmp_path / "remote", "http://fixed-env")
     remote = RemoteTools({"NAVGPT_CONDITION": "planner_agentic", "NAVGPT_VLA_BACKEND": "lightnav",
                           "NAVGPT_EXECUTION_URL": "http://worker", "NAVGPT_LIVE_DIR": str(tmp_path / "local")})
-    remote.request = worker.handle
-    remote.start()
+    from unittest.mock import AsyncMock
+    remote.request = AsyncMock(side_effect=worker.handle)
+    await remote.start()
     configure(worker.session, monkeypatch)
     segment(worker.session._tasks.memory, pose(), pose(2))
     server = build_mcp(remote)
@@ -209,11 +235,11 @@ async def test_mcp_rpc_gate_and_history_do_not_fence_recoverable_rejections(tmp_
     assert not worker.failed and not remote.failed
     await server.call_tool("observe_map", {})
     assert not (await server.call_tool("update_memory", args())).isError
-    result = await server.call_tool("read_memory", {"node_id": 0, "other_node_id": 1, "include_images": True})
+    result = await server.call_tool("read_memory", {"node_id": 0, "other_node_id": 1, "images": "trajectory"})
     assert "Crossed doorway" in text(result)
     assert sum(c.type == "image" for c in result.content) <= 4
     assert (tmp_path / "local/subtasks/topology.json").is_file()
-    remote.close()
+    await remote.close()
     assert worker.session_id is None
 
 
@@ -230,3 +256,88 @@ def test_motion_path_preserves_return_bends_without_repeating_camera_history(ses
     m.finish({'position': path[-1]}, session._tasks.frames[-1]['id'], 'returned')
     assert m.edges[-1]['trajectory'] == path
     assert m.read(0)['records'][0]['distance_m'] == 3.0
+
+
+def test_v3_observation_selection_and_endpoint_history(session, monkeypatch):
+    import base64
+    views = {v: base64.b64encode(v.encode()).decode() for v in ('front', 'right', 'back', 'left')}
+    monkeypatch.setattr(session, '_pano', lambda: {'views': views, 'pose': pose()})
+    result = session.tools.invoke('observe', {'views': ['left', 'front']})
+    assert [base64.b64decode(c.data) for c in result.content if c.type == 'image'] == [b'left', b'front']
+    assert session.tools.invoke('observe', {'views': []}).isError
+    assert session.tools.invoke('observe', {'views': ['left', 'left']}).isError
+    frame = session._tasks.frames[-1]
+    frame['planner_views'] = {'left': views['left']}
+    result = session.tools.invoke('read_memory', {'node_id': 0, 'images': 'endpoint', 'views': ['left', 'front']})
+    assert '"missing_views": ["front"]' in text(result)
+    assert len([c for c in result.content if c.type == 'image']) == 1
+    assert session.tools.invoke('read_memory', {'node_id': 0, 'views': ['front']}).isError
+    assert session._memory_map_read is None
+
+
+def test_v3_execution_keeps_plan_and_does_not_render_map(session, monkeypatch):
+    session._tasks.update_plan([{'id': 1, 'instruction': 'Original'}], 'Plan')
+    calls = []
+    monkeypatch.setattr(session, 'vla_navigate', lambda instruction: calls.append(instruction) or [])
+    monkeypatch.setattr(session, '_fetch_map', lambda: pytest.fail('Automatic map requested'))
+    result = session.tools.invoke('execute_subtask', {'task_id': 1, 'instruction': 'Local correction'})
+    assert not result.isError and calls[0].startswith('Local correction')
+    assert session._tasks.tasks[0]['instruction'] == 'Original'
+    session.tools.invoke('execute_subtask', {'task_id': 1})
+    assert calls[-1].startswith('Original')
+    assert not [c for c in result.content if c.type == 'image']
+    assert session.tools.invoke('update_memory', args(end=0)).isError
+    for name in ('observe_forward', 'observe_panorama', 'observe_node'):
+        assert name not in session.tools.definitions
+    assert session.tools.definitions['navigate_to_node'].inputSchema['properties']['node_id']['type'] == 'integer'
+    assert set(session.tools.definitions['terminate_episode'].inputSchema['required']) == {'status', 'reason'}
+
+
+def test_node_keeps_first_pose_across_revisits_and_copies_rotation(tmp_path):
+    memory = TopologyMemory(tmp_path)
+    original = {'position': [0., 0., 0.], 'rotation_wxyz': [1., 0., 0., 0.]}
+    memory.initialize(original, 'first')
+    original['rotation_wxyz'][0] = -1  # caller mutation must not change the anchor
+    turned = {'position': [0.1, 0., 0.], 'rotation_wxyz': [0., 0., 1., 0.]}
+    memory.begin(turned, 'turned', 'navigate_to_node')
+    memory.finish(turned, 'revisited', 'returned')
+    memory.observe(turned, 'latest')
+    assert len(memory.nodes) == 1
+    assert memory.nodes[0]['position'] == [0., 0., 0.]
+    assert memory.nodes[0]['rotation_wxyz'] == [1., 0., 0., 0.]
+    assert memory.edges[-1]['end_pose'] == turned
+    persisted = json.loads((tmp_path / 'topology.json').read_text())
+    assert persisted['nodes']['0']['rotation_wxyz'] == [1., 0., 0., 0.]
+
+
+@pytest.mark.parametrize('truncated', [False, True])
+def test_return_requests_original_orientation_and_preserves_result_contract(monkeypatch, truncated):
+    session = NavigationSession(env={'NAVGPT_CONDITION': 'planner_agentic'})
+    target = {'position': [1., 2., 3.], 'rotation_wxyz': [0., 0., 1., 0.]}
+    current = {'position': [2., 2., 3.], 'rotation_wxyz': [1., 0., 0., 0.]}
+    session._tasks.memory.initialize(target, 'first')
+    returned = current if truncated else target
+    response = {'arrived': not truncated, 'truncated': truncated, 'step_count': 4,
+                'pose': returned, 'retraced_m': 0.5}
+    calls = []
+    def call(name, arguments):
+        calls.append((name, arguments))
+        return copy.deepcopy(response)
+    monkeypatch.setattr(session, '_call', call)
+    monkeypatch.setattr(session, '_pano', lambda: {'pose': returned})
+    monkeypatch.setattr(session, '_pano_content', lambda pano: ['endpoint'])
+    result = session.return_node(0)
+    assert calls == [('r2rce__retrace_path', {**target, 'match_3d': True})]
+    assert json.loads(result[0]) == {**response, 'target_node_id': 0,
+                                   'termination_reason': 'stopped_short' if truncated else 'returned'}
+    assert result[1:] == ['endpoint']
+    assert session._episode_over is truncated
+
+
+@pytest.mark.parametrize('rotation', [None, [], [0, 0, 0, 0], [float('nan'), 0, 0, 1]])
+def test_return_without_valid_recorded_orientation_does_not_move(monkeypatch, rotation):
+    session = NavigationSession(env={'NAVGPT_CONDITION': 'planner_agentic'})
+    session._tasks.memory.initialize({'position': [0, 0, 0], 'rotation_wxyz': rotation}, 'f0')
+    monkeypatch.setattr(session, '_call', lambda *args: pytest.fail('Invalid target dispatched movement'))
+    with pytest.raises(ValueError, match='recorded orientation'):
+        session.return_node(0)

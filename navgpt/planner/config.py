@@ -56,6 +56,8 @@ class RunConfig:
     vla_backend: str = 'navgpt'
     harness_mode: str = 'global'
     execution_url: str = ''
+    allow_context_reset: bool = True
+    actor_history_policy: str = "episode"
     subtask_max_distance_m: float = 3.0
     subtask_max_turn_deg: float = 180.0
     subtask_max_actions: int = 80
@@ -108,6 +110,8 @@ class RunConfig:
     """End every navigate_by_instruction result with the top-down map, after the
     four closing views. None follows the condition: on for planner_vla_memory."""
     vla_max_steps_per_call: int = 200
+    history_frames: int = 16
+    boundary_frames: int = 2
     """Safety bound on one navigate_by_instruction call, in low-level steps of the
     episode budget, so a confused rollout cannot exhaust the episode."""
     max_keyframes: int = 8

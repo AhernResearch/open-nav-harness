@@ -1,5 +1,71 @@
 # LightNav-0 backend for the NavGPT-3 harness
 
+The current owned actor pins upstream revision
+`3015508b70fb6e30bbd66701e94c9b916dcb8df8` (see `requirements-lightnav.txt`).
+Deployment snapshots its source and Apache license into the release rather than
+importing a mutable neighboring checkout. The checkpoint's preprocessing, SlowFast
+sampler, unified trajectory prompt, RVQ decoder and greedy vLLM engine are reused.
+
+The default actor input profile is **continuous episode history**. Observations append once
+in causal order, including passive retraces. Neither a task switch nor a rolling
+Planner window resets or compresses this timeline. Only an episode reset clears it.
+A new instruction at the same endpoint runs inference without appending a duplicate
+image. The legacy context-replacement endpoint is rejected. Planner tools expose
+`execute_subtask(task_id, instruction="")` for this actor, with no manual reset.
+Only the chosen instruction goes into the native prompt; topology captions and
+Planner summaries are not appended. NavGPT VLA retains its separate bounded profile.
+
+An opt-in development ablation sets `harness.actor_history_policy` to
+`completed_subtask` (default: `episode`; agentic LightNav only). When `update_plan`
+marks the last executed task completed, the harness records the current frame as
+its completion boundary. On the next different task's execution it resets only
+that actor session and replays the contiguous suffix starting at the boundary.
+Passive movement after completion is retained. Task switches without completion,
+blocked returns and same-task repairs do not crop; reopening/removing the completed
+task before the next execution cancels the pending crop. Repeated completion plans
+do not move the boundary. A consumed crop does not restore old images when a task
+is subsequently reopened. All episode images remain in the Planner evidence store.
+
+This is an intentional departure from official full-episode history, not a rolling
+16-frame window. Native segment indices restart at zero over consecutive frames;
+original frame IDs remain in traces. `actor_history_crop` records the completed and
+next task IDs, boundary, discarded and retained frame counts. `policy_context`
+records the available contiguous segment, not the smaller native sampled subset.
+Both experimental arms share runtime-neutral Planner/tool wording, with no model
+reset parameter; differences from earlier smoke runs therefore require a fresh
+paired baseline. Success and runtime changes need to be interpreted alongside
+actual crop activations, Planner decisions and inference concurrency.
+
+The first [paired development run](evidence/lightnav-completion-crop-paired-20261109.json)
+used routes 0, 456, 7006 and 7648, one rollout per arm, with the same frozen source
+and runtime-neutral Planner prompt. Full history succeeded on 2/4 and completion
+cropping on 3/4; mean wall time was 268.8 s vs 208.5 s, with 347 vs 261 actor
+predictions. Three treatment episodes actually cropped (six boundaries); route 0
+never did. Route 7006 failed in both arms. Route 7648 changed from failure to
+success, but also received different local instructions. Even route 456's VLA
+tokens diverged before cropping under different inference batches, despite matching
+recorded images and instructions. These are preliminary end-to-end observations,
+not a causal or statistically established benefit. The default remains `episode`.
+[Fixed-input boundary replay](evidence/lightnav-completion-crop-boundary-replay-20261109.json)
+separately tests the history effect without changing observations or instruction;
+it does not measure navigation success or warm-cache performance.
+
+The checkpoint retains the full episode for SlowFast selection; its configured
+`num_history_frames=64` is not a 64-frame ring-buffer limit. The generation allowance
+is the official Habitat runner's 64 tokens, not the old eight-token cap. The
+VLA-only runner uses the last budgeted action for a separately recorded forced STOP,
+as the official evaluator does. Planner-assisted termination remains a Planner
+choice. Only malformed trajectory decoding falls back to zero velocity, matching
+the official Habitat policy; it is logged as `decode_error`, not a successful
+arrival. Transport failures and malformed protocol replies remain errors.
+
+`reproduction/verify_lightnav_official.py` is an explicit GPU parity probe: it
+compares the official Habitat policy and our owned batched adapter on recorded
+images using one shared model. It checks native samples, token outputs, waypoints,
+velocity conversion, continuous history, endpoint reuse and concurrent sessions.
+It never starts the formal benchmark. Planner-generated subtasks are an experimental
+extension; identical internals do not make those runs an official benchmark score.
+
 The owned worker path is now available through `python -m navgpt.vla.worker --config
 <worker.json>`. It imports LightNav inference directly with the `vllm_local` backend;
 it does not start or connect to the upstream WebSocket server. It shares the same
@@ -49,7 +115,7 @@ held until the next active prediction, preventing a repeated endpoint image; a
 capped delegation's endpoint is retained if the Planner moves next. Captured
 motion-frame IDs are distinct from the macro tool's charged step count.
 
-Malformed outputs and failed requests are errors, not an arrival signal. A
+Malformed wire replies and failed requests are errors, not an arrival signal. A
 failed upstream session requires an explicit reset. `stop=true` and the reference
 controller's zero/low-speed condition are recorded as policy arrival. LightNav does
 not expose upstream seeded reset, so controlled-study interfaces are rejected;

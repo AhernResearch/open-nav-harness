@@ -21,40 +21,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Login */
-        post: operations["login_api_login_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/logout": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Logout */
-        post: operations["logout_api_logout_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/overview": {
         parameters: {
             query?: never;
@@ -84,6 +50,23 @@ export interface paths {
         put?: never;
         /** Register */
         post: operations["register_api_services_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/inference/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Inference Status */
+        get: operations["inference_status_api_inference_status_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -447,6 +430,13 @@ export interface components {
             /** Experiment Id */
             experiment_id: string;
         };
+        /** ExecutionBinding */
+        ExecutionBinding: {
+            /** Environment Service */
+            environment_service: string;
+            /** Execution Service */
+            execution_service: string;
+        };
         /** ExperimentSpec */
         ExperimentSpec: {
             /** Name */
@@ -454,7 +444,9 @@ export interface components {
             /** Planner Service */
             planner_service?: string | null;
             /** Environment Service */
-            environment_service: string;
+            environment_service?: string | null;
+            /** Execution Pool */
+            execution_pool?: components["schemas"]["ExecutionBinding"][];
             /** Vla Service */
             vla_service?: string | null;
             /** Config */
@@ -479,11 +471,6 @@ export interface components {
         ImportRequest: {
             /** Path */
             path: string;
-        };
-        /** Login */
-        Login: {
-            /** Password */
-            password: string;
         };
         /** PlannerProfile */
         PlannerProfile: {
@@ -558,7 +545,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "planner" | "environment" | "vla";
+            kind: "planner" | "environment" | "vla" | "execution";
             /** Url */
             url: string;
             /**
@@ -580,6 +567,11 @@ export interface components {
             metadata?: {
                 [key: string]: unknown;
             };
+            /**
+             * Max Concurrency
+             * @default 1
+             */
+            max_concurrency: number;
         };
         /** ValidationError */
         ValidationError: {
@@ -604,59 +596,6 @@ export interface components {
 export type $defs = Record<string, never>;
 export interface operations {
     health_health_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-        };
-    };
-    login_api_login_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Login"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    logout_api_logout_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -745,6 +684,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    inference_status_api_inference_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
         };

@@ -10,34 +10,86 @@ import base64
 import io
 
 
-class LightNavEngine:
-    def __init__(self, model_path, gpu_memory_utilization=0.35):
-        from lightnav.tracking import build_tracking_agent
+def habitat_tracking_agent(engine, **options):
+    """Official Habitat decode-failure semantics, also for batched inference.
 
-        self.agent = build_tracking_agent(
-            model_path,
-            backend="vllm_local",
-            task_key="vlnce",
-            gpu_memory_utilization=gpu_memory_utilization,
-        )
+    Only a trajectory decode ValueError becomes a zero-velocity STOP, as in
+    TrajVocabVLNCEPolicy.act. Transport, inference and input failures still raise.
+    """
+    import numpy as np
+    from lightnav.tracking import TrackingAgent
+
+    class HabitatTrackingAgent(TrackingAgent):
+        def decode_waypoints(self, text):
+            self.decode_error = None
+            try:
+                return super().decode_waypoints(text)
+            except ValueError as exc:
+                self.decode_error = str(exc)
+                return np.zeros((self.H, 3), dtype=np.float32), text
+
+    return HabitatTrackingAgent(engine, **options)
+
+
+class LightNavEngine:
+    def __init__(self, model_path=None, gpu_memory_utilization=0.35, max_num_seqs=1, *, agent=None, predict=None):
+        self.predict = predict
+        if agent is not None:
+            self.agent = agent
+            return
+        from lightnav.tracking import resolve_action_decoder_from_config, load_centroids
+        from lightnav.eval_config import load_eval_config
+        from lightnav.inference.config import InferenceConfig
+        from lightnav.inference.engine import build_engine
+
+        decoder = resolve_action_decoder_from_config(model_path, "vlnce")
+        if decoder is None:
+            raise ValueError("Checkpoint must provide its action decoder")
+        # Match the official Habitat runner's generation budget. A shorter cap
+        # must not truncate grounding prefixes before the action tokens.
+        max_tokens = 64
+        if decoder["method"] == "rvq":
+            from lightnav.traj_vocab import load_rvq_bundle
+            rvq = load_rvq_bundle(decoder["bundle_path"], decoder["horizon"], num_frames=0, load_cluster_ids=False)
+            max_tokens = max(max_tokens, len(rvq.levels) + 2)
+            decoding = {"rvq_bundle": rvq}
+        else:
+            decoding = {"centroids": load_centroids(decoder["traj_vocab_path"], decoder["K"], decoder["horizon"])}
+        config = InferenceConfig(model_path=model_path, backend="vllm_local", max_new_tokens=max_tokens,
+                                 gpu_memory_utilization=gpu_memory_utilization, max_num_seqs=max_num_seqs)
+        tasks = (load_eval_config(model_path) or {}).get("tasks") or {}
+        task = "vlnce" if not tasks or "vlnce" in tasks else next(iter(tasks))
+        engine, bundle = build_engine(config, task_type=task, max_new_tokens=max_tokens)
+        self.agent = habitat_tracking_agent(engine, num_history_frames=int(bundle.num_history_frames), **decoding)
 
     def __call__(self, action, data):
         if action == "reset":
             self.agent.reset("")
             return {"rc": 0}
-        if action != "next":
+        if action not in ("next", "predict"):
             raise ValueError("Unknown LightNav operation")
         import numpy as np
         from PIL import Image
         from lightnav.serving.protocol import decode_prediction_signals
 
-        raw = base64.b64decode(data["image"], validate=True)
-        with Image.open(io.BytesIO(raw)) as image:
-            frame = np.asarray(image.convert("RGB")).copy()
-        self.agent.observe(frame)
+        if action == "next":
+            raw = base64.b64decode(data["image"], validate=True)
+            with Image.open(io.BytesIO(raw)) as image:
+                frame = np.asarray(image.convert("RGB")).copy()
+            self.agent.observe(frame)
         instruction = data.get("instruction", "")
         if not instruction:
             return {"rc": 0}
+        if self.predict is not None:
+            self.agent.instruction = instruction
+            prediction = self.predict(self.agent)
+            return {
+                "rc": 0, "actions": {"actions": prediction.waypoints.tolist()},
+                "stop": prediction.stop, "raw_text": prediction.raw_text,
+                "latency_ms": sum(prediction.timings_ms.get(k, 0) for k in ("vit_ms", "llm_ms")),
+                "timings_ms": prediction.timings_ms,
+                "decode_error": getattr(self.agent, "decode_error", None),
+            }
         waypoints, text, latency = self.agent.predict_waypoints(instruction, task_type="vlnce_traj")
         signals = decode_prediction_signals(
             text,
@@ -51,6 +103,7 @@ class LightNavEngine:
             "stop": signals.stop,
             "raw_text": text,
             "latency_ms": latency,
+            "decode_error": getattr(self.agent, "decode_error", None),
         }
 
 
@@ -86,15 +139,8 @@ class NativeEngine:
         self.context.reset()
         self.agent.audit_history = data.get("seed") is not None
         if self.agent.audit_history:
-            import random
-            import numpy as np
-            import torch
-
             seed = int(data["seed"])
-            random.seed(seed)
-            np.random.seed(seed % (2**32))
-            torch.manual_seed(seed)
-            torch.cuda.manual_seed_all(seed)
+            self.agent.rng.seed(seed)
         return {"status": "reset complete"}
 
     def state(self):
@@ -123,6 +169,7 @@ class NativeEngine:
         )
         if "frame_id" in data:
             self.context.commit_act(data)
+        action["inference_metrics"] = self.agent.last_timings
         return [action, navigation]
 
     def close(self):

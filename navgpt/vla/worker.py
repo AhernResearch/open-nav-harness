@@ -33,22 +33,36 @@ class ActorWorker:
         self.session = None
         self.session_id = None
         self.failed = False
+        self.cancelled = threading.Event()
         self.seen = set()
         from nav_harness.core.version import implementation_digest
 
         self.implementation_digest = implementation_digest()
 
     def actor_call(self, method, path, data=None):
+        if self.cancelled.is_set():
+            raise BusyError("Execution cancelled; retain the environment lease")
         if method == "GET":
             return {"/info": self.actor.info, "/state": self.actor.state}[path]()
-        return {
+        result = {
             "/reset": self.actor.reset,
             "/context": self.actor.replace_context,
             "/act": self.actor.act,
             "/observe": self.actor.observe,
         }[path](data)
+        if self.cancelled.is_set():
+            raise BusyError("Cancelled inference result discarded")
+        return result
 
     def handle(self, method, path, data=None):
+        # Cancellation cannot wait behind the in-flight movement's worker lock.
+        if method == "POST" and path == f"/sessions/{self.session_id}/cancel" and self.session_id:
+            self.cancelled.set()
+            self.failed = True
+            from .remote import RemoteActor
+            if isinstance(self.actor, RemoteActor):
+                self.actor.cancel()
+            return {"cancelled": True, "resource_state": "unknown"}
         if not self.lock.acquire(blocking=False):
             raise BusyError("Worker has an in-flight operation; do not retry motion")
         try:
@@ -64,6 +78,7 @@ class ActorWorker:
                 "protocol_version": 1,
                 "implementation_digest": self.implementation_digest,
                 "environment_url": self.environment_url,
+                "inference_url": self.actor.url if isinstance(getattr(self.actor, "url", None), str) else None,
                 "session_id": self.session_id,
                 "failed": self.failed,
             }
@@ -78,7 +93,9 @@ class ActorWorker:
             if env.get("NAVGPT_VLA_BACKEND") != self.backend:
                 raise ValueError("Actor backend mismatch")
             # Deployment owns network and artifact destinations, never model arguments.
-            ident = uuid.uuid4().hex
+            ident = data.get("session_id", uuid.uuid4().hex)
+            if not isinstance(ident, str) or len(ident) != 32 or any(c not in "0123456789abcdef" for c in ident):
+                raise ValueError("Invalid session identity")
             folder = self.directory / ident
             folder.mkdir(parents=True)
             env = {
@@ -90,8 +107,18 @@ class ActorWorker:
             }
             env.pop("NAVGPT_EXECUTION_URL", None)
             client = NavGPTVLAClient("", backend=self.backend, transport=self.actor_call)
-            self.session = NavigationSession(env=env, actor=client)
             self.session_id, self.failed, self.seen = ident, False, set()
+            self.cancelled.clear()
+            try:
+                from .remote import RemoteActor
+                if isinstance(self.actor, RemoteActor):
+                    self.actor.open(ident)
+                seed = env.get("NAVGPT_ACTOR_SEED")
+                self.actor.reset({"seed": int(seed)} if seed is not None else {})
+                self.session = NavigationSession(env=env, actor=client, cancelled=self.cancelled)
+            except BaseException:
+                self.failed = True
+                raise
             self.sent = {}
             return {
                 "session_id": ident,
@@ -106,6 +133,7 @@ class ActorWorker:
             if parts[2] == "close" and method == "POST":
                 if self.failed:
                     raise BusyError("Failed execution requires worker restart; retain the lease")
+                self.actor.close()
                 self.session = None
                 self.session_id = None
                 return {"closed": True}
@@ -212,15 +240,18 @@ def main():
     parser.add_argument("--config", required=True, help="Trusted worker deployment JSON")
     args = parser.parse_args()
     config = json.loads(Path(args.config).read_text())
-    from .owned import LightNavEngine, NativeEngine
-
     backend = config["backend"]
-    if backend == "lightnav":
+    if config.get("inference_url"):
+        from .remote import RemoteActor
+        actor = RemoteActor(config["inference_url"], backend)
+    elif backend == "lightnav":
+        from .owned import LightNavEngine
         from .lightnav import LightNavBridge
 
         engine = LightNavEngine(config["model_path"], **config.get("model_options", {}))
         actor = LightNavBridge(inference=engine, **config.get("control", {}))
     elif backend == "navgpt":
+        from .owned import NativeEngine
         actor = NativeEngine(config["model_path"], **config.get("model_options", {}))
     else:
         raise ValueError("Unsupported actor backend")

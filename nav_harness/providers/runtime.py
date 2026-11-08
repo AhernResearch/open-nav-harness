@@ -4,7 +4,7 @@ import json
 import traceback
 import jsonschema
 from navgpt.planner.contracts import SessionOutcome
-from navgpt.planner.runner import expected_tools
+from navgpt.planner.runner import expected_tools_from_env
 from navgpt.planner.tools.transport import open_tools
 from nav_harness.core.artifacts import Journal
 from nav_harness.core.config import PlannerProfile
@@ -72,9 +72,7 @@ class ManagedRuntime:
             async with open_tools(ctx.mcp_env) as session:
                 listed = await session.list_tools()
                 definitions = {t.name: t.inputSchema for t in listed}
-                want = expected_tools(
-                    ctx.mcp_env["NAVGPT_CONDITION"], ctx.mcp_env.get("NAVGPT_CAPABILITY_BUNDLE", "full")
-                )
+                want = expected_tools_from_env(ctx.mcp_env)
                 if set(definitions) != set(want):
                     raise ModelProtocolError("Navigation tool set differs from the configured contract")
                 tools = [

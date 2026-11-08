@@ -8,9 +8,7 @@ import { ReplayPage } from "./pages/ReplayPage";
 import { ComparePage } from "./pages/ComparePage";
 import "./style.css";
 function App() {
-  const [logged, setLogged] = useState(false),
-    [password, setPassword] = useState(""),
-    [page, setPage] = useState("queue");
+  const [page, setPage] = useState("queue");
   const [services, setServices] = useState<Row[]>([]),
     [jobs, setJobs] = useState<Row[]>([]),
     [experiments, setExperiments] = useState<Row[]>([]),
@@ -40,12 +38,6 @@ function App() {
     setTemplates(t);
   };
   useEffect(() => {
-    api("/overview")
-      .then(() => setLogged(true))
-      .catch(() => {});
-  }, []);
-  useEffect(() => {
-    if (!logged) return;
     refresh().catch((e) => setError(String(e)));
     const requested = new URLSearchParams(window.location.search).get(
       "attempt",
@@ -58,7 +50,7 @@ function App() {
       source.close();
       clearInterval(timer);
     };
-  }, [logged]);
+  }, []);
   const openAttempt = async (id: string) => {
     setDetail(await api("/attempts/" + id));
     setPage("replay");
@@ -77,44 +69,6 @@ function App() {
     setPage,
     openAttempt,
   };
-  if (!logged)
-    return (
-      <div className="login">
-        <div className="brand">
-          N<span>↗</span>
-        </div>
-        <p className="eyebrow">NAVIGATION WORKSPACE</p>
-        <h1>Nav Harness</h1>
-        <p>统一模型、执行与导航证据。</p>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            perform(async () => {
-              await api("/login", { password });
-              setPassword("");
-              setLogged(true);
-            });
-          }}
-        >
-          <label>
-            管理口令
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-            />
-          </label>
-          <button>进入工作台 →</button>
-        </form>
-        {error && (
-          <div role="alert" className="error">
-            {error}
-          </div>
-        )}
-        <small>口令保存在管理主机的 admin-password 文件。</small>
-      </div>
-    );
   return (
     <div className="layout">
       <aside>
@@ -142,17 +96,6 @@ function App() {
         </nav>
         <div className="aside-bottom">
           <span className="dot" /> Holo → A100<p>v0.1 · Local control plane</p>
-          <button
-            className="quiet"
-            onClick={() =>
-              perform(async () => {
-                await api("/logout", {});
-                setLogged(false);
-              })
-            }
-          >
-            退出
-          </button>
         </div>
       </aside>
       <main>

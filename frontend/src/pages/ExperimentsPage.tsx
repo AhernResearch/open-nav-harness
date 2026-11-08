@@ -17,7 +17,12 @@ export function ExperimentsPage({
     [backend, setBackend] = useState("lightnav"),
     [episodes, setEpisodes] = useState("0,1,2"),
     [split, setSplit] = useState("train"),
-    [mode, setMode] = useState("agentic");
+    [mode, setMode] = useState("agentic"),
+    [workers, setWorkers] = useState<string[]>([]);
+  const shared = services.find(s => s.id === vla)?.spec.metadata?.shared_inference === true;
+  const available = services.filter(s => s.spec.kind === "execution" &&
+    s.spec.metadata?.inference_url === services.find(v => v.id === vla)?.spec.url);
+
   const choices = (k: string) =>
     services
       .filter((s) => s.spec.kind === k)
@@ -30,7 +35,13 @@ export function ExperimentsPage({
     const spec: ExperimentSpec = {
       name: expName,
       planner_service: planner || null,
-      environment_service: environment,
+      environment_service: shared ? null : environment,
+      execution_pool: shared ? workers.filter(id => available.some(w => w.id === id)).map(id => {
+        const worker = available.find(w => w.id === id)!;
+        const env = services.find(s => s.spec.kind === "environment" && s.spec.url === worker.spec.metadata.environment_url);
+        if (!env) throw new Error("执行器缺少已注册的环境");
+        return { execution_service: id, environment_service: env.id };
+      }) : [],
       vla_service: vla || null,
       episodes: episodes.split(",").map((x) => Number(x.trim())),
       purpose: "development",
@@ -70,7 +81,7 @@ export function ExperimentsPage({
               {choices("planner")}
             </select>
           </label>
-          <label>
+          {!shared && <label>
             Environment
             <select
               aria-label="Environment"
@@ -80,7 +91,7 @@ export function ExperimentsPage({
               <option value="">选择环境</option>
               {choices("environment")}
             </select>
-          </label>
+          </label>}
           <label>
             VLA
             <select aria-label="VLA" value={vla} onChange={(e) => setVla(e.target.value)}>
@@ -88,6 +99,14 @@ export function ExperimentsPage({
               {choices("vla")}
             </select>
           </label>
+          {shared && <fieldset><legend>并发执行器</legend>
+            {available.map(worker => <label key={worker.id}>
+              <input type="checkbox" checked={workers.includes(worker.id)}
+                onChange={e => setWorkers(old => e.target.checked ? [...old, worker.id] : old.filter(id => id !== worker.id))} />
+              {worker.spec.name}
+            </label>)}
+            {!available.length && <p>请先注册绑定此 VLA 的执行器。</p>}
+          </fieldset>}
           <label>
             执行器类型
             <select

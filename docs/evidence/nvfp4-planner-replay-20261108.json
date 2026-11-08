@@ -1,0 +1,360 @@
+{
+  "method": "8 fixed historical multimodal planner requests, concurrent HTTP, temperature=0, max_tokens=384, no tools executed; follow-up of truncated request with production max_tokens=2048",
+  "results": {
+    "bf16": {
+      "url": "http://127.0.0.1:18101/v1",
+      "model": "navh-qwen27b",
+      "concurrency": 8,
+      "wall_s": 50.68976722005755,
+      "median_latency_s": 34.03127445757855,
+      "valid_tool_responses": 7,
+      "prompt_tokens": 69056,
+      "completion_tokens": 1418,
+      "cases": [
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/0cd2a97d1681493a966141c53d13f58b/episode/work/ep6298/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 36.087771533057094,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "update_plan"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/35c2e47cb1434c6b8b82f166c4cb4dfe/episode/work/ep3478/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 30.546456105075777,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "execute_subtask"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/4b75bc98ce2a4719a1dcb3d28e827ef1/episode/work/ep0456/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 27.932695558993146,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "update_memory"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/5ffec3cf910e4a609a0f429483347d57/episode/work/ep7648/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 34.95966889895499,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "execute_subtask"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/74dde60b472b4939be4ddfba09bd2ea4/episode/work/ep4132/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 50.59307596413419,
+          "finish_reason": "length",
+          "tool_errors": [
+            "no parsed tool call"
+          ],
+          "tools": []
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/92ac263a5a184e0796ba94a75516f6e7/episode/work/ep7006/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 34.27843634900637,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "update_plan"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/ae503ba317fd40eb849d37421e8f3f12/episode/work/ep10153/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 33.784112566150725,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "update_plan"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/eeca305eda61479ea435c795952abad1/episode/work/ep5782/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 32.06885508215055,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "execute_subtask"
+          ]
+        }
+      ]
+    },
+    "nvfp4-v025-single": {
+      "url": "http://127.0.0.1:18103/v1",
+      "model": "navh-qwen27b-nvfp4",
+      "concurrency": 8,
+      "wall_s": 32.39352690591477,
+      "median_latency_s": 29.067116401856765,
+      "valid_tool_responses": 8,
+      "prompt_tokens": 68789,
+      "completion_tokens": 1405,
+      "cases": [
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/0cd2a97d1681493a966141c53d13f58b/episode/work/ep6298/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 23.076908738119528,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "update_plan"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/35c2e47cb1434c6b8b82f166c4cb4dfe/episode/work/ep3478/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 27.429038911825046,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "execute_subtask"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/4b75bc98ce2a4719a1dcb3d28e827ef1/episode/work/ep0456/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 30.789123845053837,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "update_memory"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/5ffec3cf910e4a609a0f429483347d57/episode/work/ep7648/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 31.816654826980084,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "execute_subtask"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/74dde60b472b4939be4ddfba09bd2ea4/episode/work/ep4132/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 30.705193891888484,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "observe"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/92ac263a5a184e0796ba94a75516f6e7/episode/work/ep7006/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 20.07874384103343,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "update_plan"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/ae503ba317fd40eb849d37421e8f3f12/episode/work/ep10153/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 17.210987486876547,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "update_plan"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/eeca305eda61479ea435c795952abad1/episode/work/ep5782/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 32.25339520187117,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "execute_subtask"
+          ]
+        }
+      ]
+    },
+    "nvfp4-v025-dp3": {
+      "url": "http://127.0.0.1:18103/v1",
+      "model": "navh-qwen27b-nvfp4",
+      "concurrency": 8,
+      "wall_s": 18.531086610164493,
+      "median_latency_s": 12.955198351992294,
+      "valid_tool_responses": 7,
+      "prompt_tokens": 68789,
+      "completion_tokens": 1486,
+      "cases": [
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/0cd2a97d1681493a966141c53d13f58b/episode/work/ep6298/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 11.981014950899407,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "update_plan"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/35c2e47cb1434c6b8b82f166c4cb4dfe/episode/work/ep3478/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 12.483633553842083,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "execute_subtask"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/4b75bc98ce2a4719a1dcb3d28e827ef1/episode/work/ep0456/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 10.84767926717177,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "update_memory"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/5ffec3cf910e4a609a0f429483347d57/episode/work/ep7648/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 14.846631712978706,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "execute_subtask"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/74dde60b472b4939be4ddfba09bd2ea4/episode/work/ep4132/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 18.433824151055887,
+          "finish_reason": "length",
+          "tool_errors": [
+            "no parsed tool call"
+          ],
+          "tools": []
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/92ac263a5a184e0796ba94a75516f6e7/episode/work/ep7006/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 15.102892839815468,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "update_plan"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/ae503ba317fd40eb849d37421e8f3f12/episode/work/ep10153/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 13.389673418132588,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "update_plan"
+          ]
+        },
+        {
+          "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/eeca305eda61479ea435c795952abad1/episode/work/ep5782/trace/requests.jsonl",
+          "seq": 34,
+          "latency_s": 12.520723285852,
+          "finish_reason": "tool_calls",
+          "tool_errors": [],
+          "tools": [
+            "execute_subtask"
+          ]
+        }
+      ]
+    }
+  },
+  "production_cap_followup": {
+    "source_trace": "state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/74dde60b472b4939be4ddfba09bd2ea4/episode/work/ep4132/trace/requests.jsonl",
+    "seq": 34,
+    "max_tokens": 2048,
+    "latency_s": 10.518588598119095,
+    "response": {
+      "id": "chatcmpl-9db81a0915d80d7e",
+      "object": "chat.completion",
+      "created": 1794147328,
+      "model": "navh-qwen27b-nvfp4",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "I see the issue - the VLA is facing the wooden ladder/steps but can't move forward because it's blocked. Looking at the views, I can see:\n- Ahead: The wooden ladder/steps going up to a hatch\n- Right: A doorway leading to another room\n- Behind: A wall with a door\n\nWait, I need to re-read the instruction. It says \"Walk down the steps\" - but I'm currently at the BOTTOM of the steps (in the basement). The steps go UP, not down. Let me reconsider the instruction.\n\nActually, looking more carefully at the initial scene, I was at the TOP of the steps initially (in a hallway), and the instruction says to \"walk down the steps.\" So I need to go DOWN the steps from where I started. But the VLA turned around and is now facing the steps going UP.\n\nLet me check my current position more carefully. Looking at the right view, I see a doorway. The instruction says to \"take a very slight left, before heading through the door.\" So perhaps I need to go through that door to my right.\n\nLet me update my understanding: I'm in a basement area. The steps go UP to a hatch. The instruction says to walk DOWN the steps - but I'm already at the bottom. Perhaps the instruction means I should go through the door and navigate the route from there.\n\nLet me try to go through the door to my right.",
+            "refusal": null,
+            "annotations": null,
+            "audio": null,
+            "function_call": null,
+            "tool_calls": [
+              {
+                "id": "chatcmpl-tool-8d7df8e22be6502d",
+                "type": "function",
+                "function": {
+                  "name": "execute_subtask",
+                  "arguments": "{\"instruction\": \"Turn right and go through the doorway\", \"max_actions\": 80, \"max_distance_m\": 3, \"max_turn_deg\": 180, \"task_id\": 1}"
+                }
+              }
+            ],
+            "reasoning": null
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls",
+          "stop_reason": null,
+          "token_ids": null,
+          "routed_experts": null
+        }
+      ],
+      "service_tier": null,
+      "system_fingerprint": "vllm-0.25.0-dp3-dbb2d650",
+      "usage": {
+        "prompt_tokens": 9903,
+        "total_tokens": 10292,
+        "completion_tokens": 389,
+        "prompt_tokens_details": null
+      },
+      "prompt_logprobs": null,
+      "prompt_token_ids": null,
+      "prompt_text": null,
+      "kv_transfer_params": null,
+      "metrics": null
+    },
+    "tool_errors": []
+  },
+  "replica_metrics": [
+    "vllm:request_success_total{engine=\"0\",finished_reason=\"stop\",model_name=\"navh-qwen27b-nvfp4\"} 3.0",
+    "vllm:request_success_total{engine=\"1\",finished_reason=\"stop\",model_name=\"navh-qwen27b-nvfp4\"} 2.0",
+    "vllm:request_success_total{engine=\"2\",finished_reason=\"stop\",model_name=\"navh-qwen27b-nvfp4\"} 2.0",
+    "vllm:request_success_total{engine=\"0\",finished_reason=\"length\",model_name=\"navh-qwen27b-nvfp4\"} 0.0",
+    "vllm:request_success_total{engine=\"1\",finished_reason=\"length\",model_name=\"navh-qwen27b-nvfp4\"} 1.0",
+    "vllm:request_success_total{engine=\"2\",finished_reason=\"length\",model_name=\"navh-qwen27b-nvfp4\"} 0.0",
+    "vllm:request_success_total{engine=\"0\",finished_reason=\"abort\",model_name=\"navh-qwen27b-nvfp4\"} 0.0",
+    "vllm:request_success_total{engine=\"1\",finished_reason=\"abort\",model_name=\"navh-qwen27b-nvfp4\"} 0.0",
+    "vllm:request_success_total{engine=\"2\",finished_reason=\"abort\",model_name=\"navh-qwen27b-nvfp4\"} 0.0",
+    "vllm:request_success_total{engine=\"0\",finished_reason=\"error\",model_name=\"navh-qwen27b-nvfp4\"} 0.0",
+    "vllm:request_success_total{engine=\"1\",finished_reason=\"error\",model_name=\"navh-qwen27b-nvfp4\"} 0.0",
+    "vllm:request_success_total{engine=\"2\",finished_reason=\"error\",model_name=\"navh-qwen27b-nvfp4\"} 0.0",
+    "vllm:request_success_total{engine=\"0\",finished_reason=\"repetition\",model_name=\"navh-qwen27b-nvfp4\"} 0.0",
+    "vllm:request_success_total{engine=\"1\",finished_reason=\"repetition\",model_name=\"navh-qwen27b-nvfp4\"} 0.0",
+    "vllm:request_success_total{engine=\"2\",finished_reason=\"repetition\",model_name=\"navh-qwen27b-nvfp4\"} 0.0"
+  ],
+  "limitations": [
+    "Serving software, quantization, caching and replica count all changed; this is a deployment comparison, not an isolated quantization benchmark.",
+    "Original BF16 and final DP3 each truncated ep4132 at the test-only 384-token cap. DP3 follow-up at production cap returned a valid tool call with 389 output tokens.",
+    "Different runtime/chat templates yielded slightly different prompt token counts despite identical message/image payloads.",
+    "Navigation tools were not executed; no navigation success-rate claim.",
+    "One initial measured batch per configuration; deployment latency is not a statistically stable benchmark."
+  ]
+}

@@ -2,7 +2,7 @@
 
 import base64
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock
 
 import pytest
 
@@ -25,7 +25,7 @@ def remote(tmp_path):
         "NAVGPT_PLACE_LABELS": str(tmp_path / "labels.json"),
     }
     tools = RemoteTools(env)
-    tools.request = worker.handle
+    tools.request = AsyncMock(side_effect=worker.handle)
     return worker, tools
 
 
@@ -33,7 +33,7 @@ async def test_remote_probe_is_lazy_and_evidence_sync_is_acknowledged(remote):
     worker, tools = remote
     assert len(await tools.list_tools()) == 10
     assert worker.session_id is None
-    tools.start()
+    await tools.start()
     folder = Path(worker.session.LIVE_DIR)
     folder.mkdir()
     (folder / "view.png").write_bytes(b"fake pixels")
@@ -46,13 +46,13 @@ async def test_remote_probe_is_lazy_and_evidence_sync_is_acknowledged(remote):
     assert (local / "view.png").read_bytes() == b"fake pixels"
     assert str(local / "view.png") in (local / "index.json").read_text()
     assert worker.artifacts(Path(tools.root)) == []
-    tools.close()
+    await tools.close()
     assert worker.session_id is None
 
 
-def test_duplicate_dispatch_and_cross_episode_reset_are_fenced(remote):
+async def test_duplicate_dispatch_and_cross_episode_reset_are_fenced(remote):
     worker, tools = remote
-    tools.start()
+    await tools.start()
     call = Mock(return_value=["moved"])
     worker.session.tools.functions["navigate_relative"] = call
     path = "/sessions/" + tools.session_id + "/call"
@@ -80,7 +80,7 @@ def test_duplicate_dispatch_and_cross_episode_reset_are_fenced(remote):
 
 async def test_failed_motion_retains_worker_and_local_ownership(remote):
     worker, tools = remote
-    tools.start()
+    await tools.start()
 
     def failure(**_):
         raise RuntimeError("motion reply lost")
@@ -89,7 +89,7 @@ async def test_failed_motion_retains_worker_and_local_ownership(remote):
     with pytest.raises(RuntimeError, match="reply lost"):
         await tools.call_tool("navigate_relative", {"turn_deg": 0.0, "distance_m": 1.0})
     ident = worker.session_id
-    tools.close()
+    await tools.close()
     assert worker.session_id == ident and worker.failed and tools.failed
     with pytest.raises(BusyError):
         worker.handle("POST", "/sessions/" + ident + "/close", {})
@@ -145,7 +145,7 @@ async def test_real_mcp_stdio_to_rpc_closes_remote_ownership(tmp_path, unused_tc
 
     def session(*args, **kwargs):
         value = real_session(*args, **kwargs)
-        value.tools.functions["observe_forward"] = lambda: ["real MCP/RPC transport"]
+        value.tools.functions["observe"] = lambda views: ["real MCP/RPC transport"]
         return value
 
     monkeypatch.setattr(module, "NavigationSession", session)
@@ -178,12 +178,59 @@ async def test_real_mcp_stdio_to_rpc_closes_remote_ownership(tmp_path, unused_tc
             async with stdio_client(params) as (read, write):
                 async with ClientSession(read, write) as client:
                     await client.initialize()
-                    assert len((await client.list_tools()).tools) == 11
+                    assert len((await client.list_tools()).tools) == 9
                     assert (await http.get(url + "/info")).json()["session_id"] is None
-                    result = await client.call_tool("observe_forward", {})
+                    result = await client.call_tool("observe", {"views": ["front"]})
                     assert result.content[0].text == "real MCP/RPC transport"
                     assert (await http.get(url + "/info")).json()["session_id"] is not None
             assert (await http.get(url + "/info")).json()["session_id"] is None
     finally:
         process.terminate()
         process.join(timeout=5)
+
+
+def test_cancel_does_not_wait_for_inference_and_discards_result_before_motion(tmp_path):
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+    entered, release = threading.Event(), threading.Event()
+    moved = []
+    actor = Mock()
+    actor.info.return_value = {'backend': 'navgpt'}
+    def act(_):
+        entered.set()
+        release.wait(2)
+        return 'prediction'
+    actor.act.side_effect = act
+    worker = ActorWorker(actor, 'navgpt', tmp_path, 'http://environment')
+    worker.handle('POST', '/sessions', {'env': {'NAVGPT_VLA_BACKEND': 'navgpt'}})
+    def move():
+        worker.actor_call('POST', '/act', {})
+        moved.append('motion')
+    with ThreadPoolExecutor(1) as pool:
+        task = pool.submit(move)
+        assert entered.wait(1)
+        worker.handle('POST', f'/sessions/{worker.session_id}/cancel', {})
+        release.set()
+        with pytest.raises(BusyError, match='discarded'):
+            task.result()
+    assert moved == [] and worker.failed
+
+
+async def test_no_relative_tool_is_absent_on_both_rpc_sides(tmp_path):
+    import json
+    from navgpt.settings import AGENTIC_TOOLS
+
+    selected = [name for name in AGENTIC_TOOLS if name != 'navigate_relative']
+    actor = Mock()
+    actor.info.return_value = {'backend': 'lightnav'}
+    worker = ActorWorker(actor, 'lightnav', tmp_path / 'remote', 'http://fixed-environment')
+    tools = RemoteTools({
+        'NAVGPT_CONDITION': 'planner_agentic', 'NAVGPT_TOOLS': json.dumps(selected),
+        'NAVGPT_VLA_BACKEND': 'lightnav', 'NAVGPT_EXECUTION_URL': 'http://worker',
+        'NAVGPT_LIVE_DIR': str(tmp_path / 'local'),
+    })
+    tools.request = AsyncMock(side_effect=worker.handle)
+    await tools.start()
+    assert set(tools.definitions) == set(worker.session.tools.definitions) == set(selected)
+    assert 'navigate_relative' not in worker.session.tools.functions
+    await tools.close()

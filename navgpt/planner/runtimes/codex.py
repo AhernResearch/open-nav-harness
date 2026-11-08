@@ -11,7 +11,7 @@ from typing import Any
 from ..config import RunConfig
 from ..contracts import EpisodeContext, SessionOutcome
 from ..runner import (EventSink, PreflightError,
-                      expected_tools, mcp_launch, throttle_tag)
+                      expected_tools_from_env, mcp_launch, throttle_tag)
 from ..turns import TURN_UNIT
 
 
@@ -72,7 +72,7 @@ def runtime_config(ctx: EpisodeContext) -> dict[str, Any]:
     servers = {name: {"enabled": False} for name in existing.get("mcp_servers", {})}
     servers["env"] = {**mcp_launch(ctx.mcp_env), "enabled": True, "required": True,
                       "startup_timeout_sec": 60, "tool_timeout_sec": ctx.timeout,
-                      "enabled_tools": sorted(expected_tools(ctx.mcp_env["NAVGPT_CONDITION"], ctx.mcp_env.get("NAVGPT_CAPABILITY_BUNDLE", "full"))),
+                      "enabled_tools": sorted(expected_tools_from_env(ctx.mcp_env)),
                       "default_tools_approval_mode": "approve"}
     disabled = ("shell_tool", "unified_exec", "shell_snapshot", "apps", "plugins", "hooks",
                 "multi_agent", "multi_agent_v2", "browser_use", "computer_use", "in_app_browser",
@@ -135,7 +135,7 @@ class CodexPlannerRuntime:
                 actual = set(active["env"].tools) if "env" in active else set()
                 # Server inventory keys may be raw or namespace-qualified.
                 actual = {name.rsplit('__', 1)[-1] for name in actual}
-                want = set(expected_tools(ctx.mcp_env["NAVGPT_CONDITION"], ctx.mcp_env.get("NAVGPT_CAPABILITY_BUNDLE", "full")))
+                want = set(expected_tools_from_env(ctx.mcp_env))
                 if actual == want:
                     break
                 await asyncio.sleep(0.5)

@@ -1,0 +1,2657 @@
+{
+  "observed_at": "2026-11-08T12:04:33.403751+00:00",
+  "job_id": "de3fce1a2f8e47f9a72e011b56ef6ed7",
+  "routes": [
+    {
+      "episode": 456,
+      "status": "blocked",
+      "span_s": 899.1,
+      "model_s": 809.9,
+      "model_calls": 24,
+      "model_median_s": 31.2,
+      "model_max_s": 67.3,
+      "tool_s": 66.6,
+      "tool_breakdown": {
+        "observe": {
+          "count": 1,
+          "s": 0.7,
+          "max_s": 0.7
+        },
+        "update_plan": {
+          "count": 3,
+          "s": 0.7,
+          "max_s": 0.3
+        },
+        "execute_subtask": {
+          "count": 4,
+          "s": 49.5,
+          "max_s": 14.9
+        },
+        "observe_map": {
+          "count": 4,
+          "s": 4.7,
+          "max_s": 1.4
+        },
+        "update_memory": {
+          "count": 4,
+          "s": 1.9,
+          "max_s": 0.7
+        },
+        "navigate_relative": {
+          "count": 7,
+          "s": 9.1,
+          "max_s": 1.5
+        }
+      },
+      "calls": {
+        "observe": 1,
+        "update_plan": 3,
+        "execute_subtask": 5,
+        "observe_map": 4,
+        "update_memory": 4,
+        "navigate_relative": 7
+      },
+      "pending": [
+        {
+          "time": 1794139332.6926355,
+          "name": "execute_subtask",
+          "arguments": {
+            "instruction": "Walk through the hallway to the foyer and find the staircase. Go up the stairs and stop on the fourth stair from the top.",
+            "max_actions": 100,
+            "max_distance_m": 5,
+            "max_turn_deg": 180,
+            "task_id": 4
+          }
+        }
+      ],
+      "input_tokens": 251564,
+      "output_tokens": 3185,
+      "slow_model_calls": [
+        {
+          "s": 67.34,
+          "input": 10856,
+          "output": 275
+        },
+        {
+          "s": 53.69,
+          "input": 7552,
+          "output": 251
+        },
+        {
+          "s": 50.61,
+          "input": 11861,
+          "output": 139
+        }
+      ],
+      "result": {
+        "index": 456,
+        "episode_id": "457",
+        "scene_id": "mp3d/rPc6DW4iMge/rPc6DW4iMge.glb",
+        "dataset": "r2r",
+        "language": null,
+        "instruction_id": null,
+        "annotation_role": null,
+        "instruction": "Walk out of the bathroom and through the television room into the hallway. In the hall go to the stairs and go up the stairs, stopping on the fourth from the top stair. ",
+        "metrics": {
+          "distance_to_goal": 9.0748,
+          "success": 0.0,
+          "spl": 0.0,
+          "oracle_success": 0.0,
+          "ndtw": 0.0789,
+          "sdtw": 0.0,
+          "path_length": 20.2809,
+          "steps_taken": 132.0,
+          "stop_called": 0.0,
+          "collisions": 5.0,
+          "teleports": 0.0,
+          "teleport_fallbacks": 0.0,
+          "velocity_steps": 87.0
+        },
+        "subtasks": {
+          "revision": 3,
+          "tasks": [
+            {
+              "id": 1,
+              "instruction": "Exit the bathroom through the doorway on the left",
+              "status": "completed"
+            },
+            {
+              "id": 2,
+              "instruction": "Walk through the television room toward the hallway",
+              "status": "completed"
+            },
+            {
+              "id": 3,
+              "instruction": "Enter the hallway and locate the stairs",
+              "status": "completed"
+            },
+            {
+              "id": 4,
+              "instruction": "Go up the stairs and stop on the fourth stair from the top",
+              "status": "in_progress"
+            }
+          ],
+          "summary": "",
+          "context_key": "task-4-frame-48",
+          "current_frame_id": "frame-000147",
+          "current_map_id": "map-000147",
+          "aborted": false,
+          "active_id": 4,
+          "completion_claim": null,
+          "workflow": "model_owned",
+          "tool_contract": "topology_memory_v4",
+          "memory_context": {
+            "revision": 27,
+            "current_node_id": 9,
+            "current_execution": {
+              "sequence": 11,
+              "start_node_id": 6,
+              "end_node_id": 9,
+              "caption": "Exited the elevator and am now in the hallway at node 9. The stairs are visible on the map in the foyer area to the southeast. Need to navigate to the foyer and go up the stairs.",
+              "task_id": 4,
+              "tool": "execute_subtask",
+              "termination_reason": "turn_budget",
+              "status": "recorded"
+            },
+            "recent": [
+              {
+                "sequence": 9,
+                "start_node_id": 8,
+                "end_node_id": 7,
+                "caption": null,
+                "task_id": 4,
+                "tool": "navigate_relative",
+                "termination_reason": "tool_return",
+                "status": "recorded"
+              },
+              {
+                "sequence": 10,
+                "start_node_id": 7,
+                "end_node_id": 6,
+                "caption": "Went back into the elevator again. Currently at node 6 inside the elevator. Need to exit and find the actual staircase in the foyer. The stairs are visible on the map in the circular foyer area to the southeast.",
+                "task_id": 4,
+                "tool": "navigate_relative",
+                "termination_reason": "tool_return",
+                "status": "recorded"
+              }
+            ],
+            "related": [],
+            "history_index": [
+              {
+                "start_node_id": 7,
+                "end_node_id": 8,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 6,
+                "end_node_id": 7,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 5,
+                "end_node_id": 6,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 4,
+                "end_node_id": 5,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 3,
+                "end_node_id": 4,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 2,
+                "end_node_id": 3,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 1,
+                "end_node_id": 2,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 0,
+                "end_node_id": 1,
+                "hidden_count": 1
+              }
+            ],
+            "unlisted_pair_count": 0,
+            "retrieval": "read_memory(node_id, other_node_id?, include_images?, offset?)"
+          },
+          "latest_memory": {
+            "sequence": 11,
+            "start_node_id": 6,
+            "end_node_id": 9,
+            "caption": "Exited the elevator and am now in the hallway at node 9. The stairs are visible on the map in the foyer area to the southeast. Need to navigate to the foyer and go up the stairs.",
+            "task_id": 4,
+            "tool": "execute_subtask",
+            "termination_reason": "turn_budget",
+            "status": "recorded"
+          }
+        },
+        "task_success": 0.0,
+        "agent": {
+          "turns": 24,
+          "turn_unit": "environment_feedback_response_v1",
+          "tool_calls": {
+            "observe": 1,
+            "update_plan": 3,
+            "execute_subtask": 5,
+            "observe_map": 4,
+            "update_memory": 4,
+            "navigate_relative": 7
+          },
+          "env_steps": 131,
+          "called_stop": false,
+          "end_reason": null,
+          "cost_usd": null,
+          "usage": {},
+          "review": {},
+          "initial_rollout": null,
+          "places_total": 10,
+          "places_named": 0,
+          "clauses_bound": 0,
+          "annotate_node_calls": 0,
+          "update_memory_calls": 4,
+          "read_memory_calls": 0,
+          "navigate_to_node_calls": 0,
+          "terminate_episode_calls": 0,
+          "observe_node_calls": 0
+        },
+        "error": "episode_timeout after 900s",
+        "api_error": null,
+        "ablation_error": null,
+        "subtype": null,
+        "wall_s": 900.2,
+        "status": "errored",
+        "actor_worker_status": {
+          "error": "Client error '409 Conflict' for url 'http://127.0.0.1:19682/info'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/409"
+        },
+        "resource_state": "unknown",
+        "vla_calls": 86,
+        "implementation_digest": "715f606f093f41f6e93294af043849771f81a5d80cba6e54d165f035d7614546",
+        "attempt_id": "6715a3cb283b49e79d832887effbee92",
+        "purpose": "development",
+        "training_status": "evaluation_only"
+      }
+    },
+    {
+      "episode": 1179,
+      "status": "completed",
+      "span_s": 890.2,
+      "model_s": 831.3,
+      "model_calls": 23,
+      "model_median_s": 33.1,
+      "model_max_s": 62.6,
+      "tool_s": 31.6,
+      "tool_breakdown": {
+        "observe": {
+          "count": 1,
+          "s": 0.7,
+          "max_s": 0.7
+        },
+        "update_plan": {
+          "count": 3,
+          "s": 0.8,
+          "max_s": 0.4
+        },
+        "execute_subtask": {
+          "count": 4,
+          "s": 14.5,
+          "max_s": 6.7
+        },
+        "observe_map": {
+          "count": 4,
+          "s": 4.2,
+          "max_s": 1.3
+        },
+        "update_memory": {
+          "count": 4,
+          "s": 1.6,
+          "max_s": 0.5
+        },
+        "navigate_relative": {
+          "count": 6,
+          "s": 8.8,
+          "max_s": 1.6
+        },
+        "navigate_to_node": {
+          "count": 1,
+          "s": 1.0,
+          "max_s": 1.0
+        }
+      },
+      "calls": {
+        "observe": 1,
+        "update_plan": 3,
+        "execute_subtask": 4,
+        "observe_map": 4,
+        "update_memory": 4,
+        "navigate_relative": 6,
+        "navigate_to_node": 1
+      },
+      "pending": [],
+      "input_tokens": 235535,
+      "output_tokens": 3531,
+      "slow_model_calls": [
+        {
+          "s": 62.59,
+          "input": 11166,
+          "output": 256
+        },
+        {
+          "s": 62.06,
+          "input": 8735,
+          "output": 260
+        },
+        {
+          "s": 61.84,
+          "input": 11034,
+          "output": 257
+        }
+      ],
+      "result": {
+        "index": 1179,
+        "episode_id": "1183",
+        "scene_id": "mp3d/s8pcmisQ38h/s8pcmisQ38h.glb",
+        "dataset": "r2r",
+        "language": null,
+        "instruction_id": null,
+        "annotation_role": null,
+        "instruction": "TURN RIGHT TO FACE AN OPEN DOOR WITH A CABINET ON THE RIGHT, WALK THOUGH THE DOOR INTO A HALLWAY, TURN LEFT AND WALK DOWN A SHORT HALLWAY, FACING A NEW ROOM WITH A COUCH ON THE RIGHT AND A STAIR CASE ON THE LEFT AND WITH A DOOR WAY IN FRONT OF YOU WALK FORWARD TOWARDS THE DOORWAY, WALK TO THE END OF THE HALL SO THAT YOU ARE FACING TWO BEDROOMS, TURN SLIGHTLY TO THE LEFT AND WALK INTO THE BEDROOM ON THE LEFT HAND SIDE. ",
+        "metrics": {
+          "distance_to_goal": 7.0853,
+          "success": 0.0,
+          "spl": 0.0,
+          "oracle_success": 0.0,
+          "ndtw": 0.409,
+          "sdtw": 0.0,
+          "path_length": 13.3429,
+          "steps_taken": 67.0,
+          "stop_called": 0.0,
+          "collisions": 0.0,
+          "teleports": 0.0,
+          "teleport_fallbacks": 0.0,
+          "velocity_steps": 22.0
+        },
+        "subtasks": {
+          "revision": 3,
+          "tasks": [
+            {
+              "id": 1,
+              "instruction": "Turn right to face the open door with a cabinet on the right, then walk through the door into the hallway",
+              "status": "completed"
+            },
+            {
+              "id": 2,
+              "instruction": "Turn left and walk down the short hallway",
+              "status": "completed"
+            },
+            {
+              "id": 3,
+              "instruction": "Enter the new room with a couch on the right and staircase on the left, walk forward towards the doorway",
+              "status": "in_progress"
+            },
+            {
+              "id": 4,
+              "instruction": "Walk to the end of the hall facing two bedrooms",
+              "status": "pending"
+            },
+            {
+              "id": 5,
+              "instruction": "Turn slightly left and walk into the bedroom on the left hand side",
+              "status": "pending"
+            }
+          ],
+          "summary": "",
+          "context_key": "task-3-frame-37",
+          "current_frame_id": "frame-000068",
+          "current_map_id": "map-000068",
+          "aborted": false,
+          "active_id": 3,
+          "completion_claim": null,
+          "workflow": "model_owned",
+          "tool_contract": "topology_memory_v4",
+          "memory_context": {
+            "revision": 26,
+            "current_node_id": 5,
+            "current_execution": {
+              "sequence": 11,
+              "start_node_id": 3,
+              "end_node_id": 5,
+              "caption": null,
+              "task_id": 3,
+              "tool": "navigate_relative",
+              "termination_reason": "tool_return",
+              "status": "recorded"
+            },
+            "recent": [
+              {
+                "sequence": 9,
+                "start_node_id": 4,
+                "end_node_id": 4,
+                "caption": null,
+                "task_id": 3,
+                "tool": "navigate_relative",
+                "termination_reason": "tool_return",
+                "status": "recorded"
+              },
+              {
+                "sequence": 10,
+                "start_node_id": 4,
+                "end_node_id": 3,
+                "caption": null,
+                "task_id": 3,
+                "tool": "navigate_to_node",
+                "termination_reason": "returned",
+                "status": "recorded"
+              }
+            ],
+            "related": [],
+            "history_index": [
+              {
+                "start_node_id": 4,
+                "end_node_id": 4,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 3,
+                "end_node_id": 4,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 2,
+                "end_node_id": 3,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 2,
+                "end_node_id": 2,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 1,
+                "end_node_id": 2,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 1,
+                "end_node_id": 1,
+                "hidden_count": 2
+              },
+              {
+                "start_node_id": 0,
+                "end_node_id": 1,
+                "hidden_count": 1
+              }
+            ],
+            "unlisted_pair_count": 0,
+            "retrieval": "read_memory(node_id, other_node_id?, include_images?, offset?)"
+          },
+          "latest_memory": {
+            "sequence": 7,
+            "start_node_id": 3,
+            "end_node_id": 4,
+            "caption": "Entered the room with couch on right and staircase on left. Walked forward towards the doorway but ended up facing a wall. Need to turn and find the correct path to the hallway.",
+            "task_id": 3,
+            "tool": "navigate_relative",
+            "termination_reason": "tool_return",
+            "status": "recorded"
+          }
+        },
+        "task_success": 0.0,
+        "agent": {
+          "turns": 23,
+          "turn_unit": "environment_feedback_response_v1",
+          "tool_calls": {
+            "observe": 1,
+            "update_plan": 3,
+            "execute_subtask": 4,
+            "observe_map": 4,
+            "update_memory": 4,
+            "navigate_relative": 6,
+            "navigate_to_node": 1
+          },
+          "env_steps": 67,
+          "called_stop": false,
+          "end_reason": null,
+          "cost_usd": null,
+          "usage": {},
+          "review": {},
+          "initial_rollout": null,
+          "places_total": 6,
+          "places_named": 0,
+          "clauses_bound": 0,
+          "annotate_node_calls": 0,
+          "update_memory_calls": 4,
+          "read_memory_calls": 0,
+          "navigate_to_node_calls": 1,
+          "terminate_episode_calls": 0,
+          "observe_node_calls": 0
+        },
+        "error": "episode_timeout after 900s",
+        "api_error": null,
+        "ablation_error": null,
+        "subtype": null,
+        "wall_s": 900.4,
+        "status": "errored",
+        "actor_worker_status": {
+          "model_name": "lightnav-0",
+          "model_version": "LightNav-0",
+          "backend": "lightnav",
+          "policy_url": null,
+          "execution": "owned_vllm",
+          "context_replace": true,
+          "max_context_groups": 16,
+          "history_observe": true,
+          "seeded_reset": false,
+          "control": {
+            "control_dt_s": 0.1,
+            "max_linear_mps": 2.5,
+            "max_angular_dps": 300.0
+          },
+          "waypoint_count": 10,
+          "policy_camera": {
+            "width": 480,
+            "height": 270,
+            "height_m": 0.88,
+            "hfov": 120.0
+          },
+          "protocol_version": 1,
+          "implementation_digest": "715f606f093f41f6e93294af043849771f81a5d80cba6e54d165f035d7614546",
+          "shared_inference": true,
+          "max_sessions": 16,
+          "max_pending": 16,
+          "sessions": 5,
+          "pending_requests": 0,
+          "completed_requests": 909,
+          "accepting": true,
+          "waiting_requests": 0,
+          "active_operations": 0,
+          "tool_execution": "in_process",
+          "environment_url": "http://127.0.0.1:19585",
+          "inference_url": "http://127.0.0.1:18381",
+          "session_id": null,
+          "failed": false
+        },
+        "resource_state": "idle",
+        "vla_calls": 24,
+        "implementation_digest": "715f606f093f41f6e93294af043849771f81a5d80cba6e54d165f035d7614546",
+        "attempt_id": "ee3c199b135548e18bc56bc52ab5fec5",
+        "purpose": "development",
+        "training_status": "evaluation_only"
+      }
+    },
+    {
+      "episode": 3478,
+      "status": "completed",
+      "span_s": 849.9,
+      "model_s": 723.4,
+      "model_calls": 22,
+      "model_median_s": 30.2,
+      "model_max_s": 65.5,
+      "tool_s": 98.9,
+      "tool_breakdown": {
+        "observe": {
+          "count": 3,
+          "s": 2.8,
+          "max_s": 1.2
+        },
+        "update_plan": {
+          "count": 3,
+          "s": 1.0,
+          "max_s": 0.4
+        },
+        "execute_subtask": {
+          "count": 7,
+          "s": 85.5,
+          "max_s": 21.9
+        },
+        "observe_map": {
+          "count": 5,
+          "s": 8.3,
+          "max_s": 2.2
+        },
+        "update_memory": {
+          "count": 4,
+          "s": 1.3,
+          "max_s": 0.4
+        }
+      },
+      "calls": {
+        "observe": 3,
+        "update_plan": 3,
+        "execute_subtask": 7,
+        "observe_map": 5,
+        "update_memory": 4
+      },
+      "pending": [],
+      "input_tokens": 236915,
+      "output_tokens": 2923,
+      "slow_model_calls": [
+        {
+          "s": 65.52,
+          "input": 13113,
+          "output": 271
+        },
+        {
+          "s": 62.24,
+          "input": 9878,
+          "output": 264
+        },
+        {
+          "s": 54.33,
+          "input": 13473,
+          "output": 169
+        }
+      ],
+      "result": {
+        "index": 3478,
+        "episode_id": "3488",
+        "scene_id": "mp3d/p5wJjkQkbXX/p5wJjkQkbXX.glb",
+        "dataset": "r2r",
+        "language": null,
+        "instruction_id": null,
+        "annotation_role": null,
+        "instruction": "Exit the bedroom and cross the hallway into the kitchen. Go past the kitchen and wait in the dining room to the right of the doors. ",
+        "metrics": {
+          "distance_to_goal": 9.0487,
+          "success": 0.0,
+          "spl": 0.0,
+          "oracle_success": 0.0,
+          "ndtw": 0.4073,
+          "sdtw": 0.0,
+          "path_length": 18.3971,
+          "steps_taken": 128.0,
+          "stop_called": 0.0,
+          "collisions": 2.0,
+          "teleports": 0.0,
+          "teleport_fallbacks": 0.0,
+          "velocity_steps": 128.0
+        },
+        "subtasks": {
+          "revision": 3,
+          "tasks": [
+            {
+              "id": 1,
+              "instruction": "Exit the bedroom through the doorway ahead",
+              "status": "completed"
+            },
+            {
+              "id": 2,
+              "instruction": "Cross the hallway into the kitchen",
+              "status": "completed"
+            },
+            {
+              "id": 3,
+              "instruction": "Go past the kitchen and find the dining room to the right of the doors",
+              "status": "in_progress"
+            },
+            {
+              "id": 4,
+              "instruction": "Wait in the dining room",
+              "status": "pending"
+            }
+          ],
+          "summary": "",
+          "context_key": "task-3-frame-49",
+          "current_frame_id": "frame-000128",
+          "current_map_id": null,
+          "aborted": false,
+          "active_id": 3,
+          "completion_claim": null,
+          "workflow": "model_owned",
+          "tool_contract": "topology_memory_v4",
+          "memory_context": {
+            "revision": 18,
+            "current_node_id": 7,
+            "current_execution": {
+              "sequence": 7,
+              "start_node_id": 6,
+              "end_node_id": 7,
+              "caption": null,
+              "task_id": 3,
+              "tool": "execute_subtask",
+              "termination_reason": "turn_budget",
+              "status": "recorded"
+            },
+            "recent": [
+              {
+                "sequence": 5,
+                "start_node_id": 4,
+                "end_node_id": 5,
+                "caption": null,
+                "task_id": 3,
+                "tool": "execute_subtask",
+                "termination_reason": "distance_budget",
+                "status": "recorded"
+              },
+              {
+                "sequence": 6,
+                "start_node_id": 5,
+                "end_node_id": 6,
+                "caption": null,
+                "task_id": 3,
+                "tool": "execute_subtask",
+                "termination_reason": "distance_budget",
+                "status": "recorded"
+              }
+            ],
+            "related": [],
+            "history_index": [
+              {
+                "start_node_id": 3,
+                "end_node_id": 4,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 2,
+                "end_node_id": 3,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 1,
+                "end_node_id": 2,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 0,
+                "end_node_id": 1,
+                "hidden_count": 1
+              }
+            ],
+            "unlisted_pair_count": 0,
+            "retrieval": "read_memory(node_id, other_node_id?, include_images?, offset?)"
+          },
+          "latest_memory": {
+            "sequence": 3,
+            "start_node_id": 2,
+            "end_node_id": 3,
+            "caption": "Crossed the hallway from the bedroom exit and entered the kitchen area. Now positioned at the kitchen entrance, with the kitchen island visible on the left and the path continuing forward toward the dining area.",
+            "task_id": 2,
+            "tool": "execute_subtask",
+            "termination_reason": "vla_stop",
+            "status": "recorded"
+          }
+        },
+        "task_success": 0.0,
+        "agent": {
+          "turns": 22,
+          "turn_unit": "environment_feedback_response_v1",
+          "tool_calls": {
+            "observe": 3,
+            "update_plan": 3,
+            "execute_subtask": 7,
+            "observe_map": 5,
+            "update_memory": 4
+          },
+          "env_steps": 128,
+          "called_stop": false,
+          "end_reason": null,
+          "cost_usd": null,
+          "usage": {},
+          "review": {},
+          "initial_rollout": null,
+          "places_total": 8,
+          "places_named": 0,
+          "clauses_bound": 0,
+          "annotate_node_calls": 0,
+          "update_memory_calls": 4,
+          "read_memory_calls": 0,
+          "navigate_to_node_calls": 0,
+          "terminate_episode_calls": 0,
+          "observe_node_calls": 0
+        },
+        "error": "episode_timeout after 900s",
+        "api_error": null,
+        "ablation_error": null,
+        "subtype": null,
+        "wall_s": 900.4,
+        "status": "errored",
+        "actor_worker_status": {
+          "model_name": "lightnav-0",
+          "model_version": "LightNav-0",
+          "backend": "lightnav",
+          "policy_url": null,
+          "execution": "owned_vllm",
+          "context_replace": true,
+          "max_context_groups": 16,
+          "history_observe": true,
+          "seeded_reset": false,
+          "control": {
+            "control_dt_s": 0.1,
+            "max_linear_mps": 2.5,
+            "max_angular_dps": 300.0
+          },
+          "waypoint_count": 10,
+          "policy_camera": {
+            "width": 480,
+            "height": 270,
+            "height_m": 0.88,
+            "hfov": 120.0
+          },
+          "protocol_version": 1,
+          "implementation_digest": "715f606f093f41f6e93294af043849771f81a5d80cba6e54d165f035d7614546",
+          "shared_inference": true,
+          "max_sessions": 16,
+          "max_pending": 16,
+          "sessions": 3,
+          "pending_requests": 1,
+          "completed_requests": 917,
+          "accepting": true,
+          "waiting_requests": 0,
+          "active_operations": 1,
+          "tool_execution": "in_process",
+          "environment_url": "http://127.0.0.1:19586",
+          "inference_url": "http://127.0.0.1:18381",
+          "session_id": null,
+          "failed": false
+        },
+        "resource_state": "idle",
+        "vla_calls": 130,
+        "implementation_digest": "715f606f093f41f6e93294af043849771f81a5d80cba6e54d165f035d7614546",
+        "attempt_id": "ce3a0a3aa03a47169bca89e71a3354c4",
+        "purpose": "development",
+        "training_status": "evaluation_only"
+      }
+    },
+    {
+      "episode": 4132,
+      "status": "completed",
+      "span_s": 877.9,
+      "model_s": 821.1,
+      "model_calls": 24,
+      "model_median_s": 31.2,
+      "model_max_s": 81.0,
+      "tool_s": 31.6,
+      "tool_breakdown": {
+        "observe": {
+          "count": 2,
+          "s": 1.5,
+          "max_s": 1.0
+        },
+        "update_plan": {
+          "count": 1,
+          "s": 0.2,
+          "max_s": 0.2
+        },
+        "execute_subtask": {
+          "count": 3,
+          "s": 8.5,
+          "max_s": 4.4
+        },
+        "observe_map": {
+          "count": 5,
+          "s": 5.7,
+          "max_s": 1.6
+        },
+        "navigate_relative": {
+          "count": 11,
+          "s": 14.9,
+          "max_s": 1.9
+        },
+        "update_memory": {
+          "count": 2,
+          "s": 0.7,
+          "max_s": 0.5
+        }
+      },
+      "calls": {
+        "observe": 2,
+        "update_plan": 1,
+        "execute_subtask": 3,
+        "observe_map": 5,
+        "navigate_relative": 11,
+        "update_memory": 2
+      },
+      "pending": [],
+      "input_tokens": 248310,
+      "output_tokens": 3483,
+      "slow_model_calls": [
+        {
+          "s": 80.95,
+          "input": 12914,
+          "output": 371
+        },
+        {
+          "s": 65.58,
+          "input": 9293,
+          "output": 298
+        },
+        {
+          "s": 58.67,
+          "input": 13441,
+          "output": 230
+        }
+      ],
+      "result": {
+        "index": 4132,
+        "episode_id": "4142",
+        "scene_id": "mp3d/cV4RVeZvu5T/cV4RVeZvu5T.glb",
+        "dataset": "r2r",
+        "language": null,
+        "instruction_id": null,
+        "annotation_role": null,
+        "instruction": "Walk down the steps and take a very slight left, before heading through the door and taking a hard right, wrap around and through the same door and stop at the top of the steps. ",
+        "metrics": {
+          "distance_to_goal": 1.0726,
+          "success": 0.0,
+          "spl": 0.0,
+          "oracle_success": 1.0,
+          "ndtw": 0.3213,
+          "sdtw": 0.0,
+          "path_length": 14.9837,
+          "steps_taken": 81.0,
+          "stop_called": 0.0,
+          "collisions": 8.0,
+          "teleports": 0.0,
+          "teleport_fallbacks": 0.0,
+          "velocity_steps": 13.0
+        },
+        "subtasks": {
+          "revision": 1,
+          "tasks": [
+            {
+              "id": 1,
+              "instruction": "Turn around and walk down the steps",
+              "status": "in_progress"
+            },
+            {
+              "id": 2,
+              "instruction": "Take a very slight left after descending the steps",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "Head through the door",
+              "status": "pending"
+            },
+            {
+              "id": 4,
+              "instruction": "Take a hard right after the door",
+              "status": "pending"
+            },
+            {
+              "id": 5,
+              "instruction": "Wrap around and go through the same door again",
+              "status": "pending"
+            },
+            {
+              "id": 6,
+              "instruction": "Stop at the top of the steps",
+              "status": "pending"
+            }
+          ],
+          "summary": "",
+          "context_key": "task-1-frame-0",
+          "current_frame_id": "frame-000098",
+          "current_map_id": null,
+          "aborted": false,
+          "active_id": 1,
+          "completion_claim": null,
+          "workflow": "model_owned",
+          "tool_contract": "topology_memory_v4",
+          "memory_context": {
+            "revision": 30,
+            "current_node_id": 9,
+            "current_execution": {
+              "sequence": 14,
+              "start_node_id": 8,
+              "end_node_id": 9,
+              "caption": null,
+              "task_id": 1,
+              "tool": "navigate_relative",
+              "termination_reason": "tool_return",
+              "status": "recorded"
+            },
+            "recent": [
+              {
+                "sequence": 12,
+                "start_node_id": 6,
+                "end_node_id": 7,
+                "caption": null,
+                "task_id": 1,
+                "tool": "navigate_relative",
+                "termination_reason": "tool_return",
+                "status": "recorded"
+              },
+              {
+                "sequence": 13,
+                "start_node_id": 7,
+                "end_node_id": 8,
+                "caption": null,
+                "task_id": 1,
+                "tool": "navigate_relative",
+                "termination_reason": "tool_return",
+                "status": "recorded"
+              }
+            ],
+            "related": [],
+            "history_index": [
+              {
+                "start_node_id": 5,
+                "end_node_id": 6,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 4,
+                "end_node_id": 5,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 2,
+                "end_node_id": 4,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 2,
+                "end_node_id": 2,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 3,
+                "end_node_id": 2,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 2,
+                "end_node_id": 3,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 0,
+                "end_node_id": 2,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 1,
+                "end_node_id": 0,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 1,
+                "end_node_id": 1,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 0,
+                "end_node_id": 1,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 0,
+                "end_node_id": 0,
+                "hidden_count": 1
+              }
+            ],
+            "unlisted_pair_count": 0,
+            "retrieval": "read_memory(node_id, other_node_id?, include_images?, offset?)"
+          },
+          "latest_memory": {
+            "sequence": 2,
+            "start_node_id": 0,
+            "end_node_id": 1,
+            "caption": "Started in basement/utility room at node 0. Turned and moved forward to node 1. Can see steps going up behind me and a doorway to the right leading to a larger room with windows.",
+            "task_id": 1,
+            "tool": "navigate_relative",
+            "termination_reason": "tool_return",
+            "status": "recorded"
+          }
+        },
+        "task_success": 0.0,
+        "agent": {
+          "turns": 24,
+          "turn_unit": "environment_feedback_response_v1",
+          "tool_calls": {
+            "observe": 2,
+            "update_plan": 1,
+            "execute_subtask": 3,
+            "observe_map": 5,
+            "navigate_relative": 11,
+            "update_memory": 2
+          },
+          "env_steps": 81,
+          "called_stop": false,
+          "end_reason": null,
+          "cost_usd": null,
+          "usage": {},
+          "review": {},
+          "initial_rollout": null,
+          "places_total": 10,
+          "places_named": 0,
+          "clauses_bound": 0,
+          "annotate_node_calls": 0,
+          "update_memory_calls": 2,
+          "read_memory_calls": 0,
+          "navigate_to_node_calls": 0,
+          "terminate_episode_calls": 0,
+          "observe_node_calls": 0
+        },
+        "error": "episode_timeout after 900s",
+        "api_error": null,
+        "ablation_error": null,
+        "subtype": null,
+        "wall_s": 900.4,
+        "status": "errored",
+        "actor_worker_status": {
+          "model_name": "lightnav-0",
+          "model_version": "LightNav-0",
+          "backend": "lightnav",
+          "policy_url": null,
+          "execution": "owned_vllm",
+          "context_replace": true,
+          "max_context_groups": 16,
+          "history_observe": true,
+          "seeded_reset": false,
+          "control": {
+            "control_dt_s": 0.1,
+            "max_linear_mps": 2.5,
+            "max_angular_dps": 300.0
+          },
+          "waypoint_count": 10,
+          "policy_camera": {
+            "width": 480,
+            "height": 270,
+            "height_m": 0.88,
+            "hfov": 120.0
+          },
+          "protocol_version": 1,
+          "implementation_digest": "715f606f093f41f6e93294af043849771f81a5d80cba6e54d165f035d7614546",
+          "shared_inference": true,
+          "max_sessions": 16,
+          "max_pending": 16,
+          "sessions": 5,
+          "pending_requests": 0,
+          "completed_requests": 909,
+          "accepting": true,
+          "waiting_requests": 0,
+          "active_operations": 0,
+          "tool_execution": "in_process",
+          "environment_url": "http://127.0.0.1:19581",
+          "inference_url": "http://127.0.0.1:18381",
+          "session_id": null,
+          "failed": false
+        },
+        "resource_state": "idle",
+        "vla_calls": 14,
+        "implementation_digest": "715f606f093f41f6e93294af043849771f81a5d80cba6e54d165f035d7614546",
+        "attempt_id": "8d42a0aa457a4caea20f3a244277cfc7",
+        "purpose": "development",
+        "training_status": "evaluation_only"
+      }
+    },
+    {
+      "episode": 5782,
+      "status": "completed",
+      "span_s": 872.5,
+      "model_s": 761.0,
+      "model_calls": 25,
+      "model_median_s": 29.3,
+      "model_max_s": 55.4,
+      "tool_s": 83.5,
+      "tool_breakdown": {
+        "observe": {
+          "count": 1,
+          "s": 0.9,
+          "max_s": 0.9
+        },
+        "update_plan": {
+          "count": 4,
+          "s": 2.3,
+          "max_s": 0.9
+        },
+        "execute_subtask": {
+          "count": 5,
+          "s": 63.5,
+          "max_s": 15.8
+        },
+        "observe_map": {
+          "count": 6,
+          "s": 9.1,
+          "max_s": 2.1
+        },
+        "update_memory": {
+          "count": 7,
+          "s": 4.3,
+          "max_s": 0.9
+        },
+        "navigate_relative": {
+          "count": 2,
+          "s": 3.5,
+          "max_s": 1.9
+        }
+      },
+      "calls": {
+        "observe": 1,
+        "update_plan": 4,
+        "execute_subtask": 5,
+        "observe_map": 6,
+        "update_memory": 7,
+        "navigate_relative": 2
+      },
+      "pending": [],
+      "input_tokens": 267580,
+      "output_tokens": 3125,
+      "slow_model_calls": [
+        {
+          "s": 55.42,
+          "input": 11901,
+          "output": 194
+        },
+        {
+          "s": 53.49,
+          "input": 10603,
+          "output": 200
+        },
+        {
+          "s": 49.96,
+          "input": 13214,
+          "output": 188
+        }
+      ],
+      "result": {
+        "index": 5782,
+        "episode_id": "5792",
+        "scene_id": "mp3d/1pXnuDYAj8r/1pXnuDYAj8r.glb",
+        "dataset": "r2r",
+        "language": null,
+        "instruction_id": null,
+        "annotation_role": null,
+        "instruction": "Go past the couches and then when you get to the table and chairs turn right and go straight until you pass the stairs on the right. Turn left and wait by the entrance. ",
+        "metrics": {
+          "distance_to_goal": 4.3124,
+          "success": 0.0,
+          "spl": 0.0,
+          "oracle_success": 0.0,
+          "ndtw": 0.6883,
+          "sdtw": 0.0,
+          "path_length": 16.3261,
+          "steps_taken": 111.0,
+          "stop_called": 0.0,
+          "collisions": 4.0,
+          "teleports": 0.0,
+          "teleport_fallbacks": 0.0,
+          "velocity_steps": 91.0
+        },
+        "subtasks": {
+          "revision": 4,
+          "tasks": [
+            {
+              "id": 1,
+              "instruction": "Go past the couches toward the dining area (table and chairs)",
+              "status": "completed"
+            },
+            {
+              "id": 2,
+              "instruction": "At the table and chairs, turn right and go straight",
+              "status": "completed"
+            },
+            {
+              "id": 3,
+              "instruction": "Continue straight until passing stairs on the right",
+              "status": "completed"
+            },
+            {
+              "id": 4,
+              "instruction": "Turn left and wait by the entrance",
+              "status": "in_progress"
+            }
+          ],
+          "summary": "",
+          "context_key": "task-3-frame-55",
+          "current_frame_id": "frame-000116",
+          "current_map_id": "map-000116",
+          "aborted": false,
+          "active_id": 4,
+          "completion_claim": null,
+          "workflow": "model_owned",
+          "tool_contract": "topology_memory_v4",
+          "memory_context": {
+            "revision": 21,
+            "current_node_id": 7,
+            "current_execution": {
+              "sequence": 7,
+              "start_node_id": 6,
+              "end_node_id": 7,
+              "caption": "Continued straight down the hallway and have now passed the stairs on the right. The stairs are behind me. I need to turn left to find the entrance.",
+              "task_id": 3,
+              "tool": "execute_subtask",
+              "termination_reason": "distance_budget",
+              "status": "recorded"
+            },
+            "recent": [
+              {
+                "sequence": 5,
+                "start_node_id": 4,
+                "end_node_id": 5,
+                "caption": "Continued straight from the dining area into a hallway. I can now see stairs on the right side. Need to continue forward to pass the stairs.",
+                "task_id": 3,
+                "tool": "execute_subtask",
+                "termination_reason": "distance_budget",
+                "status": "recorded"
+              },
+              {
+                "sequence": 6,
+                "start_node_id": 5,
+                "end_node_id": 6,
+                "caption": "Continued straight down the hallway. The stairs are visible on the right side. I need to continue forward to pass them completely before turning left.",
+                "task_id": 3,
+                "tool": "execute_subtask",
+                "termination_reason": "distance_budget",
+                "status": "recorded"
+              }
+            ],
+            "related": [],
+            "history_index": [
+              {
+                "start_node_id": 3,
+                "end_node_id": 4,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 2,
+                "end_node_id": 3,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 1,
+                "end_node_id": 2,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 0,
+                "end_node_id": 1,
+                "hidden_count": 1
+              }
+            ],
+            "unlisted_pair_count": 0,
+            "retrieval": "read_memory(node_id, other_node_id?, include_images?, offset?)"
+          },
+          "latest_memory": {
+            "sequence": 7,
+            "start_node_id": 6,
+            "end_node_id": 7,
+            "caption": "Continued straight down the hallway and have now passed the stairs on the right. The stairs are behind me. I need to turn left to find the entrance.",
+            "task_id": 3,
+            "tool": "execute_subtask",
+            "termination_reason": "distance_budget",
+            "status": "recorded"
+          }
+        },
+        "task_success": 0.0,
+        "agent": {
+          "turns": 25,
+          "turn_unit": "environment_feedback_response_v1",
+          "tool_calls": {
+            "observe": 1,
+            "update_plan": 4,
+            "execute_subtask": 5,
+            "observe_map": 6,
+            "update_memory": 7,
+            "navigate_relative": 2
+          },
+          "env_steps": 111,
+          "called_stop": false,
+          "end_reason": null,
+          "cost_usd": null,
+          "usage": {},
+          "review": {},
+          "initial_rollout": null,
+          "places_total": 8,
+          "places_named": 0,
+          "clauses_bound": 0,
+          "annotate_node_calls": 0,
+          "update_memory_calls": 7,
+          "read_memory_calls": 0,
+          "navigate_to_node_calls": 0,
+          "terminate_episode_calls": 0,
+          "observe_node_calls": 0
+        },
+        "error": "episode_timeout after 900s",
+        "api_error": null,
+        "ablation_error": null,
+        "subtype": null,
+        "wall_s": 900.5,
+        "status": "errored",
+        "actor_worker_status": {
+          "model_name": "lightnav-0",
+          "model_version": "LightNav-0",
+          "backend": "lightnav",
+          "policy_url": null,
+          "execution": "owned_vllm",
+          "context_replace": true,
+          "max_context_groups": 16,
+          "history_observe": true,
+          "seeded_reset": false,
+          "control": {
+            "control_dt_s": 0.1,
+            "max_linear_mps": 2.5,
+            "max_angular_dps": 300.0
+          },
+          "waypoint_count": 10,
+          "policy_camera": {
+            "width": 480,
+            "height": 270,
+            "height_m": 0.88,
+            "hfov": 120.0
+          },
+          "protocol_version": 1,
+          "implementation_digest": "715f606f093f41f6e93294af043849771f81a5d80cba6e54d165f035d7614546",
+          "shared_inference": true,
+          "max_sessions": 16,
+          "max_pending": 16,
+          "sessions": 2,
+          "pending_requests": 0,
+          "completed_requests": 927,
+          "accepting": true,
+          "waiting_requests": 0,
+          "active_operations": 0,
+          "tool_execution": "in_process",
+          "environment_url": "http://127.0.0.1:19583",
+          "inference_url": "http://127.0.0.1:18381",
+          "session_id": null,
+          "failed": false
+        },
+        "resource_state": "idle",
+        "vla_calls": 91,
+        "implementation_digest": "715f606f093f41f6e93294af043849771f81a5d80cba6e54d165f035d7614546",
+        "attempt_id": "36c78a54cfac40849955d1381b192043",
+        "purpose": "development",
+        "training_status": "evaluation_only"
+      }
+    },
+    {
+      "episode": 6298,
+      "status": "completed",
+      "span_s": 894.8,
+      "model_s": 840.8,
+      "model_calls": 22,
+      "model_median_s": 32.9,
+      "model_max_s": 107.1,
+      "tool_s": 27.6,
+      "tool_breakdown": {
+        "observe": {
+          "count": 3,
+          "s": 2.3,
+          "max_s": 0.8
+        },
+        "update_plan": {
+          "count": 2,
+          "s": 0.5,
+          "max_s": 0.3
+        },
+        "execute_subtask": {
+          "count": 1,
+          "s": 5.2,
+          "max_s": 5.2
+        },
+        "observe_map": {
+          "count": 4,
+          "s": 4.4,
+          "max_s": 1.3
+        },
+        "update_memory": {
+          "count": 2,
+          "s": 0.6,
+          "max_s": 0.4
+        },
+        "navigate_relative": {
+          "count": 9,
+          "s": 13.5,
+          "max_s": 1.7
+        },
+        "navigate_to_node": {
+          "count": 1,
+          "s": 1.1,
+          "max_s": 1.1
+        }
+      },
+      "calls": {
+        "observe": 3,
+        "update_plan": 2,
+        "execute_subtask": 1,
+        "observe_map": 4,
+        "update_memory": 2,
+        "navigate_relative": 9,
+        "navigate_to_node": 1
+      },
+      "pending": [],
+      "input_tokens": 226858,
+      "output_tokens": 3578,
+      "slow_model_calls": [
+        {
+          "s": 107.14,
+          "input": 13515,
+          "output": 452
+        },
+        {
+          "s": 74.06,
+          "input": 13178,
+          "output": 285
+        },
+        {
+          "s": 57.23,
+          "input": 12890,
+          "output": 258
+        }
+      ],
+      "result": {
+        "index": 6298,
+        "episode_id": "6308",
+        "scene_id": "mp3d/r47D5H71a5s/r47D5H71a5s.glb",
+        "dataset": "r2r",
+        "language": null,
+        "instruction_id": null,
+        "annotation_role": null,
+        "instruction": "Exit the room. Turn right and go into the third door on the right. Go straight into the door in the middle and wait therfe. ",
+        "metrics": {
+          "distance_to_goal": 9.4931,
+          "success": 0.0,
+          "spl": 0.0,
+          "oracle_success": 0.0,
+          "ndtw": 0.1524,
+          "sdtw": 0.0,
+          "path_length": 13.259,
+          "steps_taken": 58.0,
+          "stop_called": 0.0,
+          "collisions": 2.0,
+          "teleports": 0.0,
+          "teleport_fallbacks": 0.0,
+          "velocity_steps": 7.0
+        },
+        "subtasks": {
+          "revision": 2,
+          "tasks": [
+            {
+              "id": 1,
+              "instruction": "Exit the treatment room through the opening to the gym area",
+              "status": "completed"
+            },
+            {
+              "id": 2,
+              "instruction": "Turn right and go into the third door on the right",
+              "status": "in_progress"
+            },
+            {
+              "id": 3,
+              "instruction": "Go straight into the door in the middle and wait there",
+              "status": "pending"
+            }
+          ],
+          "summary": "",
+          "context_key": "task-1-frame-0",
+          "current_frame_id": "frame-000054",
+          "current_map_id": null,
+          "aborted": false,
+          "active_id": 2,
+          "completion_claim": null,
+          "workflow": "model_owned",
+          "tool_contract": "topology_memory_v4",
+          "memory_context": {
+            "revision": 25,
+            "current_node_id": 3,
+            "current_execution": {
+              "sequence": 11,
+              "start_node_id": 3,
+              "end_node_id": 3,
+              "caption": null,
+              "task_id": 2,
+              "tool": "navigate_relative",
+              "termination_reason": "tool_return",
+              "status": "recorded"
+            },
+            "recent": [
+              {
+                "sequence": 9,
+                "start_node_id": 3,
+                "end_node_id": 3,
+                "caption": null,
+                "task_id": 2,
+                "tool": "navigate_relative",
+                "termination_reason": "tool_return",
+                "status": "recorded"
+              },
+              {
+                "sequence": 10,
+                "start_node_id": 3,
+                "end_node_id": 3,
+                "caption": null,
+                "task_id": 2,
+                "tool": "navigate_relative",
+                "termination_reason": "tool_return",
+                "status": "recorded"
+              }
+            ],
+            "related": [
+              {
+                "sequence": 7,
+                "start_node_id": 5,
+                "end_node_id": 3,
+                "caption": null,
+                "task_id": 2,
+                "tool": "navigate_to_node",
+                "termination_reason": "returned",
+                "status": "recorded"
+              },
+              {
+                "sequence": 5,
+                "start_node_id": 3,
+                "end_node_id": 4,
+                "caption": null,
+                "task_id": 2,
+                "tool": "navigate_relative",
+                "termination_reason": "tool_return",
+                "status": "recorded"
+              },
+              {
+                "sequence": 3,
+                "start_node_id": 2,
+                "end_node_id": 3,
+                "caption": "Moved from node 2 to node 3 in the gym/salon area. Turned right from the gym entrance and moved forward, but ended up facing a wall/obstacle. Need to reorient to find the third door on the right.",
+                "task_id": 2,
+                "tool": "navigate_relative",
+                "termination_reason": "tool_return",
+                "status": "recorded"
+              }
+            ],
+            "history_index": [
+              {
+                "start_node_id": 3,
+                "end_node_id": 3,
+                "hidden_count": 2
+              },
+              {
+                "start_node_id": 4,
+                "end_node_id": 5,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 1,
+                "end_node_id": 2,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 0,
+                "end_node_id": 1,
+                "hidden_count": 1
+              }
+            ],
+            "unlisted_pair_count": 0,
+            "retrieval": "read_memory(node_id, other_node_id?, include_images?, offset?)"
+          },
+          "latest_memory": {
+            "sequence": 3,
+            "start_node_id": 2,
+            "end_node_id": 3,
+            "caption": "Moved from node 2 to node 3 in the gym/salon area. Turned right from the gym entrance and moved forward, but ended up facing a wall/obstacle. Need to reorient to find the third door on the right.",
+            "task_id": 2,
+            "tool": "navigate_relative",
+            "termination_reason": "tool_return",
+            "status": "recorded"
+          }
+        },
+        "task_success": 0.0,
+        "agent": {
+          "turns": 22,
+          "turn_unit": "environment_feedback_response_v1",
+          "tool_calls": {
+            "observe": 3,
+            "update_plan": 2,
+            "execute_subtask": 1,
+            "observe_map": 4,
+            "update_memory": 2,
+            "navigate_relative": 9,
+            "navigate_to_node": 1
+          },
+          "env_steps": 58,
+          "called_stop": false,
+          "end_reason": null,
+          "cost_usd": null,
+          "usage": {},
+          "review": {},
+          "initial_rollout": null,
+          "places_total": 6,
+          "places_named": 0,
+          "clauses_bound": 0,
+          "annotate_node_calls": 0,
+          "update_memory_calls": 2,
+          "read_memory_calls": 0,
+          "navigate_to_node_calls": 1,
+          "terminate_episode_calls": 0,
+          "observe_node_calls": 0
+        },
+        "error": "episode_timeout after 900s",
+        "api_error": null,
+        "ablation_error": null,
+        "subtype": null,
+        "wall_s": 900.5,
+        "status": "errored",
+        "actor_worker_status": {
+          "model_name": "lightnav-0",
+          "model_version": "LightNav-0",
+          "backend": "lightnav",
+          "policy_url": null,
+          "execution": "owned_vllm",
+          "context_replace": true,
+          "max_context_groups": 16,
+          "history_observe": true,
+          "seeded_reset": false,
+          "control": {
+            "control_dt_s": 0.1,
+            "max_linear_mps": 2.5,
+            "max_angular_dps": 300.0
+          },
+          "waypoint_count": 10,
+          "policy_camera": {
+            "width": 480,
+            "height": 270,
+            "height_m": 0.88,
+            "hfov": 120.0
+          },
+          "protocol_version": 1,
+          "implementation_digest": "715f606f093f41f6e93294af043849771f81a5d80cba6e54d165f035d7614546",
+          "shared_inference": true,
+          "max_sessions": 16,
+          "max_pending": 16,
+          "sessions": 7,
+          "pending_requests": 0,
+          "completed_requests": 907,
+          "accepting": true,
+          "waiting_requests": 0,
+          "active_operations": 0,
+          "tool_execution": "in_process",
+          "environment_url": "http://127.0.0.1:19580",
+          "inference_url": "http://127.0.0.1:18381",
+          "session_id": null,
+          "failed": false
+        },
+        "resource_state": "idle",
+        "vla_calls": 7,
+        "implementation_digest": "715f606f093f41f6e93294af043849771f81a5d80cba6e54d165f035d7614546",
+        "attempt_id": "f5e86c1abcd14b679acd26e85de2ce37",
+        "purpose": "development",
+        "training_status": "evaluation_only"
+      }
+    },
+    {
+      "episode": 7006,
+      "status": "completed",
+      "span_s": 878.3,
+      "model_s": 809.9,
+      "model_calls": 24,
+      "model_median_s": 34.1,
+      "model_max_s": 56.2,
+      "tool_s": 45.8,
+      "tool_breakdown": {
+        "observe": {
+          "count": 3,
+          "s": 2.7,
+          "max_s": 1.5
+        },
+        "update_plan": {
+          "count": 1,
+          "s": 0.2,
+          "max_s": 0.2
+        },
+        "execute_subtask": {
+          "count": 3,
+          "s": 27.7,
+          "max_s": 11.3
+        },
+        "observe_map": {
+          "count": 4,
+          "s": 3.6,
+          "max_s": 1.1
+        },
+        "update_memory": {
+          "count": 3,
+          "s": 0.8,
+          "max_s": 0.3
+        },
+        "navigate_relative": {
+          "count": 9,
+          "s": 10.0,
+          "max_s": 1.4
+        },
+        "navigate_to_node": {
+          "count": 1,
+          "s": 0.7,
+          "max_s": 0.7
+        }
+      },
+      "calls": {
+        "observe": 3,
+        "update_plan": 1,
+        "execute_subtask": 3,
+        "observe_map": 4,
+        "update_memory": 3,
+        "navigate_relative": 9,
+        "navigate_to_node": 1
+      },
+      "pending": [],
+      "input_tokens": 265533,
+      "output_tokens": 3307,
+      "slow_model_calls": [
+        {
+          "s": 56.19,
+          "input": 13736,
+          "output": 207
+        },
+        {
+          "s": 54.74,
+          "input": 13717,
+          "output": 248
+        },
+        {
+          "s": 53.55,
+          "input": 10308,
+          "output": 228
+        }
+      ],
+      "result": {
+        "index": 7006,
+        "episode_id": "7016",
+        "scene_id": "mp3d/7y3sRwLe3Va/7y3sRwLe3Va.glb",
+        "dataset": "r2r",
+        "language": null,
+        "instruction_id": null,
+        "annotation_role": null,
+        "instruction": "Walk up stairs. Make a left on the stair landing. Make a left through the open door on the left. Wait at the foot of the bed. ",
+        "metrics": {
+          "distance_to_goal": 1.5133,
+          "success": 0.0,
+          "spl": 0.0,
+          "oracle_success": 1.0,
+          "ndtw": 0.3678,
+          "sdtw": 0.0,
+          "path_length": 18.2953,
+          "steps_taken": 100.0,
+          "stop_called": 0.0,
+          "collisions": 2.0,
+          "teleports": 0.0,
+          "teleport_fallbacks": 0.0,
+          "velocity_steps": 55.0
+        },
+        "subtasks": {
+          "revision": 1,
+          "tasks": [
+            {
+              "id": 1,
+              "instruction": "Walk up the stairs to the landing",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "Make a left on the stair landing",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "Make a left through the open door on the left",
+              "status": "in_progress"
+            },
+            {
+              "id": 4,
+              "instruction": "Wait at the foot of the bed",
+              "status": "pending"
+            }
+          ],
+          "summary": "",
+          "context_key": "task-3-frame-33",
+          "current_frame_id": "frame-000104",
+          "current_map_id": null,
+          "aborted": false,
+          "active_id": 3,
+          "completion_claim": null,
+          "workflow": "model_owned",
+          "tool_contract": "topology_memory_v4",
+          "memory_context": {
+            "revision": 30,
+            "current_node_id": 7,
+            "current_execution": {
+              "sequence": 13,
+              "start_node_id": 6,
+              "end_node_id": 7,
+              "caption": null,
+              "task_id": 3,
+              "tool": "navigate_relative",
+              "termination_reason": "tool_return",
+              "status": "recorded"
+            },
+            "recent": [
+              {
+                "sequence": 11,
+                "start_node_id": 5,
+                "end_node_id": 6,
+                "caption": null,
+                "task_id": 3,
+                "tool": "navigate_relative",
+                "termination_reason": "tool_return",
+                "status": "recorded"
+              },
+              {
+                "sequence": 12,
+                "start_node_id": 6,
+                "end_node_id": 6,
+                "caption": null,
+                "task_id": 3,
+                "tool": "navigate_relative",
+                "termination_reason": "tool_return",
+                "status": "recorded"
+              }
+            ],
+            "related": [],
+            "history_index": [
+              {
+                "start_node_id": 5,
+                "end_node_id": 5,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 3,
+                "end_node_id": 5,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 3,
+                "end_node_id": 3,
+                "hidden_count": 3
+              },
+              {
+                "start_node_id": 4,
+                "end_node_id": 3,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 3,
+                "end_node_id": 4,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 2,
+                "end_node_id": 3,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 1,
+                "end_node_id": 2,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 0,
+                "end_node_id": 1,
+                "hidden_count": 1
+              }
+            ],
+            "unlisted_pair_count": 0,
+            "retrieval": "read_memory(node_id, other_node_id?, include_images?, offset?)"
+          },
+          "latest_memory": {
+            "sequence": 3,
+            "start_node_id": 2,
+            "end_node_id": 3,
+            "caption": "Attempted to go through the open door on the left, but the VLA turned about 197 degrees and moved 1.91m. I'm now near the landing area again, facing a wall. I need to find the correct open door on the left side of the hallway.",
+            "task_id": 3,
+            "tool": "execute_subtask",
+            "termination_reason": "turn_budget",
+            "status": "recorded"
+          }
+        },
+        "task_success": 0.0,
+        "agent": {
+          "turns": 24,
+          "turn_unit": "environment_feedback_response_v1",
+          "tool_calls": {
+            "observe": 3,
+            "update_plan": 1,
+            "execute_subtask": 3,
+            "observe_map": 4,
+            "update_memory": 3,
+            "navigate_relative": 9,
+            "navigate_to_node": 1
+          },
+          "env_steps": 100,
+          "called_stop": false,
+          "end_reason": null,
+          "cost_usd": null,
+          "usage": {},
+          "review": {},
+          "initial_rollout": null,
+          "places_total": 8,
+          "places_named": 0,
+          "clauses_bound": 0,
+          "annotate_node_calls": 0,
+          "update_memory_calls": 3,
+          "read_memory_calls": 0,
+          "navigate_to_node_calls": 1,
+          "terminate_episode_calls": 0,
+          "observe_node_calls": 0
+        },
+        "error": "episode_timeout after 900s",
+        "api_error": null,
+        "ablation_error": null,
+        "subtype": null,
+        "wall_s": 900.4,
+        "status": "errored",
+        "actor_worker_status": {
+          "model_name": "lightnav-0",
+          "model_version": "LightNav-0",
+          "backend": "lightnav",
+          "policy_url": null,
+          "execution": "owned_vllm",
+          "context_replace": true,
+          "max_context_groups": 16,
+          "history_observe": true,
+          "seeded_reset": false,
+          "control": {
+            "control_dt_s": 0.1,
+            "max_linear_mps": 2.5,
+            "max_angular_dps": 300.0
+          },
+          "waypoint_count": 10,
+          "policy_camera": {
+            "width": 480,
+            "height": 270,
+            "height_m": 0.88,
+            "hfov": 120.0
+          },
+          "protocol_version": 1,
+          "implementation_digest": "715f606f093f41f6e93294af043849771f81a5d80cba6e54d165f035d7614546",
+          "shared_inference": true,
+          "max_sessions": 16,
+          "max_pending": 16,
+          "sessions": 4,
+          "pending_requests": 1,
+          "completed_requests": 913,
+          "accepting": true,
+          "waiting_requests": 0,
+          "active_operations": 1,
+          "tool_execution": "in_process",
+          "environment_url": "http://127.0.0.1:19587",
+          "inference_url": "http://127.0.0.1:18381",
+          "session_id": null,
+          "failed": false
+        },
+        "resource_state": "idle",
+        "vla_calls": 56,
+        "implementation_digest": "715f606f093f41f6e93294af043849771f81a5d80cba6e54d165f035d7614546",
+        "attempt_id": "c8daee77860c4131bca08136aba2b2cf",
+        "purpose": "development",
+        "training_status": "evaluation_only"
+      }
+    },
+    {
+      "episode": 7648,
+      "status": "completed",
+      "span_s": 354.0,
+      "model_s": 328.8,
+      "model_calls": 13,
+      "model_median_s": 24.8,
+      "model_max_s": 47.6,
+      "tool_s": 16.1,
+      "tool_breakdown": {
+        "observe": {
+          "count": 1,
+          "s": 0.6,
+          "max_s": 0.6
+        },
+        "update_plan": {
+          "count": 3,
+          "s": 0.8,
+          "max_s": 0.3
+        },
+        "execute_subtask": {
+          "count": 2,
+          "s": 10.7,
+          "max_s": 8.7
+        },
+        "update_memory": {
+          "count": 3,
+          "s": 0.7,
+          "max_s": 0.3
+        },
+        "observe_map": {
+          "count": 2,
+          "s": 1.7,
+          "max_s": 0.9
+        },
+        "navigate_relative": {
+          "count": 1,
+          "s": 1.2,
+          "max_s": 1.2
+        },
+        "terminate_episode": {
+          "count": 1,
+          "s": 0.4,
+          "max_s": 0.4
+        }
+      },
+      "calls": {
+        "observe": 1,
+        "update_plan": 3,
+        "execute_subtask": 2,
+        "update_memory": 3,
+        "observe_map": 2,
+        "navigate_relative": 1,
+        "terminate_episode": 1
+      },
+      "pending": [],
+      "input_tokens": 113655,
+      "output_tokens": 1417,
+      "slow_model_calls": [
+        {
+          "s": 47.62,
+          "input": 13356,
+          "output": 168
+        },
+        {
+          "s": 45.71,
+          "input": 13184,
+          "output": 143
+        },
+        {
+          "s": 40.2,
+          "input": 12956,
+          "output": 168
+        }
+      ],
+      "result": {
+        "index": 7648,
+        "episode_id": "7658",
+        "scene_id": "mp3d/b8cTxDM8gDG/b8cTxDM8gDG.glb",
+        "dataset": "r2r",
+        "language": null,
+        "instruction_id": null,
+        "annotation_role": null,
+        "instruction": "Walk down stairs.  Stop at bottom.  Wait here. ",
+        "metrics": {
+          "distance_to_goal": 2.366,
+          "success": 1.0,
+          "spl": 1.0,
+          "oracle_success": 1.0,
+          "ndtw": 0.8657,
+          "sdtw": 0.8657,
+          "path_length": 5.4135,
+          "steps_taken": 30.0,
+          "stop_called": 1.0,
+          "collisions": 4.0,
+          "teleports": 0.0,
+          "teleport_fallbacks": 0.0,
+          "velocity_steps": 21.0
+        },
+        "subtasks": {
+          "revision": 3,
+          "tasks": [
+            {
+              "id": 1,
+              "instruction": "Walk forward down the hallway toward the stairs",
+              "status": "completed"
+            },
+            {
+              "id": 2,
+              "instruction": "Walk down the stairs to the bottom",
+              "status": "completed"
+            },
+            {
+              "id": 3,
+              "instruction": "Stop at the bottom of the stairs and wait",
+              "status": "in_progress"
+            }
+          ],
+          "summary": "",
+          "context_key": "task-2-frame-18",
+          "current_frame_id": "frame-000031",
+          "current_map_id": "map-000031",
+          "aborted": false,
+          "active_id": 3,
+          "completion_claim": "complete",
+          "workflow": "model_owned",
+          "tool_contract": "topology_memory_v4",
+          "memory_context": {
+            "revision": 9,
+            "current_node_id": 2,
+            "current_execution": {
+              "sequence": 3,
+              "start_node_id": 1,
+              "end_node_id": 2,
+              "caption": "Successfully walked down the stairs from the top (node 1) to the bottom (node 2). The stairs led to a lower level with an open area, blue artwork on the wall, and a kitchen/living space visible ahead.",
+              "task_id": 2,
+              "tool": "navigate_relative",
+              "termination_reason": "tool_return",
+              "status": "recorded"
+            },
+            "recent": [
+              {
+                "sequence": 1,
+                "start_node_id": 0,
+                "end_node_id": 1,
+                "caption": "Walked forward down the hallway for about 3 meters. Reached the top of the stairs which are visible ahead, going down to a lower level.",
+                "task_id": 1,
+                "tool": "execute_subtask",
+                "termination_reason": "distance_budget",
+                "status": "recorded"
+              },
+              {
+                "sequence": 2,
+                "start_node_id": 1,
+                "end_node_id": 1,
+                "caption": null,
+                "task_id": 2,
+                "tool": "execute_subtask",
+                "termination_reason": "blocked",
+                "status": "recorded"
+              }
+            ],
+            "related": [],
+            "history_index": [],
+            "unlisted_pair_count": 0,
+            "retrieval": "read_memory(node_id, other_node_id?, include_images?, offset?)"
+          },
+          "latest_memory": {
+            "sequence": 3,
+            "start_node_id": 1,
+            "end_node_id": 2,
+            "caption": "Successfully walked down the stairs from the top (node 1) to the bottom (node 2). The stairs led to a lower level with an open area, blue artwork on the wall, and a kitchen/living space visible ahead.",
+            "task_id": 2,
+            "tool": "navigate_relative",
+            "termination_reason": "tool_return",
+            "status": "recorded"
+          }
+        },
+        "task_success": 1.0,
+        "agent": {
+          "turns": 13,
+          "turn_unit": "environment_feedback_response_v1",
+          "tool_calls": {
+            "observe": 1,
+            "update_plan": 3,
+            "execute_subtask": 2,
+            "update_memory": 3,
+            "observe_map": 2,
+            "navigate_relative": 1,
+            "terminate_episode": 1
+          },
+          "env_steps": 30,
+          "called_stop": true,
+          "end_reason": "stop_called",
+          "cost_usd": null,
+          "usage": {
+            "input_tokens": 113655,
+            "cached_input_tokens": 0,
+            "output_tokens": 1417
+          },
+          "review": {},
+          "initial_rollout": null,
+          "places_total": 3,
+          "places_named": 0,
+          "clauses_bound": 0,
+          "annotate_node_calls": 0,
+          "update_memory_calls": 3,
+          "read_memory_calls": 0,
+          "navigate_to_node_calls": 0,
+          "terminate_episode_calls": 1,
+          "observe_node_calls": 0
+        },
+        "error": null,
+        "api_error": null,
+        "ablation_error": null,
+        "subtype": null,
+        "wall_s": 354.3,
+        "status": "completed",
+        "actor_worker_status": {
+          "model_name": "lightnav-0",
+          "model_version": "LightNav-0",
+          "backend": "lightnav",
+          "policy_url": null,
+          "execution": "owned_vllm",
+          "context_replace": true,
+          "max_context_groups": 16,
+          "history_observe": true,
+          "seeded_reset": false,
+          "control": {
+            "control_dt_s": 0.1,
+            "max_linear_mps": 2.5,
+            "max_angular_dps": 300.0
+          },
+          "waypoint_count": 10,
+          "policy_camera": {
+            "width": 480,
+            "height": 270,
+            "height_m": 0.88,
+            "hfov": 120.0
+          },
+          "protocol_version": 1,
+          "implementation_digest": "715f606f093f41f6e93294af043849771f81a5d80cba6e54d165f035d7614546",
+          "shared_inference": true,
+          "max_sessions": 16,
+          "max_pending": 16,
+          "sessions": 7,
+          "pending_requests": 0,
+          "completed_requests": 500,
+          "accepting": true,
+          "waiting_requests": 0,
+          "active_operations": 0,
+          "tool_execution": "in_process",
+          "environment_url": "http://127.0.0.1:19584",
+          "inference_url": "http://127.0.0.1:18381",
+          "session_id": null,
+          "failed": false
+        },
+        "resource_state": "idle",
+        "vla_calls": 21,
+        "implementation_digest": "715f606f093f41f6e93294af043849771f81a5d80cba6e54d165f035d7614546",
+        "attempt_id": "88e63ca727434f418dd964af6d60cb0c",
+        "purpose": "development",
+        "training_status": "evaluation_only"
+      }
+    },
+    {
+      "episode": 10153,
+      "status": "completed",
+      "span_s": 597.0,
+      "model_s": 556.9,
+      "model_calls": 21,
+      "model_median_s": 20.4,
+      "model_max_s": 59.2,
+      "tool_s": 23.2,
+      "tool_breakdown": {
+        "observe": {
+          "count": 1,
+          "s": 0.9,
+          "max_s": 0.9
+        },
+        "update_plan": {
+          "count": 4,
+          "s": 1.1,
+          "max_s": 0.3
+        },
+        "execute_subtask": {
+          "count": 2,
+          "s": 9.7,
+          "max_s": 7.8
+        },
+        "observe_map": {
+          "count": 4,
+          "s": 4.3,
+          "max_s": 1.2
+        },
+        "update_memory": {
+          "count": 5,
+          "s": 1.5,
+          "max_s": 0.4
+        },
+        "navigate_relative": {
+          "count": 4,
+          "s": 4.4,
+          "max_s": 1.2
+        },
+        "terminate_episode": {
+          "count": 1,
+          "s": 1.2,
+          "max_s": 1.2
+        }
+      },
+      "calls": {
+        "observe": 1,
+        "update_plan": 4,
+        "execute_subtask": 2,
+        "observe_map": 4,
+        "update_memory": 5,
+        "navigate_relative": 4,
+        "terminate_episode": 1
+      },
+      "pending": [],
+      "input_tokens": 217129,
+      "output_tokens": 2450,
+      "slow_model_calls": [
+        {
+          "s": 59.16,
+          "input": 4031,
+          "output": 283
+        },
+        {
+          "s": 55.41,
+          "input": 11870,
+          "output": 186
+        },
+        {
+          "s": 50.38,
+          "input": 11954,
+          "output": 188
+        }
+      ],
+      "result": {
+        "index": 10153,
+        "episode_id": "10172",
+        "scene_id": "mp3d/5LpN3gDmAk7/5LpN3gDmAk7.glb",
+        "dataset": "r2r",
+        "language": null,
+        "instruction_id": null,
+        "annotation_role": null,
+        "instruction": "Walk upstairs.  Enter the room to the left of the red painting.  Wait by white chair. ",
+        "metrics": {
+          "distance_to_goal": 0.7054,
+          "success": 1.0,
+          "spl": 0.8297,
+          "oracle_success": 1.0,
+          "ndtw": 0.8327,
+          "sdtw": 0.8327,
+          "path_length": 7.7213,
+          "steps_taken": 42.0,
+          "stop_called": 1.0,
+          "collisions": 6.0,
+          "teleports": 0.0,
+          "teleport_fallbacks": 0.0,
+          "velocity_steps": 19.0
+        },
+        "subtasks": {
+          "revision": 4,
+          "tasks": [
+            {
+              "id": 1,
+              "instruction": "Walk up the stairs to reach the upper floor",
+              "status": "completed"
+            },
+            {
+              "id": 2,
+              "instruction": "Find and enter the room to the left of the red painting",
+              "status": "completed"
+            },
+            {
+              "id": 3,
+              "instruction": "Wait by the white chair",
+              "status": "completed"
+            }
+          ],
+          "summary": "",
+          "context_key": "task-2-frame-16",
+          "current_frame_id": "frame-000049",
+          "current_map_id": "map-000049",
+          "aborted": false,
+          "active_id": null,
+          "completion_claim": "complete",
+          "workflow": "model_owned",
+          "tool_contract": "topology_memory_v4",
+          "memory_context": {
+            "revision": 17,
+            "current_node_id": 5,
+            "current_execution": {
+              "sequence": 6,
+              "start_node_id": 4,
+              "end_node_id": 5,
+              "caption": "Moved to the white chair in the bedroom. I am now positioned right next to the white chair with a blue cushion, near the glass door leading to the balcony. This completes the task of waiting by the white chair.",
+              "task_id": 3,
+              "tool": "navigate_relative",
+              "termination_reason": "tool_return",
+              "status": "recorded"
+            },
+            "recent": [
+              {
+                "sequence": 4,
+                "start_node_id": 2,
+                "end_node_id": 3,
+                "caption": null,
+                "task_id": 2,
+                "tool": "navigate_relative",
+                "termination_reason": "tool_return",
+                "status": "recorded"
+              },
+              {
+                "sequence": 5,
+                "start_node_id": 3,
+                "end_node_id": 4,
+                "caption": "Entered the room to the left of the red painting. This is a bedroom with a blue bed. I can see a white chair to my left near a glass door leading to a balcony. Need to wait by the white chair.",
+                "task_id": 2,
+                "tool": "navigate_relative",
+                "termination_reason": "tool_return",
+                "status": "recorded"
+              }
+            ],
+            "related": [],
+            "history_index": [
+              {
+                "start_node_id": 1,
+                "end_node_id": 2,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 1,
+                "end_node_id": 1,
+                "hidden_count": 1
+              },
+              {
+                "start_node_id": 0,
+                "end_node_id": 1,
+                "hidden_count": 1
+              }
+            ],
+            "unlisted_pair_count": 0,
+            "retrieval": "read_memory(node_id, other_node_id?, include_images?, offset?)"
+          },
+          "latest_memory": {
+            "sequence": 6,
+            "start_node_id": 4,
+            "end_node_id": 5,
+            "caption": "Moved to the white chair in the bedroom. I am now positioned right next to the white chair with a blue cushion, near the glass door leading to the balcony. This completes the task of waiting by the white chair.",
+            "task_id": 3,
+            "tool": "navigate_relative",
+            "termination_reason": "tool_return",
+            "status": "recorded"
+          }
+        },
+        "task_success": 1.0,
+        "agent": {
+          "turns": 21,
+          "turn_unit": "environment_feedback_response_v1",
+          "tool_calls": {
+            "observe": 1,
+            "update_plan": 4,
+            "execute_subtask": 2,
+            "observe_map": 4,
+            "update_memory": 5,
+            "navigate_relative": 4,
+            "terminate_episode": 1
+          },
+          "env_steps": 42,
+          "called_stop": true,
+          "end_reason": "stop_called",
+          "cost_usd": null,
+          "usage": {
+            "input_tokens": 217129,
+            "cached_input_tokens": 0,
+            "output_tokens": 2450
+          },
+          "review": {},
+          "initial_rollout": null,
+          "places_total": 6,
+          "places_named": 0,
+          "clauses_bound": 0,
+          "annotate_node_calls": 0,
+          "update_memory_calls": 5,
+          "read_memory_calls": 0,
+          "navigate_to_node_calls": 0,
+          "terminate_episode_calls": 1,
+          "observe_node_calls": 0
+        },
+        "error": null,
+        "api_error": null,
+        "ablation_error": null,
+        "subtype": null,
+        "wall_s": 597.3,
+        "status": "completed",
+        "actor_worker_status": {
+          "model_name": "lightnav-0",
+          "model_version": "LightNav-0",
+          "backend": "lightnav",
+          "policy_url": null,
+          "execution": "owned_vllm",
+          "context_replace": true,
+          "max_context_groups": 16,
+          "history_observe": true,
+          "seeded_reset": false,
+          "control": {
+            "control_dt_s": 0.1,
+            "max_linear_mps": 2.5,
+            "max_angular_dps": 300.0
+          },
+          "waypoint_count": 10,
+          "policy_camera": {
+            "width": 480,
+            "height": 270,
+            "height_m": 0.88,
+            "hfov": 120.0
+          },
+          "protocol_version": 1,
+          "implementation_digest": "715f606f093f41f6e93294af043849771f81a5d80cba6e54d165f035d7614546",
+          "shared_inference": true,
+          "max_sessions": 16,
+          "max_pending": 16,
+          "sessions": 1,
+          "pending_requests": 0,
+          "completed_requests": 973,
+          "accepting": true,
+          "waiting_requests": 0,
+          "active_operations": 0,
+          "tool_execution": "in_process",
+          "environment_url": "http://127.0.0.1:19584",
+          "inference_url": "http://127.0.0.1:18381",
+          "session_id": null,
+          "failed": false
+        },
+        "resource_state": "idle",
+        "vla_calls": 19,
+        "implementation_digest": "715f606f093f41f6e93294af043849771f81a5d80cba6e54d165f035d7614546",
+        "attempt_id": "2bb7f8544f5d4215aa4c930b2fba1e60",
+        "purpose": "development",
+        "training_status": "evaluation_only"
+      }
+    }
+  ],
+  "summary": {
+    "route_wall_s_sum": 7254.4,
+    "completed_model_http_s_sum": 6483.1,
+    "completed_tool_s_sum": 424.9,
+    "model_fraction_of_wall": 0.8936783193647994,
+    "planner_server_completed_requests": 198,
+    "planner_queue_mean_s": 2.2729444444444447,
+    "planner_prefill_mean_s": 4.030676767676767,
+    "planner_decode_mean_s": 25.41931818181818,
+    "planner_e2e_mean_s": 32.597848484848484,
+    "planner_enable_prefix_caching": false,
+    "planner_enforce_eager": true,
+    "planner_mm_processor_cache_gb": 0,
+    "lightnav_act_count": 482,
+    "lightnav_act_median_ms": 159.08,
+    "lightnav_act_p95_ms": 243.7,
+    "lightnav_errors": 0
+  },
+  "limitations": [
+    "HTTP timing includes client/server overhead, not pure GPU time.",
+    "Completed request sums omit an in-flight request cancelled by episode timeout.",
+    "No controlled concurrency-1 versus concurrency-8 planner comparison has been run.",
+    "Tool timings include execution, artifact sync and transport; these subcomponents are not separately instrumented."
+  ]
+}

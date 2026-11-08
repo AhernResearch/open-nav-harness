@@ -2964,6 +2964,7 @@ class R2RCEEnv:
                 "interface_variant": _INTERFACE_VARIANT,
                 "gpu_device_id": int(os.environ.get("NAVGPT_GPU_DEVICE_ID", "0")),
                 "status": "ok",
+                "history_cameras": ["policy_front"] if self.config.get("policy_camera") else list(self.PANO_NAMES),
                 "policy_camera": self.config.get('policy_camera'),
                 "velocity_control": self.config.get('velocity_control'),
                 "max_steps": self.config["max_steps"],

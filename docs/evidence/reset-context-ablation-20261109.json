@@ -1,0 +1,245 @@
+{
+  "release": "/data/nav_storage/nav-harness/releases/async-733aac44641a",
+  "implementation_digest": "733aac44641a6eaecefec56875df296c19766ede76a16b50fdf07c587ae5746c",
+  "restarted_service_ids": [
+    "457941e1ef2448f28537209c16de106e",
+    "2e7bd465f9ac473ba75313fa3c5afc4d",
+    "20d3792f5f7c45f587d77fac6f19b9b0",
+    "339b2b74985a4b0aba3144eea9705249",
+    "e950bb08bcd540d795fac907cdbf6194",
+    "d1fdc31244874534a5c8299aeaf1d742",
+    "c10b40fb9e9140f3b9444521fc788b1e",
+    "c09ae78998624a99b962333d6a275c4b",
+    "2c84605389974f618def4e68baaf3216"
+  ],
+  "created": 1794155667.648431,
+  "environments": "existing unchanged services",
+  "planner": "existing DP3 unchanged",
+  "protected_services": "GPU1/5 and other inference service unchanged",
+  "with_reset": {
+    "variant": "with_reset",
+    "experiment_id": "0e374bc7be6a49d1bb0031ed49a7df0c",
+    "created": 1794155708.3656857,
+    "implementation_digest": "733aac44641a6eaecefec56875df296c19766ede76a16b50fdf07c587ae5746c",
+    "spec": {
+      "name": "LightNav / no segment caps / with_reset / paired4",
+      "planner_service": "eaa85c5c908141f6b57e16a231cdc511",
+      "vla_service": "457941e1ef2448f28537209c16de106e",
+      "execution_pool": [
+        {
+          "environment_service": "e0802796122642d9b19f9ae9c39ba1f8",
+          "execution_service": "2e7bd465f9ac473ba75313fa3c5afc4d"
+        },
+        {
+          "environment_service": "ba97ba0f106f47d983d2b9ecff4a07d8",
+          "execution_service": "20d3792f5f7c45f587d77fac6f19b9b0"
+        },
+        {
+          "environment_service": "5e54bafdfe224410b5c1720ba63601f4",
+          "execution_service": "339b2b74985a4b0aba3144eea9705249"
+        },
+        {
+          "environment_service": "37bbdb5e0dcb4dae8a2c905f5aba1955",
+          "execution_service": "e950bb08bcd540d795fac907cdbf6194"
+        }
+      ],
+      "episodes": [
+        4132,
+        456,
+        7006,
+        7648
+      ],
+      "purpose": "development",
+      "config": {
+        "dataset": {
+          "name": "r2r",
+          "split": "train"
+        },
+        "environment": {
+          "max_steps": 500,
+          "forward_view_px": 512,
+          "panorama_view_px": 400
+        },
+        "vla": {
+          "backend": "lightnav"
+        },
+        "planner": {
+          "max_turns": 100,
+          "episode_timeout_s": 900,
+          "tools": [
+            "observe_map",
+            "navigate_to_node",
+            "terminate_episode",
+            "update_plan",
+            "execute_subtask",
+            "observe",
+            "update_memory",
+            "read_memory"
+          ]
+        },
+        "harness": {
+          "mode": "agentic",
+          "allow_context_reset": true,
+          "vla_steps_per_call": 0
+        }
+      }
+    },
+    "historical_baseline_job": "fc21827e81f74b84b06e4cb58c4fb3fb",
+    "limits": "Only policy STOP, 3 consecutive blocked moves, global500 actions and900s episode timeout; runtime per-call cap disabled.",
+    "reset_semantics": "False variant removes manual reset only; automatic task-change anchoring and normal history eviction remain.",
+    "job_id": "9c5134bbbd204396aac406a1edc5f155"
+  },
+  "validation": {
+    "pytest": 131,
+    "subtests": 4,
+    "ruff": "passed",
+    "mypy": "passed",
+    "frontend_build": "passed"
+  },
+  "without_reset": {
+    "variant": "without_reset",
+    "experiment_id": "377aac39f3044291a9cc3f487de6ed64",
+    "created": 1794156631.3470004,
+    "implementation_digest": "733aac44641a6eaecefec56875df296c19766ede76a16b50fdf07c587ae5746c",
+    "spec": {
+      "name": "LightNav / no segment caps / without_reset / paired4",
+      "planner_service": "eaa85c5c908141f6b57e16a231cdc511",
+      "vla_service": "457941e1ef2448f28537209c16de106e",
+      "execution_pool": [
+        {
+          "environment_service": "e0802796122642d9b19f9ae9c39ba1f8",
+          "execution_service": "2e7bd465f9ac473ba75313fa3c5afc4d"
+        },
+        {
+          "environment_service": "ba97ba0f106f47d983d2b9ecff4a07d8",
+          "execution_service": "20d3792f5f7c45f587d77fac6f19b9b0"
+        },
+        {
+          "environment_service": "5e54bafdfe224410b5c1720ba63601f4",
+          "execution_service": "339b2b74985a4b0aba3144eea9705249"
+        },
+        {
+          "environment_service": "37bbdb5e0dcb4dae8a2c905f5aba1955",
+          "execution_service": "e950bb08bcd540d795fac907cdbf6194"
+        }
+      ],
+      "episodes": [
+        4132,
+        456,
+        7006,
+        7648
+      ],
+      "purpose": "development",
+      "config": {
+        "dataset": {
+          "name": "r2r",
+          "split": "train"
+        },
+        "environment": {
+          "max_steps": 500,
+          "forward_view_px": 512,
+          "panorama_view_px": 400
+        },
+        "vla": {
+          "backend": "lightnav"
+        },
+        "planner": {
+          "max_turns": 100,
+          "episode_timeout_s": 900,
+          "tools": [
+            "observe_map",
+            "navigate_to_node",
+            "terminate_episode",
+            "update_plan",
+            "execute_subtask",
+            "observe",
+            "update_memory",
+            "read_memory"
+          ]
+        },
+        "harness": {
+          "mode": "agentic",
+          "allow_context_reset": false,
+          "vla_steps_per_call": 0
+        }
+      }
+    },
+    "historical_baseline_job": "fc21827e81f74b84b06e4cb58c4fb3fb",
+    "limits": "Only policy STOP, 3 consecutive blocked moves, global500 actions and900s episode timeout; runtime per-call cap disabled.",
+    "reset_semantics": "False variant removes manual reset only; automatic task-change anchoring and normal history eviction remain.",
+    "job_id": "466757b65dff4240882f6cedf7cdcf76"
+  },
+  "matched_configuration_verified": true,
+  "known_findings": {
+    "no_mid_call_handoff": "456 with reset executed 436 movements in one call (268.255s); no planner intervention during that call.",
+    "termination_loop": {
+      "location": "nav_harness/providers/runtime.py:198",
+      "cause": "Only stop_called is terminal; arrive early-return on exhausted episode omits terminal structured result, so abort/complete requests repeat until timeout.",
+      "with_reset_456_terminate_calls": 81,
+      "with_reset_456_after_first_terminate_s": 519.232
+    },
+    "output_truncation": {
+      "episode": 4132,
+      "variant": "with_reset",
+      "finish_reason": "length",
+      "prompt_tokens": 13274,
+      "completion_tokens": 2048
+    },
+    "manual_reset_semantics": "Re-anchor VLA visual history; retain two boundary frames, current task anchor and recent frames to at most16. Does not clear planner state or historical caption in VLA instruction.",
+    "causal_limits": [
+      "Historical baseline includes older common code.",
+      "One run per condition and four selected routes; no statistical significance claim.",
+      "All B actual executions are initial/task-change; no same-task manual reset comparison.",
+      "7006 used no explicit reset in A either; its improvement cannot be attributed to a removed reset action."
+    ],
+    "long_rollouts": [
+      {
+        "variant": "with_reset",
+        "episode": 456,
+        "steps": 436,
+        "wall_s": 268.255,
+        "path_m": 41.86,
+        "net_displacement_m": 0.58
+      },
+      {
+        "variant": "without_reset",
+        "episode": 4132,
+        "steps": 329,
+        "wall_s": 209.831,
+        "path_m": 30.62,
+        "net_displacement_m": 0.64
+      }
+    ]
+  },
+  "completed_at": 1794157568.9039764,
+  "result_evidence": "reset-context-ablation-results-20261109.json",
+  "results": {
+    "with_reset": {
+      "completed": 4,
+      "successes": 0,
+      "errors": 2,
+      "mean_wall_s": 414.2,
+      "manual_resets": 5,
+      "oracle_successes": 2.0,
+      "mean_ne_m": 8.2399,
+      "vla_calls": 1049,
+      "tool_calls": 134
+    },
+    "without_reset": {
+      "completed": 4,
+      "successes": 1.0,
+      "errors": 2,
+      "mean_wall_s": 589.55,
+      "manual_resets": 0,
+      "oracle_successes": 3.0,
+      "mean_ne_m": 5.4807749999999995,
+      "vla_calls": 1546,
+      "tool_calls": 155
+    }
+  },
+  "final_queue_check": {
+    "active_attempts": 0,
+    "old_50_job": "paused",
+    "old_50_completed": 8
+  }
+}

@@ -15,7 +15,7 @@ The navigation tools have one implementation shared by all Planner runtimes.
   ownership-checked start/stop, health and logs. External services are read-only.
 - Immutable experiment snapshots; a SQLite queue with exclusive environment/VLA
   leases, Planner concurrency limits, pause/cancel, restart recovery and distinct attempts.
-- A password-protected React console for services, experiments, queue, replay,
+- An open-access React console for services, experiments, queue, replay,
   comparisons, CSV/trace exports and read-only historical imports.
 - Content-addressed images and the exact API request/response journal, including
   context selection and tool provenance. SDK-internal model inputs remain opaque.
@@ -40,8 +40,8 @@ and use `uv run --extra sdk ...` (or that environment's Python interpreter) when
 Local API planners do not import MCP or either model SDK; the development extra includes
 MCP only to test adapter compatibility.
 
-Open `http://127.0.0.1:8878`. The generated administrator password is in
-`state/admin-password` (mode 0600). `serve --host 0.0.0.0` enables LAN access.
+Open `http://127.0.0.1:8878`; the console and API require no login.
+`serve --host 0.0.0.0` enables LAN access with full management access.
 Use an HTTPS reverse proxy when transport confidentiality is required.
 Credentials are environment-variable references, never experiment fields.
 

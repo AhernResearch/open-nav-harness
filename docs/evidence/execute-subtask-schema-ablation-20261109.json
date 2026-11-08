@@ -1,0 +1,62 @@
+{
+  "implementation_digest": "733aac44641a6eaecefec56875df296c19766ede76a16b50fdf07c587ae5746c",
+  "episodes": [
+    4132,
+    456,
+    7006,
+    7648
+  ],
+  "variants": {
+    "with_reset": {
+      "name": "execute_subtask",
+      "description": "Delegate one chosen task. Optionally rewrite its remaining instruction from the current pose.\n\n        Runs until policy stop, blockage or runtime/global limits; no per-call distance or turn cap.\n        VLA stop returns control, not\n        global success: subtask_return=vla_stop means only that the policy requested a stop.\n        History budgets are runtime configuration. Task switches\n        reset the context anchor; reset_context also starts a new segment within this task.\n        Returns route evidence and endpoint views. Request observe_map separately. You choose whether to review, repair,\n        continue, replan or stop; there is no mandatory review gate.\n        ",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "task_id": {
+            "title": "Task Id",
+            "type": "integer"
+          },
+          "instruction": {
+            "default": "",
+            "title": "Instruction",
+            "type": "string"
+          },
+          "reset_context": {
+            "default": false,
+            "title": "Reset Context",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "task_id"
+        ],
+        "title": "execute_subtaskArguments",
+        "type": "object"
+      }
+    },
+    "without_reset": {
+      "name": "execute_subtask",
+      "description": "Delegate one chosen task. Optionally rewrite its remaining instruction from the current pose.\n\n        Runs until policy stop, blockage or runtime/global limits; no per-call distance or turn cap.\n        VLA stop returns control, not\n        global success: subtask_return=vla_stop means only that the policy requested a stop.\n        History budgets are runtime configuration. Task switches\n        reset the context anchor; Within the same task, visual history is retained.\n        Returns route evidence and endpoint views. Request observe_map separately. You choose whether to review, repair,\n        continue, replan or stop; there is no mandatory review gate.\n        ",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "task_id": {
+            "title": "Task Id",
+            "type": "integer"
+          },
+          "instruction": {
+            "default": "",
+            "title": "Instruction",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_id"
+        ],
+        "title": "execute_subtaskArguments",
+        "type": "object"
+      }
+    }
+  }
+}

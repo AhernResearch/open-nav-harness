@@ -1,0 +1,864 @@
+{
+  "started": 1794164701.9590049,
+  "checks": [
+    {
+      "frame": 0,
+      "buffer_frames": 1,
+      "raw_text": "<apos_1297><opos_0><act_l0_5><act_l1_40><act_l2_94><|im_end|>",
+      "sample": {
+        "video_segments": [
+          {
+            "video": {
+              "shape": [
+                2,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "d98bea73ef9e6c0c55f613b34e5d7eae74bdb29bafdff7f1b817c2f74fad5162"
+            },
+            "frame_indices": [
+              0,
+              0
+            ],
+            "total_frames": 1,
+            "pool_spatial": 1,
+            "pool_mode": "avg"
+          }
+        ],
+        "conversations": [
+          {
+            "from": "human",
+            "value": "You are a mobile robot. You are given visual observations over time, ordered from earliest to most recent: <video>. Your assigned task is: <navigation_task>Walk out of the bathroom and through the television room into the hallway. In the hall go to the stairs and go up the stairs, stopping on the fourth from the top stair.</navigation_task>. You may be at the beginning, middle, or end of the task. Predict your future trajectory as a sequence of coarse-to-fine trajectory tokens. "
+          },
+          {
+            "from": "gpt",
+            "value": "placeholder"
+          }
+        ],
+        "video_fps": 4,
+        "slowfast_abs_frame_indices": true,
+        "_allow_vit_cache": true,
+        "_skip_normalize": true
+      },
+      "matched": true
+    },
+    {
+      "frame": 1,
+      "buffer_frames": 2,
+      "raw_text": "<apos_1297><opos_0><act_l0_5><act_l1_40><act_l2_94><|im_end|>",
+      "sample": {
+        "video_segments": [
+          {
+            "video": {
+              "shape": [
+                2,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "b50c254e4ff0f503a5896b40edc0f14840115c3dad092b7758712999eb0e50de"
+            },
+            "frame_indices": [
+              0,
+              1
+            ],
+            "total_frames": 2,
+            "pool_spatial": 1,
+            "pool_mode": "avg"
+          }
+        ],
+        "conversations": [
+          {
+            "from": "human",
+            "value": "You are a mobile robot. You are given visual observations over time, ordered from earliest to most recent: <video>. Your assigned task is: <navigation_task>Walk out of the bathroom and through the television room into the hallway. In the hall go to the stairs and go up the stairs, stopping on the fourth from the top stair.</navigation_task>. You may be at the beginning, middle, or end of the task. Predict your future trajectory as a sequence of coarse-to-fine trajectory tokens. "
+          },
+          {
+            "from": "gpt",
+            "value": "placeholder"
+          }
+        ],
+        "video_fps": 4,
+        "slowfast_abs_frame_indices": true,
+        "_allow_vit_cache": true,
+        "_skip_normalize": true
+      },
+      "matched": true
+    },
+    {
+      "frame": 15,
+      "buffer_frames": 16,
+      "raw_text": "<apos_1120><opos_0><act_l0_14><act_l1_159><act_l2_147><|im_end|>",
+      "sample": {
+        "video_segments": [
+          {
+            "video": {
+              "shape": [
+                14,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "0dffb8c2cf0275808ce545eca0c543d0b87644d37ea7686530ff6cb0129fa746"
+            },
+            "frame_indices": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13
+            ],
+            "total_frames": 16,
+            "pool_spatial": 2,
+            "pool_mode": "avg"
+          },
+          {
+            "video": {
+              "shape": [
+                2,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "41aff2ebbcb53e6673ba9d5aa74972d831114fb329f80be20bf6e6e850c74f97"
+            },
+            "frame_indices": [
+              14,
+              15
+            ],
+            "total_frames": 16,
+            "pool_spatial": 1,
+            "pool_mode": "avg"
+          }
+        ],
+        "conversations": [
+          {
+            "from": "human",
+            "value": "You are a mobile robot. You are given visual observations over time, ordered from earliest to most recent: <video> <video>. Your assigned task is: <navigation_task>Walk out of the bathroom and through the television room into the hallway. In the hall go to the stairs and go up the stairs, stopping on the fourth from the top stair.</navigation_task>. You may be at the beginning, middle, or end of the task. Predict your future trajectory as a sequence of coarse-to-fine trajectory tokens. "
+          },
+          {
+            "from": "gpt",
+            "value": "placeholder"
+          }
+        ],
+        "video_fps": 4,
+        "slowfast_abs_frame_indices": true,
+        "_allow_vit_cache": true,
+        "_skip_normalize": true
+      },
+      "matched": true
+    },
+    {
+      "frame": 16,
+      "buffer_frames": 17,
+      "raw_text": "<apos_690><opos_0><act_l0_14><act_l1_159><act_l2_147><|im_end|>",
+      "sample": {
+        "video_segments": [
+          {
+            "video": {
+              "shape": [
+                16,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "c1fb368ade5db7024077b3469a89fc9cda25db2392f7cc2615b13d9f1921967e"
+            },
+            "frame_indices": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              14
+            ],
+            "total_frames": 17,
+            "pool_spatial": 2,
+            "pool_mode": "avg"
+          },
+          {
+            "video": {
+              "shape": [
+                2,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "6be14cec65b71e580f4adfa6a22fed37a6666d459279bdc3ab8eb587f5a11bfc"
+            },
+            "frame_indices": [
+              15,
+              16
+            ],
+            "total_frames": 17,
+            "pool_spatial": 1,
+            "pool_mode": "avg"
+          }
+        ],
+        "conversations": [
+          {
+            "from": "human",
+            "value": "You are a mobile robot. You are given visual observations over time, ordered from earliest to most recent: <video> <video>. Your assigned task is: <navigation_task>Walk out of the bathroom and through the television room into the hallway. In the hall go to the stairs and go up the stairs, stopping on the fourth from the top stair.</navigation_task>. You may be at the beginning, middle, or end of the task. Predict your future trajectory as a sequence of coarse-to-fine trajectory tokens. "
+          },
+          {
+            "from": "gpt",
+            "value": "placeholder"
+          }
+        ],
+        "video_fps": 4,
+        "slowfast_abs_frame_indices": true,
+        "_allow_vit_cache": true,
+        "_skip_normalize": true
+      },
+      "matched": true
+    },
+    {
+      "frame": 33,
+      "buffer_frames": 34,
+      "raw_text": "<apos_701><opos_0><act_l0_214><act_l1_20><act_l2_161><|im_end|>",
+      "sample": {
+        "video_segments": [
+          {
+            "video": {
+              "shape": [
+                32,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "90384bcf38228cd37445b194badba3f33bb65198238fcf032b686c537537bf03"
+            },
+            "frame_indices": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              25,
+              26,
+              27,
+              28,
+              29,
+              30,
+              31
+            ],
+            "total_frames": 34,
+            "pool_spatial": 2,
+            "pool_mode": "avg"
+          },
+          {
+            "video": {
+              "shape": [
+                2,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "18fce4a38d1e018e6e631d72439211662252dd0059f7081f164887a1b7d5a5d8"
+            },
+            "frame_indices": [
+              32,
+              33
+            ],
+            "total_frames": 34,
+            "pool_spatial": 1,
+            "pool_mode": "avg"
+          }
+        ],
+        "conversations": [
+          {
+            "from": "human",
+            "value": "You are a mobile robot. You are given visual observations over time, ordered from earliest to most recent: <video> <video>. Your assigned task is: <navigation_task>Walk out of the bathroom and through the television room into the hallway. In the hall go to the stairs and go up the stairs, stopping on the fourth from the top stair.</navigation_task>. You may be at the beginning, middle, or end of the task. Predict your future trajectory as a sequence of coarse-to-fine trajectory tokens. "
+          },
+          {
+            "from": "gpt",
+            "value": "placeholder"
+          }
+        ],
+        "video_fps": 4,
+        "slowfast_abs_frame_indices": true,
+        "_allow_vit_cache": true,
+        "_skip_normalize": true
+      },
+      "matched": true
+    },
+    {
+      "frame": 89,
+      "buffer_frames": 90,
+      "raw_text": "<apos_789><opos_0><act_l0_133><act_l1_128><act_l2_42><|im_end|>",
+      "sample": {
+        "video_segments": [
+          {
+            "video": {
+              "shape": [
+                2,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "b50c254e4ff0f503a5896b40edc0f14840115c3dad092b7758712999eb0e50de"
+            },
+            "frame_indices": [
+              0,
+              1
+            ],
+            "total_frames": 90,
+            "pool_spatial": 4,
+            "pool_mode": "avg"
+          },
+          {
+            "video": {
+              "shape": [
+                18,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "9d7b62bbb6c872e536be01d319d4f2452ef87df929b9e588f32b0b8d57ca937f"
+            },
+            "frame_indices": [
+              6,
+              7,
+              12,
+              13,
+              18,
+              19,
+              24,
+              25,
+              30,
+              31,
+              36,
+              37,
+              42,
+              43,
+              48,
+              49,
+              54,
+              55
+            ],
+            "total_frames": 90,
+            "pool_spatial": 2,
+            "pool_mode": "avg"
+          },
+          {
+            "video": {
+              "shape": [
+                32,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "46531f3054c02ba821a123e1af8d6fb95a8aed7649825666ff513553356ceabf"
+            },
+            "frame_indices": [
+              56,
+              57,
+              58,
+              59,
+              60,
+              61,
+              62,
+              63,
+              64,
+              65,
+              66,
+              67,
+              68,
+              69,
+              70,
+              71,
+              72,
+              73,
+              74,
+              75,
+              76,
+              77,
+              78,
+              79,
+              80,
+              81,
+              82,
+              83,
+              84,
+              85,
+              86,
+              87
+            ],
+            "total_frames": 90,
+            "pool_spatial": 2,
+            "pool_mode": "avg"
+          },
+          {
+            "video": {
+              "shape": [
+                2,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "9e80ca98403aa0bb51482d991c6b5dcafe08b3d284d6b4640393c7ce0d0b4925"
+            },
+            "frame_indices": [
+              88,
+              89
+            ],
+            "total_frames": 90,
+            "pool_spatial": 1,
+            "pool_mode": "avg"
+          }
+        ],
+        "conversations": [
+          {
+            "from": "human",
+            "value": "You are a mobile robot. You are given visual observations over time, ordered from earliest to most recent: <video> <video> <video> <video>. Your assigned task is: <navigation_task>Walk out of the bathroom and through the television room into the hallway. In the hall go to the stairs and go up the stairs, stopping on the fourth from the top stair.</navigation_task>. You may be at the beginning, middle, or end of the task. Predict your future trajectory as a sequence of coarse-to-fine trajectory tokens. "
+          },
+          {
+            "from": "gpt",
+            "value": "placeholder"
+          }
+        ],
+        "video_fps": 4,
+        "slowfast_abs_frame_indices": true,
+        "_allow_vit_cache": true,
+        "_skip_normalize": true
+      },
+      "matched": true
+    },
+    {
+      "frame": 128,
+      "buffer_frames": 129,
+      "raw_text": "<apos_963><opos_0><act_l0_87><act_l1_109><act_l2_184><|im_end|>",
+      "sample": {
+        "video_segments": [
+          {
+            "video": {
+              "shape": [
+                2,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "b50c254e4ff0f503a5896b40edc0f14840115c3dad092b7758712999eb0e50de"
+            },
+            "frame_indices": [
+              0,
+              1
+            ],
+            "total_frames": 129,
+            "pool_spatial": 4,
+            "pool_mode": "avg"
+          },
+          {
+            "video": {
+              "shape": [
+                26,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "e8c298d2b82a1ae68e4008ffa53e8fe1e0f897fa163f0aa2d9f6de80e152b272"
+            },
+            "frame_indices": [
+              3,
+              4,
+              6,
+              7,
+              9,
+              10,
+              11,
+              12,
+              14,
+              15,
+              17,
+              18,
+              20,
+              21,
+              23,
+              24,
+              26,
+              27,
+              28,
+              29,
+              31,
+              32,
+              34,
+              35,
+              37,
+              38
+            ],
+            "total_frames": 129,
+            "pool_spatial": 4,
+            "pool_mode": "avg"
+          },
+          {
+            "video": {
+              "shape": [
+                20,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "a28bea02753f52284772586f9958fffc661f661d52f0048fe83d2c26472171eb"
+            },
+            "frame_indices": [
+              39,
+              40,
+              45,
+              46,
+              51,
+              52,
+              57,
+              58,
+              63,
+              64,
+              69,
+              70,
+              75,
+              76,
+              81,
+              82,
+              87,
+              88,
+              93,
+              94
+            ],
+            "total_frames": 129,
+            "pool_spatial": 2,
+            "pool_mode": "avg"
+          },
+          {
+            "video": {
+              "shape": [
+                32,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "19db23349975184fec450a47248a8d8e6edcc6d157bead85395c54d18ac919c7"
+            },
+            "frame_indices": [
+              95,
+              96,
+              97,
+              98,
+              99,
+              100,
+              101,
+              102,
+              103,
+              104,
+              105,
+              106,
+              107,
+              108,
+              109,
+              110,
+              111,
+              112,
+              113,
+              114,
+              115,
+              116,
+              117,
+              118,
+              119,
+              120,
+              121,
+              122,
+              123,
+              124,
+              125,
+              126
+            ],
+            "total_frames": 129,
+            "pool_spatial": 2,
+            "pool_mode": "avg"
+          },
+          {
+            "video": {
+              "shape": [
+                2,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "f7542ee1cbbd6440f12da367ee1badfdfef45c2673315d44498429d784023fb9"
+            },
+            "frame_indices": [
+              127,
+              128
+            ],
+            "total_frames": 129,
+            "pool_spatial": 1,
+            "pool_mode": "avg"
+          }
+        ],
+        "conversations": [
+          {
+            "from": "human",
+            "value": "You are a mobile robot. You are given visual observations over time, ordered from earliest to most recent: <video> <video> <video> <video> <video>. Your assigned task is: <navigation_task>Walk out of the bathroom and through the television room into the hallway. In the hall go to the stairs and go up the stairs, stopping on the fourth from the top stair.</navigation_task>. You may be at the beginning, middle, or end of the task. Predict your future trajectory as a sequence of coarse-to-fine trajectory tokens. "
+          },
+          {
+            "from": "gpt",
+            "value": "placeholder"
+          }
+        ],
+        "video_fps": 4,
+        "slowfast_abs_frame_indices": true,
+        "_allow_vit_cache": true,
+        "_skip_normalize": true
+      },
+      "matched": true
+    },
+    {
+      "frame": 499,
+      "buffer_frames": 500,
+      "raw_text": "<apos_1297><opos_0><act_l0_24><act_l1_170><act_l2_10><|im_end|>",
+      "sample": {
+        "video_segments": [
+          {
+            "video": {
+              "shape": [
+                2,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "b50c254e4ff0f503a5896b40edc0f14840115c3dad092b7758712999eb0e50de"
+            },
+            "frame_indices": [
+              0,
+              1
+            ],
+            "total_frames": 500,
+            "pool_spatial": 4,
+            "pool_mode": "avg"
+          },
+          {
+            "video": {
+              "shape": [
+                26,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "8b1eb39969fc67a2ab303c6b46633df15bac24c9e86870c5bffc33eeda4e80ba"
+            },
+            "frame_indices": [
+              31,
+              32,
+              63,
+              64,
+              94,
+              95,
+              126,
+              127,
+              157,
+              158,
+              188,
+              189,
+              220,
+              221,
+              251,
+              252,
+              282,
+              283,
+              314,
+              315,
+              345,
+              346,
+              377,
+              378,
+              408,
+              409
+            ],
+            "total_frames": 500,
+            "pool_spatial": 4,
+            "pool_mode": "avg"
+          },
+          {
+            "video": {
+              "shape": [
+                20,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "31bb8f135a7c5cf279d2efb53286a942724c918effafa12ad3def97785204ae6"
+            },
+            "frame_indices": [
+              410,
+              411,
+              416,
+              417,
+              422,
+              423,
+              428,
+              429,
+              434,
+              435,
+              440,
+              441,
+              446,
+              447,
+              452,
+              453,
+              458,
+              459,
+              464,
+              465
+            ],
+            "total_frames": 500,
+            "pool_spatial": 2,
+            "pool_mode": "avg"
+          },
+          {
+            "video": {
+              "shape": [
+                32,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "c5454c54d64d5bf96a2c0527a74250e1be478817f78244e454664e0de8566a13"
+            },
+            "frame_indices": [
+              466,
+              467,
+              468,
+              469,
+              470,
+              471,
+              472,
+              473,
+              474,
+              475,
+              476,
+              477,
+              478,
+              479,
+              480,
+              481,
+              482,
+              483,
+              484,
+              485,
+              486,
+              487,
+              488,
+              489,
+              490,
+              491,
+              492,
+              493,
+              494,
+              495,
+              496,
+              497
+            ],
+            "total_frames": 500,
+            "pool_spatial": 2,
+            "pool_mode": "avg"
+          },
+          {
+            "video": {
+              "shape": [
+                2,
+                3,
+                256,
+                448
+              ],
+              "dtype": "torch.float32",
+              "sha256": "1650e3704c2293dda71faa46879d15a5984d56c1b91156fc989ec5c469a38e35"
+            },
+            "frame_indices": [
+              498,
+              499
+            ],
+            "total_frames": 500,
+            "pool_spatial": 1,
+            "pool_mode": "avg"
+          }
+        ],
+        "conversations": [
+          {
+            "from": "human",
+            "value": "You are a mobile robot. You are given visual observations over time, ordered from earliest to most recent: <video> <video> <video> <video> <video>. Your assigned task is: <navigation_task>Walk out of the bathroom and through the television room into the hallway. In the hall go to the stairs and go up the stairs, stopping on the fourth from the top stair.</navigation_task>. You may be at the beginning, middle, or end of the task. Predict your future trajectory as a sequence of coarse-to-fine trajectory tokens. "
+          },
+          {
+            "from": "gpt",
+            "value": "placeholder"
+          }
+        ],
+        "video_fps": 4,
+        "slowfast_abs_frame_indices": true,
+        "_allow_vit_cache": true,
+        "_skip_normalize": true
+      },
+      "matched": true
+    }
+  ],
+  "controller_cases": 0,
+  "same_endpoint_reinstruction": true,
+  "finished": 1794164761.8192656
+}

@@ -1,0 +1,346 @@
+{
+  "experiment_id": "416cbc6f9ae94ee18994623ffcdbdb50",
+  "spec": {
+    "name": "LightNav official episode history / integration smoke2",
+    "planner_service": "eaa85c5c908141f6b57e16a231cdc511",
+    "vla_service": "457941e1ef2448f28537209c16de106e",
+    "execution_pool": [
+      {
+        "environment_service": "e0802796122642d9b19f9ae9c39ba1f8",
+        "execution_service": "2e7bd465f9ac473ba75313fa3c5afc4d"
+      },
+      {
+        "environment_service": "ba97ba0f106f47d983d2b9ecff4a07d8",
+        "execution_service": "20d3792f5f7c45f587d77fac6f19b9b0"
+      }
+    ],
+    "episodes": [
+      0,
+      7648
+    ],
+    "purpose": "development",
+    "config": {
+      "dataset": {
+        "name": "r2r",
+        "split": "train"
+      },
+      "environment": {
+        "max_steps": 500,
+        "forward_view_px": 512,
+        "panorama_view_px": 400
+      },
+      "vla": {
+        "backend": "lightnav"
+      },
+      "planner": {
+        "max_turns": 100,
+        "episode_timeout_s": 900,
+        "tools": [
+          "observe_map",
+          "navigate_to_node",
+          "terminate_episode",
+          "update_plan",
+          "execute_subtask",
+          "observe",
+          "update_memory",
+          "read_memory"
+        ]
+      },
+      "harness": {
+        "mode": "agentic",
+        "allow_context_reset": false,
+        "vla_steps_per_call": 0
+      }
+    }
+  },
+  "implementation_digest": "795d5eb1da9c08fc0d51851085f20135864fd4179eaa90f0ebd7cb2127df336f",
+  "job_id": "767e2bc19a35486bb0e3f86df337081f",
+  "created": 1794164969.3669097,
+  "rows": [
+    {
+      "attempt_id": "9f4553eb682d40ef9040e889e32ab842",
+      "episode": 0,
+      "attempt": 1,
+      "status": "completed",
+      "success": 1.0,
+      "ne": 0.5798,
+      "spl": 1.0,
+      "ndtw": 0.9225,
+      "distance_m": 6.1298,
+      "wall_s": 135.2,
+      "tool_calls": 14,
+      "turns": 14,
+      "vla_calls": 51,
+      "input_tokens": 130289,
+      "cached_input_tokens": 0,
+      "output_tokens": 2017,
+      "cost_usd": null,
+      "error": null,
+      "scene_id": "mp3d/7y3sRwLe3Va/7y3sRwLe3Va.glb",
+      "episode_id": "1",
+      "training_status": "evaluation_only",
+      "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/767e2bc19a35486bb0e3f86df337081f/9f4553eb682d40ef9040e889e32ab842/episode/work/ep0000/trace/requests.jsonl",
+      "replay_url": "http://192.168.66.221:18889/?attempt=9f4553eb682d40ef9040e889e32ab842",
+      "tool_counts": {
+        "observe": 1,
+        "update_plan": 3,
+        "execute_subtask": 3,
+        "observe_map": 3,
+        "update_memory": 3,
+        "terminate_episode": 1
+      },
+      "segments": [
+        {
+          "arguments": {
+            "task_id": 1,
+            "instruction": "Move forward along the right side of the kitchen island, keeping the island on my left"
+          },
+          "wall_s": 2.371,
+          "steps_the_vla_took": 3,
+          "step_budget_for_this_call": 500,
+          "distance_travelled_m": 0.15,
+          "net_displacement_m": 0.15,
+          "blocked_events": 0,
+          "steps_taken_total": 3,
+          "steps_remaining_approx": 497,
+          "episode_over": false,
+          "subtask_return": "vla_stop",
+          "turn_travelled_deg": 36.12
+        },
+        {
+          "arguments": {
+            "instruction": "Continue moving forward along the right side of the kitchen island, keeping it on my left, and proceed toward the open area beyond the island",
+            "task_id": 1
+          },
+          "wall_s": 17.402,
+          "steps_the_vla_took": 37,
+          "step_budget_for_this_call": 497,
+          "distance_travelled_m": 5.14,
+          "net_displacement_m": 4.14,
+          "blocked_events": 0,
+          "steps_taken_total": 40,
+          "steps_remaining_approx": 460,
+          "episode_over": false,
+          "subtask_return": "vla_stop",
+          "turn_travelled_deg": 135.53
+        },
+        {
+          "arguments": {
+            "instruction": "Move toward the doorway on the right side where the dining table and mirror are visible",
+            "task_id": 2
+          },
+          "wall_s": 5.048,
+          "steps_the_vla_took": 8,
+          "step_budget_for_this_call": 460,
+          "distance_travelled_m": 0.84,
+          "net_displacement_m": 0.84,
+          "blocked_events": 0,
+          "steps_taken_total": 48,
+          "steps_remaining_approx": 452,
+          "episode_over": false,
+          "subtask_return": "vla_stop",
+          "turn_travelled_deg": 28.01
+        }
+      ],
+      "actor_predictions": 51,
+      "max_available_history_frames": 49,
+      "continuous_prefix_verified": true,
+      "plain_instruction_verified": true,
+      "execute_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "task_id": {
+            "title": "Task Id",
+            "type": "integer"
+          },
+          "instruction": {
+            "default": "",
+            "title": "Instruction",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_id"
+        ],
+        "title": "execute_subtaskArguments",
+        "type": "object"
+      },
+      "metrics": {
+        "distance_to_goal": 0.5798,
+        "success": 1.0,
+        "spl": 1.0,
+        "oracle_success": 1.0,
+        "ndtw": 0.9225,
+        "sdtw": 0.9225,
+        "path_length": 6.1298,
+        "steps_taken": 49.0,
+        "stop_called": 1.0,
+        "collisions": 0.0,
+        "teleports": 0.0,
+        "teleport_fallbacks": 0.0,
+        "velocity_steps": 48.0
+      }
+    },
+    {
+      "attempt_id": "765ef9d0a97c4ab685644fa7664573af",
+      "episode": 7648,
+      "attempt": 1,
+      "status": "completed",
+      "success": 1.0,
+      "ne": 2.57,
+      "spl": 0.6396,
+      "ndtw": 0.4206,
+      "distance_m": 11.1594,
+      "wall_s": 191.7,
+      "tool_calls": 20,
+      "turns": 20,
+      "vla_calls": 69,
+      "input_tokens": 211564,
+      "cached_input_tokens": 0,
+      "output_tokens": 2888,
+      "cost_usd": null,
+      "error": null,
+      "scene_id": "mp3d/b8cTxDM8gDG/b8cTxDM8gDG.glb",
+      "episode_id": "7658",
+      "training_status": "evaluation_only",
+      "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/767e2bc19a35486bb0e3f86df337081f/765ef9d0a97c4ab685644fa7664573af/episode/work/ep7648/trace/requests.jsonl",
+      "replay_url": "http://192.168.66.221:18889/?attempt=765ef9d0a97c4ab685644fa7664573af",
+      "tool_counts": {
+        "observe": 2,
+        "update_plan": 2,
+        "execute_subtask": 5,
+        "observe_map": 4,
+        "update_memory": 5,
+        "navigate_to_node": 1,
+        "terminate_episode": 1
+      },
+      "segments": [
+        {
+          "arguments": {
+            "instruction": "Walk down the stairs ahead",
+            "task_id": 1
+          },
+          "wall_s": 8.88,
+          "steps_the_vla_took": 20,
+          "step_budget_for_this_call": 500,
+          "distance_travelled_m": 3.02,
+          "net_displacement_m": 2.87,
+          "blocked_events": 3,
+          "steps_taken_total": 20,
+          "steps_remaining_approx": 480,
+          "episode_over": false,
+          "subtask_return": "blocked",
+          "turn_travelled_deg": 0.17
+        },
+        {
+          "arguments": {
+            "instruction": "Continue down the stairs, turning right to follow the staircase downward",
+            "task_id": 1
+          },
+          "wall_s": 1.98,
+          "steps_the_vla_took": 3,
+          "step_budget_for_this_call": 480,
+          "distance_travelled_m": 0.0,
+          "net_displacement_m": 0.0,
+          "blocked_events": 3,
+          "steps_taken_total": 23,
+          "steps_remaining_approx": 477,
+          "episode_over": false,
+          "subtask_return": "blocked",
+          "turn_travelled_deg": 0.04
+        },
+        {
+          "arguments": {
+            "instruction": "Turn right to face the stairs, then walk down the stairs to the bottom level",
+            "task_id": 1
+          },
+          "wall_s": 2.09,
+          "steps_the_vla_took": 3,
+          "step_budget_for_this_call": 477,
+          "distance_travelled_m": 0.0,
+          "net_displacement_m": 0.0,
+          "blocked_events": 3,
+          "steps_taken_total": 26,
+          "steps_remaining_approx": 474,
+          "episode_over": false,
+          "subtask_return": "blocked",
+          "turn_travelled_deg": 0.0
+        },
+        {
+          "arguments": {
+            "instruction": "Move backward and turn right to face the stairs, then walk down",
+            "task_id": 1
+          },
+          "wall_s": 2.141,
+          "steps_the_vla_took": 3,
+          "step_budget_for_this_call": 474,
+          "distance_travelled_m": 0.0,
+          "net_displacement_m": 0.0,
+          "blocked_events": 3,
+          "steps_taken_total": 29,
+          "steps_remaining_approx": 471,
+          "episode_over": false,
+          "subtask_return": "blocked",
+          "turn_travelled_deg": 0.0
+        },
+        {
+          "arguments": {
+            "instruction": "Turn around to face the stairs behind you, then walk down the stairs to the bottom level",
+            "task_id": 1
+          },
+          "wall_s": 18.614,
+          "steps_the_vla_took": 39,
+          "step_budget_for_this_call": 460,
+          "distance_travelled_m": 5.1,
+          "net_displacement_m": 4.87,
+          "blocked_events": 0,
+          "steps_taken_total": 79,
+          "steps_remaining_approx": 421,
+          "episode_over": false,
+          "subtask_return": "vla_stop",
+          "turn_travelled_deg": 183.67
+        }
+      ],
+      "actor_predictions": 69,
+      "max_available_history_frames": 70,
+      "continuous_prefix_verified": true,
+      "plain_instruction_verified": true,
+      "execute_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "task_id": {
+            "title": "Task Id",
+            "type": "integer"
+          },
+          "instruction": {
+            "default": "",
+            "title": "Instruction",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_id"
+        ],
+        "title": "execute_subtaskArguments",
+        "type": "object"
+      },
+      "metrics": {
+        "distance_to_goal": 2.57,
+        "success": 1.0,
+        "spl": 0.6396,
+        "oracle_success": 1.0,
+        "ndtw": 0.4206,
+        "sdtw": 0.4206,
+        "path_length": 11.1594,
+        "steps_taken": 80.0,
+        "stop_called": 1.0,
+        "collisions": 12.0,
+        "teleports": 0.0,
+        "teleport_fallbacks": 0.0,
+        "velocity_steps": 68.0
+      }
+    }
+  ],
+  "purpose": "development integration smoke; not a benchmark",
+  "finished": 1794165260.5392275
+}

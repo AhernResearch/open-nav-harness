@@ -1,0 +1,112 @@
+{
+  "repo_id": "nv-community/Qwen3.6-27B-NVFP4",
+  "endpoint": "https://modelscope.cn",
+  "upstream": "nvidia/Qwen3.6-27B-NVFP4",
+  "upstream_revision": "0893e1606ff3d5f97a441f405d5fc541a6bdf404",
+  "files": [
+    {
+      "Path": ".gitattributes",
+      "Revision": "ff202a99b132db74f3e674d078c78dcf445fb174",
+      "Sha256": "1cd99b71b179ad721514391afdbd61af17c96a1591e34af67e878dbcc2e9f08a",
+      "Size": 2184
+    },
+    {
+      "Path": "README.md",
+      "Revision": "2a1517f499d2a5454e74c60a026da14da87ce61d",
+      "Sha256": "371a5c5980e3b9b4df31035aab3e13dfe03b17e89bc4ab69055bd4039bf80f7d",
+      "Size": 9313
+    },
+    {
+      "Path": "chat_template.jinja",
+      "Revision": "9652642f714629d54d57a4e20e8a3a46f9f4b1ec",
+      "Sha256": "e84f32a23fdda27689f868aa4a1a5621f41133e51a48d7f3efcbea2839574259",
+      "Size": 7764
+    },
+    {
+      "Path": "config.json",
+      "Revision": "acdbbad78f6b805c7244d27dccea3e738c78a446",
+      "Sha256": "c04a19ba293737ad7be4f6e96d6666cb7e479cbe19ecc0c289fad267135b0338",
+      "Size": 88567
+    },
+    {
+      "Path": "configuration.json",
+      "Revision": "d40d2f3d01046c8d4c8f00078f4f376b8f6d6799",
+      "Sha256": "2d4464e2ead06bc9bc718c781309ad1e7baded626d66e8dcdc8b469ba185faf0",
+      "Size": 51
+    },
+    {
+      "Path": "generation_config.json",
+      "Revision": "67f379062054d28cf95f0d6f635663ae2f663313",
+      "Sha256": "e70c136c1b78ddc1fb0905bac8e733a4dc448d4f852a5dd75143fffc70be550e",
+      "Size": 202
+    },
+    {
+      "Path": "hf_quant_config.json",
+      "Revision": "85ab4e1c45df153290587aceef16f91ab8f78897",
+      "Sha256": "fd7200cd8bca2a8a5d777061521abf83e2deb97ab6bc2f04e7a0a3d3f8ecd5c1",
+      "Size": 54902
+    },
+    {
+      "Path": "model-00001-of-00003.safetensors",
+      "Revision": "014be5513164f5944c6d2b5dbb7687a6b9ee78a5",
+      "Sha256": "b4a0d9a57ff1859dac1144b53ca285011db072737d8813fc16d8d1e07ecae17d",
+      "Size": 9965652512
+    },
+    {
+      "Path": "model-00002-of-00003.safetensors",
+      "Revision": "573cc190d4f9ebc5b8c4b0c1e6e9abfad44f5e31",
+      "Sha256": "06da4242b0f491118d19d4d4c7564307a7bd6059c6bed284e08c93f6fc5a556d",
+      "Size": 9985757032
+    },
+    {
+      "Path": "model-00003-of-00003.safetensors",
+      "Revision": "ff1aa15fa12eecfd6b4cba97bdf5f00380b81e52",
+      "Sha256": "e90f5b2bb16814a0565de284ea179edec201edfb120d13f1debaab66f9e60845",
+      "Size": 1970287640
+    },
+    {
+      "Path": "model.safetensors.index.json",
+      "Revision": "77fa26983a2fdbb75b1e1a019f64e6b870c25b6f",
+      "Sha256": "7aa103a2582b7d26631988de33dea19e8a308ee9c239e8e14feb374af30905e2",
+      "Size": 214866
+    },
+    {
+      "Path": "preprocessor_config.json",
+      "Revision": "ff67234358c30f8ed62e003af0b242973f40f836",
+      "Sha256": "27225450ac9c6529872ee1924fcb0962ff5634834f817040f444118116f4e516",
+      "Size": 390
+    },
+    {
+      "Path": "processor_config.json",
+      "Revision": "13b252d63d52066786c936797ebda4ef7830bd46",
+      "Sha256": "d89ef49ce9cd37fbf510158e13c1ef063d9286411c1ec9049932dbe0487143b1",
+      "Size": 1191
+    },
+    {
+      "Path": "tokenizer.json",
+      "Revision": "e8a0944e60ebf05982fa7d8305adc4859d82db34",
+      "Sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+      "Size": 12807982
+    },
+    {
+      "Path": "tokenizer_config.json",
+      "Revision": "9b6c6cc3bd33a72274fb3b65c19e0f8ac40b878c",
+      "Sha256": "5186f0defcd7f232382c7f0aebcd2252d073bb921ab240e407b7ae8745d2b29b",
+      "Size": 16718
+    },
+    {
+      "Path": "video_preprocessor_config.json",
+      "Revision": "79e07219e3f22cd501b69df01537088a3805998a",
+      "Sha256": "7768af27c1fafa9cc9011c1dc20067e03f8915e03b63504550e11d5066986d13",
+      "Size": 385
+    },
+    {
+      "Path": "vocab.json",
+      "Revision": "ff202a99b132db74f3e674d078c78dcf445fb174",
+      "Sha256": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003",
+      "Size": 6722759
+    }
+  ],
+  "completed_at": 1794144478.8094385,
+  "all_sha256_verified": true
+}

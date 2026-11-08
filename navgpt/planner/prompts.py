@@ -483,19 +483,21 @@ Original instruction:
 Observe the initial scene and write a plan of meaningful local goals. Preserve route
 order, directions, counts and endpoint qualifiers; do not invent unseen landmarks.
 An initial room description is context, not an action. Keep a turn with its destination.
-The VLA receives only the chosen local instruction, its completion criterion and your
-latest executed-segment memory. It does not know the original full route or global plan.
+The VLA receives only the chosen local instruction and your latest executed-segment memory. It does not know the original full route or global plan.
 
-Use update_plan to replace your full task list and update completion statuses. Each task has a stable id, instruction and
-completion_criterion; status is pending, in_progress or completed (at most one in_progress). Select the task with
-execute_subtask(task_id). You may rewrite its remaining instruction from the current
-pose and choose execution budgets. Do not repeat a turn or doorway crossing already
+Use update_plan to replace your full task list and update completion statuses. Each task has a stable id, instruction and status; status is pending, in_progress or completed (at most one in_progress). Select the task with
+execute_subtask(task_id). You may override the instruction for this call without modifying the plan. Do not repeat a turn or doorway crossing already
 completed. A VLA stop is a request for your judgment, not proof of success.
+Revise how to achieve the original route, not what it requires: do not replace an
+unachieved action with a description of where you already are. Reopen unsupported completions.
+Execution ends at policy stop, blockage or runtime/global limits. There are no model-selected
+distance, angle or action caps. A runtime limit does not establish completion.
 
-At each handoff examine the returned route evidence and endpoint views/map. Decide
+At each handoff examine the returned route evidence and endpoint views. Decide
 whether to continue, repair, inspect, update the plan or finish. You can directly use
 navigate_relative or navigate_to_node; no review call is required to unlock movement.
-Use observe_node to retrieve a previous node's image when its caption is insufficient.
+Use observe(views=["front", "left"]) to select current camera directions without rotation.
+Use read_memory(node_id, images="endpoint", views=["front"]) for historical node views.
 Avoid fetching observations already provided by the preceding tool unless necessary.
 
 Use update_memory(start_node_id, end_node_id, caption) to summarize the CURRENT execution.
@@ -503,7 +505,7 @@ Nodes are places at execution boundaries; captions describe directed experiences
 places, not the places themselves. Both IDs must be the numbers printed on observe_map
 and must match its pending segment. First call observe_map after the latest movement,
 then read it in a preceding model turn. Never batch observe_map and update_memory.
-Automatically returned maps and read_memory do not satisfy this read requirement.
+Maps are requested explicitly; read_memory does not satisfy this read requirement.
 Summarize what was done, what changed, unfinished conditions and uncertainty. For an
 exploration describe the question and observed discoveries; for a failed attempt describe
 what was not achieved and the evidence; for a return explain why and where you returned.
@@ -515,12 +517,12 @@ Unwritten segments are explicitly marked, and movement is not gated on caption w
 observe_map supplies bounded recent memory and history related to your current node,
 plus an index of omitted records. read_memory(node_id) retrieves incoming/outgoing history;
 read_memory(node_id, other_node_id) retrieves that direction only. Use next_offset for
-older pages and include_images=true when past visual evidence could change your decision.
+older pages and images="trajectory" when past visual evidence could change your decision.
 Memory captions are prior model assessments, not unquestionable facts. When an old branch,
 failed approach or ambiguous location matters, consult its history before repeating it.
 The latest map memory context supersedes earlier snapshots. Full history stays in storage.
 Task switches start a new VLA context with nearby boundary frames. You can set reset_context
-and history_frames/boundary_frames to control what the VLA sees. Current execution keyframes
+to reset actor context; frame budgets are runtime configuration. Current execution keyframes
 are provided automatically; older images can be retrieved without carrying them every turn.
 
 A doorway visible ahead does not establish that it was crossed. Similar beds or rooms
@@ -597,11 +599,31 @@ def instruction_counts_instances(instruction: str) -> bool:
 
 
 def build_briefing_for(condition: str, instruction: str, step_budget: int,
-                       move_routes: bool = True) -> str:
+                       move_routes: bool = True, tools: list[str] | None = None,
+                       allow_context_reset: bool = True, actor_history: str = "bounded") -> str:
     """Briefing for a condition; `planner_basic` uses the bare briefing."""
     if condition == "planner_basic" or condition not in CONDITION_PROMPTS:
         return build_briefing(instruction, step_budget)
     tpl = CONDITION_PROMPTS[condition]
+    if condition == "planner_agentic" and actor_history == "episode":
+        tpl = tpl.replace(
+            "Task switches start a new VLA context with nearby boundary frames. You can set reset_context\n"
+            "to reset actor context; frame budgets are runtime configuration.",
+            "VLA visual history is runtime-managed using native policy sampling. "
+            "Within a task it remains continuous; map memory is not appended to VLA instructions.",
+        )
+    elif condition == "planner_agentic" and not allow_context_reset:
+        tpl = tpl.replace(
+            "You can set reset_context\nto reset actor context; frame budgets are runtime configuration.",
+            "Within a task, actor history is retained; frame budgets are runtime configuration.",
+        )
+    if condition == "planner_agentic" and tools is not None and "navigate_relative" not in tools:
+        tpl = tpl.replace(
+            "You can directly use\nnavigate_relative or navigate_to_node; no review call is required to unlock movement.",
+            "Use execute_subtask for forward progress and local repairs, with an updated local "
+            "instruction when needed. Use navigate_to_node to return to a visited node; "
+            "no review call is required to unlock movement.",
+        )
     if condition in ("planner_motion", "planner_memory"):
         if condition == "planner_memory":
             extra_tools = _PLACE_TOOLS
@@ -638,6 +660,8 @@ def build_briefing_for(condition: str, instruction: str, step_budget: int,
 def first_prompt_for(condition: str) -> str:
     """`planner_basic` opens on observe_forward(); the VLA profiles open on the drive
     itself (it returns the views a look would); the others open on the scan."""
+    if condition == "planner_agentic":
+        return 'Begin with observe(views=["front","right","back","left"]), then write a local plan.'
     if condition == "planner_basic":
         return FIRST_PROMPT
     if condition == "planner_vla_memory":

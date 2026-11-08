@@ -61,7 +61,10 @@ class TopologyMemory:
                    if math.dist(position, n["position"]) <= 0.25]
         ident = min(matches)[1] if matches else len(self.nodes)
         if ident not in self.nodes:
-            self.nodes[ident] = {"id": ident, "position": position, "observation_refs": []}
+            # A place keeps its first pose even when revisited from another direction.
+            self.nodes[ident] = {"id": ident, "position": position,
+                                 "rotation_wxyz": copy.deepcopy(pose.get("rotation_wxyz")),
+                                 "observation_refs": []}
         refs = self.nodes[ident]["observation_refs"]
         if frame_id and frame_id not in refs:
             refs.append(frame_id)
@@ -174,7 +177,7 @@ class TopologyMemory:
                 pairs.add(pair)
             if len(extra) == self.RELATED:
                 break
-        result = {**self.status(), "recent": [self.brief(e) for e in recent],
+        result = {**self.status(), "recent": [self.brief(e) for e in recent if e["id"] != self.pending],
                   "related": [self.brief(e) for e in extra]}
         # Drop whole older records, not fragments. Preserve current execution.
         while len(json.dumps(result, ensure_ascii=False).encode()) > self.CONTEXT_BYTES - 1200:

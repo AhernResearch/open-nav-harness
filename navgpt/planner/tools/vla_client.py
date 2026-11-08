@@ -33,6 +33,7 @@ import threading
 from typing import Any
 
 import requests
+from navgpt.vla.profiles import input_profile
 
 log = logging.getLogger("navgpt.planner.vla")
 
@@ -146,11 +147,13 @@ class NavGPTVLAClient:
         if backend not in ('navgpt', 'lightnav'):
             raise ValueError('unknown VLA backend: '+backend)
         self.backend = backend
+        self.input_profile = input_profile(backend)
         self._lock = threading.Lock()
         # consecutive arrival hits, per the two-hit rule
         self._arrival_streak = 0
         self._context_key = None
         self._context_ids = set()
+        self._context_order = []
 
     def _request(self, method, path, data=None):
         if self.transport is not None:
@@ -189,12 +192,36 @@ class NavGPTVLAClient:
             self._context_ids = {f['id'] for f in frames}
             return state
 
+    def prepare_context(self, context_key, frames):
+        """Synchronize history; the current observation is consumed by act once.
+
+        Episode actors append only unseen observations. A task switch never resets
+        their native history, and a repeated endpoint can be inferred with new text
+        without becoming a new timestep.
+        """
+        if self.input_profile.history == "bounded":
+            return self.replace_context(context_key, frames[:-1])
+        with self._lock:
+            ids = [f['id'] for f in frames]
+            if not ids or len(set(ids)) != len(ids) or ids[:len(self._context_order)] != self._context_order:
+                raise ValueError('Episode history must extend the existing ordered frames')
+            for frame in frames[len(self._context_order):-1]:
+                state = self._request('POST', '/observe', {
+                    'rgb_policy': frame['views']['policy_front'], 'frame_id': frame['id'],
+                })
+                if state.get('frame_ids', [])[-1:] != [frame['id']]:
+                    raise RuntimeError('Backend history acknowledgment mismatch')
+                self._context_order.append(frame['id'])
+                self._context_ids.add(frame['id'])
+            self._context_key = 'episode'
+
     def reset(self, success: bool | None = None) -> dict[str, Any]:
         """MANDATORY between episodes — this is what clears the frame history."""
         with self._lock:
             self._arrival_streak = 0
             self._context_key = None
             self._context_ids = set()
+            self._context_order = []
             return self._request("POST", "/reset", {"success": success})
 
     # ── inference ──
@@ -237,6 +264,8 @@ class NavGPTVLAClient:
             action, navigation = _parse_act(body)
             if frame_id is not None:
                 self._context_ids.add(frame_id)
+                if self.input_profile.history == "episode" and self._context_order[-1:] != [frame_id]:
+                    self._context_order.append(frame_id)
 
             if self.backend == 'lightnav':
                 if action.get('policy_backend') != 'lightnav' or type(action.get('stop')) is not bool:

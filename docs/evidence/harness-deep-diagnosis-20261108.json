@@ -1,0 +1,313 @@
+{
+  "job_id": "fc21827e81f74b84b06e4cb58c4fb3fb",
+  "scope": "Read-only diagnosis of frozen eight attempts; no code changes, deployments or new navigation runs.",
+  "episodes": [
+    {
+      "episode": 5782,
+      "instruction": "Go past the couches and then when you get to the table and chairs turn right and go straight until you pass the stairs on the right. Turn left and wait by the entrance. ",
+      "metrics": {
+        "success": 0.0,
+        "oracle_success": 0.0,
+        "distance_to_goal": 14.7825
+      },
+      "completed_execute_segments": 7,
+      "handoff_reasons": {
+        "turn_budget": 7
+      },
+      "net_displacement_under_10cm": 3,
+      "unwritten_segments": 0,
+      "last_context_retained_turns": 11,
+      "last_context_dropped_turns": 13,
+      "context_keys_with_multiple_local_instructions": {
+        "task-1-frame-0": [
+          "Continue moving forward toward the dining table and chairs. I need to get past the couches and reach the dining area to complete this task.",
+          "Continue moving forward toward the dining table and chairs. Keep the blue armchairs to my right and move into the open space between the living room and dining area.",
+          "Go past the couches toward the dining area. Move forward and slightly left to navigate around the coffee table and couches toward the open area where the dining table and chairs are visible.",
+          "Move forward and slightly left to navigate around the coffee table and couches toward the dining area. The dining table and chairs are visible ahead-left past the blue armchairs."
+        ],
+        "task-2-frame-25": [
+          "Continue moving straight in the current direction. I've already turned right and now need to go straight to find the stairs on the right side.",
+          "Move straight forward. I'm currently facing the living room area with the stone fireplace wall on my left. I need to continue moving straight to find the stairs on the right side.",
+          "Turn right and move straight. I'm currently at the dining area with the table to my left. I need to turn right and head toward the hallway/open area beyond the fireplace wall."
+        ]
+      },
+      "source_trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/0d908686695143f189cb58d5b9b5e6d1/episode/work/ep5782/trace/requests.jsonl",
+      "source_events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/0d908686695143f189cb58d5b9b5e6d1/episode/live/ep5782/subtasks/events.jsonl"
+    },
+    {
+      "episode": 3478,
+      "instruction": "Exit the bedroom and cross the hallway into the kitchen. Go past the kitchen and wait in the dining room to the right of the doors. ",
+      "metrics": {
+        "success": 0.0,
+        "oracle_success": 0.0,
+        "distance_to_goal": 8.9963
+      },
+      "completed_execute_segments": 5,
+      "handoff_reasons": {
+        "turn_budget": 2,
+        "distance_budget": 2,
+        "vla_stop": 1
+      },
+      "net_displacement_under_10cm": 0,
+      "unwritten_segments": 0,
+      "last_context_retained_turns": 9,
+      "last_context_dropped_turns": 16,
+      "context_keys_with_multiple_local_instructions": {
+        "task-1-frame-0": [
+          "Move forward through the open doorway to exit the bedroom",
+          "Turn right and exit the bedroom through the doorway"
+        ],
+        "task-3-frame-51": [
+          "Continue forward past the kitchen island, looking for the dining room area to the right of any doors",
+          "Move forward into the dining room area, positioning myself to the right of the glass doors"
+        ]
+      },
+      "source_trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/27cb899d4270484a912ed859dfb65cbd/episode/work/ep3478/trace/requests.jsonl",
+      "source_events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/27cb899d4270484a912ed859dfb65cbd/episode/live/ep3478/subtasks/events.jsonl"
+    },
+    {
+      "episode": 6298,
+      "instruction": "Exit the room. Turn right and go into the third door on the right. Go straight into the door in the middle and wait therfe. ",
+      "metrics": {
+        "success": 1.0,
+        "oracle_success": 1.0,
+        "distance_to_goal": 0.6675
+      },
+      "completed_execute_segments": 9,
+      "handoff_reasons": {
+        "vla_stop": 1,
+        "turn_budget": 3,
+        "action_budget": 2,
+        "distance_budget": 3
+      },
+      "net_displacement_under_10cm": 0,
+      "unwritten_segments": 5,
+      "last_context_retained_turns": 7,
+      "last_context_dropped_turns": 23,
+      "context_keys_with_multiple_local_instructions": {
+        "task-1-frame-0": [
+          "Exit the room through the doorway to the right",
+          "Turn around and exit through the doorway behind me to the hallway"
+        ],
+        "task-2-frame-28": [
+          "Turn right and enter the doorway into the room",
+          "Turn right and walk down the hallway, counting doors on the right. Enter the third door on the right."
+        ],
+        "task-3-frame-90": [
+          "Go straight into the doorway in the center of the far wall",
+          "Go straight into the left doorway (the middle door)",
+          "Go straight toward the doorway in the middle of the hallway ahead",
+          "Turn left and go into the hallway to find the door in the middle",
+          "Turn left to face the doorway and move toward it"
+        ]
+      },
+      "source_trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/3c29c615c9df432593d81e7410e40a69/episode/work/ep6298/trace/requests.jsonl",
+      "source_events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/3c29c615c9df432593d81e7410e40a69/episode/live/ep6298/subtasks/events.jsonl"
+    },
+    {
+      "episode": 7006,
+      "instruction": "Walk up stairs. Make a left on the stair landing. Make a left through the open door on the left. Wait at the foot of the bed. ",
+      "metrics": {
+        "success": 0.0,
+        "oracle_success": 1.0,
+        "distance_to_goal": 5.6104
+      },
+      "completed_execute_segments": 7,
+      "handoff_reasons": {
+        "vla_stop": 3,
+        "turn_budget": 3,
+        "distance_budget": 1
+      },
+      "net_displacement_under_10cm": 2,
+      "unwritten_segments": 3,
+      "last_context_retained_turns": 7,
+      "last_context_dropped_turns": 21,
+      "context_keys_with_multiple_local_instructions": {
+        "task-2-frame-12": [
+          "Continue down the hallway, looking for an open door on the left",
+          "Turn left and walk down the hallway on the landing"
+        ],
+        "task-4-frame-46": [
+          "Move forward to the foot of the bed",
+          "Move to the foot of the bed",
+          "Turn around and walk to the foot of the bed"
+        ]
+      },
+      "source_trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/508f07eb53134d1fb15dc701c892a239/episode/work/ep7006/trace/requests.jsonl",
+      "source_events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/508f07eb53134d1fb15dc701c892a239/episode/live/ep7006/subtasks/events.jsonl"
+    },
+    {
+      "episode": 1179,
+      "instruction": "TURN RIGHT TO FACE AN OPEN DOOR WITH A CABINET ON THE RIGHT, WALK THOUGH THE DOOR INTO A HALLWAY, TURN LEFT AND WALK DOWN A SHORT HALLWAY, FACING A NEW ROOM WITH A COUCH ON THE RIGHT AND A STAIR CASE ON THE LEFT AND WITH A DOOR WAY IN FRONT OF YOU WALK FORWARD TOWARDS THE DOORWAY, WALK TO THE END OF THE HALL SO THAT YOU ARE FACING TWO BEDROOMS, TURN SLIGHTLY TO THE LEFT AND WALK INTO THE BEDROOM ON THE LEFT HAND SIDE. ",
+      "metrics": {
+        "success": 0.0,
+        "oracle_success": 0.0,
+        "distance_to_goal": 10.2
+      },
+      "completed_execute_segments": 7,
+      "handoff_reasons": {
+        "vla_stop": 1,
+        "turn_budget": 6
+      },
+      "net_displacement_under_10cm": 2,
+      "unwritten_segments": 2,
+      "last_context_retained_turns": 10,
+      "last_context_dropped_turns": 17,
+      "context_keys_with_multiple_local_instructions": {
+        "task-3-frame-32": [
+          "Turn to face the doorway and walk forward towards it",
+          "Walk forward through the doorway ahead"
+        ],
+        "task-5-frame-54": [
+          "Turn slightly left and walk into the bedroom on the left hand side",
+          "Walk forward into the bedroom on the left"
+        ]
+      },
+      "source_trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/6cc2a917e74b480b89a2a3b27a9b6309/episode/work/ep1179/trace/requests.jsonl",
+      "source_events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/6cc2a917e74b480b89a2a3b27a9b6309/episode/live/ep1179/subtasks/events.jsonl"
+    },
+    {
+      "episode": 456,
+      "instruction": "Walk out of the bathroom and through the television room into the hallway. In the hall go to the stairs and go up the stairs, stopping on the fourth from the top stair. ",
+      "metrics": {
+        "success": 1.0,
+        "oracle_success": 1.0,
+        "distance_to_goal": 0.7367
+      },
+      "completed_execute_segments": 11,
+      "handoff_reasons": {
+        "distance_budget": 4,
+        "vla_stop": 6,
+        "turn_budget": 1
+      },
+      "net_displacement_under_10cm": 1,
+      "unwritten_segments": 8,
+      "last_context_retained_turns": 10,
+      "last_context_dropped_turns": 22,
+      "context_keys_with_multiple_local_instructions": {
+        "task-4-frame-50": [
+          "Climb up the stairs, counting the steps. Stop on the fourth stair from the top.",
+          "Continue climbing up the stairs. I need to reach the fourth stair from the top. Count the remaining stairs and position myself correctly."
+        ],
+        "task-4-frame-77": [
+          "Continue climbing up the stairs toward the top landing",
+          "Move forward up the stairs by one or two steps"
+        ],
+        "task-4-frame-107": [
+          "Continue down the stairs, descending 2 more steps to reach the fourth stair from the top.",
+          "Step down exactly 4 stairs from the top. Stop on the fourth stair below the landing.",
+          "Step down one more stair to reach the fourth stair from the top."
+        ]
+      },
+      "source_trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/90c57e90872c4b58bcaafca46ec11b24/episode/work/ep0456/trace/requests.jsonl",
+      "source_events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/90c57e90872c4b58bcaafca46ec11b24/episode/live/ep0456/subtasks/events.jsonl"
+    },
+    {
+      "episode": 7648,
+      "instruction": "Walk down stairs.  Stop at bottom.  Wait here. ",
+      "metrics": {
+        "success": 1.0,
+        "oracle_success": 1.0,
+        "distance_to_goal": 1.246
+      },
+      "completed_execute_segments": 3,
+      "handoff_reasons": {
+        "vla_stop": 1,
+        "turn_budget": 1,
+        "distance_budget": 1
+      },
+      "net_displacement_under_10cm": 0,
+      "unwritten_segments": 2,
+      "last_context_retained_turns": 7,
+      "last_context_dropped_turns": 3,
+      "context_keys_with_multiple_local_instructions": {
+        "task-2-frame-10": [
+          "Continue walking down the stairs to the bottom",
+          "Walk down the stairs"
+        ]
+      },
+      "source_trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/bd2f9e9ca32d4c078c8d892c7fd83614/episode/work/ep7648/trace/requests.jsonl",
+      "source_events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/bd2f9e9ca32d4c078c8d892c7fd83614/episode/live/ep7648/subtasks/events.jsonl"
+    },
+    {
+      "episode": 4132,
+      "instruction": "Walk down the steps and take a very slight left, before heading through the door and taking a hard right, wrap around and through the same door and stop at the top of the steps. ",
+      "metrics": {
+        "success": 0.0,
+        "oracle_success": 1.0,
+        "distance_to_goal": 3.6553
+      },
+      "completed_execute_segments": 20,
+      "handoff_reasons": {
+        "blocked": 5,
+        "turn_budget": 14,
+        "vla_stop": 1
+      },
+      "net_displacement_under_10cm": 5,
+      "unwritten_segments": 9,
+      "last_context_retained_turns": 11,
+      "last_context_dropped_turns": 54,
+      "context_keys_with_multiple_local_instructions": {
+        "task-2-frame-78": [
+          "Move forward and slightly left in the living room, looking for a door to go through",
+          "Turn right to face the living room, then move forward into the living room"
+        ],
+        "task-3-frame-109": [
+          "Turn left and go through the doorway to the kitchen/pantry area",
+          "Turn left and go through the doorway with the large wooden door"
+        ],
+        "task-5-frame-149": [
+          "Move forward through the door into the living room",
+          "Move forward through the door to the living room",
+          "Turn around and move into the living room",
+          "Turn left and go back through the door to the living room",
+          "Turn left and move through the door into the living room",
+          "Turn right and move into the living room"
+        ]
+      },
+      "source_trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/fd8839613c6b44c097ae2e217d62c76d/episode/work/ep4132/trace/requests.jsonl",
+      "source_events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/fd8839613c6b44c097ae2e217d62c76d/episode/live/ep4132/subtasks/events.jsonl"
+    }
+  ],
+  "aggregate": {
+    "success": 3.0,
+    "oracle_success": 5.0,
+    "total_episodes": 8,
+    "completed_execute_segments": 69,
+    "handoff_reasons": {
+      "turn_budget": 37,
+      "distance_budget": 11,
+      "vla_stop": 14,
+      "action_budget": 2,
+      "blocked": 5
+    },
+    "net_displacement_under_10cm": 13,
+    "unwritten_execute_segments": 29,
+    "segments_with_turn_limit_at_most_90deg": 45,
+    "actor_stop_sources": {
+      "model_stop": 14
+    }
+  },
+  "findings": [
+    {
+      "claim": "7006 reached success radius and subsequently left; not simply failure to find the initial target room.",
+      "evidence": "oracle_success=1; new entry node3 [-14.1348,3.15184,6.77164] is near old successful endpoint [-13.7051,3.15184,6.90710]; later 3.06m +.75m traversals enter opposite bedroom as visible in waypoint images.",
+      "limitation": "Oracle metric is offline diagnosis only, never planner input. It does not identify the exact successful timestep."
+    },
+    {
+      "claim": "Automatic VLA memory injection can supply an older segment from a different task after intervening movement.",
+      "evidence": "AgenticTasks.policy_instruction always selects latest caption. 7006 final request atnode4 injects edge2->3 caption from task3;4132 task5 uses task3 caption through six intervening segments.",
+      "limitation": "Mechanism and inputs verified; causal navigation effect needs ablation."
+    },
+    {
+      "claim": "Changing local instruction within same task retains old visual anchor unless reset_context is requested.",
+      "evidence": "7006 task4-frame46 used for Move to foot / Turn around and walk / Move forward;4132 task5-frame149 used for six different instructions.",
+      "limitation": "Continuation may correctly retain history; do not reset indiscriminately. Need define instruction reference frame and compare."
+    },
+    {
+      "claim": "Planner image pruning is FIFO over complete tool-feedback turns, not execution evidence importance.",
+      "evidence": "ContextWindow.build advances start exponentially. Projection preserves plan/latest caption but not earlier task-boundary images or per-task accepted evidence.",
+      "limitation": "7006 latest endpoint images were present; cannot attribute its final error just to missing images."
+    }
+  ]
+}

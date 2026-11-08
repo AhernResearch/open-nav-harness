@@ -27,30 +27,62 @@ class CompatibleClient:
     async def close(self):
         await self.http.aclose()
 
+    async def _post_inference(self, url, payload, *, operation, journal, timeout=None):
+        """Retry only read-only inference requests, never navigation/tool execution."""
+        for attempt in range(1, 4):
+            if journal and operation == "model":
+                journal.emit("model_request", request=payload, attempt=attempt)
+            started = time.monotonic()
+            try:
+                options = {"timeout": timeout} if timeout is not None else {}
+                response = await self.http.post(url, json=payload, **options)
+            except httpx.RequestError as exc:
+                if journal:
+                    journal.emit(
+                        operation + "_transport_error", error=f"{type(exc).__name__}: {exc}",
+                        elapsed_s=time.monotonic() - started, attempt=attempt,
+                    )
+                if attempt == 3:
+                    raise
+            else:
+                if journal:
+                    try:
+                        body = response.json()
+                    except ValueError:
+                        body = {"error": response.text}
+                    if operation == "model":
+                        fields = {"response": body}
+                    elif isinstance(body, dict):
+                        fields = {key: body.get(key) for key in ("count", "max_model_len", "error")}
+                    else:
+                        fields = {"error": "Non-object tokenizer response"}
+                    journal.emit(
+                        "model_response" if operation == "model" else "token_count",
+                        status=response.status_code, elapsed_s=time.monotonic() - started,
+                        attempt=attempt, **fields,
+                    )
+                if response.status_code not in (429, 502, 503, 504) or attempt == 3:
+                    return response
+            await asyncio.sleep(2 ** (attempt - 1))
+        raise ModelProtocolError("Request attempts exhausted")
+
     async def count(self, messages: list, tools: list) -> int:
         p = self.profile
         url = p.token_count_url or p.base_url.removesuffix("/v1") + "/tokenize"
         # vLLM's tokenize endpoint applies the actual processor/chat template,
         # including image placeholders. An unavailable counter fails closed.
-        r = await self.http.post(
+        r = await self._post_inference(
             url,
-            json={
+            {
                 "model": p.model,
                 "messages": messages,
                 "tools": tools,
                 "add_generation_prompt": True,
                 "chat_template_kwargs": {"enable_thinking": p.thinking},
             },
+            operation="token_count", journal=self.journal,
+            timeout=min(15, p.request_timeout_s),
         )
-        if self.journal:
-            body = r.json() if "json" in r.headers.get("content-type", "") else {"error": r.text}
-            self.journal.emit(
-                "token_count",
-                status=r.status_code,
-                count=body.get("count"),
-                max_model_len=body.get("max_model_len"),
-                error=body.get("error"),
-            )
         if r.status_code == 400 and any(
             phrase in r.text.lower()
             for phrase in (
@@ -63,9 +95,14 @@ class CompatibleClient:
             raise CounterLimit(r.text)
         if r.is_error:
             raise ModelProtocolError(f"Tokenizer HTTP {r.status_code}: {r.text[:4000]}")
-        body = r.json()
+        try:
+            body = r.json()
+        except ValueError as exc:
+            raise ModelProtocolError("Tokenizer endpoint returned invalid JSON") from exc
+        if not isinstance(body, dict):
+            raise ModelProtocolError("Tokenizer endpoint did not return an object")
         count = body.get("count")
-        if not isinstance(count, int) or count < 0:
+        if type(count) is not int or count < 0:
             raise ModelProtocolError("Tokenizer endpoint did not return a valid count")
         return count
 
@@ -81,34 +118,15 @@ class CompatibleClient:
             "max_tokens": p.output_tokens,
             "chat_template_kwargs": {"enable_thinking": p.thinking},
         }
-        for attempt in range(3):
-            journal.emit("model_request", request=payload, attempt=attempt + 1)
-            started = time.monotonic()
-            try:
-                r = await self.http.post(p.base_url.rstrip("/") + "/chat/completions", json=payload)
-            except httpx.RequestError as e:
-                journal.emit("model_transport_error", error=str(e), attempt=attempt + 1)
-                if attempt == 2:
-                    raise
-                await asyncio.sleep(2**attempt)
-                continue
-            journal.emit(
-                "model_response",
-                status=r.status_code,
-                elapsed_s=time.monotonic() - started,
-                response=r.json() if "json" in r.headers.get("content-type", "") else r.text,
-                attempt=attempt + 1,
-            )
-            if r.status_code == 429 or r.status_code in (502, 503, 504):
-                if attempt < 2:
-                    await asyncio.sleep(2**attempt)
-                    continue
-            r.raise_for_status()
-            body = r.json()
-            choices = body.get("choices") or []
-            if len(choices) != 1 or not isinstance(choices[0].get("message"), dict):
-                raise ModelProtocolError("Expected exactly one assistant response")
-            if choices[0].get("finish_reason") == "length":
-                raise ModelProtocolError("Model response truncated before completion")
-            return body
-        raise ModelProtocolError("Request attempts exhausted")
+        r = await self._post_inference(
+            p.base_url.rstrip("/") + "/chat/completions", payload,
+            operation="model", journal=journal,
+        )
+        r.raise_for_status()
+        body = r.json()
+        choices = body.get("choices") or []
+        if len(choices) != 1 or not isinstance(choices[0].get("message"), dict):
+            raise ModelProtocolError("Expected exactly one assistant response")
+        if choices[0].get("finish_reason") == "length":
+            raise ModelProtocolError("Model response truncated before completion")
+        return body

@@ -1,10 +1,8 @@
-"""Authenticated single-origin management API. No navigation logic here."""
+"""Open-access management API. No navigation logic here."""
 
 import asyncio
 import hashlib
-import hmac
 import json
-import secrets
 import time
 import zipfile
 from contextlib import asynccontextmanager, suppress
@@ -18,10 +16,6 @@ from nav_harness.core.config import ExperimentSpec, PlatformSettings, ServiceSpe
 from .database import Database, ident
 from .services import ServiceManager
 from .results import attempt_detail, csv_export, metrics, aggregate, read_jsonl
-
-
-class Login(BaseModel):
-    password: str
 
 
 class Action(BaseModel):
@@ -41,12 +35,6 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
     root = root.resolve()
     db = Database(root)
     db.migrate()
-    password_path = root / "admin-password"
-    if not password_path.exists():
-        password_path.write_text(secrets.token_urlsafe(24))
-        password_path.chmod(0o600)
-    password = password_path.read_text().strip()
-    key = hashlib.sha256(password.encode()).digest()
     manager = ServiceManager(db, settings)
 
     @asynccontextmanager
@@ -69,27 +57,8 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
     app.state.db = db
     app.state.services = manager
 
-    def authenticated(request):
-        auth = request.headers.get("authorization", "")
-        if auth.startswith("Bearer ") and hmac.compare_digest(auth[7:], password):
-            return True
-        cookie = request.cookies.get("navh_session", "")
-        try:
-            stamp, signature = cookie.split(".")
-            expected = hmac.new(key, stamp.encode(), "sha256").hexdigest()
-            return 0 <= time.time() - int(stamp) < 28800 and hmac.compare_digest(signature, expected)
-        except (ValueError, TypeError):
-            return False
-
     @app.middleware("http")
-    async def authentication(request: Request, call_next):
-        if request.url.path.startswith("/api/") and request.url.path != "/api/login":
-            if not authenticated(request):
-                return JSONResponse({"detail": "Authentication required"}, status_code=401)
-            if request.method not in ("GET", "HEAD") and not request.headers.get("authorization"):
-                origin = request.headers.get("origin")
-                if origin != str(request.base_url).rstrip("/"):
-                    return JSONResponse({"detail": "Same-origin request required"}, status_code=403)
+    async def response_headers(request: Request, call_next):
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
@@ -113,30 +82,6 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
     def health():
         return {"ok": True, "version": "0.1.0"}
 
-    @app.post("/api/login")
-    async def login(body: Login, request: Request):
-        if not hmac.compare_digest(body.password, password):
-            await asyncio.sleep(0.5)
-            raise HTTPException(401, "Invalid password")
-        stamp = str(int(time.time()))
-        signed = stamp + "." + hmac.new(key, stamp.encode(), "sha256").hexdigest()
-        response = JSONResponse({"ok": True})
-        response.set_cookie(
-            "navh_session",
-            signed,
-            httponly=True,
-            samesite="strict",
-            secure=request.url.scheme == "https",
-            max_age=28800,
-        )
-        return response
-
-    @app.post("/api/logout")
-    def logout():
-        response = JSONResponse({"ok": True})
-        response.delete_cookie("navh_session")
-        return response
-
     @app.get("/api/overview")
     def overview():
         counts = db.rows("SELECT status,COUNT(*) AS count FROM jobs GROUP BY status")
@@ -157,6 +102,23 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
         if body.managed and body.template not in settings.service_templates:
             raise ValueError("Unknown service template")
         return {"id": db.register_service(body)}
+
+    @app.get("/api/inference/status")
+    async def inference_status():
+        shared = [
+            r
+            for r in db.rows("SELECT id,spec FROM services")
+            if json.loads(r["spec"]).get("metadata", {}).get("shared_inference")
+        ]
+
+        async def inspect(row):
+            return {
+                "service_id": row["id"],
+                "name": json.loads(row["spec"])["name"],
+                **await manager.health(row["id"]),
+            }
+
+        return await asyncio.gather(*(inspect(row) for row in shared))
 
     @app.get("/api/templates")
     def templates():
@@ -202,7 +164,13 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
     @app.post("/api/experiments", status_code=201)
     def experiment(body: ExperimentSpec):
         deployments = {}
-        for sid in (body.planner_service, body.environment_service, body.vla_service):
+        for sid in [
+            body.planner_service,
+            body.environment_service,
+            body.vla_service,
+            *(b.environment_service for b in body.execution_pool),
+            *(b.execution_service for b in body.execution_pool),
+        ]:
             if not sid:
                 continue
             service = db.service(sid)
@@ -229,6 +197,10 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
                 "SELECT COUNT(DISTINCT episode) AS n FROM attempts WHERE job_id=:j AND status='completed'",
                 j=row["id"],
             )[0]["n"]
+            row["active"] = db.rows(
+                "SELECT COUNT(*) AS n FROM attempts WHERE job_id=:j AND status='running'", j=row["id"]
+            )[0]["n"]
+            row["execution_pool"] = spec.get("execution_pool", [])
             row["resources"] = {
                 k: spec.get(k) for k in ("planner_service", "environment_service", "vla_service")
             }
@@ -258,8 +230,8 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
         return attempt_detail(get_attempt(aid))
 
     @app.post("/api/attempts/{aid}/reconcile")
-    def reconcile_attempt(aid: str):
-        db.release_reconciled(aid)
+    async def reconcile_attempt(aid: str):
+        await manager.reconcile_attempt(aid)
         return {"ok": True}
 
     @app.get("/api/attempts/{aid}/artifact/{digest}")

@@ -1,0 +1,2668 @@
+{
+  "created": 1794166209.1743073,
+  "implementation_digest": "88fa16a679ba7a77bfa85144601ade8359be5ca6e12ff47f62b548a6d403f16a",
+  "release": "/data/nav_storage/nav-harness/releases/async-88fa16a679ba",
+  "episodes": [
+    0,
+    456,
+    7006,
+    7648
+  ],
+  "arms": [
+    {
+      "policy": "episode",
+      "experiment_id": "88c4b5a549d0494fb2dbb31a33b52dab",
+      "spec": {
+        "name": "LightNav official chain / episode / paired4",
+        "planner_service": "eaa85c5c908141f6b57e16a231cdc511",
+        "vla_service": "457941e1ef2448f28537209c16de106e",
+        "execution_pool": [
+          {
+            "environment_service": "e0802796122642d9b19f9ae9c39ba1f8",
+            "execution_service": "2e7bd465f9ac473ba75313fa3c5afc4d"
+          },
+          {
+            "environment_service": "ba97ba0f106f47d983d2b9ecff4a07d8",
+            "execution_service": "20d3792f5f7c45f587d77fac6f19b9b0"
+          },
+          {
+            "environment_service": "5e54bafdfe224410b5c1720ba63601f4",
+            "execution_service": "339b2b74985a4b0aba3144eea9705249"
+          },
+          {
+            "environment_service": "37bbdb5e0dcb4dae8a2c905f5aba1955",
+            "execution_service": "e950bb08bcd540d795fac907cdbf6194"
+          }
+        ],
+        "episodes": [
+          0,
+          456,
+          7006,
+          7648
+        ],
+        "purpose": "development",
+        "config": {
+          "dataset": {
+            "name": "r2r",
+            "split": "train"
+          },
+          "environment": {
+            "max_steps": 500,
+            "forward_view_px": 512,
+            "panorama_view_px": 400
+          },
+          "vla": {
+            "backend": "lightnav"
+          },
+          "planner": {
+            "max_turns": 100,
+            "episode_timeout_s": 900,
+            "tools": [
+              "observe_map",
+              "navigate_to_node",
+              "terminate_episode",
+              "update_plan",
+              "execute_subtask",
+              "observe",
+              "update_memory",
+              "read_memory"
+            ]
+          },
+          "harness": {
+            "mode": "agentic",
+            "allow_context_reset": false,
+            "vla_steps_per_call": 0,
+            "actor_history_policy": "episode"
+          }
+        }
+      },
+      "job_id": "15255edd53a74958ba8b5fbf7a1e74a3",
+      "rows": [
+        {
+          "attempt_id": "910d395a8c0e41b48bbda9f8f1c70d3d",
+          "episode": 0,
+          "attempt": 1,
+          "status": "completed",
+          "success": 1.0,
+          "ne": 0.7152,
+          "spl": 1.0,
+          "ndtw": 0.9076,
+          "distance_m": 6.3079,
+          "wall_s": 155.8,
+          "tool_calls": 14,
+          "turns": 14,
+          "vla_calls": 53,
+          "input_tokens": 132574,
+          "cached_input_tokens": 0,
+          "output_tokens": 2338,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/7y3sRwLe3Va/7y3sRwLe3Va.glb",
+          "episode_id": "1",
+          "training_status": "evaluation_only",
+          "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/910d395a8c0e41b48bbda9f8f1c70d3d/episode/work/ep0000/trace/requests.jsonl",
+          "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/910d395a8c0e41b48bbda9f8f1c70d3d/episode/live/ep0000/subtasks/events.jsonl",
+          "replay_url": "http://192.168.66.221:18889/?attempt=910d395a8c0e41b48bbda9f8f1c70d3d",
+          "metrics": {
+            "distance_to_goal": 0.7152,
+            "success": 1.0,
+            "spl": 1.0,
+            "oracle_success": 1.0,
+            "ndtw": 0.9076,
+            "sdtw": 0.9076,
+            "path_length": 6.3079,
+            "steps_taken": 51.0,
+            "stop_called": 1.0,
+            "collisions": 0.0,
+            "teleports": 0.0,
+            "teleport_fallbacks": 0.0,
+            "velocity_steps": 50.0
+          },
+          "tool_counts": {
+            "observe": 1,
+            "update_plan": 3,
+            "execute_subtask": 3,
+            "observe_map": 3,
+            "update_memory": 3,
+            "terminate_episode": 1
+          },
+          "segments": [
+            {
+              "arguments": {
+                "task_id": 1,
+                "instruction": "Move forward along the right side of the kitchen island, keeping the island on my left"
+              },
+              "wall_s": 2.7181317806243896,
+              "steps_the_vla_took": 3,
+              "step_budget_for_this_call": 500,
+              "distance_travelled_m": 0.15,
+              "net_displacement_m": 0.15,
+              "blocked_events": 0,
+              "steps_taken_total": 3,
+              "steps_remaining_approx": 497,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 36.12
+            },
+            {
+              "arguments": {
+                "instruction": "Continue moving forward along the right side of the kitchen island, keeping it on my left, and go around the end of the island",
+                "task_id": 1
+              },
+              "wall_s": 22.342668056488037,
+              "steps_the_vla_took": 40,
+              "step_budget_for_this_call": 497,
+              "distance_travelled_m": 5.56,
+              "net_displacement_m": 4.3,
+              "blocked_events": 0,
+              "steps_taken_total": 43,
+              "steps_remaining_approx": 457,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 149.89
+            },
+            {
+              "arguments": {
+                "instruction": "Move toward the doorway on the right that leads to the dining room with the table and mirror, and stop at the doorway",
+                "task_id": 3
+              },
+              "wall_s": 5.117015361785889,
+              "steps_the_vla_took": 7,
+              "step_budget_for_this_call": 457,
+              "distance_travelled_m": 0.6,
+              "net_displacement_m": 0.6,
+              "blocked_events": 0,
+              "steps_taken_total": 50,
+              "steps_remaining_approx": 450,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 62.59
+            }
+          ],
+          "actor_predictions": 53,
+          "crops": [],
+          "crop_count": 0,
+          "completion_boundaries": [
+            {
+              "event": 286,
+              "kind": "task_completion_boundary",
+              "task_id": 1,
+              "frame_index": 43,
+              "frame_id": "frame-000043"
+            },
+            {
+              "event": 342,
+              "kind": "task_completion_boundary",
+              "task_id": 3,
+              "frame_index": 50,
+              "frame_id": "frame-000050"
+            }
+          ],
+          "available_history_frames": {
+            "count": 53,
+            "mean": 25.92452830188679,
+            "p50": 26,
+            "p95": 49,
+            "sum": 1374
+          },
+          "inference_and_context_s": {
+            "count": 53,
+            "mean": 0.2222246603773585,
+            "p50": 0.211361,
+            "p95": 0.345402,
+            "sum": 11.777907
+          },
+          "actor_latency_ms": {
+            "count": 53,
+            "mean": 143.91044065145388,
+            "p50": 135.67310804501176,
+            "p95": 186.55311642214656,
+            "sum": 7627.253354527056
+          },
+          "inference_metrics": {
+            "batch_size": {
+              "count": 53,
+              "mean": 1.2641509433962264,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 67.0
+            },
+            "queue_wait_ms": {
+              "count": 53,
+              "mean": 43.61449573013299,
+              "p50": 23.62487092614174,
+              "p95": 122.62758892029524,
+              "sum": 2311.5682736970484
+            },
+            "queue_ms": {
+              "count": 53,
+              "mean": 0.6621150510772219,
+              "p50": 0.25796424597501755,
+              "p95": 3.6820201203227043,
+              "sum": 35.09209770709276
+            },
+            "llm_ms": {
+              "count": 53,
+              "mean": 81.26478912835975,
+              "p50": 81.48121880367398,
+              "p95": 102.81904088333249,
+              "sum": 4307.033823803067
+            },
+            "vit_ms": {
+              "count": 53,
+              "mean": 62.64565152309413,
+              "p50": 53.00790211185813,
+              "p95": 96.8191809952259,
+              "sum": 3320.219530723989
+            },
+            "process_sample_ms": {
+              "count": 53,
+              "mean": 23.979547073326582,
+              "p50": 25.338436011224985,
+              "p95": 32.873577903956175,
+              "sum": 1270.915994886309
+            },
+            "vit_cache_hits": {
+              "count": 53,
+              "mean": 11.169811320754716,
+              "p50": 12.0,
+              "p95": 20.0,
+              "sum": 592.0
+            },
+            "vit_cache_misses": {
+              "count": 53,
+              "mean": 1.2452830188679245,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 66.0
+            },
+            "execution_ms": {
+              "count": 53,
+              "mean": 212.99083930668684,
+              "p50": 203.0324642546475,
+              "p95": 329.14250204339623,
+              "sum": 11288.514483254403
+            }
+          },
+          "planner_requests": 14,
+          "planner_elapsed_s": 114.11503500910476,
+          "planner_tokens": {
+            "prompt_tokens": 132574,
+            "completion_tokens": 2338
+          },
+          "initial_request_sha256": "d688cf7389e13a4e326b59d2e2b4f232e75ebc765821bd085a6c1417b7bf9085",
+          "initial_plan": {
+            "reason": "Initial plan based on observations. I'm in a kitchen with a center island. I need to go around the right side of it to find a doorway with a dining table and mirror.",
+            "subtasks": [
+              {
+                "id": 1,
+                "instruction": "Move forward along the right side of the kitchen island, keeping the island on my left",
+                "status": "pending"
+              },
+              {
+                "id": 2,
+                "instruction": "Continue around the end of the island toward the doorway area",
+                "status": "pending"
+              },
+              {
+                "id": 3,
+                "instruction": "Stop by the right side doorway that has a dining table and mirror visible",
+                "status": "pending"
+              }
+            ]
+          },
+          "first_execution": {
+            "task_id": 1,
+            "instruction": "Move forward along the right side of the kitchen island, keeping the island on my left"
+          },
+          "contiguous_history_verified": true,
+          "plain_instruction_verified": true
+        },
+        {
+          "attempt_id": "d79677121725490d9470b8db4e79bb12",
+          "episode": 456,
+          "attempt": 1,
+          "status": "completed",
+          "success": 1.0,
+          "ne": 2.5972,
+          "spl": 0.5918,
+          "ndtw": 0.5971,
+          "distance_m": 18.9155,
+          "wall_s": 433.9,
+          "tool_calls": 43,
+          "turns": 43,
+          "vla_calls": 121,
+          "input_tokens": 493597,
+          "cached_input_tokens": 0,
+          "output_tokens": 5391,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/rPc6DW4iMge/rPc6DW4iMge.glb",
+          "episode_id": "457",
+          "training_status": "evaluation_only",
+          "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/d79677121725490d9470b8db4e79bb12/episode/work/ep0456/trace/requests.jsonl",
+          "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/d79677121725490d9470b8db4e79bb12/episode/live/ep0456/subtasks/events.jsonl",
+          "replay_url": "http://192.168.66.221:18889/?attempt=d79677121725490d9470b8db4e79bb12",
+          "metrics": {
+            "distance_to_goal": 2.5972,
+            "success": 1.0,
+            "spl": 0.5918,
+            "oracle_success": 1.0,
+            "ndtw": 0.5971,
+            "sdtw": 0.5971,
+            "path_length": 18.9155,
+            "steps_taken": 123.0,
+            "stop_called": 1.0,
+            "collisions": 0.0,
+            "teleports": 0.0,
+            "teleport_fallbacks": 0.0,
+            "velocity_steps": 107.0
+          },
+          "tool_counts": {
+            "observe": 3,
+            "update_plan": 5,
+            "execute_subtask": 14,
+            "update_memory": 9,
+            "observe_map": 10,
+            "navigate_to_node": 1,
+            "terminate_episode": 1
+          },
+          "segments": [
+            {
+              "arguments": {
+                "instruction": "Exit the bathroom through the doorway to the left",
+                "task_id": 1
+              },
+              "wall_s": 7.52381157875061,
+              "steps_the_vla_took": 13,
+              "step_budget_for_this_call": 500,
+              "distance_travelled_m": 1.33,
+              "net_displacement_m": 1.31,
+              "blocked_events": 0,
+              "steps_taken_total": 13,
+              "steps_remaining_approx": 487,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 103.44
+            },
+            {
+              "arguments": {
+                "instruction": "Walk through the television room toward the hallway",
+                "task_id": 2
+              },
+              "wall_s": 24.098198652267456,
+              "steps_the_vla_took": 46,
+              "step_budget_for_this_call": 487,
+              "distance_travelled_m": 5.47,
+              "net_displacement_m": 4.06,
+              "blocked_events": 0,
+              "steps_taken_total": 59,
+              "steps_remaining_approx": 441,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 311.02
+            },
+            {
+              "arguments": {
+                "instruction": "Go to the stairs and start climbing them",
+                "task_id": 3
+              },
+              "wall_s": 8.181412935256958,
+              "steps_the_vla_took": 12,
+              "step_budget_for_this_call": 441,
+              "distance_travelled_m": 1.92,
+              "net_displacement_m": 1.73,
+              "blocked_events": 0,
+              "steps_taken_total": 71,
+              "steps_remaining_approx": 429,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 71.2
+            },
+            {
+              "arguments": {
+                "instruction": "Climb up the curved staircase, counting stairs from the top. Stop on the fourth stair from the top.",
+                "task_id": 4
+              },
+              "wall_s": 7.324923753738403,
+              "steps_the_vla_took": 12,
+              "step_budget_for_this_call": 429,
+              "distance_travelled_m": 2.07,
+              "net_displacement_m": 1.94,
+              "blocked_events": 0,
+              "steps_taken_total": 83,
+              "steps_remaining_approx": 417,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 61.79
+            },
+            {
+              "arguments": {
+                "instruction": "Continue climbing up the curved staircase toward the top. I need to reach near the top to count back and find the fourth stair from the top.",
+                "task_id": 4
+              },
+              "wall_s": 6.111609697341919,
+              "steps_the_vla_took": 10,
+              "step_budget_for_this_call": 417,
+              "distance_travelled_m": 1.71,
+              "net_displacement_m": 1.67,
+              "blocked_events": 0,
+              "steps_taken_total": 93,
+              "steps_remaining_approx": 407,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 40.45
+            },
+            {
+              "arguments": {
+                "instruction": "Continue climbing up the curved staircase toward the top landing. I need to reach near the top to count back and find the fourth stair from the top.",
+                "task_id": 4
+              },
+              "wall_s": 4.401975393295288,
+              "steps_the_vla_took": 1,
+              "step_budget_for_this_call": 407,
+              "distance_travelled_m": 0.18,
+              "net_displacement_m": 0.18,
+              "blocked_events": 0,
+              "steps_taken_total": 94,
+              "steps_remaining_approx": 406,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 0.09
+            },
+            {
+              "arguments": {
+                "instruction": "Keep climbing up the stairs. Continue ascending the curved staircase toward the top landing.",
+                "task_id": 4
+              },
+              "wall_s": 1.5719153881072998,
+              "steps_the_vla_took": 0,
+              "step_budget_for_this_call": 406,
+              "distance_travelled_m": 0.0,
+              "net_displacement_m": 0.0,
+              "blocked_events": 0,
+              "steps_taken_total": 94,
+              "steps_remaining_approx": 406,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 0.0
+            },
+            {
+              "arguments": {
+                "instruction": "Move forward up the stairs, continuing to ascend toward the top landing.",
+                "task_id": 4
+              },
+              "wall_s": 2.4823830127716064,
+              "steps_the_vla_took": 2,
+              "step_budget_for_this_call": 406,
+              "distance_travelled_m": 0.32,
+              "net_displacement_m": 0.32,
+              "blocked_events": 0,
+              "steps_taken_total": 96,
+              "steps_remaining_approx": 404,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 4.6
+            },
+            {
+              "arguments": {
+                "instruction": "Continue climbing up the curved staircase toward the top landing. Keep ascending until you reach near the top.",
+                "task_id": 4
+              },
+              "wall_s": 2.0455424785614014,
+              "steps_the_vla_took": 0,
+              "step_budget_for_this_call": 404,
+              "distance_travelled_m": 0.0,
+              "net_displacement_m": 0.0,
+              "blocked_events": 0,
+              "steps_taken_total": 96,
+              "steps_remaining_approx": 404,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 0.0
+            },
+            {
+              "arguments": {
+                "instruction": "Step forward and up the stairs, continuing to ascend toward the top landing.",
+                "task_id": 4
+              },
+              "wall_s": 2.064788579940796,
+              "steps_the_vla_took": 1,
+              "step_budget_for_this_call": 404,
+              "distance_travelled_m": 0.16,
+              "net_displacement_m": 0.16,
+              "blocked_events": 0,
+              "steps_taken_total": 97,
+              "steps_remaining_approx": 403,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 4.6
+            },
+            {
+              "arguments": {
+                "instruction": "Continue ascending the curved staircase. Move forward and up toward the top landing visible ahead.",
+                "task_id": 4
+              },
+              "wall_s": 1.8028478622436523,
+              "steps_the_vla_took": 0,
+              "step_budget_for_this_call": 403,
+              "distance_travelled_m": 0.0,
+              "net_displacement_m": 0.0,
+              "blocked_events": 0,
+              "steps_taken_total": 97,
+              "steps_remaining_approx": 403,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 0.0
+            },
+            {
+              "arguments": {
+                "instruction": "Move forward up the stairs, taking one step at a time toward the top landing.",
+                "task_id": 4
+              },
+              "wall_s": 1.8093953132629395,
+              "steps_the_vla_took": 0,
+              "step_budget_for_this_call": 403,
+              "distance_travelled_m": 0.0,
+              "net_displacement_m": 0.0,
+              "blocked_events": 0,
+              "steps_taken_total": 97,
+              "steps_remaining_approx": 403,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 0.0
+            },
+            {
+              "arguments": {
+                "instruction": "Step forward up the stairs",
+                "task_id": 4
+              },
+              "wall_s": 2.2766661643981934,
+              "steps_the_vla_took": 1,
+              "step_budget_for_this_call": 403,
+              "distance_travelled_m": 0.17,
+              "net_displacement_m": 0.17,
+              "blocked_events": 0,
+              "steps_taken_total": 98,
+              "steps_remaining_approx": 402,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 13.06
+            },
+            {
+              "arguments": {
+                "instruction": "Continue up the stairs toward the top landing",
+                "task_id": 4
+              },
+              "wall_s": 6.4616265296936035,
+              "steps_the_vla_took": 9,
+              "step_budget_for_this_call": 402,
+              "distance_travelled_m": 1.52,
+              "net_displacement_m": 1.47,
+              "blocked_events": 0,
+              "steps_taken_total": 107,
+              "steps_remaining_approx": 393,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 42.31
+            }
+          ],
+          "actor_predictions": 121,
+          "crops": [],
+          "crop_count": 0,
+          "completion_boundaries": [
+            {
+              "event": 94,
+              "kind": "task_completion_boundary",
+              "task_id": 1,
+              "frame_index": 13,
+              "frame_id": "frame-000013"
+            },
+            {
+              "event": 384,
+              "kind": "task_completion_boundary",
+              "task_id": 2,
+              "frame_index": 59,
+              "frame_id": "frame-000059"
+            },
+            {
+              "event": 470,
+              "kind": "task_completion_boundary",
+              "task_id": 3,
+              "frame_index": 71,
+              "frame_id": "frame-000071"
+            },
+            {
+              "event": 807,
+              "kind": "task_completion_boundary",
+              "task_id": 4,
+              "frame_index": 108,
+              "frame_id": "frame-000108"
+            }
+          ],
+          "available_history_frames": {
+            "count": 121,
+            "mean": 57.743801652892564,
+            "p50": 60,
+            "p95": 102,
+            "sum": 6987
+          },
+          "inference_and_context_s": {
+            "count": 121,
+            "mean": 0.20769987603305784,
+            "p50": 0.192042,
+            "p95": 0.298209,
+            "sum": 25.131684999999997
+          },
+          "actor_latency_ms": {
+            "count": 121,
+            "mean": 150.14607856850608,
+            "p50": 147.52671867609024,
+            "p95": 208.9238278567791,
+            "sum": 18167.675506789237
+          },
+          "inference_metrics": {
+            "batch_size": {
+              "count": 121,
+              "mean": 1.1322314049586777,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 137.0
+            },
+            "queue_wait_ms": {
+              "count": 121,
+              "mean": 20.45135306240606,
+              "p50": 2.4001039564609528,
+              "p95": 111.14321602508426,
+              "sum": 2474.613720551133
+            },
+            "queue_ms": {
+              "count": 121,
+              "mean": 0.35104455718816807,
+              "p50": 0.22038724273443222,
+              "p95": 0.8608140051364899,
+              "sum": 42.47639141976833
+            },
+            "llm_ms": {
+              "count": 121,
+              "mean": 88.31211788318127,
+              "p50": 87.80814101919532,
+              "p95": 108.08801790699363,
+              "sum": 10685.766263864934
+            },
+            "vit_ms": {
+              "count": 121,
+              "mean": 61.83396068532482,
+              "p50": 53.44195198267698,
+              "p95": 100.65741091966629,
+              "sum": 7481.909242924303
+            },
+            "process_sample_ms": {
+              "count": 121,
+              "mean": 32.11423358687561,
+              "p50": 28.821446001529694,
+              "p95": 75.71413461118937,
+              "sum": 3885.8222640119493
+            },
+            "vit_cache_hits": {
+              "count": 121,
+              "mean": 19.56198347107438,
+              "p50": 21.0,
+              "p95": 32.0,
+              "sum": 2367.0
+            },
+            "vit_cache_misses": {
+              "count": 121,
+              "mean": 1.0165289256198347,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 123.0
+            },
+            "execution_ms": {
+              "count": 121,
+              "mean": 199.0121767571396,
+              "p50": 184.7507650963962,
+              "p95": 287.92361728847027,
+              "sum": 24080.473387613893
+            }
+          },
+          "planner_requests": 43,
+          "planner_elapsed_s": 304.19889334985055,
+          "planner_tokens": {
+            "prompt_tokens": 493597,
+            "completion_tokens": 5391
+          },
+          "initial_request_sha256": "0d62dfc29a8da72974357a0ebf7ecdfbdc6a7d5b41926f87a101da3bc6ad15af",
+          "initial_plan": {
+            "reason": "Initial plan based on observations. I'm in a bathroom and need to exit through the doorway to my left, then navigate through the television room to the hallway, find stairs, and go up to the fourth from the top stair.",
+            "subtasks": [
+              {
+                "id": 1,
+                "instruction": "Exit the bathroom through the doorway to the left",
+                "status": "pending"
+              },
+              {
+                "id": 2,
+                "instruction": "Walk through the television room toward the hallway",
+                "status": "pending"
+              },
+              {
+                "id": 3,
+                "instruction": "Enter the hallway and find the stairs",
+                "status": "pending"
+              },
+              {
+                "id": 4,
+                "instruction": "Go up the stairs and stop on the fourth from the top stair",
+                "status": "pending"
+              }
+            ]
+          },
+          "first_execution": {
+            "instruction": "Exit the bathroom through the doorway to the left",
+            "task_id": 1
+          },
+          "contiguous_history_verified": true,
+          "plain_instruction_verified": true
+        },
+        {
+          "attempt_id": "8c9760ab36054efda43899a68025bb39",
+          "episode": 7006,
+          "attempt": 1,
+          "status": "completed",
+          "success": 0.0,
+          "ne": 5.9524,
+          "spl": 0.0,
+          "ndtw": 0.238,
+          "distance_m": 13.8075,
+          "wall_s": 309.9,
+          "tool_calls": 28,
+          "turns": 28,
+          "vla_calls": 98,
+          "input_tokens": 311665,
+          "cached_input_tokens": 0,
+          "output_tokens": 4193,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/7y3sRwLe3Va/7y3sRwLe3Va.glb",
+          "episode_id": "7016",
+          "training_status": "evaluation_only",
+          "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/8c9760ab36054efda43899a68025bb39/episode/work/ep7006/trace/requests.jsonl",
+          "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/8c9760ab36054efda43899a68025bb39/episode/live/ep7006/subtasks/events.jsonl",
+          "replay_url": "http://192.168.66.221:18889/?attempt=8c9760ab36054efda43899a68025bb39",
+          "metrics": {
+            "distance_to_goal": 5.9524,
+            "success": 0.0,
+            "spl": 0.0,
+            "oracle_success": 0.0,
+            "ndtw": 0.238,
+            "sdtw": 0.0,
+            "path_length": 13.8075,
+            "steps_taken": 101.0,
+            "stop_called": 1.0,
+            "collisions": 1.0,
+            "teleports": 0.0,
+            "teleport_fallbacks": 0.0,
+            "velocity_steps": 89.0
+          },
+          "tool_counts": {
+            "observe": 3,
+            "update_plan": 4,
+            "execute_subtask": 9,
+            "observe_map": 6,
+            "update_memory": 4,
+            "navigate_to_node": 1,
+            "terminate_episode": 1
+          },
+          "segments": [
+            {
+              "arguments": {
+                "instruction": "Walk up the stairs",
+                "task_id": 1
+              },
+              "wall_s": 5.054130554199219,
+              "steps_the_vla_took": 8,
+              "step_budget_for_this_call": 500,
+              "distance_travelled_m": 1.24,
+              "net_displacement_m": 1.23,
+              "blocked_events": 0,
+              "steps_taken_total": 8,
+              "steps_remaining_approx": 492,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 43.12
+            },
+            {
+              "arguments": {
+                "instruction": "Make a left on the stair landing and walk along the hallway",
+                "task_id": 2
+              },
+              "wall_s": 11.819324731826782,
+              "steps_the_vla_took": 22,
+              "step_budget_for_this_call": 492,
+              "distance_travelled_m": 3.33,
+              "net_displacement_m": 2.94,
+              "blocked_events": 0,
+              "steps_taken_total": 30,
+              "steps_remaining_approx": 470,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 70.34
+            },
+            {
+              "arguments": {
+                "instruction": "Make a left through the open door on the left into the bedroom",
+                "task_id": 3
+              },
+              "wall_s": 9.275431871414185,
+              "steps_the_vla_took": 18,
+              "step_budget_for_this_call": 470,
+              "distance_travelled_m": 2.55,
+              "net_displacement_m": 2.47,
+              "blocked_events": 0,
+              "steps_taken_total": 48,
+              "steps_remaining_approx": 452,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 52.38
+            },
+            {
+              "arguments": {
+                "instruction": "Go through the open door on the right into the bedroom",
+                "task_id": 3
+              },
+              "wall_s": 3.0927937030792236,
+              "steps_the_vla_took": 3,
+              "step_budget_for_this_call": 441,
+              "distance_travelled_m": 0.45,
+              "net_displacement_m": 0.45,
+              "blocked_events": 0,
+              "steps_taken_total": 62,
+              "steps_remaining_approx": 438,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 0.0
+            },
+            {
+              "arguments": {
+                "instruction": "Move forward down the hallway to find an open door on the left",
+                "task_id": 3
+              },
+              "wall_s": 3.310253858566284,
+              "steps_the_vla_took": 4,
+              "step_budget_for_this_call": 438,
+              "distance_travelled_m": 0.0,
+              "net_displacement_m": 0.0,
+              "blocked_events": 0,
+              "steps_taken_total": 66,
+              "steps_remaining_approx": 434,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 52.64
+            },
+            {
+              "arguments": {
+                "instruction": "Turn left and go through the open door on the left into the bedroom",
+                "task_id": 3
+              },
+              "wall_s": 2.2952117919921875,
+              "steps_the_vla_took": 2,
+              "step_budget_for_this_call": 434,
+              "distance_travelled_m": 0.0,
+              "net_displacement_m": 0.0,
+              "blocked_events": 0,
+              "steps_taken_total": 68,
+              "steps_remaining_approx": 432,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 26.24
+            },
+            {
+              "arguments": {
+                "instruction": "Turn left and go through the open door into the bedroom",
+                "task_id": 3
+              },
+              "wall_s": 1.2171392440795898,
+              "steps_the_vla_took": 0,
+              "step_budget_for_this_call": 432,
+              "distance_travelled_m": 0.0,
+              "net_displacement_m": 0.0,
+              "blocked_events": 0,
+              "steps_taken_total": 68,
+              "steps_remaining_approx": 432,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 0.0
+            },
+            {
+              "arguments": {
+                "instruction": "Turn left and go through the open door into the bedroom, then find the bed",
+                "task_id": 3
+              },
+              "wall_s": 14.78640866279602,
+              "steps_the_vla_took": 30,
+              "step_budget_for_this_call": 432,
+              "distance_travelled_m": 3.68,
+              "net_displacement_m": 2.96,
+              "blocked_events": 0,
+              "steps_taken_total": 98,
+              "steps_remaining_approx": 402,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 215.73
+            },
+            {
+              "arguments": {
+                "instruction": "Move to the foot of the bed and wait there",
+                "task_id": 4
+              },
+              "wall_s": 2.2787909507751465,
+              "steps_the_vla_took": 2,
+              "step_budget_for_this_call": 402,
+              "distance_travelled_m": 0.0,
+              "net_displacement_m": 0.0,
+              "blocked_events": 0,
+              "steps_taken_total": 100,
+              "steps_remaining_approx": 400,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 35.61
+            }
+          ],
+          "actor_predictions": 98,
+          "crops": [],
+          "crop_count": 0,
+          "completion_boundaries": [
+            {
+              "event": 64,
+              "kind": "task_completion_boundary",
+              "task_id": 1,
+              "frame_index": 8,
+              "frame_id": "frame-000008"
+            },
+            {
+              "event": 210,
+              "kind": "task_completion_boundary",
+              "task_id": 2,
+              "frame_index": 30,
+              "frame_id": "frame-000030"
+            },
+            {
+              "event": 640,
+              "kind": "task_completion_boundary",
+              "task_id": 4,
+              "frame_index": 90,
+              "frame_id": "frame-000090"
+            }
+          ],
+          "available_history_frames": {
+            "count": 98,
+            "mean": 46.357142857142854,
+            "p50": 47.5,
+            "p95": 88,
+            "sum": 4543
+          },
+          "inference_and_context_s": {
+            "count": 98,
+            "mean": 0.20918858163265305,
+            "p50": 0.189344,
+            "p95": 0.320925,
+            "sum": 20.500480999999994
+          },
+          "actor_latency_ms": {
+            "count": 98,
+            "mean": 146.91138209071846,
+            "p50": 141.0040045157075,
+            "p95": 204.2973218485713,
+            "sum": 14397.31544489041
+          },
+          "inference_metrics": {
+            "batch_size": {
+              "count": 98,
+              "mean": 1.1734693877551021,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 115.0
+            },
+            "queue_wait_ms": {
+              "count": 98,
+              "mean": 28.942209231306094,
+              "p50": 2.3988450411707163,
+              "p95": 130.77328586950898,
+              "sum": 2836.3365046679974
+            },
+            "queue_ms": {
+              "count": 98,
+              "mean": 0.29035948920158705,
+              "p50": 0.21933438256382942,
+              "p95": 0.679889228194952,
+              "sum": 28.455229941755533
+            },
+            "llm_ms": {
+              "count": 98,
+              "mean": 86.11365136386333,
+              "p50": 86.9198958389461,
+              "p95": 113.72028477489948,
+              "sum": 8439.137833658606
+            },
+            "vit_ms": {
+              "count": 98,
+              "mean": 60.79773072685514,
+              "p50": 53.71852219104767,
+              "p95": 93.32566894590855,
+              "sum": 5958.177611231804
+            },
+            "process_sample_ms": {
+              "count": 98,
+              "mean": 28.962200488515045,
+              "p50": 28.23465852998197,
+              "p95": 61.40819005668163,
+              "sum": 2838.2956478744745
+            },
+            "vit_cache_hits": {
+              "count": 98,
+              "mean": 16.642857142857142,
+              "p50": 19.0,
+              "p95": 26.0,
+              "sum": 1631.0
+            },
+            "vit_cache_misses": {
+              "count": 98,
+              "mean": 1.0816326530612246,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 106.0
+            },
+            "execution_ms": {
+              "count": 98,
+              "mean": 201.57641839064962,
+              "p50": 181.66781053878367,
+              "p95": 312.97951797023416,
+              "sum": 19754.489002283663
+            }
+          },
+          "planner_requests": 28,
+          "planner_elapsed_s": 230.26533818268217,
+          "planner_tokens": {
+            "prompt_tokens": 311665,
+            "completion_tokens": 4193
+          },
+          "initial_request_sha256": "87020dbf0ca8a1dcf5dc26341b4865c323719daff1d2880a818e4191988d3109",
+          "initial_plan": {
+            "reason": "Initial plan based on observations: stairs are visible to the right, going up to a landing.",
+            "subtasks": [
+              {
+                "id": 1,
+                "instruction": "Walk up the stairs",
+                "status": "pending"
+              },
+              {
+                "id": 2,
+                "instruction": "Make a left on the stair landing",
+                "status": "pending"
+              },
+              {
+                "id": 3,
+                "instruction": "Make a left through the open door on the left",
+                "status": "pending"
+              },
+              {
+                "id": 4,
+                "instruction": "Wait at the foot of the bed",
+                "status": "pending"
+              }
+            ]
+          },
+          "first_execution": {
+            "instruction": "Walk up the stairs",
+            "task_id": 1
+          },
+          "contiguous_history_verified": true,
+          "plain_instruction_verified": true
+        },
+        {
+          "attempt_id": "01a7045bc13f40bb84098ac8490a31ef",
+          "episode": 7648,
+          "attempt": 1,
+          "status": "completed",
+          "success": 0.0,
+          "ne": 10.3456,
+          "spl": 0.0,
+          "ndtw": 0.3126,
+          "distance_m": 9.4549,
+          "wall_s": 175.6,
+          "tool_calls": 16,
+          "turns": 16,
+          "vla_calls": 75,
+          "input_tokens": 154440,
+          "cached_input_tokens": 0,
+          "output_tokens": 2046,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/b8cTxDM8gDG/b8cTxDM8gDG.glb",
+          "episode_id": "7658",
+          "training_status": "evaluation_only",
+          "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/01a7045bc13f40bb84098ac8490a31ef/episode/work/ep7648/trace/requests.jsonl",
+          "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/01a7045bc13f40bb84098ac8490a31ef/episode/live/ep7648/subtasks/events.jsonl",
+          "replay_url": "http://192.168.66.221:18889/?attempt=01a7045bc13f40bb84098ac8490a31ef",
+          "metrics": {
+            "distance_to_goal": 10.3456,
+            "success": 0.0,
+            "spl": 0.0,
+            "oracle_success": 0.0,
+            "ndtw": 0.3126,
+            "sdtw": 0.0,
+            "path_length": 9.4549,
+            "steps_taken": 73.0,
+            "stop_called": 1.0,
+            "collisions": 11.0,
+            "teleports": 0.0,
+            "teleport_fallbacks": 0.0,
+            "velocity_steps": 72.0
+          },
+          "tool_counts": {
+            "observe": 2,
+            "update_plan": 3,
+            "execute_subtask": 6,
+            "observe_map": 2,
+            "update_memory": 2,
+            "terminate_episode": 1
+          },
+          "segments": [
+            {
+              "arguments": {
+                "task_id": 1,
+                "instruction": "Walk forward toward the stairs"
+              },
+              "wall_s": 6.17585015296936,
+              "steps_the_vla_took": 11,
+              "step_budget_for_this_call": 500,
+              "distance_travelled_m": 1.85,
+              "net_displacement_m": 1.77,
+              "blocked_events": 0,
+              "steps_taken_total": 11,
+              "steps_remaining_approx": 489,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 1.74
+            },
+            {
+              "arguments": {
+                "instruction": "Walk down the stairs to the bottom",
+                "task_id": 2
+              },
+              "wall_s": 4.4396302700042725,
+              "steps_the_vla_took": 9,
+              "step_budget_for_this_call": 489,
+              "distance_travelled_m": 1.19,
+              "net_displacement_m": 1.1,
+              "blocked_events": 3,
+              "steps_taken_total": 20,
+              "steps_remaining_approx": 480,
+              "episode_over": false,
+              "subtask_return": "blocked",
+              "turn_travelled_deg": 0.01
+            },
+            {
+              "arguments": {
+                "instruction": "Turn right and walk down the stairs to the bottom floor",
+                "task_id": 2
+              },
+              "wall_s": 2.3403091430664062,
+              "steps_the_vla_took": 3,
+              "step_budget_for_this_call": 480,
+              "distance_travelled_m": 0.01,
+              "net_displacement_m": 0.01,
+              "blocked_events": 3,
+              "steps_taken_total": 23,
+              "steps_remaining_approx": 477,
+              "episode_over": false,
+              "subtask_return": "blocked",
+              "turn_travelled_deg": 15.0
+            },
+            {
+              "arguments": {
+                "instruction": "Turn right to face the stairs and walk down them to the bottom",
+                "task_id": 2
+              },
+              "wall_s": 2.15777587890625,
+              "steps_the_vla_took": 2,
+              "step_budget_for_this_call": 477,
+              "distance_travelled_m": 0.09,
+              "net_displacement_m": 0.09,
+              "blocked_events": 2,
+              "steps_taken_total": 25,
+              "steps_remaining_approx": 475,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 0.0
+            },
+            {
+              "arguments": {
+                "instruction": "Move forward and right to descend the stairs to the bottom floor",
+                "task_id": 2
+              },
+              "wall_s": 2.1853578090667725,
+              "steps_the_vla_took": 3,
+              "step_budget_for_this_call": 475,
+              "distance_travelled_m": 0.08,
+              "net_displacement_m": 0.08,
+              "blocked_events": 3,
+              "steps_taken_total": 28,
+              "steps_remaining_approx": 472,
+              "episode_over": false,
+              "subtask_return": "blocked",
+              "turn_travelled_deg": 49.0
+            },
+            {
+              "arguments": {
+                "instruction": "Turn right to face the stairs and walk down them",
+                "task_id": 2
+              },
+              "wall_s": 22.687239170074463,
+              "steps_the_vla_took": 44,
+              "step_budget_for_this_call": 472,
+              "distance_travelled_m": 6.24,
+              "net_displacement_m": 2.66,
+              "blocked_events": 0,
+              "steps_taken_total": 72,
+              "steps_remaining_approx": 428,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 366.54
+            }
+          ],
+          "actor_predictions": 75,
+          "crops": [],
+          "crop_count": 0,
+          "completion_boundaries": [
+            {
+              "event": 78,
+              "kind": "task_completion_boundary",
+              "task_id": 1,
+              "frame_index": 11,
+              "frame_id": "frame-000011"
+            },
+            {
+              "event": 486,
+              "kind": "task_completion_boundary",
+              "task_id": 2,
+              "frame_index": 72,
+              "frame_id": "frame-000072"
+            }
+          ],
+          "available_history_frames": {
+            "count": 75,
+            "mean": 36.52,
+            "p50": 36,
+            "p95": 70,
+            "sum": 2739
+          },
+          "inference_and_context_s": {
+            "count": 75,
+            "mean": 0.19534848,
+            "p50": 0.180887,
+            "p95": 0.316777,
+            "sum": 14.651136000000006
+          },
+          "actor_latency_ms": {
+            "count": 75,
+            "mean": 134.61523979281387,
+            "p50": 135.36075316369534,
+            "p95": 153.93422450870275,
+            "sum": 10096.14298446104
+          },
+          "inference_metrics": {
+            "batch_size": {
+              "count": 75,
+              "mean": 1.0533333333333332,
+              "p50": 1.0,
+              "p95": 1.0,
+              "sum": 79.0
+            },
+            "queue_wait_ms": {
+              "count": 75,
+              "mean": 25.473260525614023,
+              "p50": 2.39316513761878,
+              "p95": 114.5268608815968,
+              "sum": 1910.4945394210517
+            },
+            "queue_ms": {
+              "count": 75,
+              "mean": 0.2552515206237634,
+              "p50": 0.21420791745185852,
+              "p95": 0.4651211202144623,
+              "sum": 19.143864046782255
+            },
+            "llm_ms": {
+              "count": 75,
+              "mean": 79.8356883910795,
+              "p50": 81.71385200694203,
+              "p95": 92.01188897714019,
+              "sum": 5987.676629330963
+            },
+            "vit_ms": {
+              "count": 75,
+              "mean": 54.77955140173435,
+              "p50": 52.49791080132127,
+              "p95": 71.10532093793154,
+              "sum": 4108.466355130076
+            },
+            "process_sample_ms": {
+              "count": 75,
+              "mean": 27.13278105482459,
+              "p50": 27.945442590862513,
+              "p95": 35.37850780412555,
+              "sum": 2034.9585791118443
+            },
+            "vit_cache_hits": {
+              "count": 75,
+              "mean": 14.2,
+              "p50": 17.0,
+              "p95": 23.0,
+              "sum": 1065.0
+            },
+            "vit_cache_misses": {
+              "count": 75,
+              "mean": 1.1733333333333333,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 88.0
+            },
+            "execution_ms": {
+              "count": 75,
+              "mean": 186.8489094513158,
+              "p50": 172.6494668982923,
+              "p95": 309.5908132381737,
+              "sum": 14013.668208848685
+            }
+          },
+          "planner_requests": 16,
+          "planner_elapsed_s": 123.02708540926687,
+          "planner_tokens": {
+            "prompt_tokens": 154440,
+            "completion_tokens": 2046
+          },
+          "initial_request_sha256": "7ddd527d595f2fb5c9b4ec0c634477d1b7c55f1baaf1e29e0e2d90feaefa638f",
+          "initial_plan": {
+            "reason": "Initial plan based on observation: I'm in a hallway with stairs visible ahead going down. Need to walk down the stairs and stop at the bottom.",
+            "subtasks": [
+              {
+                "id": 1,
+                "instruction": "Walk forward toward the stairs",
+                "status": "pending"
+              },
+              {
+                "id": 2,
+                "instruction": "Walk down the stairs",
+                "status": "pending"
+              },
+              {
+                "id": 3,
+                "instruction": "Stop at the bottom of the stairs",
+                "status": "pending"
+              }
+            ]
+          },
+          "first_execution": {
+            "task_id": 1,
+            "instruction": "Walk forward toward the stairs"
+          },
+          "contiguous_history_verified": true,
+          "plain_instruction_verified": true
+        }
+      ],
+      "aggregate": {
+        "n": 4,
+        "successes": 2,
+        "mean_ne": 4.9026,
+        "mean_wall_s": 268.8,
+        "actor_predictions": 347,
+        "crop_count": 0,
+        "total_inference_and_context_s": 72.06120899999999,
+        "execute_subtask_calls": 32,
+        "planner_requests": 101,
+        "planner_prompt_tokens": 1092276,
+        "mean_spl": 0.39795,
+        "osr": 0.5
+      }
+    },
+    {
+      "policy": "completed_subtask",
+      "experiment_id": "1fea97e7ea5148f09e219470cce971e0",
+      "spec": {
+        "name": "LightNav official chain / completed_subtask / paired4",
+        "planner_service": "eaa85c5c908141f6b57e16a231cdc511",
+        "vla_service": "457941e1ef2448f28537209c16de106e",
+        "execution_pool": [
+          {
+            "environment_service": "506a59f66fbd4988a81c20c00dcb074c",
+            "execution_service": "d1fdc31244874534a5c8299aeaf1d742"
+          },
+          {
+            "environment_service": "7c9024ce60574f8c87f6adab5b0326b0",
+            "execution_service": "c10b40fb9e9140f3b9444521fc788b1e"
+          },
+          {
+            "environment_service": "4aeca142cfde48fe95a540edd017ed37",
+            "execution_service": "c09ae78998624a99b962333d6a275c4b"
+          },
+          {
+            "environment_service": "d7ba8de177134722b3bc31a0d295156d",
+            "execution_service": "2c84605389974f618def4e68baaf3216"
+          }
+        ],
+        "episodes": [
+          0,
+          456,
+          7006,
+          7648
+        ],
+        "purpose": "development",
+        "config": {
+          "dataset": {
+            "name": "r2r",
+            "split": "train"
+          },
+          "environment": {
+            "max_steps": 500,
+            "forward_view_px": 512,
+            "panorama_view_px": 400
+          },
+          "vla": {
+            "backend": "lightnav"
+          },
+          "planner": {
+            "max_turns": 100,
+            "episode_timeout_s": 900,
+            "tools": [
+              "observe_map",
+              "navigate_to_node",
+              "terminate_episode",
+              "update_plan",
+              "execute_subtask",
+              "observe",
+              "update_memory",
+              "read_memory"
+            ]
+          },
+          "harness": {
+            "mode": "agentic",
+            "allow_context_reset": false,
+            "vla_steps_per_call": 0,
+            "actor_history_policy": "completed_subtask"
+          }
+        }
+      },
+      "job_id": "45d4fcb0d1a14071820c5e1a0f1be2e9",
+      "rows": [
+        {
+          "attempt_id": "501d612398774154bd275f1cc05c9885",
+          "episode": 0,
+          "attempt": 1,
+          "status": "completed",
+          "success": 1.0,
+          "ne": 1.211,
+          "spl": 1.0,
+          "ndtw": 0.9164,
+          "distance_m": 5.4027,
+          "wall_s": 99.6,
+          "tool_calls": 10,
+          "turns": 10,
+          "vla_calls": 43,
+          "input_tokens": 78926,
+          "cached_input_tokens": 0,
+          "output_tokens": 1437,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/7y3sRwLe3Va/7y3sRwLe3Va.glb",
+          "episode_id": "1",
+          "training_status": "evaluation_only",
+          "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/45d4fcb0d1a14071820c5e1a0f1be2e9/501d612398774154bd275f1cc05c9885/episode/work/ep0000/trace/requests.jsonl",
+          "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/45d4fcb0d1a14071820c5e1a0f1be2e9/501d612398774154bd275f1cc05c9885/episode/live/ep0000/subtasks/events.jsonl",
+          "replay_url": "http://192.168.66.221:18889/?attempt=501d612398774154bd275f1cc05c9885",
+          "metrics": {
+            "distance_to_goal": 1.211,
+            "success": 1.0,
+            "spl": 1.0,
+            "oracle_success": 1.0,
+            "ndtw": 0.9164,
+            "sdtw": 0.9164,
+            "path_length": 5.4027,
+            "steps_taken": 42.0,
+            "stop_called": 1.0,
+            "collisions": 0.0,
+            "teleports": 0.0,
+            "teleport_fallbacks": 0.0,
+            "velocity_steps": 41.0
+          },
+          "tool_counts": {
+            "observe": 1,
+            "update_plan": 2,
+            "execute_subtask": 2,
+            "observe_map": 2,
+            "update_memory": 2,
+            "terminate_episode": 1
+          },
+          "segments": [
+            {
+              "arguments": {
+                "task_id": 1,
+                "instruction": "Move forward along the right side of the kitchen island, keeping the island on my left"
+              },
+              "wall_s": 2.5288281440734863,
+              "steps_the_vla_took": 3,
+              "step_budget_for_this_call": 500,
+              "distance_travelled_m": 0.15,
+              "net_displacement_m": 0.15,
+              "blocked_events": 0,
+              "steps_taken_total": 3,
+              "steps_remaining_approx": 497,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 36.12
+            },
+            {
+              "arguments": {
+                "instruction": "Continue moving forward along the right side of the kitchen island, keeping it on my left. Move past the island toward the open area ahead.",
+                "task_id": 1
+              },
+              "wall_s": 19.363603591918945,
+              "steps_the_vla_took": 38,
+              "step_budget_for_this_call": 497,
+              "distance_travelled_m": 5.25,
+              "net_displacement_m": 4.3,
+              "blocked_events": 0,
+              "steps_taken_total": 41,
+              "steps_remaining_approx": 459,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 140.94
+            }
+          ],
+          "actor_predictions": 43,
+          "crops": [],
+          "crop_count": 0,
+          "completion_boundaries": [
+            {
+              "event": 274,
+              "kind": "task_completion_boundary",
+              "task_id": 1,
+              "frame_index": 41,
+              "frame_id": "frame-000041"
+            }
+          ],
+          "available_history_frames": {
+            "count": 43,
+            "mean": 21.093023255813954,
+            "p50": 21,
+            "p95": 40,
+            "sum": 907
+          },
+          "inference_and_context_s": {
+            "count": 43,
+            "mean": 0.17980823255813955,
+            "p50": 0.153243,
+            "p95": 0.315457,
+            "sum": 7.731754
+          },
+          "actor_latency_ms": {
+            "count": 43,
+            "mean": 131.97487227748647,
+            "p50": 122.44118331000209,
+            "p95": 196.90688932314515,
+            "sum": 5674.919507931918
+          },
+          "inference_metrics": {
+            "batch_size": {
+              "count": 43,
+              "mean": 1.1627906976744187,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 50.0
+            },
+            "queue_wait_ms": {
+              "count": 43,
+              "mean": 19.50490868888622,
+              "p50": 2.427408006042242,
+              "p95": 83.57442589476705,
+              "sum": 838.7110736221075
+            },
+            "queue_ms": {
+              "count": 43,
+              "mean": 0.2751628933257835,
+              "p50": 0.2283519133925438,
+              "p95": 0.6915107369422913,
+              "sum": 11.83200441300869
+            },
+            "llm_ms": {
+              "count": 43,
+              "mean": 75.82791126874643,
+              "p50": 72.13170733302832,
+              "p95": 100.89779598638415,
+              "sum": 3260.600184556097
+            },
+            "vit_ms": {
+              "count": 43,
+              "mean": 56.14696100874003,
+              "p50": 51.26572586596012,
+              "p95": 85.51151677966118,
+              "sum": 2414.319323375821
+            },
+            "process_sample_ms": {
+              "count": 43,
+              "mean": 22.857360585137855,
+              "p50": 24.02155799791217,
+              "p95": 32.771612983196974,
+              "sum": 982.8665051609278
+            },
+            "vit_cache_hits": {
+              "count": 43,
+              "mean": 9.30232558139535,
+              "p50": 9.0,
+              "p95": 18.0,
+              "sum": 400.0
+            },
+            "vit_cache_misses": {
+              "count": 43,
+              "mean": 1.3255813953488371,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 57.0
+            },
+            "execution_ms": {
+              "count": 43,
+              "mean": 171.6241832974172,
+              "p50": 146.27845026552677,
+              "p95": 307.5120528228581,
+              "sum": 7379.839881788939
+            }
+          },
+          "planner_requests": 10,
+          "planner_elapsed_s": 70.44011217681691,
+          "planner_tokens": {
+            "prompt_tokens": 78926,
+            "completion_tokens": 1437
+          },
+          "initial_request_sha256": "d688cf7389e13a4e326b59d2e2b4f232e75ebc765821bd085a6c1417b7bf9085",
+          "initial_plan": {
+            "subtasks": [
+              {
+                "id": 1,
+                "instruction": "Move forward along the right side of the kitchen island, keeping the island on my left",
+                "status": "pending"
+              },
+              {
+                "id": 2,
+                "instruction": "Continue past the island toward the doorway area on the right side",
+                "status": "pending"
+              },
+              {
+                "id": 3,
+                "instruction": "Stop by the right side doorway that has a dining table and mirror visible",
+                "status": "pending"
+              }
+            ],
+            "reason": "Initial plan to navigate around the right side of the kitchen island to find the doorway with dining table and mirror. Starting from the kitchen area, I need to move along the right side of the center island."
+          },
+          "first_execution": {
+            "task_id": 1,
+            "instruction": "Move forward along the right side of the kitchen island, keeping the island on my left"
+          },
+          "contiguous_history_verified": true,
+          "plain_instruction_verified": true
+        },
+        {
+          "attempt_id": "7307c9214fed473e904e9b0c9217793c",
+          "episode": 456,
+          "attempt": 1,
+          "status": "completed",
+          "success": 1.0,
+          "ne": 2.0506,
+          "spl": 0.9873,
+          "ndtw": 0.7854,
+          "distance_m": 11.3382,
+          "wall_s": 355.4,
+          "tool_calls": 25,
+          "turns": 25,
+          "vla_calls": 92,
+          "input_tokens": 271413,
+          "cached_input_tokens": 0,
+          "output_tokens": 7163,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/rPc6DW4iMge/rPc6DW4iMge.glb",
+          "episode_id": "457",
+          "training_status": "evaluation_only",
+          "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/45d4fcb0d1a14071820c5e1a0f1be2e9/7307c9214fed473e904e9b0c9217793c/episode/work/ep0456/trace/requests.jsonl",
+          "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/45d4fcb0d1a14071820c5e1a0f1be2e9/7307c9214fed473e904e9b0c9217793c/episode/live/ep0456/subtasks/events.jsonl",
+          "replay_url": "http://192.168.66.221:18889/?attempt=7307c9214fed473e904e9b0c9217793c",
+          "metrics": {
+            "distance_to_goal": 2.0506,
+            "success": 1.0,
+            "spl": 0.9873,
+            "oracle_success": 1.0,
+            "ndtw": 0.7854,
+            "sdtw": 0.7854,
+            "path_length": 11.3382,
+            "steps_taken": 87.0,
+            "stop_called": 1.0,
+            "collisions": 0.0,
+            "teleports": 0.0,
+            "teleport_fallbacks": 0.0,
+            "velocity_steps": 86.0
+          },
+          "tool_counts": {
+            "observe": 2,
+            "update_plan": 4,
+            "execute_subtask": 6,
+            "observe_map": 5,
+            "update_memory": 7,
+            "terminate_episode": 1
+          },
+          "segments": [
+            {
+              "arguments": {
+                "instruction": "Exit the bathroom through the doorway to the left",
+                "task_id": 1
+              },
+              "wall_s": 10.75458550453186,
+              "steps_the_vla_took": 21,
+              "step_budget_for_this_call": 500,
+              "distance_travelled_m": 2.41,
+              "net_displacement_m": 2.31,
+              "blocked_events": 0,
+              "steps_taken_total": 21,
+              "steps_remaining_approx": 479,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 141.67
+            },
+            {
+              "arguments": {
+                "instruction": "Walk through the television room toward the hallway doorway ahead",
+                "task_id": 2
+              },
+              "wall_s": 18.129788160324097,
+              "steps_the_vla_took": 32,
+              "step_budget_for_this_call": 479,
+              "distance_travelled_m": 4.52,
+              "net_displacement_m": 4.28,
+              "blocked_events": 0,
+              "steps_taken_total": 53,
+              "steps_remaining_approx": 447,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 106.4
+            },
+            {
+              "arguments": {
+                "instruction": "Turn left to face the stairs and go up the stairs, stopping on the fourth stair from the top",
+                "task_id": 4
+              },
+              "wall_s": 17.231940746307373,
+              "steps_the_vla_took": 33,
+              "step_budget_for_this_call": 447,
+              "distance_travelled_m": 4.41,
+              "net_displacement_m": 3.98,
+              "blocked_events": 0,
+              "steps_taken_total": 86,
+              "steps_remaining_approx": 414,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 232.42
+            },
+            {
+              "arguments": {
+                "instruction": "Move up one more stair to reach the fourth stair from the top",
+                "task_id": 4
+              },
+              "wall_s": 1.1798968315124512,
+              "steps_the_vla_took": 0,
+              "step_budget_for_this_call": 414,
+              "distance_travelled_m": 0.0,
+              "net_displacement_m": 0.0,
+              "blocked_events": 0,
+              "steps_taken_total": 86,
+              "steps_remaining_approx": 414,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 0.0
+            },
+            {
+              "arguments": {
+                "instruction": "Walk forward up the stairs one step",
+                "task_id": 4
+              },
+              "wall_s": 1.3754031658172607,
+              "steps_the_vla_took": 0,
+              "step_budget_for_this_call": 414,
+              "distance_travelled_m": 0.0,
+              "net_displacement_m": 0.0,
+              "blocked_events": 0,
+              "steps_taken_total": 86,
+              "steps_remaining_approx": 414,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 0.0
+            },
+            {
+              "arguments": {
+                "instruction": "Move forward slightly on the stairs",
+                "task_id": 4
+              },
+              "wall_s": 1.2957234382629395,
+              "steps_the_vla_took": 0,
+              "step_budget_for_this_call": 414,
+              "distance_travelled_m": 0.0,
+              "net_displacement_m": 0.0,
+              "blocked_events": 0,
+              "steps_taken_total": 86,
+              "steps_remaining_approx": 414,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 0.0
+            }
+          ],
+          "actor_predictions": 92,
+          "crops": [
+            {
+              "event": 145,
+              "kind": "actor_history_crop",
+              "reason": "completed_subtask",
+              "completed_task_id": 1,
+              "next_task_id": 2,
+              "start_frame_id": "frame-000021",
+              "discarded_frames": 21,
+              "retained_frames": 1
+            },
+            {
+              "event": 352,
+              "kind": "actor_history_crop",
+              "reason": "completed_subtask",
+              "completed_task_id": 2,
+              "next_task_id": 4,
+              "start_frame_id": "frame-000053",
+              "discarded_frames": 32,
+              "retained_frames": 1
+            }
+          ],
+          "crop_count": 2,
+          "completion_boundaries": [
+            {
+              "event": 138,
+              "kind": "task_completion_boundary",
+              "task_id": 1,
+              "frame_index": 21,
+              "frame_id": "frame-000021"
+            },
+            {
+              "event": 349,
+              "kind": "task_completion_boundary",
+              "task_id": 2,
+              "frame_index": 53,
+              "frame_id": "frame-000053"
+            },
+            {
+              "event": 596,
+              "kind": "task_completion_boundary",
+              "task_id": 4,
+              "frame_index": 86,
+              "frame_id": "frame-000086"
+            }
+          ],
+          "available_history_frames": {
+            "count": 92,
+            "mean": 16.42391304347826,
+            "p50": 16.0,
+            "p95": 33,
+            "sum": 1511
+          },
+          "inference_and_context_s": {
+            "count": 92,
+            "mean": 0.1972549456521739,
+            "p50": 0.1735145,
+            "p95": 0.351651,
+            "sum": 18.147454999999994
+          },
+          "actor_latency_ms": {
+            "count": 92,
+            "mean": 132.01293256639948,
+            "p50": 122.57909053005278,
+            "p95": 200.1276952214539,
+            "sum": 12145.189796108752
+          },
+          "inference_metrics": {
+            "batch_size": {
+              "count": 92,
+              "mean": 1.1956521739130435,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 110.0
+            },
+            "queue_wait_ms": {
+              "count": 92,
+              "mean": 33.92612421885133,
+              "p50": 17.49885524623096,
+              "p95": 128.01724718883634,
+              "sum": 3121.203428134322
+            },
+            "queue_ms": {
+              "count": 92,
+              "mean": 0.4276576219126582,
+              "p50": 0.25092647410929203,
+              "p95": 1.3829930685460567,
+              "sum": 39.344501215964556
+            },
+            "llm_ms": {
+              "count": 92,
+              "mean": 74.47145570008813,
+              "p50": 72.52878323197365,
+              "p95": 103.0528130941093,
+              "sum": 6851.373924408108
+            },
+            "vit_ms": {
+              "count": 92,
+              "mean": 57.541476866311356,
+              "p50": 50.27000466361642,
+              "p95": 88.41589372605085,
+              "sum": 5293.8158717006445
+            },
+            "process_sample_ms": {
+              "count": 92,
+              "mean": 23.283186905167025,
+              "p50": 23.312341421842575,
+              "p95": 28.62473763525486,
+              "sum": 2142.0531952753663
+            },
+            "vit_cache_hits": {
+              "count": 92,
+              "mean": 7.065217391304348,
+              "p50": 7.0,
+              "p95": 15.0,
+              "sum": 650.0
+            },
+            "vit_cache_misses": {
+              "count": 92,
+              "mean": 1.391304347826087,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 128.0
+            },
+            "execution_ms": {
+              "count": 92,
+              "mean": 188.79491742700338,
+              "p50": 165.5621265526861,
+              "p95": 341.48780163377523,
+              "sum": 17369.13240328431
+            }
+          },
+          "planner_requests": 25,
+          "planner_elapsed_s": 281.8867010367103,
+          "planner_tokens": {
+            "prompt_tokens": 271413,
+            "completion_tokens": 7163
+          },
+          "initial_request_sha256": "0d62dfc29a8da72974357a0ebf7ecdfbdc6a7d5b41926f87a101da3bc6ad15af",
+          "initial_plan": {
+            "reason": "Initial plan based on bathroom starting position. Need to exit bathroom through the doorway visible to my left, then navigate through the television room to the hallway, find stairs, and ascend to the fourth from top stair.",
+            "subtasks": [
+              {
+                "id": 1,
+                "instruction": "Exit the bathroom through the doorway to the left",
+                "status": "pending"
+              },
+              {
+                "id": 2,
+                "instruction": "Walk through the television room toward the hallway",
+                "status": "pending"
+              },
+              {
+                "id": 3,
+                "instruction": "Enter the hallway and locate the stairs",
+                "status": "pending"
+              },
+              {
+                "id": 4,
+                "instruction": "Go up the stairs and stop on the fourth from the top stair",
+                "status": "pending"
+              }
+            ]
+          },
+          "first_execution": {
+            "instruction": "Exit the bathroom through the doorway to the left",
+            "task_id": 1
+          },
+          "contiguous_history_verified": true,
+          "plain_instruction_verified": true
+        },
+        {
+          "attempt_id": "1ff378d26da447138fd484de0b42a8b9",
+          "episode": 7006,
+          "attempt": 1,
+          "status": "completed",
+          "success": 0.0,
+          "ne": 5.9349,
+          "spl": 0.0,
+          "ndtw": 0.3108,
+          "distance_m": 11.7349,
+          "wall_s": 267.8,
+          "tool_calls": 25,
+          "turns": 25,
+          "vla_calls": 77,
+          "input_tokens": 271383,
+          "cached_input_tokens": 0,
+          "output_tokens": 3478,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/7y3sRwLe3Va/7y3sRwLe3Va.glb",
+          "episode_id": "7016",
+          "training_status": "evaluation_only",
+          "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/45d4fcb0d1a14071820c5e1a0f1be2e9/1ff378d26da447138fd484de0b42a8b9/episode/work/ep7006/trace/requests.jsonl",
+          "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/45d4fcb0d1a14071820c5e1a0f1be2e9/1ff378d26da447138fd484de0b42a8b9/episode/live/ep7006/subtasks/events.jsonl",
+          "replay_url": "http://192.168.66.221:18889/?attempt=1ff378d26da447138fd484de0b42a8b9",
+          "metrics": {
+            "distance_to_goal": 5.9349,
+            "success": 0.0,
+            "spl": 0.0,
+            "oracle_success": 0.0,
+            "ndtw": 0.3108,
+            "sdtw": 0.0,
+            "path_length": 11.7349,
+            "steps_taken": 81.0,
+            "stop_called": 1.0,
+            "collisions": 0.0,
+            "teleports": 0.0,
+            "teleport_fallbacks": 0.0,
+            "velocity_steps": 72.0
+          },
+          "tool_counts": {
+            "observe": 1,
+            "update_plan": 5,
+            "execute_subtask": 5,
+            "observe_map": 6,
+            "update_memory": 6,
+            "navigate_to_node": 1,
+            "terminate_episode": 1
+          },
+          "segments": [
+            {
+              "arguments": {
+                "instruction": "Walk up the stairs",
+                "task_id": 1
+              },
+              "wall_s": 4.68939471244812,
+              "steps_the_vla_took": 8,
+              "step_budget_for_this_call": 500,
+              "distance_travelled_m": 1.24,
+              "net_displacement_m": 1.23,
+              "blocked_events": 0,
+              "steps_taken_total": 8,
+              "steps_remaining_approx": 492,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 43.12
+            },
+            {
+              "arguments": {
+                "instruction": "Make a left on the stair landing and walk along the hallway",
+                "task_id": 2
+              },
+              "wall_s": 13.50143575668335,
+              "steps_the_vla_took": 28,
+              "step_budget_for_this_call": 492,
+              "distance_travelled_m": 4.11,
+              "net_displacement_m": 3.64,
+              "blocked_events": 0,
+              "steps_taken_total": 36,
+              "steps_remaining_approx": 464,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 89.55
+            },
+            {
+              "arguments": {
+                "instruction": "Turn left and go through the open door into the bedroom",
+                "task_id": 3
+              },
+              "wall_s": 6.50128698348999,
+              "steps_the_vla_took": 13,
+              "step_budget_for_this_call": 464,
+              "distance_travelled_m": 1.81,
+              "net_displacement_m": 1.8,
+              "blocked_events": 0,
+              "steps_taken_total": 49,
+              "steps_remaining_approx": 451,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 45.63
+            },
+            {
+              "arguments": {
+                "instruction": "Turn left and enter the bedroom through the open door on the left",
+                "task_id": 3
+              },
+              "wall_s": 6.840846538543701,
+              "steps_the_vla_took": 13,
+              "step_budget_for_this_call": 443,
+              "distance_travelled_m": 1.35,
+              "net_displacement_m": 1.34,
+              "blocked_events": 0,
+              "steps_taken_total": 70,
+              "steps_remaining_approx": 430,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 87.11
+            },
+            {
+              "arguments": {
+                "instruction": "Walk to the foot of the bed",
+                "task_id": 4
+              },
+              "wall_s": 5.254741191864014,
+              "steps_the_vla_took": 10,
+              "step_budget_for_this_call": 430,
+              "distance_travelled_m": 1.42,
+              "net_displacement_m": 1.42,
+              "blocked_events": 0,
+              "steps_taken_total": 80,
+              "steps_remaining_approx": 420,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 29.78
+            }
+          ],
+          "actor_predictions": 77,
+          "crops": [
+            {
+              "event": 67,
+              "kind": "actor_history_crop",
+              "reason": "completed_subtask",
+              "completed_task_id": 1,
+              "next_task_id": 2,
+              "start_frame_id": "frame-000008",
+              "discarded_frames": 8,
+              "retained_frames": 1
+            },
+            {
+              "event": 250,
+              "kind": "actor_history_crop",
+              "reason": "completed_subtask",
+              "completed_task_id": 2,
+              "next_task_id": 3,
+              "start_frame_id": "frame-000036",
+              "discarded_frames": 28,
+              "retained_frames": 1
+            },
+            {
+              "event": 439,
+              "kind": "actor_history_crop",
+              "reason": "completed_subtask",
+              "completed_task_id": 3,
+              "next_task_id": 4,
+              "start_frame_id": "frame-000063",
+              "discarded_frames": 27,
+              "retained_frames": 1
+            }
+          ],
+          "crop_count": 3,
+          "completion_boundaries": [
+            {
+              "event": 64,
+              "kind": "task_completion_boundary",
+              "task_id": 1,
+              "frame_index": 8,
+              "frame_id": "frame-000008"
+            },
+            {
+              "event": 247,
+              "kind": "task_completion_boundary",
+              "task_id": 2,
+              "frame_index": 36,
+              "frame_id": "frame-000036"
+            },
+            {
+              "event": 436,
+              "kind": "task_completion_boundary",
+              "task_id": 3,
+              "frame_index": 63,
+              "frame_id": "frame-000063"
+            },
+            {
+              "event": 511,
+              "kind": "task_completion_boundary",
+              "task_id": 4,
+              "frame_index": 73,
+              "frame_id": "frame-000073"
+            }
+          ],
+          "available_history_frames": {
+            "count": 77,
+            "mean": 12.363636363636363,
+            "p50": 10,
+            "p95": 27,
+            "sum": 952
+          },
+          "inference_and_context_s": {
+            "count": 77,
+            "mean": 0.17001954545454545,
+            "p50": 0.145227,
+            "p95": 0.270325,
+            "sum": 13.091504999999996
+          },
+          "actor_latency_ms": {
+            "count": 77,
+            "mean": 123.03544545860646,
+            "p50": 116.11794214695692,
+            "p95": 171.6210669837892,
+            "sum": 9473.729300312698
+          },
+          "inference_metrics": {
+            "batch_size": {
+              "count": 77,
+              "mean": 1.12987012987013,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 87.0
+            },
+            "queue_wait_ms": {
+              "count": 77,
+              "mean": 22.38338144326752,
+              "p50": 2.4118656292557716,
+              "p95": 92.41842431947589,
+              "sum": 1723.520371131599
+            },
+            "queue_ms": {
+              "count": 77,
+              "mean": 0.28134395017639385,
+              "p50": 0.23015402257442474,
+              "p95": 0.41945790871977806,
+              "sum": 21.663484163582325
+            },
+            "llm_ms": {
+              "count": 77,
+              "mean": 68.26839367435737,
+              "p50": 65.67794317379594,
+              "p95": 87.5332192517817,
+              "sum": 5256.666312925518
+            },
+            "vit_ms": {
+              "count": 77,
+              "mean": 54.7670517842491,
+              "p50": 50.508341286331415,
+              "p95": 84.39196599647403,
+              "sum": 4217.06298738718
+            },
+            "process_sample_ms": {
+              "count": 77,
+              "mean": 22.421095187642745,
+              "p50": 22.900918032974005,
+              "p95": 28.700164053589106,
+              "sum": 1726.4243294484913
+            },
+            "vit_cache_hits": {
+              "count": 77,
+              "mean": 5.025974025974026,
+              "p50": 4.0,
+              "p95": 12.0,
+              "sum": 387.0
+            },
+            "vit_cache_misses": {
+              "count": 77,
+              "mean": 1.4155844155844155,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 109.0
+            },
+            "execution_ms": {
+              "count": 77,
+              "mean": 162.39263353167803,
+              "p50": 137.50061765313148,
+              "p95": 261.83832017704844,
+              "sum": 12504.232781939209
+            }
+          },
+          "planner_requests": 25,
+          "planner_elapsed_s": 200.23432818474248,
+          "planner_tokens": {
+            "prompt_tokens": 271383,
+            "completion_tokens": 3478
+          },
+          "initial_request_sha256": "87020dbf0ca8a1dcf5dc26341b4865c323719daff1d2880a818e4191988d3109",
+          "initial_plan": {
+            "reason": "Initial plan based on observations: I'm at the bottom of stairs that go up to my right. I need to walk up, make a left on the landing, then find an open door on the left, and wait at the foot of the bed.",
+            "subtasks": [
+              {
+                "id": 1,
+                "instruction": "Walk up the stairs",
+                "status": "pending"
+              },
+              {
+                "id": 2,
+                "instruction": "Make a left on the stair landing",
+                "status": "pending"
+              },
+              {
+                "id": 3,
+                "instruction": "Make a left through the open door on the left",
+                "status": "pending"
+              },
+              {
+                "id": 4,
+                "instruction": "Wait at the foot of the bed",
+                "status": "pending"
+              }
+            ]
+          },
+          "first_execution": {
+            "instruction": "Walk up the stairs",
+            "task_id": 1
+          },
+          "contiguous_history_verified": true,
+          "plain_instruction_verified": true
+        },
+        {
+          "attempt_id": "c7122424ee93470dbeaf7b0319f10468",
+          "episode": 7648,
+          "attempt": 1,
+          "status": "completed",
+          "success": 1.0,
+          "ne": 1.1679,
+          "spl": 0.9077,
+          "ndtw": 0.8637,
+          "distance_m": 7.8635,
+          "wall_s": 111.1,
+          "tool_calls": 11,
+          "turns": 11,
+          "vla_calls": 49,
+          "input_tokens": 92914,
+          "cached_input_tokens": 0,
+          "output_tokens": 1224,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/b8cTxDM8gDG/b8cTxDM8gDG.glb",
+          "episode_id": "7658",
+          "training_status": "evaluation_only",
+          "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/45d4fcb0d1a14071820c5e1a0f1be2e9/c7122424ee93470dbeaf7b0319f10468/episode/work/ep7648/trace/requests.jsonl",
+          "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/45d4fcb0d1a14071820c5e1a0f1be2e9/c7122424ee93470dbeaf7b0319f10468/episode/live/ep7648/subtasks/events.jsonl",
+          "replay_url": "http://192.168.66.221:18889/?attempt=c7122424ee93470dbeaf7b0319f10468",
+          "metrics": {
+            "distance_to_goal": 1.1679,
+            "success": 1.0,
+            "spl": 0.9077,
+            "oracle_success": 1.0,
+            "ndtw": 0.8637,
+            "sdtw": 0.8637,
+            "path_length": 7.8635,
+            "steps_taken": 48.0,
+            "stop_called": 1.0,
+            "collisions": 2.0,
+            "teleports": 0.0,
+            "teleport_fallbacks": 0.0,
+            "velocity_steps": 47.0
+          },
+          "tool_counts": {
+            "observe": 1,
+            "update_plan": 3,
+            "execute_subtask": 2,
+            "observe_map": 2,
+            "update_memory": 2,
+            "terminate_episode": 1
+          },
+          "segments": [
+            {
+              "arguments": {
+                "task_id": 1,
+                "instruction": "Walk forward toward the stairs"
+              },
+              "wall_s": 6.543177843093872,
+              "steps_the_vla_took": 11,
+              "step_budget_for_this_call": 500,
+              "distance_travelled_m": 1.85,
+              "net_displacement_m": 1.77,
+              "blocked_events": 0,
+              "steps_taken_total": 11,
+              "steps_remaining_approx": 489,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 1.74
+            },
+            {
+              "arguments": {
+                "instruction": "Turn left and walk down the stairs to the bottom",
+                "task_id": 2
+              },
+              "wall_s": 19.652450561523438,
+              "steps_the_vla_took": 36,
+              "step_budget_for_this_call": 489,
+              "distance_travelled_m": 6.02,
+              "net_displacement_m": 4.14,
+              "blocked_events": 0,
+              "steps_taken_total": 47,
+              "steps_remaining_approx": 453,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 182.41
+            }
+          ],
+          "actor_predictions": 49,
+          "crops": [
+            {
+              "event": 85,
+              "kind": "actor_history_crop",
+              "reason": "completed_subtask",
+              "completed_task_id": 1,
+              "next_task_id": 2,
+              "start_frame_id": "frame-000011",
+              "discarded_frames": 11,
+              "retained_frames": 1
+            }
+          ],
+          "crop_count": 1,
+          "completion_boundaries": [
+            {
+              "event": 78,
+              "kind": "task_completion_boundary",
+              "task_id": 1,
+              "frame_index": 11,
+              "frame_id": "frame-000011"
+            },
+            {
+              "event": 313,
+              "kind": "task_completion_boundary",
+              "task_id": 2,
+              "frame_index": 47,
+              "frame_id": "frame-000047"
+            }
+          ],
+          "available_history_frames": {
+            "count": 49,
+            "mean": 15.938775510204081,
+            "p50": 13,
+            "p95": 35,
+            "sum": 781
+          },
+          "inference_and_context_s": {
+            "count": 49,
+            "mean": 0.22723695918367348,
+            "p50": 0.220319,
+            "p95": 0.32101,
+            "sum": 11.134611000000001
+          },
+          "actor_latency_ms": {
+            "count": 49,
+            "mean": 142.4125959640559,
+            "p50": 128.61065054312348,
+            "p95": 192.4574519507587,
+            "sum": 6978.2172022387385
+          },
+          "inference_metrics": {
+            "batch_size": {
+              "count": 49,
+              "mean": 1.2857142857142858,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 63.0
+            },
+            "queue_wait_ms": {
+              "count": 49,
+              "mean": 51.61202907068085,
+              "p50": 36.46273026242852,
+              "p95": 148.70438212528825,
+              "sum": 2528.9894244633615
+            },
+            "queue_ms": {
+              "count": 49,
+              "mean": 0.4933866463145431,
+              "p50": 0.2694111317396164,
+              "p95": 1.7406963743269444,
+              "sum": 24.175945669412613
+            },
+            "llm_ms": {
+              "count": 49,
+              "mean": 79.249551795347,
+              "p50": 77.79630040749907,
+              "p95": 102.81904088333249,
+              "sum": 3883.228037972003
+            },
+            "vit_ms": {
+              "count": 49,
+              "mean": 63.163044168708886,
+              "p50": 52.437881007790565,
+              "p95": 104.9923081882298,
+              "sum": 3094.9891642667353
+            },
+            "process_sample_ms": {
+              "count": 49,
+              "mean": 22.285305562296085,
+              "p50": 22.600675001740456,
+              "p95": 28.05426437407732,
+              "sum": 1091.9799725525081
+            },
+            "vit_cache_hits": {
+              "count": 49,
+              "mean": 6.816326530612245,
+              "p50": 5.0,
+              "p95": 17.0,
+              "sum": 334.0
+            },
+            "vit_cache_misses": {
+              "count": 49,
+              "mean": 1.3877551020408163,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 68.0
+            },
+            "execution_ms": {
+              "count": 49,
+              "mean": 218.09629852674445,
+              "p50": 211.11025987192988,
+              "p95": 312.499123159796,
+              "sum": 10686.718627810478
+            }
+          },
+          "planner_requests": 11,
+          "planner_elapsed_s": 76.75723673007451,
+          "planner_tokens": {
+            "prompt_tokens": 92914,
+            "completion_tokens": 1224
+          },
+          "initial_request_sha256": "7ddd527d595f2fb5c9b4ec0c634477d1b7c55f1baaf1e29e0e2d90feaefa638f",
+          "initial_plan": {
+            "reason": "Initial plan based on observation: I'm in a hallway with stairs visible ahead going down. Need to walk down the stairs and stop at the bottom.",
+            "subtasks": [
+              {
+                "id": 1,
+                "instruction": "Walk forward toward the stairs",
+                "status": "pending"
+              },
+              {
+                "id": 2,
+                "instruction": "Walk down the stairs",
+                "status": "pending"
+              },
+              {
+                "id": 3,
+                "instruction": "Stop at the bottom of the stairs",
+                "status": "pending"
+              }
+            ]
+          },
+          "first_execution": {
+            "task_id": 1,
+            "instruction": "Walk forward toward the stairs"
+          },
+          "contiguous_history_verified": true,
+          "plain_instruction_verified": true
+        }
+      ],
+      "aggregate": {
+        "n": 4,
+        "successes": 3,
+        "mean_ne": 2.5911,
+        "mean_wall_s": 208.475,
+        "actor_predictions": 261,
+        "crop_count": 6,
+        "total_inference_and_context_s": 50.105324999999986,
+        "execute_subtask_calls": 15,
+        "planner_requests": 71,
+        "planner_prompt_tokens": 714636,
+        "mean_spl": 0.7237499999999999,
+        "osr": 0.75
+      }
+    }
+  ],
+  "purpose": "development paired ablation, not benchmark; one run per episode and arm",
+  "paired_audit": [
+    {
+      "episode": 0,
+      "initial_planner_request_identical": true,
+      "identical_action_token_and_instruction_prefix": 4,
+      "crop_activated": false
+    },
+    {
+      "episode": 456,
+      "initial_planner_request_identical": true,
+      "identical_action_token_and_instruction_prefix": 1,
+      "crop_activated": true
+    },
+    {
+      "episode": 7006,
+      "initial_planner_request_identical": true,
+      "identical_action_token_and_instruction_prefix": 9,
+      "crop_activated": true
+    },
+    {
+      "episode": 7648,
+      "initial_planner_request_identical": true,
+      "identical_action_token_and_instruction_prefix": 12,
+      "crop_activated": true
+    }
+  ],
+  "finished": 1794166686.5083675,
+  "validation": {
+    "pytest": 137,
+    "subtests": 4,
+    "ruff": "passed",
+    "mypy": "passed",
+    "frontend_build": "passed"
+  },
+  "caveats": [
+    "Four development routes, one rollout per arm; no statistical significance claim.",
+    "Shared concurrent model services; wall/inference latency is load-sensitive.",
+    "Planner may diverge before first crop; compare trace prefixes before causal attribution.",
+    "No forced plan completion: some episodes may never activate cropping.",
+    "Available history size is not the native sampled image count or token count."
+  ],
+  "final_queue": {
+    "active_attempts": 0,
+    "historical_50_job": "paused",
+    "historical_50_completed": 8
+  },
+  "boundary_replay": {
+    "evidence": "lightnav-completion-crop-boundary-replay-20261109.json",
+    "cases": 6,
+    "changed_outputs": 5,
+    "stable_within_policy_cases": 6
+  }
+}

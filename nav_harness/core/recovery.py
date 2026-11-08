@@ -1,5 +1,22 @@
 """Determine whether interrupted tool calls may still own remote motion."""
 
+import json
+
+
+def rejected_before_motion(event: dict, wire: bool) -> bool:
+    """Only an explicit tool-side no-state-change rejection resolves a failed call."""
+    texts = [event.get("feedback", {}).get("content", "")] if wire else event.get("texts", [])
+    for text in texts:
+        for line in text.splitlines():
+            try:
+                value = json.loads(line)
+            except (TypeError, ValueError):
+                continue
+            if isinstance(value, dict) and value.get("error") == "precondition_failed" and value.get("state_changed") is False:
+                return True
+    return False
+
+
 MOTION_TOOLS = frozenset(
     {
         "execute_subtask",
@@ -26,6 +43,6 @@ def resource_state(events: list[dict], *, wire: bool, worker_info: dict | None =
                 pending.add(e.get("call_id") if wire else e.get("id"))
         elif e["kind"] == "tool_result":
             key = e.get("call_id") if wire else e.get("tool_use_id")
-            if not e.get("is_error"):
+            if not e.get("is_error") or rejected_before_motion(e, wire):
                 pending.discard(key)
     return "unknown" if pending else "idle"

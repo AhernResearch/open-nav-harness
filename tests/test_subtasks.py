@@ -120,24 +120,10 @@ class TaskTests(unittest.TestCase):
 
 
 class ContextTests(unittest.TestCase):
-    def test_lightnav_replacement_only_buffers_and_current_is_unique(self):
-        ws = FakeWS(); bridge = LightNavBridge('ws://local', connect=lambda *a, **k: ws)
-        bridge.reset({})
-        frames = [{'id': str(i), 'views': {'policy_front': str(i)}} for i in range(15)]
-        bridge.replace_context({'context_key': '1:1', 'frames': frames})
-        self.assertTrue(all(not m['data']['instruction'] for m in ws.sent if m['action']=='next'))
-        bridge.act({'text': 'Exit', 'rgb_policy': '15', 'frame_id': '15', 'context_key': '1:1'})
-        self.assertEqual(len(bridge.state()['frame_ids']), 16)
-        with self.assertRaises(ValueError): bridge.act({'text':'Exit','rgb_policy':'15','frame_id':'15','context_key':'1:1'})
-        count = len([m for m in ws.sent if m['action']=='reset'])
-        frames = frames[-2:]
-        bridge.replace_context({'context_key':'1:2','frames':frames})
-        self.assertEqual(bridge.state()['frame_ids'], ['13','14'])
-        self.assertEqual(len([m for m in ws.sent if m['action']=='reset']), count+1)
-        bridge.replace_context({'context_key':'1:2','frames':[{'id':'13'},{'id':'14'}]})
-        self.assertEqual(bridge.state()['frame_ids'],['13','14'])
-        with self.assertRaises(ValueError):bridge.replace_context({'context_key':'1:2','frames':[{'id':'unknown'}]})
-        with self.assertRaises(ValueError): bridge.replace_context({'context_key':'x','frames':frames*8})
+    def test_lightnav_refuses_lossy_context_replacement(self):
+        bridge = LightNavBridge('ws://local', connect=lambda *a, **k: FakeWS())
+        with self.assertRaisesRegex(ValueError, 'append-only episode history'):
+            bridge.replace_context({'context_key': 'task', 'frames': []})
 
     def test_navgpt_reuses_only_matching_frame_cache_indices(self):
         class Agent:

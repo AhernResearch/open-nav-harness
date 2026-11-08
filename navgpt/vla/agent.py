@@ -40,7 +40,7 @@ _DEFAULT_CAMERA_NAMES: dict[int, list[str]] = {
 }
 
 
-def sample_indices(n: int, sample_size: int) -> list[int]:
+def sample_indices(n: int, sample_size: int, rng=None) -> list[int]:
     """Sample up to sample_size indices from [0, n-1], always keeping 0 and n-1."""
     if n <= 0:
         raise ValueError("n must be >= 1")
@@ -51,7 +51,7 @@ def sample_indices(n: int, sample_size: int) -> list[int]:
     if sample_size == 1:
         return [n - 1]
     pool = list(range(1, n - 1))
-    return sorted({0, n - 1} | set(random.sample(pool, sample_size - 2)))
+    return sorted({0, n - 1} | set((rng or random).sample(pool, sample_size - 2)))
 
 
 def sample_latest_indices(n: int, sample_size: int) -> list[int]:
@@ -123,6 +123,7 @@ class NavGPTVLA:
         robot_type: str = "habitat_nav",
         codec_enabled: bool = True,
         attn_implementation: str | None = None,
+        shared_model=None,
     ) -> None:
         if robot_type not in ROBOT_SCALE_CONFIGS:
             raise ValueError(f"Unknown robot_type {robot_type!r}; available: {list(ROBOT_SCALE_CONFIGS)}")
@@ -145,7 +146,10 @@ class NavGPTVLA:
         self.codec_enabled = codec_enabled
         self._scale = ROBOT_SCALE_CONFIGS[robot_type]
 
-        self.model, self.processor = load_from_pretrained(model_path, attn_implementation=attn_implementation)
+        self.model, self.processor = shared_model or load_from_pretrained(
+            model_path, attn_implementation=attn_implementation
+        )
+        self.rng = random.Random()
 
         self.rgb_lists: list[list] = [[] for _ in range(view_num)]
         self.history_digest = hashlib.sha256()
@@ -267,7 +271,7 @@ class NavGPTVLA:
         if self.sample_mode == "latest":
             index_list = sample_latest_indices(total, self.max_sample_size)
         else:
-            index_list = sample_indices(total, self.max_sample_size)
+            index_list = sample_indices(total, self.max_sample_size, self.rng)
         prompt = self.PROMPT_TEMPLATE.format(self._build_image_describe(index_list), instruction)
 
         t0 = time.time()
@@ -276,7 +280,13 @@ class NavGPTVLA:
         else:
             data = self._build_input_no_cache(prompt, index_list)
         print(f"[NavGPT VLA] preprocessing {time.time() - t0:.3f}s steps={len(index_list)} frame_cache={self.frame_cache}")
-        return self._model_forward(data)
+        preprocessing_ms = (time.time() - t0) * 1000
+        forward_started = time.monotonic()
+        result = self._model_forward(data)
+        self.last_timings = {"preprocessing_ms": preprocessing_ms,
+                             "inference_ms": (time.monotonic() - forward_started) * 1000,
+                             "batch_size": 1}
+        return result
 
     # ------------------------------------------------------------------
     # Public API
@@ -305,7 +315,6 @@ class NavGPTVLA:
         self.history_digest = hashlib.sha256()
         self.rgb_lists = [[] for _ in range(self.view_num)]
         self.multi_res_cache.clear()
-        torch.cuda.empty_cache()
 
     def observe_history(self, images: list) -> None:
         """Append one step of observations without predicting an action.

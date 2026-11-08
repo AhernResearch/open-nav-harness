@@ -10,10 +10,11 @@ import re
 import sys
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 import requests
 from .registry import Image, TextContent, ToolRegistry, ToolResult
 from .agentic import PlanItem
+from navgpt.vla.profiles import input_profile
 
 
 def _sibling(module_name, attr):
@@ -38,19 +39,27 @@ frame_exists = _sibling("frame_store", "frame_exists")
 class NavigationSession:
     """Episode-local navigation tool state. One instance per episode; no mutable module state."""
 
-    def __init__(self, env=None, actor=None):
+    def __init__(self, env=None, actor=None, cancelled=None):
         self.env = dict(os.environ if env is None else env)
         self._actor = actor
+        self._cancelled = cancelled
         self.SERVER_URL = self.env.get("NAVGPT_SERVER_URL", "http://127.0.0.1:9200")
         self.VERB_PREFIX = self.env.get("NAVGPT_VERB_PREFIX", "r2rce")
         self.STEP_BUDGET = int(self.env.get("NAVGPT_STEP_BUDGET", "500"))
         self.LIVE_DIR = Path(self.env["NAVGPT_LIVE_DIR"]) if self.env.get("NAVGPT_LIVE_DIR") else None
         self.CONDITION = self.env.get("NAVGPT_CONDITION", "planner_basic")
+        self._enabled_tools = json.loads(self.env["NAVGPT_TOOLS"]) if "NAVGPT_TOOLS" in self.env else None
+        if self._enabled_tools is not None and (
+            not isinstance(self._enabled_tools, list) or not self._enabled_tools
+            or any(not isinstance(name, str) for name in self._enabled_tools)
+        ):
+            raise ValueError("NAVGPT_TOOLS must be a non-empty list of tool names")
         self._AGENTIC = self.CONDITION == "planner_agentic"
         self._SUBTASK = self.CONDITION in ("planner_subtask", "planner_agentic")
         self._rollout_limits = None
         self.VLA_URL = self.env.get("NAVGPT_VLA_URL", "http://127.0.0.1:8000")
         self.VLA_BACKEND = self.env.get("NAVGPT_VLA_BACKEND", "navgpt")
+        self._input_profile = input_profile(self.VLA_BACKEND)
         self.VLA_MAX_STEPS = int(self.env.get("NAVGPT_VLA_MAX_STEPS", "200"))
         self.VLA_MAP = self.env.get(
             "NAVGPT_VLA_MAP", "1" if self.CONDITION in ("planner_vla_memory", "planner_subtask", "planner_agentic") else "0"
@@ -88,6 +97,14 @@ class NavigationSession:
         self._tool_call_counts: dict[str, int] = {}
         self._vla = None
         self._history_pending = None
+        self._actor_history_start = 0
+        self._actor_history_policy = self.env.get("NAVGPT_ACTOR_HISTORY_POLICY", "episode")
+        if self._actor_history_policy not in ("episode", "completed_subtask"):
+            raise ValueError("Unknown actor history policy")
+        if self._actor_history_policy == "completed_subtask" and (
+            not self._AGENTIC or self._input_profile.history != "episode"
+        ):
+            raise ValueError("completed_subtask requires an agentic episode-history actor")
         self._last_policy_inference_id = None
         self._last_pose = None
         self._last_scan = None
@@ -128,7 +145,10 @@ class NavigationSession:
         self._trace_keys: list[int] = []
         self._ARRIVE_DESC = 'END THE EPISODE BY SAYING WHERE YOU ARE STOPPING. This is how you finish; it is permanent.\n\nterminate_episode("here") stops where you stand. terminate_episode(3) walks back to place 3 first and stops there — the retrace walks back over ground you already covered.\n\nWHY THIS TOOL EXISTS instead of a plain STOP. Ending the episode is a CHOICE BETWEEN CANDIDATES — where you stand, or somewhere you recorded — rather than a reflex from wherever the robot happens to be. Both errors cost the same episode and neither is the safe default: always preferring the place you bound to the last clause loses the episodes where you were already at the end, and always preferring where you stand loses the episodes where the route plainly continued past you. So name your target and say why it beats the other.\n\nYou do not need to be certain, see the landmark, or be able to name the room. You need to be within 3 metres of where the last clause points.'
         self._RECALL_DESC = "Show the picture that was taken at a place you recorded — observe_node(3).\n\nUse it when a caption is not enough to tell two places apart, which is the one moment an image of a place is worth asking for. It is deliberately NOT attached to the place list: an image added to this conversation is re-sent on every following turn, so images per place quickly become expensive. So the list carries words, the map carries where everything is, and this carries the pixels only when you ask.\nIt does not move the robot."
-        self._register("observe_forward", self._OBSERVE_DESC, self.observe)
+        if self._AGENTIC:
+            self._register("observe", self.observe_views.__doc__, self.observe_views)
+        else:
+            self._register("observe_forward", self._OBSERVE_DESC, self.observe)
         if self.CONDITION != "planner_basic":
             self._register(
                 "terminate_episode",
@@ -137,20 +157,34 @@ class NavigationSession:
             )
         if not self._HAS_VLA:
             self._register("navigate_primitive", self._STEP_DESC, self.step)
-        if self._HAS_PANO:
+        if self._HAS_PANO and not self._AGENTIC:
             self._register("observe_panorama", self._LOOK_DESC, self.look_around)
         if self._HAS_MOVE:
             self._register("observe_map", self._MAP_DESC, self.local_map)
             self._register("navigate_relative", self._MOVE_DESC, self.move)
         if self._HAS_PLACES:
-            self._register("navigate_to_node", self._GO_DESC, self.go)
+            self._register("navigate_to_node", self._GO_DESC, self.return_node if self._AGENTIC else self.go)
             if not self._AGENTIC:
                 self._register("annotate_node", self._ADD_PLACE_DESC, self.add_place)
-        if self._HAS_PLACES and (not self._HAS_VLA or self._AGENTIC):
+        if self._HAS_PLACES and not self._HAS_VLA and not self._AGENTIC:
             self._register("observe_node", self._RECALL_DESC, self.recall)
         if self._AGENTIC:
             self._register("update_plan", self.update_agentic_plan.__doc__, self.update_agentic_plan)
-            self._register("execute_subtask", self.execute_agentic_task.__doc__, self.execute_agentic_task)
+            execute = self.execute_agentic_task
+            description = execute.__doc__
+            if self.env.get("NAVGPT_ALLOW_CONTEXT_RESET", "1") == "0" or not self._input_profile.manual_reset:
+                execute = self.execute_agentic_task_without_reset
+                description = description.replace(
+                    "reset_context also starts a new segment within this task.",
+                    "Within the same task, visual history is retained.",
+                )
+            if self._input_profile.history == "episode":
+                description = description.replace(
+                    "History budgets are runtime configuration. Task switches\n        reset the context anchor; Within the same task, visual history is retained.",
+                    "Visual history is runtime-managed using native policy sampling. "
+                    "Within a task it remains continuous; no map captions are sent to the policy.",
+                )
+            self._register("execute_subtask", description, execute)
             self._register("update_memory", self.update_memory.__doc__, self.update_memory)
             self._register("read_memory", self.read_memory.__doc__, self.read_memory)
         elif self._SUBTASK:
@@ -159,6 +193,8 @@ class NavigationSession:
             self._register("review_subtask", self.review_subtask.__doc__, self.review_subtask)
         elif self._HAS_VLA:
             self._register("navigate_by_instruction", self._VLA_DESC, self.vla_navigate)
+        if self._enabled_tools is not None and set(self._enabled_tools) != set(self.tools.definitions):
+            raise ValueError("Configured tools do not match the condition's registered surface")
 
     def _tool_enter(self, name: str) -> None:
         self._tool_call_counts[name] = self._tool_call_counts.get(name, 0) + 1
@@ -292,6 +328,8 @@ class NavigationSession:
         if motion in ("step_hightolow", "retrace_to", "retrace_path", "step_discrete", "step_velocity", "teleport"):
             self._motion_epoch += 1
             self._memory_map_read = None
+        if self._cancelled is not None and self._cancelled.is_set():
+            raise RuntimeError("Execution cancelled before environment call")
         resp = requests.post(
             "{}/call/{}".format(self.SERVER_URL, function_name), json={"inputs": inputs}, timeout=300
         )
@@ -360,6 +398,17 @@ class NavigationSession:
             self._tasks.observe(
                 self._policy_views(out.get("raw_views") or {}), out.get("pose") or {}, self._steps_taken
             )
+        if self._AGENTIC:
+            frame = self._tasks.frames[-1]
+            frame["planner_views"] = dict(out.get("views") or {})
+            if self._tasks.directory:
+                folder = self._tasks.directory / "observations" / frame["id"] / "planner"
+                folder.mkdir(parents=True, exist_ok=True)
+                for direction, value in frame["planner_views"].items():
+                    if direction in ("front", "right", "back", "left"):
+                        (folder / (direction + ".png")).write_bytes(base64.b64decode(value))
+            self._tasks._event("planner_observation", frame_id=frame["id"], pose=frame["pose"],
+                               directions=list(frame["planner_views"]))
         return out
 
     def _clearance_summary(self, scan, payload=None) -> dict[str, Any]:
@@ -459,6 +508,38 @@ class NavigationSession:
         self._obs_count += 1
         self._live_frame(png, "forward view")
         return png
+
+    @staticmethod
+    def _validate_views(views):
+        if not views or len(views) != len(set(views)) or any(
+                v not in ("front", "right", "back", "left") for v in views):
+            raise ValueError("views must select distinct front/right/back/left directions")
+
+    def observe_views(self, views: list[Literal["front", "right", "back", "left"]]) -> list:
+        """Inspect selected simultaneous camera directions without moving or rotating.
+
+        Movement already returns endpoint views; request fresh views only when needed.
+        Each image identifies its direction, capture orientation and approximate clearance.
+        """
+        self._validate_views(views)
+        if self._episode_over:
+            raise ValueError("Episode is already over")
+        self._tool_enter("observe")
+        pano = self._pano()
+        selected = dict(pano, views={v: pano.get("views", {}).get(v) for v in views})
+        frames = dict(zip((v for v in ("front", "right", "back", "left")
+                           if selected["views"].get(v)), self._pano_frames(selected)))
+        result = [json.dumps({"orientation": (pano.get("pose") or {}).get("rotation_wxyz"),
+                              "missing_views": [v for v in views if v not in frames]})]
+        for direction in views:
+            if direction in frames:
+                label, png = frames[direction]
+                self._bump_obs(png, direction)
+                result.extend([label, Image(data=png, format="png")])
+        return result
+
+    def return_node(self, node_id: int) -> list:
+        return self._return_memory_node(node_id)
 
     def observe(self) -> list:
         self._tool_enter("observe_forward")
@@ -956,7 +1037,8 @@ class NavigationSession:
                 "pending_edge_id": self._tasks.memory.pending,
             }
             self._tasks._event("memory_map_read", **self._memory_map_read)
-            status["memory_read"] = dict(self._memory_map_read)
+            status = {"facing": status.get("facing"), "places_px": status.get("places_px"),
+                      "memory_context": self._tasks.memory.context(self._tasks.active_id)}
         out: list[Any] = [Image(data=png, format="png"), json.dumps(status)]
         if table:
             out.append(table)
@@ -986,7 +1068,7 @@ class NavigationSession:
         }
         remaining = max(1, self.STEP_BUDGET - self._steps_taken)
         budget = remaining if self.VLA_MAX_STEPS <= 0 else max(1, min(self.VLA_MAX_STEPS, remaining))
-        if self._SUBTASK:
+        if self._SUBTASK and not self._AGENTIC:
             budget = min(budget, limits["max_actions"])
         spec = self._lazy_vla()
         grant = self._scheduler.begin(route) if self._ABLATION else None
@@ -1031,8 +1113,9 @@ class NavigationSession:
             try:
                 self._prepare_policy_observation(pano)
                 if self._SUBTASK:
-                    selected = self._tasks.selected_frames()
-                    spec.replace_context(self._tasks.context_key, selected[:-1])
+                    selected = (self._tasks.frames[self._actor_history_start:] if self._input_profile.history == "episode"
+                                else self._tasks.selected_frames())
+                    spec.prepare_context(self._tasks.context_key, selected)
                     self._tasks.record_context(selected, route, prediction_id=self._policy_step)
                 advice = spec.act(
                     views=pano.get("raw_views") or {},
@@ -1077,7 +1160,7 @@ class NavigationSession:
             arrival = bool(advice.get("should_stop"))
             velocity = advice.get("velocity")
             if self.VLA_BACKEND == "lightnav" and arrival:
-                subtask_return = "vla_stop"
+                subtask_return = "decode_error" if advice.get('stop_reason') == 'decode_error' else "vla_stop"
                 if self._ABLATION:
                     handoff = self._scheduler.finish(grant)
                 break
@@ -1139,8 +1222,10 @@ class NavigationSession:
                 break
             if self._SUBTASK and (
                 blocked_count >= 3
-                or travelled >= limits["max_distance_m"]
-                or turned >= limits["max_turn_deg"]
+                or (not self._AGENTIC and (
+                    travelled >= limits["max_distance_m"]
+                    or turned >= limits["max_turn_deg"]
+                ))
             ):
                 subtask_return = (
                     "blocked"
@@ -1685,7 +1770,38 @@ class NavigationSession:
         self._obs_count += 1
         self._live_frame(png, label, kind)
 
+    @staticmethod
+    def _compact_motion_result(result):
+        # Keep decision-relevant execution facts; raw backend responses remain in the trace.
+        # subtask_return already records vla_stop. Do not present the actor's
+        # stop signal again under an arrival label: it cannot verify a goal.
+        allowed = {"steps_the_vla_took", "step_budget_for_this_call", "distance_travelled_m",
+                   "net_displacement_m", "blocked_events", "steps_taken_total",
+                   "steps_remaining_approx", "episode_over", "subtask_return", "turn_travelled_deg",
+                   "turned_deg", "requested_m", "walked_m", "blocked", "detour_m", "detoured",
+                   "nearest_obstacle_before_m", "end_reason", "target_node_id", "termination_reason",
+                   "arrived", "step_count", "terminated", "truncated"}
+        compact = []
+        for item in result:
+            if isinstance(item, str) and item.startswith("{"):
+                data = json.loads(item)
+                compact.append(json.dumps({k: v for k, v in data.items() if k in allowed}))
+            else:
+                compact.append(item)
+        return compact
+
+    def _tool_state(self):
+        state = self._tasks.snapshot()
+        if self._AGENTIC:
+            read = self._memory_map_read
+            state["map_read_valid"] = bool(read and read["motion_epoch"] == self._motion_epoch
+                                            and read["pending_edge_id"] == self._tasks.memory.pending)
+            state["steps_remaining"] = max(0, self.STEP_BUDGET - self._steps_taken)
+        return state
+
     def _register(self, name, description, fn):
+        if self._enabled_tools is not None and name not in self._enabled_tools:
+            return
         if self._AGENTIC:
             description = _sibling("agentic", "TOOL_DESCRIPTIONS").get(name, description)
         if self.VLA_BACKEND == "lightnav":
@@ -1729,11 +1845,8 @@ class NavigationSession:
                                         and frame["pose"].get("position") == pose.get("position") else None)
                             self._tasks.memory.finish(pose, frame_id, reason)
                             self._tasks._event("execution_memory", **self._tasks.memory.status())
-                            got = self._fetch_map()
-                            if got[0] is not None:
-                                self._bump_obs(got[0], "map", kind="map")
-                                result.extend(["Execution-boundary map; use observe_map before writing memory.",
-                                               Image(data=got[0], format="png")])
+                            result = self._compact_motion_result(result)
+                            result.append(json.dumps({"execution": self._tasks.memory.status()}))
                     except ValueError as exc:
                         if begun:
                             if self._motion_epoch != before_motion:
@@ -1744,15 +1857,15 @@ class NavigationSession:
                             raise RuntimeError("Tool failed after dispatching movement; retain the lease") from exc
                         if self._AGENTIC:
                             return ToolResult(isError=True, content=[
-                                TextContent(text=json.dumps({"protocol_error": str(exc)})),
-                                TextContent(text=json.dumps({"subtask_state": self._tasks.snapshot()})),
+                                TextContent(text=json.dumps({"error": "precondition_failed", "message": str(exc), "state_changed": False})),
+                                TextContent(text=json.dumps({"subtask_state": self._tool_state()})),
                             ])
-                        result = [json.dumps({"protocol_error": str(exc)})]
+                        result = [json.dumps({"error": "precondition_failed", "message": str(exc), "state_changed": False})]
                     except Exception as exc:
                         if begun:
                             self._tasks.memory.uncertain(str(exc))
                         raise
-                    result.append(json.dumps({"subtask_state": self._tasks.snapshot()}))
+                    result.append(json.dumps({"subtask_state": self._tool_state()}))
                     return result
 
             self.tools.register(name, description, task_call)
@@ -1819,7 +1932,7 @@ class NavigationSession:
     def execute_subtask(self) -> list:
         """Execute ONLY the active local goal. Returns fresh views/map; review before another move."""
         self._tasks.begin()
-        result = self.vla_navigate(self._tasks.policy_instruction())
+        result = self.vla_navigate(self._tasks.policy_instruction(self._input_profile.include_memory))
         self._tasks.returned("execution_handoff")
         return result
 
@@ -1838,48 +1951,69 @@ class NavigationSession:
         return self.arrive("here")
 
     def update_agentic_plan(self, subtasks: list[PlanItem], reason: str) -> list:
-        """Write or revise your plan. Each task needs id, instruction and completion_criterion.
+        """Write or revise your plan. Each task needs id, instruction and status.
 
         Replace the full plan, preserving IDs for retained tasks and explaining the change.
         Each status is pending, in_progress or completed; at most one is in_progress.
+        Preserve the original route requirements when changing the approach. Statuses are
+        your assessments, not verification; a failed action is not a completed requirement.
         Reopen incorrect completions here. This records task state; it does not execute movement.
         """
         self._tasks.update_plan(subtasks, reason)
-        return []
+        return [json.dumps({"plan_updated": True, "revision": self._tasks.revision})]
 
-    def execute_agentic_task(self, task_id: int, instruction: str = "", max_actions: int = 80,
-                             max_distance_m: float = 3.0, max_turn_deg: float = 180.0,
-                             reset_context: bool = False, history_frames: int = 16,
-                             boundary_frames: int = 2) -> list:
+    def execute_agentic_task(self, task_id: int, instruction: str = "",
+                             reset_context: bool = False) -> list:
         """Delegate one chosen task. Optionally rewrite its remaining instruction from the current pose.
 
-        Choose action/distance/turn budgets for this segment. VLA stop returns control, not
-        global success. history_frames (1-16) includes the current frame; boundary_frames
-        (0-4, below history_frames) keeps adjacent frames from the prior task. Task switches
+        Runs until policy stop, blockage or runtime/global limits; no per-call distance or turn cap.
+        VLA stop returns control, not
+        global success: subtask_return=vla_stop means only that the policy requested a stop.
+        History budgets are runtime configuration. Task switches
         reset the context anchor; reset_context also starts a new segment within this task.
-        Returns route evidence and endpoint views/map. You choose whether to review, repair,
+        Returns route evidence and endpoint views. Request observe_map separately. You choose whether to review, repair,
         continue, replan or stop; there is no mandatory review gate.
         """
-        if not 1 <= max_actions <= self.STEP_BUDGET:
-            raise ValueError('max_actions must fit the global action budget')
-        if not all(math.isfinite(v) and 0 < v <= bound for v, bound in
-                   ((max_distance_m, 1000), (max_turn_deg, 3600))):
-            raise ValueError('Distance/turn budgets must be finite and positive (at most 1000 m / 3600 deg)')
+        if reset_context and not self._input_profile.manual_reset:
+            raise ValueError('This policy retains episode history; task-local reset is unsupported')
+        history_frames = int(self.env.get("NAVGPT_HISTORY_FRAMES", "16"))
+        boundary_frames = int(self.env.get("NAVGPT_BOUNDARY_FRAMES", "2"))
         if not 1 <= history_frames <= 16 or not 0 <= boundary_frames <= min(4, history_frames - 1):
             raise ValueError('Invalid actor history budget')
         self._tasks.begin(task_id, instruction, reset_context)
+        boundary = self._tasks.completed_boundary
+        if (self._actor_history_policy == "completed_subtask" and boundary
+                and boundary['task_id'] != task_id):
+            start = boundary['frame_index']
+            if start > self._actor_history_start:
+                # Deliberate contiguous segment reset, never a sparse rolling window.
+                # Reset errors propagate: never silently continue an uncertain history.
+                self._lazy_vla().reset()
+                self._tasks._event(
+                    'actor_history_crop', reason='completed_subtask',
+                    completed_task_id=boundary['task_id'], next_task_id=task_id,
+                    start_frame_id=boundary['frame_id'],
+                    discarded_frames=start - self._actor_history_start,
+                    retained_frames=len(self._tasks.frames) - start,
+                )
+                self._actor_history_start = start
+            self._tasks.completed_boundary = None
         self._memory_map_read = None
         self._tasks.max_frames, self._tasks.boundary_frames = history_frames, boundary_frames
-        self._rollout_limits = {'max_actions': max_actions, 'max_distance_m': max_distance_m,
-                                'max_turn_deg': max_turn_deg}
-        self._tasks._event('execution_budget', **self._rollout_limits,
-                          history_frames=history_frames, boundary_frames=boundary_frames)
-        try:
-            result = self.vla_navigate(self._tasks.policy_instruction())
-            self._tasks.returned('execution_handoff')
-            return result
-        finally:
-            self._rollout_limits = None
+        self._tasks._event('execution_budget', scope='runtime_and_episode',
+                          remaining_actions=max(0, self.STEP_BUDGET - self._steps_taken),
+                          runtime_max_actions=self.VLA_MAX_STEPS or None,
+                          history_mode=self._input_profile.history,
+                          history_policy=self._actor_history_policy,
+                          history_frames=history_frames if self._input_profile.history == "bounded" else None,
+                          boundary_frames=boundary_frames if self._input_profile.history == "bounded" else 0)
+        result = self.vla_navigate(self._tasks.policy_instruction(self._input_profile.include_memory))
+        self._tasks.returned('execution_handoff')
+        return result
+
+    def execute_agentic_task_without_reset(self, task_id: int, instruction: str = "") -> list:
+        """Schema adapter for the reset ablation; execution has one implementation."""
+        return self.execute_agentic_task(task_id, instruction)
 
     def update_memory(self, start_node_id: int, end_node_id: int, caption: str) -> list:
         """Summarize the current execution from start_node_id to end_node_id (1-800 characters).
@@ -1893,6 +2027,8 @@ class NavigationSession:
         Only the current segment is writable. Repeating this call revises its caption;
         starting another movement closes it. Earlier traversals are never overwritten.
         Geometry/evidence are system-owned. Task status belongs to update_plan.
+        Separate observed transitions from inferred identity/completion in the caption;
+        captions are model assessments and do not independently verify plan completion.
         """
         self._tool_enter("update_memory")
         read = self._memory_map_read
@@ -1906,31 +2042,54 @@ class NavigationSession:
         entry = self._tasks.remember(start_node_id, end_node_id, caption, evidence)
         self._live_log({"update_memory": [start_node_id, end_node_id],
                         "memory_revision": self._tasks.memory.revision})
-        return [json.dumps({"updated_memory": entry})]
+        return [json.dumps({"updated_memory": {"start_node_id": start_node_id, "end_node_id": end_node_id,
+                                               "revision": self._tasks.memory.revision}})]
 
     def read_memory(self, node_id: int, other_node_id: int | None = None,
-                    include_images: bool = False, offset: int = 0) -> list:
-        """Read recorded history using map node IDs; does not move or grant memory-write access.
+                    images: Literal["none", "endpoint", "trajectory"] = "none",
+                    views: list[Literal["front", "right", "back", "left"]] | None = None,
+                    offset: int = 0) -> list:
+        """Read historical experiences, never move or grant memory-write access.
 
-        node_id alone selects all incoming/outgoing experiences. With other_node_id,
-        select only node_id -> other_node_id, never the reverse direction. Returns up to
-        5 records newest-first, including unsummarized executions and actual stop reasons.
-        Pass returned next_offset for older records. include_images loads at most 4 ordered
-        keyframes across this page, with sequence/frame labels; omitted frames stay stored.
-        Captions are model assessments, not verified success or permanent traversability.
+        node_id selects incoming/outgoing history; other_node_id restricts node_id -> other_node_id.
+        Five records newest-first; next_offset retrieves older pages. Captions are model assessments.
+        images=endpoint returns one saved snapshot (latest node visit, or newest matched segment's
+        endpoint); views selects its directions, default front. Missing directions are reported,
+        never borrowed from another visit. trajectory returns up to four ordered process frames.
         """
+        if views is not None and images != "endpoint":
+            raise ValueError("views is only valid with images=endpoint")
+        self._validate_views(views if views is not None else ["front"])
         self._tool_enter("read_memory")
         page = self._tasks.memory.read(node_id, other_node_id, offset)
-        images = []
-        if include_images:
-            candidates = [(record["sequence"], ref) for record in page["records"]
-                          for ref in record["frame_refs"]]
-            chosen = self._tasks.memory.sample(candidates, self._tasks.memory.IMAGE_LIMIT)
-            for sequence, ref in chosen:
-                images.extend([f"Execution {sequence}, {ref}", *self._memory_images([ref])])
-            page["image_selection"] = chosen
-            page["image_limit"] = self._tasks.memory.IMAGE_LIMIT
-        return [json.dumps(page, ensure_ascii=False), *images]
+        evidence = []
+        if images == "trajectory":
+            candidates = [(r["sequence"], ref) for r in page["records"] for ref in r["frame_refs"]]
+            for sequence, ref in self._tasks.memory.sample(candidates, 4):
+                evidence.extend([f"Historical execution {sequence}, {ref}", *self._memory_images([ref])])
+        elif images == "endpoint":
+            sequence = None
+            if other_node_id is None:
+                refs = self._tasks.memory.nodes[node_id]["observation_refs"]
+                ref = refs[-1] if refs else None
+            elif page["records"]:
+                sequence = page["records"][0]["sequence"]
+                edge = self._tasks.memory.edges[sequence - 1]
+                refs = self._tasks.memory.nodes[other_node_id]["observation_refs"]
+                ref = next((r for r in reversed(edge["frame_refs"]) if r in refs), None)
+            else:
+                ref = None
+            frame = next((f for f in self._tasks.frames if f["id"] == ref), None)
+            selected = views if views is not None else ["front"]
+            saved = frame.get("planner_views", {}) if frame else {}
+            page["observation"] = {"historical": True, "frame_id": ref, "sequence": sequence,
+                                   "orientation": (frame["pose"] if frame else {}).get("rotation_wxyz"),
+                                   "missing_views": [v for v in selected if not saved.get(v)]}
+            for direction in selected:
+                if saved.get(direction):
+                    evidence.extend([f"Historical {ref}: {direction}",
+                                     Image(data=base64.b64decode(saved[direction]), format="png")])
+        return [json.dumps(page, ensure_ascii=False), *evidence]
 
     def _memory_images(self, refs):
         images = []
@@ -1938,7 +2097,7 @@ class NavigationSession:
             frame = next((f for f in self._tasks.frames if f["id"] == ref), None)
             if frame:
                 views = frame["views"]
-                value = views.get("policy_front") or views.get("front")
+                value = frame.get("planner_views", {}).get("front") or views.get("front")
                 if value:
                     images.append(Image(data=base64.b64decode(value), format="png"))
         return images
@@ -1948,8 +2107,14 @@ class NavigationSession:
         if type(node_id) is not int or node_id not in self._tasks.memory.nodes:
             raise ValueError("navigate_to_node requires a node ID printed on observe_map")
         node = self._tasks.memory.nodes[node_id]
+        rotation = node.get("rotation_wxyz")
+        if (not isinstance(rotation, (list, tuple)) or len(rotation) != 4
+                or not all(isinstance(v, (int, float)) and math.isfinite(v) for v in rotation)
+                or sum(v * v for v in rotation) < 1e-12):
+            raise ValueError("The target node has no valid recorded orientation")
         result = self._call(self.VERB_PREFIX + "__retrace_path",
-                            {"position": node["position"], "match_3d": True})
+                            {"position": node["position"], "rotation_wxyz": list(rotation),
+                             "match_3d": True})
         if result.get("error"):
             raise RuntimeError(result["error"])
         self._steps_taken = int(result.get("step_count", self._steps_taken))
@@ -1960,12 +2125,15 @@ class NavigationSession:
         result["termination_reason"] = "returned" if result.get("arrived") else "stopped_short"
         return [json.dumps(result), *self._pano_content(pano)]
 
-    def finish_agentic_episode(self, status: str = "complete", reason: str = "") -> list:
+    def finish_agentic_episode(self, status: Literal["complete", "abort"], reason: str) -> list:
         """Permanently STOP here. Declare complete or abort and explain the endpoint evidence.
 
         This is your decision, independent of plan checkboxes. Evaluation measures actual
         success separately; a completion declaration cannot make a route successful.
         """
+        if not reason.strip():
+            raise ValueError("Explain why the episode should end")
         self._tasks.finish(status)
         self._tasks._event('completion_reason', reason=reason)
-        return self.arrive('here')
+        return [*self.arrive('here'), json.dumps({"declared_status": status, "reason": reason,
+                                                 "node_id": self._tasks.memory.current_node_id})]

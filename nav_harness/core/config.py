@@ -46,7 +46,7 @@ class PlannerProfile(StrictModel):
 
 class ServiceSpec(StrictModel):
     name: str = Field(pattern=r"^[a-z][a-z0-9_-]{0,47}$")
-    kind: Literal["planner", "environment", "vla"]
+    kind: Literal["planner", "environment", "vla", "execution"]
     url: str
     managed: bool = False
     template: str | None = None
@@ -54,6 +54,7 @@ class ServiceSpec(StrictModel):
     reserve_mib: int = Field(default=0, ge=0)
     planner: PlannerProfile | None = None
     metadata: dict = Field(default_factory=dict)
+    max_concurrency: int = Field(default=1, ge=1, le=32)
 
     _endpoint = field_validator("url")(PlannerProfile.endpoint.__func__)
 
@@ -76,14 +77,33 @@ class ServiceSpec(StrictModel):
         return self
 
 
+class ExecutionBinding(StrictModel):
+    environment_service: str
+    execution_service: str
+
+
 class ExperimentSpec(StrictModel):
     name: str = Field(min_length=1, max_length=100)
     planner_service: str | None = None
-    environment_service: str
+    environment_service: str | None = None
+    execution_pool: list[ExecutionBinding] = Field(default_factory=list, max_length=16)
     vla_service: str | None = None
     config: dict
     episodes: list[int] = Field(min_length=1, max_length=10000)
     purpose: Literal["development", "evaluation", "collection"] = "development"
+
+    @model_validator(mode="after")
+    def execution(self):
+        if bool(self.environment_service) == bool(self.execution_pool):
+            raise ValueError("Choose one environment_service or an execution_pool")
+        if self.execution_pool:
+            if not self.vla_service:
+                raise ValueError("Execution pool requires shared VLA inference")
+            for key in ("environment_service", "execution_service"):
+                values = [getattr(binding, key) for binding in self.execution_pool]
+                if len(set(values)) != len(values):
+                    raise ValueError("Execution pool must contain independent environments and workers")
+        return self
 
     @field_validator("episodes")
     @classmethod
@@ -106,7 +126,7 @@ class ServiceTemplate(StrictModel):
 class PlatformSettings(StrictModel):
     host: str = "127.0.0.1"
     port: int = 8878
-    max_workers: int = Field(default=2, ge=1, le=16)
+    max_workers: int = Field(default=4, ge=1, le=16)
     ssh_config: str | None = None
     service_templates: dict[str, ServiceTemplate] = Field(default_factory=dict)
     import_roots: list[str] = Field(default_factory=list)

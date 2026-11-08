@@ -10,7 +10,7 @@ import json
 import math
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from .context import context_frames, frame_digest
+from .context import frame_digest
 
 
 def velocity_action(waypoints, stop, dt=0.1, max_linear=2.5, max_angular_dps=300.0):
@@ -55,7 +55,7 @@ class LightNavBridge:
         self.digest = hashlib.sha256()
         self.lock = threading.RLock()
         self.failed = False
-        self.context_key, self.frame_ids, self.frame_digests, self.frame_images = None, [], {}, {}
+        self.frame_ids, self.frame_digests = [], {}
 
     def _call(self, action, data):
         try:
@@ -90,7 +90,8 @@ class LightNavBridge:
             return {'model_name': 'lightnav-0', 'model_version': 'LightNav-0',
                     'backend': 'lightnav', 'policy_url': self.policy_url,
                     'execution': 'owned_vllm' if self.inference is not None else 'websocket_bridge',
-                    'context_replace': True, 'max_context_groups': 16,
+                    'context_replace': False, 'history_mode': 'episode',
+                    'max_context_groups': None, 'input_contract': 'lightnav_official_episode_v1',
                     'history_observe': True, 'seeded_reset': False,
                     'control': self.control, 'waypoint_count': 10,
                     'policy_camera': {'width': 480, 'height': 270, 'height_m': 0.88, 'hfov': 120.0}}
@@ -104,59 +105,60 @@ class LightNavBridge:
             self._call('reset', {})
             self.seq = 0
             self.digest = hashlib.sha256()
-            self.context_key, self.frame_ids, self.frame_digests, self.frame_images = None, [], {}, {}
+            self.frame_ids, self.frame_digests = [], {}
             return {'status': 'reset complete', 'backend': 'lightnav'}
 
     def replace_context(self, data):
-        with self.lock:
-            frames = context_frames(data, ('policy_front',), self.frame_images)
-            if self.failed:
-                raise RuntimeError('LightNav session failed; reset the episode')
-            desired = [frame['id'] for frame in frames]
-            reuse_prefix = (desired[:len(self.frame_ids)] == self.frame_ids
-                            and all(self.frame_digests.get(frame['id']) == frame_digest(frame)
-                                    for frame in frames[:len(self.frame_ids)]))
-            if self.context_key is None or not reuse_prefix:
-                self._call('reset', {})
-                self.seq = 0
-                self.digest = hashlib.sha256()
-                self.frame_ids, self.frame_digests = [], {}
-            for frame in frames[len(self.frame_ids):]:
-                self._next(frame['views']['policy_front'], '')
-                self.frame_ids.append(frame['id'])
-                self.frame_digests[frame['id']] = frame_digest(frame)
-            self.context_key = data['context_key']
-            self.frame_images = {frame['id']: frame['views'] for frame in frames}
-            return {'context_key': self.context_key, 'frame_ids': list(self.frame_ids),
-                    'history_frames': len(self.frame_ids)}
+        raise ValueError('LightNav uses append-only episode history, not context replacement')
 
-    def _next(self, image, instruction):
+    def _reuse_frame(self, data):
+        ident = data.get('frame_id')
+        if ident is None:
+            return False
+        if not isinstance(ident, str) or not ident:
+            raise ValueError('Frame ID must be a nonempty string')
+        if ident not in self.frame_digests:
+            return False
+        digest = frame_digest({'views': {'policy_front': data.get('rgb_policy')}})
+        if self.frame_ids[-1:] != [ident] or self.frame_digests[ident] != digest:
+            raise ValueError('Cannot rewrite or reorder an observed episode frame')
+        return True
+
+    def _commit_frame(self, data, reused):
+        ident = data.get('frame_id')
+        if ident is not None and not reused:
+            self.frame_ids.append(ident)
+            self.frame_digests[ident] = frame_digest({'views': {'policy_front': data['rgb_policy']}})
+
+    def _next(self, image, instruction, reused=False):
         if self.failed:
             raise RuntimeError('LightNav session failed; reset required')
         if not isinstance(image, str) or not image:
             raise ValueError('rgb_policy image is required')
+        if reused and self.inference is None:
+            raise ValueError('Reusing an endpoint requires the owned LightNav inference service')
         data = {'seq': self.seq, 'image': image, 'instruction': instruction}
-        reply = self._call('next', data)
-        self.digest.update(image.encode())
-        self.seq += 1
+        reply = self._call('predict' if reused else 'next', data)
+        if not reused:
+            self.digest.update(image.encode())
+            self.seq += 1
         return reply
 
     def observe(self, data):
         with self.lock:
-            self._next(data.get('rgb_policy'), '')
-            return {'status': 'observed', 'frames': self.seq}
+            reused = self._reuse_frame(data)
+            if not reused:
+                self._next(data.get('rgb_policy'), '')
+                self._commit_frame(data, reused)
+            return {'status': 'observed', **self.state()}
 
     def act(self, data):
         text = data.get('text')
         if not isinstance(text, str) or not text.strip():
             raise ValueError('nonempty text instruction is required')
         with self.lock:
-            ident = data.get('frame_id')
-            if ident is not None and (data.get('context_key') != self.context_key
-                    or self.context_key is None or not isinstance(ident, str)
-                    or not ident or ident in self.frame_ids or len(self.frame_ids) >= 16):
-                raise ValueError('Replace context first; current frame must be new and within the 16-group limit')
-            reply = self._next(data.get('rgb_policy'), text)
+            reused = self._reuse_frame(data)
+            reply = self._next(data.get('rgb_policy'), text, reused)
             try:
                 waypoints = reply['actions']['actions']
                 action = velocity_action(waypoints, reply['stop'], self.control['control_dt_s'],
@@ -165,17 +167,19 @@ class LightNavBridge:
                 self.failed = True
                 raise
             action['raw_text'] = reply.get('raw_text')
+            if reply.get('decode_error'):
+                action['decode_error'] = reply['decode_error']
+                action['stop_reason'] = 'decode_error'
             action['latency_ms'] = reply.get('latency_ms')
-            if ident is not None:
-                self.frame_ids.append(ident)
-                self.frame_digests[ident] = frame_digest({'views': {'policy_front': data['rgb_policy']}})
-                self.frame_images[ident] = {'policy_front': data['rgb_policy']}
+            if reply.get('timings_ms'):
+                action['inference_metrics'] = reply['timings_ms']
+            self._commit_frame(data, reused)
             return [action, waypoints]
 
     def state(self):
         with self.lock:
             return {'history_frames': self.seq, 'history_sha256': self.digest.hexdigest(),
-                    'context_key': self.context_key, 'frame_ids': list(self.frame_ids),
+                    'history_mode': 'episode', 'frame_ids': list(self.frame_ids),
                     'failed': self.failed, 'backend': 'lightnav', 'seeded_reset': False}
 
     def close(self):

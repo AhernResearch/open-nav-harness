@@ -1,0 +1,136 @@
+{
+  "experiment_id": "b1ea98faeeac441682966d67a4147506",
+  "baseline_job_id": "fa6e1398814e461d9ad44d69e667ff9e",
+  "previous_hard50_job_id": "de3fce1a2f8e47f9a72e011b56ef6ed7",
+  "manifest": "/home/holo/robots/nav-harness-async/docs/evidence/async-lightnav-hard50-selection-20261108.json",
+  "manifest_sha256": "4f344b3714c28ece472ebe9fcb1613c80bbfe0ac60aec20aab8b47c28077f636",
+  "implementation_digest": "434e09bdce5ffc8bf7618e0f90a78f6150d33ef95c83a776edb98aad5bfd5c8e",
+  "spec": {
+    "name": "LightNav hard-50 / no short movement / Qwen27B NVFP4 DP3",
+    "planner_service": "eaa85c5c908141f6b57e16a231cdc511",
+    "vla_service": "457941e1ef2448f28537209c16de106e",
+    "execution_pool": [
+      {
+        "environment_service": "e0802796122642d9b19f9ae9c39ba1f8",
+        "execution_service": "2e7bd465f9ac473ba75313fa3c5afc4d"
+      },
+      {
+        "environment_service": "ba97ba0f106f47d983d2b9ecff4a07d8",
+        "execution_service": "20d3792f5f7c45f587d77fac6f19b9b0"
+      },
+      {
+        "environment_service": "5e54bafdfe224410b5c1720ba63601f4",
+        "execution_service": "339b2b74985a4b0aba3144eea9705249"
+      },
+      {
+        "environment_service": "37bbdb5e0dcb4dae8a2c905f5aba1955",
+        "execution_service": "e950bb08bcd540d795fac907cdbf6194"
+      },
+      {
+        "environment_service": "506a59f66fbd4988a81c20c00dcb074c",
+        "execution_service": "d1fdc31244874534a5c8299aeaf1d742"
+      },
+      {
+        "environment_service": "7c9024ce60574f8c87f6adab5b0326b0",
+        "execution_service": "c10b40fb9e9140f3b9444521fc788b1e"
+      },
+      {
+        "environment_service": "4aeca142cfde48fe95a540edd017ed37",
+        "execution_service": "c09ae78998624a99b962333d6a275c4b"
+      },
+      {
+        "environment_service": "d7ba8de177134722b3bc31a0d295156d",
+        "execution_service": "2c84605389974f618def4e68baaf3216"
+      }
+    ],
+    "episodes": [
+      6298,
+      4132,
+      456,
+      5782,
+      7648,
+      1179,
+      3478,
+      7006,
+      10153,
+      3712,
+      5206,
+      1375,
+      1885,
+      1010,
+      2080,
+      6622,
+      10609,
+      5542,
+      6112,
+      9889,
+      3658,
+      8614,
+      1046,
+      8071,
+      4153,
+      9670,
+      3493,
+      5236,
+      10063,
+      3235,
+      6184,
+      3307,
+      6106,
+      7012,
+      4369,
+      8053,
+      6205,
+      2122,
+      9238,
+      9598,
+      8197,
+      986,
+      4402,
+      2530,
+      4813,
+      727,
+      5260,
+      4906,
+      3742,
+      10684
+    ],
+    "purpose": "development",
+    "config": {
+      "dataset": {
+        "name": "r2r",
+        "split": "train"
+      },
+      "environment": {
+        "max_steps": 500,
+        "forward_view_px": 512,
+        "panorama_view_px": 400
+      },
+      "vla": {
+        "backend": "lightnav"
+      },
+      "planner": {
+        "max_turns": 100,
+        "episode_timeout_s": 900,
+        "tools": [
+          "observe_map",
+          "navigate_to_node",
+          "terminate_episode",
+          "update_plan",
+          "execute_subtask",
+          "observe",
+          "update_memory",
+          "read_memory"
+        ]
+      },
+      "harness": {
+        "mode": "agentic"
+      }
+    }
+  },
+  "created": 1794149547.5147147,
+  "navigation_concurrency": 8,
+  "planner_capacity": 12,
+  "launch_phase": "enqueued",
+  "job_id": "fc21827e81f74b84b06e4cb58c4fb3fb"
+}

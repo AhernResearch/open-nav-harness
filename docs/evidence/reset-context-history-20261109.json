@@ -1,0 +1,4033 @@
+{
+  "roots": [
+    "state/async-integration/runs",
+    "/home/holo/robots/nav-harness/state/runs",
+    "/home/holo/robots/nav-harness-hw/state/runs"
+  ],
+  "summary": {
+    "omitted": 381,
+    "false": 19,
+    "true": 24
+  },
+  "attempts": [
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/f33b348cc447452199806325e5b05d21/2995dde329044d0cb3620fba449698e5/episode/work/ep1879/trace/requests.jsonl",
+      "attempt": "2995dde329044d0cb3620fba449698e5",
+      "job": "f33b348cc447452199806325e5b05d21",
+      "episode": "ep1879",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/f33b348cc447452199806325e5b05d21/75e9ac8432834c1d8217ed59ac5a4178/episode/work/ep4828/trace/requests.jsonl",
+      "attempt": "75e9ac8432834c1d8217ed59ac5a4178",
+      "job": "f33b348cc447452199806325e5b05d21",
+      "episode": "ep4828",
+      "counts": {
+        "omitted": 4
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 72,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 91,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/f33b348cc447452199806325e5b05d21/cb60dbc8573f4d42972192bc9778df73/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "cb60dbc8573f4d42972192bc9778df73",
+      "job": "f33b348cc447452199806325e5b05d21",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 24,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/f33b348cc447452199806325e5b05d21/bff8c0f68f0c416d90b6a2c2c21d8cf5/episode/work/ep1606/trace/requests.jsonl",
+      "attempt": "bff8c0f68f0c416d90b6a2c2c21d8cf5",
+      "job": "f33b348cc447452199806325e5b05d21",
+      "episode": "ep1606",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/de3fce1a2f8e47f9a72e011b56ef6ed7/36c78a54cfac40849955d1381b192043/episode/work/ep5782/trace/requests.jsonl",
+      "attempt": "36c78a54cfac40849955d1381b192043",
+      "job": "de3fce1a2f8e47f9a72e011b56ef6ed7",
+      "episode": "ep5782",
+      "counts": {
+        "omitted": 4,
+        "false": 1
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 72,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 96,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 116,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 134,
+          "reset": "false",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/de3fce1a2f8e47f9a72e011b56ef6ed7/ce3a0a3aa03a47169bca89e71a3354c4/episode/work/ep3478/trace/requests.jsonl",
+      "attempt": "ce3a0a3aa03a47169bca89e71a3354c4",
+      "job": "de3fce1a2f8e47f9a72e011b56ef6ed7",
+      "episode": "ep3478",
+      "counts": {
+        "omitted": 7
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 66,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 90,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 110,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 131,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 137,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/de3fce1a2f8e47f9a72e011b56ef6ed7/88e63ca727434f418dd964af6d60cb0c/episode/work/ep7648/trace/requests.jsonl",
+      "attempt": "88e63ca727434f418dd964af6d60cb0c",
+      "job": "de3fce1a2f8e47f9a72e011b56ef6ed7",
+      "episode": "ep7648",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/de3fce1a2f8e47f9a72e011b56ef6ed7/c8daee77860c4131bca08136aba2b2cf/episode/work/ep7006/trace/requests.jsonl",
+      "attempt": "c8daee77860c4131bca08136aba2b2cf",
+      "job": "de3fce1a2f8e47f9a72e011b56ef6ed7",
+      "episode": "ep7006",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 60,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/de3fce1a2f8e47f9a72e011b56ef6ed7/6715a3cb283b49e79d832887effbee92/episode/work/ep0456/trace/requests.jsonl",
+      "attempt": "6715a3cb283b49e79d832887effbee92",
+      "job": "de3fce1a2f8e47f9a72e011b56ef6ed7",
+      "episode": "ep0456",
+      "counts": {
+        "omitted": 5
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 128,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 146,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": null
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/de3fce1a2f8e47f9a72e011b56ef6ed7/2bb7f8544f5d4215aa4c930b2fba1e60/episode/work/ep10153/trace/requests.jsonl",
+      "attempt": "2bb7f8544f5d4215aa4c930b2fba1e60",
+      "job": "de3fce1a2f8e47f9a72e011b56ef6ed7",
+      "episode": "ep10153",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/de3fce1a2f8e47f9a72e011b56ef6ed7/f5e86c1abcd14b679acd26e85de2ce37/episode/work/ep6298/trace/requests.jsonl",
+      "attempt": "f5e86c1abcd14b679acd26e85de2ce37",
+      "job": "de3fce1a2f8e47f9a72e011b56ef6ed7",
+      "episode": "ep6298",
+      "counts": {
+        "omitted": 1
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/de3fce1a2f8e47f9a72e011b56ef6ed7/8d42a0aa457a4caea20f3a244277cfc7/episode/work/ep4132/trace/requests.jsonl",
+      "attempt": "8d42a0aa457a4caea20f3a244277cfc7",
+      "job": "de3fce1a2f8e47f9a72e011b56ef6ed7",
+      "episode": "ep4132",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 54,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 90,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/de3fce1a2f8e47f9a72e011b56ef6ed7/ee3c199b135548e18bc56bc52ab5fec5/episode/work/ep1179/trace/requests.jsonl",
+      "attempt": "ee3c199b135548e18bc56bc52ab5fec5",
+      "job": "de3fce1a2f8e47f9a72e011b56ef6ed7",
+      "episode": "ep1179",
+      "counts": {
+        "omitted": 3,
+        "true": 1
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "true",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 84,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {
+        "same_task": 1
+      }
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fb37855afe064c0cb680e34e27877bcf/9ecbc02f818e4df5929c2a6df8be75ac/episode/work/ep1606/trace/requests.jsonl",
+      "attempt": "9ecbc02f818e4df5929c2a6df8be75ac",
+      "job": "fb37855afe064c0cb680e34e27877bcf",
+      "episode": "ep1606",
+      "counts": {
+        "omitted": 8
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 54,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 60,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 66,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fb37855afe064c0cb680e34e27877bcf/bbf79ca455cb446c933b201b249c81c4/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "bbf79ca455cb446c933b201b249c81c4",
+      "job": "fb37855afe064c0cb680e34e27877bcf",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fb37855afe064c0cb680e34e27877bcf/3c85c726bbfd453fb03237ead9f21c21/episode/work/ep4828/trace/requests.jsonl",
+      "attempt": "3c85c726bbfd453fb03237ead9f21c21",
+      "job": "fb37855afe064c0cb680e34e27877bcf",
+      "episode": "ep4828",
+      "counts": {
+        "omitted": 11
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 72,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 90,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 114,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 120,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": true
+        },
+        {
+          "seq": 126,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 132,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 138,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 144,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 150,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fb37855afe064c0cb680e34e27877bcf/b231ea6376c24fcb82ac72b156475fa7/episode/work/ep1879/trace/requests.jsonl",
+      "attempt": "b231ea6376c24fcb82ac72b156475fa7",
+      "job": "fb37855afe064c0cb680e34e27877bcf",
+      "episode": "ep1879",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 54,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/508f07eb53134d1fb15dc701c892a239/episode/work/ep7006/trace/requests.jsonl",
+      "attempt": "508f07eb53134d1fb15dc701c892a239",
+      "job": "fc21827e81f74b84b06e4cb58c4fb3fb",
+      "episode": "ep7006",
+      "counts": {
+        "omitted": 7
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 54,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 84,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 120,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 132,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 144,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/6cc2a917e74b480b89a2a3b27a9b6309/episode/work/ep1179/trace/requests.jsonl",
+      "attempt": "6cc2a917e74b480b89a2a3b27a9b6309",
+      "job": "fc21827e81f74b84b06e4cb58c4fb3fb",
+      "episode": "ep1179",
+      "counts": {
+        "omitted": 7
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 72,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 78,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 108,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 138,
+          "reset": "omitted",
+          "task_id": 5,
+          "error": false
+        },
+        {
+          "seq": 144,
+          "reset": "omitted",
+          "task_id": 5,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/bd2f9e9ca32d4c078c8d892c7fd83614/episode/work/ep7648/trace/requests.jsonl",
+      "attempt": "bd2f9e9ca32d4c078c8d892c7fd83614",
+      "job": "fc21827e81f74b84b06e4cb58c4fb3fb",
+      "episode": "ep7648",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/fd8839613c6b44c097ae2e217d62c76d/episode/work/ep4132/trace/requests.jsonl",
+      "attempt": "fd8839613c6b44c097ae2e217d62c76d",
+      "job": "fc21827e81f74b84b06e4cb58c4fb3fb",
+      "episode": "ep4132",
+      "counts": {
+        "omitted": 1,
+        "true": 9,
+        "false": 11
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "true",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 60,
+          "reset": "true",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 78,
+          "reset": "true",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 96,
+          "reset": "true",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 114,
+          "reset": "true",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 133,
+          "reset": "true",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 151,
+          "reset": "true",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 181,
+          "reset": "true",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 201,
+          "reset": "true",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 208,
+          "reset": "false",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 232,
+          "reset": "false",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 250,
+          "reset": "false",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 276,
+          "reset": "false",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 294,
+          "reset": "false",
+          "task_id": 5,
+          "error": false
+        },
+        {
+          "seq": 302,
+          "reset": "false",
+          "task_id": 5,
+          "error": false
+        },
+        {
+          "seq": 322,
+          "reset": "false",
+          "task_id": 5,
+          "error": false
+        },
+        {
+          "seq": 329,
+          "reset": "false",
+          "task_id": 5,
+          "error": false
+        },
+        {
+          "seq": 335,
+          "reset": "false",
+          "task_id": 5,
+          "error": false
+        },
+        {
+          "seq": 341,
+          "reset": "false",
+          "task_id": 5,
+          "error": true
+        },
+        {
+          "seq": 347,
+          "reset": "false",
+          "task_id": 5,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {
+        "same_task": 7,
+        "new_task_or_initial": 2
+      }
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/90c57e90872c4b58bcaafca46ec11b24/episode/work/ep0456/trace/requests.jsonl",
+      "attempt": "90c57e90872c4b58bcaafca46ec11b24",
+      "job": "fc21827e81f74b84b06e4cb58c4fb3fb",
+      "episode": "ep0456",
+      "counts": {
+        "omitted": 6,
+        "true": 3,
+        "false": 2
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 54,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 66,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 78,
+          "reset": "true",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 84,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 96,
+          "reset": "true",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 120,
+          "reset": "true",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 157,
+          "reset": "false",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 177,
+          "reset": "false",
+          "task_id": 4,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {
+        "same_task": 3
+      }
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/27cb899d4270484a912ed859dfb65cbd/episode/work/ep3478/trace/requests.jsonl",
+      "attempt": "27cb899d4270484a912ed859dfb65cbd",
+      "job": "fc21827e81f74b84b06e4cb58c4fb3fb",
+      "episode": "ep3478",
+      "counts": {
+        "omitted": 5
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 24,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 72,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 96,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 136,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/0d908686695143f189cb58d5b9b5e6d1/episode/work/ep5782/trace/requests.jsonl",
+      "attempt": "0d908686695143f189cb58d5b9b5e6d1",
+      "job": "fc21827e81f74b84b06e4cb58c4fb3fb",
+      "episode": "ep5782",
+      "counts": {
+        "omitted": 7
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 54,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 72,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 99,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 120,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 140,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fc21827e81f74b84b06e4cb58c4fb3fb/3c29c615c9df432593d81e7410e40a69/episode/work/ep6298/trace/requests.jsonl",
+      "attempt": "3c29c615c9df432593d81e7410e40a69",
+      "job": "fc21827e81f74b84b06e4cb58c4fb3fb",
+      "episode": "ep6298",
+      "counts": {
+        "omitted": 9
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 66,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 90,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 110,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 122,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 134,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 152,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 159,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/5ffec3cf910e4a609a0f429483347d57/episode/work/ep7648/trace/requests.jsonl",
+      "attempt": "5ffec3cf910e4a609a0f429483347d57",
+      "job": "fa6e1398814e461d9ad44d69e667ff9e",
+      "episode": "ep7648",
+      "counts": {
+        "omitted": 3,
+        "true": 5
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "true",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "true",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 60,
+          "reset": "true",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 78,
+          "reset": "true",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 84,
+          "reset": "true",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {
+        "same_task": 5
+      }
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/4b75bc98ce2a4719a1dcb3d28e827ef1/episode/work/ep0456/trace/requests.jsonl",
+      "attempt": "4b75bc98ce2a4719a1dcb3d28e827ef1",
+      "job": "fa6e1398814e461d9ad44d69e667ff9e",
+      "episode": "ep0456",
+      "counts": {
+        "omitted": 9
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 72,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 96,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 102,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 108,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 114,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 120,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 138,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/92ac263a5a184e0796ba94a75516f6e7/episode/work/ep7006/trace/requests.jsonl",
+      "attempt": "92ac263a5a184e0796ba94a75516f6e7",
+      "job": "fa6e1398814e461d9ad44d69e667ff9e",
+      "episode": "ep7006",
+      "counts": {
+        "omitted": 4
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 72,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 96,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/35c2e47cb1434c6b8b82f166c4cb4dfe/episode/work/ep3478/trace/requests.jsonl",
+      "attempt": "35c2e47cb1434c6b8b82f166c4cb4dfe",
+      "job": "fa6e1398814e461d9ad44d69e667ff9e",
+      "episode": "ep3478",
+      "counts": {
+        "omitted": 6
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 66,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 90,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 117,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 143,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/0cd2a97d1681493a966141c53d13f58b/episode/work/ep6298/trace/requests.jsonl",
+      "attempt": "0cd2a97d1681493a966141c53d13f58b",
+      "job": "fa6e1398814e461d9ad44d69e667ff9e",
+      "episode": "ep6298",
+      "counts": {
+        "omitted": 6
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 66,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 90,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 120,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 140,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/eeca305eda61479ea435c795952abad1/episode/work/ep5782/trace/requests.jsonl",
+      "attempt": "eeca305eda61479ea435c795952abad1",
+      "job": "fa6e1398814e461d9ad44d69e667ff9e",
+      "episode": "ep5782",
+      "counts": {
+        "omitted": 10
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 72,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 90,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 109,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 133,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 154,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 166,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 180,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/ae503ba317fd40eb849d37421e8f3f12/episode/work/ep10153/trace/requests.jsonl",
+      "attempt": "ae503ba317fd40eb849d37421e8f3f12",
+      "job": "fa6e1398814e461d9ad44d69e667ff9e",
+      "episode": "ep10153",
+      "counts": {
+        "omitted": 8,
+        "true": 4
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 60,
+          "reset": "true",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 66,
+          "reset": "true",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 72,
+          "reset": "true",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 78,
+          "reset": "true",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 102,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 114,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 120,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 138,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 144,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {
+        "same_task": 4
+      }
+    },
+    {
+      "path": "/home/holo/robots/nav-harness-async/state/async-integration/runs/fa6e1398814e461d9ad44d69e667ff9e/74dde60b472b4939be4ddfba09bd2ea4/episode/work/ep4132/trace/requests.jsonl",
+      "attempt": "74dde60b472b4939be4ddfba09bd2ea4",
+      "job": "fa6e1398814e461d9ad44d69e667ff9e",
+      "episode": "ep4132",
+      "counts": {
+        "omitted": 7
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 66,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 90,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 96,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/c977aa551d4e43238f6ada0acc556efd/b9cd476dd67844c282a5b5436814815e/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "b9cd476dd67844c282a5b5436814815e",
+      "job": "c977aa551d4e43238f6ada0acc556efd",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 4
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 54,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 84,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/13ea43009dcc4930af04ad77b3199987/f9c8bf29fd6d430bb7b5da30a0f07153/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "f9c8bf29fd6d430bb7b5da30a0f07153",
+      "job": "13ea43009dcc4930af04ad77b3199987",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 4
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 66,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 97,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/4f0d46e1e4d540679cfe02891a083d4c/75f12ed2a47544eaac5b8e0db2bd854c/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "75f12ed2a47544eaac5b8e0db2bd854c",
+      "job": "4f0d46e1e4d540679cfe02891a083d4c",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/f6ec090e5854459992ed0f0540c5210b/5ca691f74cc745a2b3b634cf865ff64c/episode/work/ep0574/trace/requests.jsonl",
+      "attempt": "5ca691f74cc745a2b3b634cf865ff64c",
+      "job": "f6ec090e5854459992ed0f0540c5210b",
+      "episode": "ep0574",
+      "counts": {
+        "omitted": 1
+      },
+      "success": null,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/7bf9896fe50d4d1a9c68b3f09f261259/a72dbee121e642c0806de97426d92af6/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "a72dbee121e642c0806de97426d92af6",
+      "job": "7bf9896fe50d4d1a9c68b3f09f261259",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 75,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/d494732605c24e8c99a01b0d27ebdfcc/44f2bec316764edc9a95a3cc0c28888e/episode/work/ep0003/trace/requests.jsonl",
+      "attempt": "44f2bec316764edc9a95a3cc0c28888e",
+      "job": "d494732605c24e8c99a01b0d27ebdfcc",
+      "episode": "ep0003",
+      "counts": {
+        "omitted": 5
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 89,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 121,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 153,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/d494732605c24e8c99a01b0d27ebdfcc/b23fdb26b0c643869194f6cc817a7d1a/episode/work/ep0009/trace/requests.jsonl",
+      "attempt": "b23fdb26b0c643869194f6cc817a7d1a",
+      "job": "d494732605c24e8c99a01b0d27ebdfcc",
+      "episode": "ep0009",
+      "counts": {
+        "omitted": 6
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 100,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 130,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 154,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 227,
+          "reset": "omitted",
+          "task_id": null,
+          "error": null
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/d494732605c24e8c99a01b0d27ebdfcc/5b67c7cc8c8f487ebd667afdd2ace0c2/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "5b67c7cc8c8f487ebd667afdd2ace0c2",
+      "job": "d494732605c24e8c99a01b0d27ebdfcc",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/5b97b0cacb69419a961f38d382f7ee22/68cc7333eb484ad8a8078dc84f406ccc/episode/work/ep0003/trace/requests.jsonl",
+      "attempt": "68cc7333eb484ad8a8078dc84f406ccc",
+      "job": "5b97b0cacb69419a961f38d382f7ee22",
+      "episode": "ep0003",
+      "counts": {
+        "omitted": 1
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/5b97b0cacb69419a961f38d382f7ee22/cb83d42f28b34f9cb11237fca3ad8fba/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "cb83d42f28b34f9cb11237fca3ad8fba",
+      "job": "5b97b0cacb69419a961f38d382f7ee22",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 20,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/15e035d688794147a1af027532a37e9a/a9040257d4f2470baf9009121ace7ce3/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "a9040257d4f2470baf9009121ace7ce3",
+      "job": "15e035d688794147a1af027532a37e9a",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 1
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 24,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/15e035d688794147a1af027532a37e9a/16170a06c16c4c0a803080f07f55519d/episode/work/ep0003/trace/requests.jsonl",
+      "attempt": "16170a06c16c4c0a803080f07f55519d",
+      "job": "15e035d688794147a1af027532a37e9a",
+      "episode": "ep0003",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 24,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/64dbcf7b172744ff84434aa2afdcb000/8cfa650ff3c74667a7a1059c5e2d4085/episode/work/ep9373/trace/requests.jsonl",
+      "attempt": "8cfa650ff3c74667a7a1059c5e2d4085",
+      "job": "64dbcf7b172744ff84434aa2afdcb000",
+      "episode": "ep9373",
+      "counts": {
+        "omitted": 8
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 81,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 108,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 115,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 133,
+          "reset": "omitted",
+          "task_id": 5,
+          "error": false
+        },
+        {
+          "seq": 145,
+          "reset": "omitted",
+          "task_id": 5,
+          "error": false
+        },
+        {
+          "seq": 151,
+          "reset": "omitted",
+          "task_id": 5,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/64dbcf7b172744ff84434aa2afdcb000/0285e9ca563546e59ed796f34c23dc96/episode/work/ep4765/trace/requests.jsonl",
+      "attempt": "0285e9ca563546e59ed796f34c23dc96",
+      "job": "64dbcf7b172744ff84434aa2afdcb000",
+      "episode": "ep4765",
+      "counts": {
+        "omitted": 1
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/64dbcf7b172744ff84434aa2afdcb000/66e71fa421214aeeabacc85f4919319e/episode/work/ep1606/trace/requests.jsonl",
+      "attempt": "66e71fa421214aeeabacc85f4919319e",
+      "job": "64dbcf7b172744ff84434aa2afdcb000",
+      "episode": "ep1606",
+      "counts": {
+        "omitted": 4
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 54,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/64dbcf7b172744ff84434aa2afdcb000/aa6886886503406894088122731873e1/episode/work/ep10279/trace/requests.jsonl",
+      "attempt": "aa6886886503406894088122731873e1",
+      "job": "64dbcf7b172744ff84434aa2afdcb000",
+      "episode": "ep10279",
+      "counts": {
+        "omitted": 4
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 72,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 96,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/64dbcf7b172744ff84434aa2afdcb000/5661b80bbc54437f96fc402b236dc92c/episode/work/ep7771/trace/requests.jsonl",
+      "attempt": "5661b80bbc54437f96fc402b236dc92c",
+      "job": "64dbcf7b172744ff84434aa2afdcb000",
+      "episode": "ep7771",
+      "counts": {
+        "omitted": 6
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 72,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 129,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 137,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 143,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/64dbcf7b172744ff84434aa2afdcb000/63660c3cfb364411bbbb0c8e98d5c045/episode/work/ep3805/trace/requests.jsonl",
+      "attempt": "63660c3cfb364411bbbb0c8e98d5c045",
+      "job": "64dbcf7b172744ff84434aa2afdcb000",
+      "episode": "ep3805",
+      "counts": {
+        "omitted": 2,
+        "true": 1
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "true",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {
+        "same_task": 1
+      }
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/64dbcf7b172744ff84434aa2afdcb000/804af7af13f847dd9ecc850dd54a08b5/episode/work/ep3757/trace/requests.jsonl",
+      "attempt": "804af7af13f847dd9ecc850dd54a08b5",
+      "job": "64dbcf7b172744ff84434aa2afdcb000",
+      "episode": "ep3757",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 84,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/64dbcf7b172744ff84434aa2afdcb000/a2e42331b3634533be677b83f4fa731f/episode/work/ep7402/trace/requests.jsonl",
+      "attempt": "a2e42331b3634533be677b83f4fa731f",
+      "job": "64dbcf7b172744ff84434aa2afdcb000",
+      "episode": "ep7402",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 54,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/64dbcf7b172744ff84434aa2afdcb000/12319560123849129414c1b5c8cef75e/episode/work/ep9421/trace/requests.jsonl",
+      "attempt": "12319560123849129414c1b5c8cef75e",
+      "job": "64dbcf7b172744ff84434aa2afdcb000",
+      "episode": "ep9421",
+      "counts": {
+        "omitted": 6
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 72,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 90,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": true
+        },
+        {
+          "seq": 96,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/ec51bb0608684fb7828f1865e2e1d30c/01aa8fe57ac748aaa0359bf998cbbf3d/episode/work/ep4828/trace/requests.jsonl",
+      "attempt": "01aa8fe57ac748aaa0359bf998cbbf3d",
+      "job": "ec51bb0608684fb7828f1865e2e1d30c",
+      "episode": "ep4828",
+      "counts": {
+        "omitted": 4
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 72,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 104,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/ec51bb0608684fb7828f1865e2e1d30c/9624bfb8c4044f78a82f1584cf90969d/episode/work/ep1879/trace/requests.jsonl",
+      "attempt": "9624bfb8c4044f78a82f1584cf90969d",
+      "job": "ec51bb0608684fb7828f1865e2e1d30c",
+      "episode": "ep1879",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 54,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/ec51bb0608684fb7828f1865e2e1d30c/bb8ef6b528d14074af4ae40f72d52183/episode/work/ep8737/trace/requests.jsonl",
+      "attempt": "bb8ef6b528d14074af4ae40f72d52183",
+      "job": "ec51bb0608684fb7828f1865e2e1d30c",
+      "episode": "ep8737",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/ec51bb0608684fb7828f1865e2e1d30c/6ce16afa8c7f466883f6dda977814c81/episode/work/ep0763/trace/requests.jsonl",
+      "attempt": "6ce16afa8c7f466883f6dda977814c81",
+      "job": "ec51bb0608684fb7828f1865e2e1d30c",
+      "episode": "ep0763",
+      "counts": {
+        "omitted": 4
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 72,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 96,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/8bb76c6d76c644e291b0d8e64820a667/09e02dd51b614c4a91074e0402074614/episode/work/ep0015/trace/requests.jsonl",
+      "attempt": "09e02dd51b614c4a91074e0402074614",
+      "job": "8bb76c6d76c644e291b0d8e64820a667",
+      "episode": "ep0015",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 24,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 92,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 111,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/8bb76c6d76c644e291b0d8e64820a667/2b56cc89c3194d0fb3fc1abcc4d200b7/episode/work/ep0003/trace/requests.jsonl",
+      "attempt": "2b56cc89c3194d0fb3fc1abcc4d200b7",
+      "job": "8bb76c6d76c644e291b0d8e64820a667",
+      "episode": "ep0003",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/8bb76c6d76c644e291b0d8e64820a667/04b474ba6b6341539ae04123bb0d2930/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "04b474ba6b6341539ae04123bb0d2930",
+      "job": "8bb76c6d76c644e291b0d8e64820a667",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/8bb76c6d76c644e291b0d8e64820a667/d6a159d2799a476e8edf8aac6345dd5d/episode/work/ep0009/trace/requests.jsonl",
+      "attempt": "d6a159d2799a476e8edf8aac6345dd5d",
+      "job": "8bb76c6d76c644e291b0d8e64820a667",
+      "episode": "ep0009",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 96,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/8bb76c6d76c644e291b0d8e64820a667/c6f891f361f342b1b6ff0a00339ee8a5/episode/work/ep0012/trace/requests.jsonl",
+      "attempt": "c6f891f361f342b1b6ff0a00339ee8a5",
+      "job": "8bb76c6d76c644e291b0d8e64820a667",
+      "episode": "ep0012",
+      "counts": {
+        "omitted": 1
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/8bb76c6d76c644e291b0d8e64820a667/8703acfafb5a4fa596f93d97ac766e5c/episode/work/ep0018/trace/requests.jsonl",
+      "attempt": "8703acfafb5a4fa596f93d97ac766e5c",
+      "job": "8bb76c6d76c644e291b0d8e64820a667",
+      "episode": "ep0018",
+      "counts": {
+        "omitted": 1
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 24,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/8b11a1fe2a0a4ce896cc6796f5538951/4097c41dc1fc48eb8a52ce61e90a69f9/episode/work/ep6907/trace/requests.jsonl",
+      "attempt": "4097c41dc1fc48eb8a52ce61e90a69f9",
+      "job": "8b11a1fe2a0a4ce896cc6796f5538951",
+      "episode": "ep6907",
+      "counts": {
+        "omitted": 1
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/8b11a1fe2a0a4ce896cc6796f5538951/da980e304cfd46eaa9d1ad6041410c35/episode/work/ep2050/trace/requests.jsonl",
+      "attempt": "da980e304cfd46eaa9d1ad6041410c35",
+      "job": "8b11a1fe2a0a4ce896cc6796f5538951",
+      "episode": "ep2050",
+      "counts": {
+        "true": 1,
+        "false": 5
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "true",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "false",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "false",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 54,
+          "reset": "false",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 78,
+          "reset": "false",
+          "task_id": 5,
+          "error": false
+        },
+        {
+          "seq": 110,
+          "reset": "false",
+          "task_id": 7,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {
+        "new_task_or_initial": 1
+      }
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/8b11a1fe2a0a4ce896cc6796f5538951/0d792f37d40246c6852e6e1c83926ecd/episode/work/ep6955/trace/requests.jsonl",
+      "attempt": "0d792f37d40246c6852e6e1c83926ecd",
+      "job": "8b11a1fe2a0a4ce896cc6796f5538951",
+      "episode": "ep6955",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/94a6ffb36d4348c9a5b6dd21a2fdce55/c8ca0ec36af744e0a96f337828574654/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "c8ca0ec36af744e0a96f337828574654",
+      "job": "94a6ffb36d4348c9a5b6dd21a2fdce55",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/16794f09a37845c59bb4a5a891b24b72/bd51c945ee2847aea4d3af49e380c279/episode/work/ep6907/trace/requests.jsonl",
+      "attempt": "bd51c945ee2847aea4d3af49e380c279",
+      "job": "16794f09a37845c59bb4a5a891b24b72",
+      "episode": "ep6907",
+      "counts": {
+        "omitted": 7
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 54,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 60,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        },
+        {
+          "seq": 66,
+          "reset": "omitted",
+          "task_id": 5,
+          "error": false
+        },
+        {
+          "seq": 84,
+          "reset": "omitted",
+          "task_id": 5,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/16794f09a37845c59bb4a5a891b24b72/7229fd3a5a79488a8d73c3cd5488e4e1/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "7229fd3a5a79488a8d73c3cd5488e4e1",
+      "job": "16794f09a37845c59bb4a5a891b24b72",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 4
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 24,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 66,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 96,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/c4a892425cf14224aa6ecc05d8b16121/083bfd204a814c43ab961b522d823866/episode/work/ep0003/trace/requests.jsonl",
+      "attempt": "083bfd204a814c43ab961b522d823866",
+      "job": "c4a892425cf14224aa6ecc05d8b16121",
+      "episode": "ep0003",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/c4a892425cf14224aa6ecc05d8b16121/5b60881f04f34bf08f104e8f72e0c4f4/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "5b60881f04f34bf08f104e8f72e0c4f4",
+      "job": "c4a892425cf14224aa6ecc05d8b16121",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/581c8e208d67413ebfde0686fb88a0b1/91ed99040d284e2084f2dde54aeac923/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "91ed99040d284e2084f2dde54aeac923",
+      "job": "581c8e208d67413ebfde0686fb88a0b1",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/13f6ae30ec6941688c7f03372a386614/cb44dc24292f40efa659355aaab50105/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "cb44dc24292f40efa659355aaab50105",
+      "job": "13f6ae30ec6941688c7f03372a386614",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 1
+      },
+      "success": null,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/5ac992b34e7543fdbc18fe2619f0d345/6c045c6408814abea46054bf735ff2d8/episode/work/ep0575/trace/requests.jsonl",
+      "attempt": "6c045c6408814abea46054bf735ff2d8",
+      "job": "5ac992b34e7543fdbc18fe2619f0d345",
+      "episode": "ep0575",
+      "counts": {
+        "omitted": 5
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 66,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 111,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 132,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/f2d0e41d2b40476ea2315b834426ca3e/70184e2e58aa4292bb39a3074aa857d2/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "70184e2e58aa4292bb39a3074aa857d2",
+      "job": "f2d0e41d2b40476ea2315b834426ca3e",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 63,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/045b1124dcc742f8aaa545af3a2a35b1/da305d371f8c49f2b5057c085bbd0b6c/episode/work/ep0016/trace/requests.jsonl",
+      "attempt": "da305d371f8c49f2b5057c085bbd0b6c",
+      "job": "045b1124dcc742f8aaa545af3a2a35b1",
+      "episode": "ep0016",
+      "counts": {
+        "omitted": 7
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 72,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 132,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 164,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 183,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 207,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/396efd39f275420489f2c9fdd26c3dbd/3a6088b484ff434d825bed68ffd7790d/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "3a6088b484ff434d825bed68ffd7790d",
+      "job": "396efd39f275420489f2c9fdd26c3dbd",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 61,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/5ba414ae2ffe4c739e33d517843f3b66/74b48482d65548cdbb2c51487f49853a/episode/work/ep0003/trace/requests.jsonl",
+      "attempt": "74b48482d65548cdbb2c51487f49853a",
+      "job": "5ba414ae2ffe4c739e33d517843f3b66",
+      "episode": "ep0003",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 15,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 40,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/5ba414ae2ffe4c739e33d517843f3b66/3e74a592e963426da526408f948d373f/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "3e74a592e963426da526408f948d373f",
+      "job": "5ba414ae2ffe4c739e33d517843f3b66",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 15,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 25,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/5ba414ae2ffe4c739e33d517843f3b66/1e0f32a2948e44bab36d41b0c082db6e/episode/work/ep0009/trace/requests.jsonl",
+      "attempt": "1e0f32a2948e44bab36d41b0c082db6e",
+      "job": "5ba414ae2ffe4c739e33d517843f3b66",
+      "episode": "ep0009",
+      "counts": {
+        "omitted": 3
+      },
+      "success": null,
+      "calls": [
+        {
+          "seq": 15,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 85,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/dd640b626a2a4782860debb19df5f916/7f5fe921a6d04e65a23c5c2027c61e03/episode/work/ep7378/trace/requests.jsonl",
+      "attempt": "7f5fe921a6d04e65a23c5c2027c61e03",
+      "job": "dd640b626a2a4782860debb19df5f916",
+      "episode": "ep7378",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 60,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/af3fdaef821244329820cb708fdb08db/a44f59499ecb4dc68d4725d19754acbe/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "a44f59499ecb4dc68d4725d19754acbe",
+      "job": "af3fdaef821244329820cb708fdb08db",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 1
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 24,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/11888fddbf7041948b0a41e55ad08003/cf77adb77cd345ed9a7df5092c19a6a8/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "cf77adb77cd345ed9a7df5092c19a6a8",
+      "job": "11888fddbf7041948b0a41e55ad08003",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/11888fddbf7041948b0a41e55ad08003/f4dabbc524844c639ecc9ef5670d8104/episode/work/ep0018/trace/requests.jsonl",
+      "attempt": "f4dabbc524844c639ecc9ef5670d8104",
+      "job": "11888fddbf7041948b0a41e55ad08003",
+      "episode": "ep0018",
+      "counts": {
+        "omitted": 7
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 132,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 214,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 305,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 438,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 493,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 542,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/11888fddbf7041948b0a41e55ad08003/4fd29d2e05344a799dfb6128ba8b3ac0/episode/work/ep0015/trace/requests.jsonl",
+      "attempt": "4fd29d2e05344a799dfb6128ba8b3ac0",
+      "job": "11888fddbf7041948b0a41e55ad08003",
+      "episode": "ep0015",
+      "counts": {
+        "omitted": 4
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 24,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 63,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 82,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 148,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/11888fddbf7041948b0a41e55ad08003/f04540659e49443f8be2ece45a897269/episode/work/ep0009/trace/requests.jsonl",
+      "attempt": "f04540659e49443f8be2ece45a897269",
+      "job": "11888fddbf7041948b0a41e55ad08003",
+      "episode": "ep0009",
+      "counts": {
+        "omitted": 8
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 104,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 125,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 148,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 239,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 287,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 320,
+          "reset": "omitted",
+          "task_id": null,
+          "error": null
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/11888fddbf7041948b0a41e55ad08003/7771500dc7af47f48af202a4693cdc0a/episode/work/ep0012/trace/requests.jsonl",
+      "attempt": "7771500dc7af47f48af202a4693cdc0a",
+      "job": "11888fddbf7041948b0a41e55ad08003",
+      "episode": "ep0012",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 55,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/11888fddbf7041948b0a41e55ad08003/61bb557443454358bd362391437a5a7b/episode/work/ep0003/trace/requests.jsonl",
+      "attempt": "61bb557443454358bd362391437a5a7b",
+      "job": "11888fddbf7041948b0a41e55ad08003",
+      "episode": "ep0003",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 51,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/a28c32bce2d54b159209a2917c71fe78/0a42b3cd53b743c1aedf1a645acd97b6/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "0a42b3cd53b743c1aedf1a645acd97b6",
+      "job": "a28c32bce2d54b159209a2917c71fe78",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/a28c32bce2d54b159209a2917c71fe78/0791e8b19dc14ea28641fd5567b312f5/episode/work/ep0003/trace/requests.jsonl",
+      "attempt": "0791e8b19dc14ea28641fd5567b312f5",
+      "job": "a28c32bce2d54b159209a2917c71fe78",
+      "episode": "ep0003",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 24,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 50,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/1cdbcfbe135143b78e93ea3282785379/2a25e8cfbaaa444ea3b2303df08514f1/episode/work/ep0205/trace/requests.jsonl",
+      "attempt": "2a25e8cfbaaa444ea3b2303df08514f1",
+      "job": "1cdbcfbe135143b78e93ea3282785379",
+      "episode": "ep0205",
+      "counts": {
+        "omitted": 4
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 92,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 113,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/d9f077a3468d414cb39a77205c6082ee/bef9a6a125684e8d90e735a7691f1bee/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "bef9a6a125684e8d90e735a7691f1bee",
+      "job": "d9f077a3468d414cb39a77205c6082ee",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/d9f077a3468d414cb39a77205c6082ee/e509ed1e11784ed59bcc0b80fb565936/episode/work/ep0003/trace/requests.jsonl",
+      "attempt": "e509ed1e11784ed59bcc0b80fb565936",
+      "job": "d9f077a3468d414cb39a77205c6082ee",
+      "episode": "ep0003",
+      "counts": {
+        "omitted": 9
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 59,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 117,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 274,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 308,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 356,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 400,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 495,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/f38bdebcdeaf4cfe954c95984d296253/09c20df3d6d04818bd61417815959842/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "09c20df3d6d04818bd61417815959842",
+      "job": "f38bdebcdeaf4cfe954c95984d296253",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 2
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 30,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/5152d6041c134e4aa5952540ac2e112e/45de9875cefc4cb985922f1c094f5829/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "45de9875cefc4cb985922f1c094f5829",
+      "job": "5152d6041c134e4aa5952540ac2e112e",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 1
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/5152d6041c134e4aa5952540ac2e112e/30b82463fcfc4135b8cefe519dc97cf8/episode/work/ep0012/trace/requests.jsonl",
+      "attempt": "30b82463fcfc4135b8cefe519dc97cf8",
+      "job": "5152d6041c134e4aa5952540ac2e112e",
+      "episode": "ep0012",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 55,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 151,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/5152d6041c134e4aa5952540ac2e112e/b4d7b7fc60c94c3782596c0ea200a81d/episode/work/ep0018/trace/requests.jsonl",
+      "attempt": "b4d7b7fc60c94c3782596c0ea200a81d",
+      "job": "5152d6041c134e4aa5952540ac2e112e",
+      "episode": "ep0018",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 24,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 57,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/5152d6041c134e4aa5952540ac2e112e/f26e53beeb6c4d49a172abe5f9cfb294/episode/work/ep0015/trace/requests.jsonl",
+      "attempt": "f26e53beeb6c4d49a172abe5f9cfb294",
+      "job": "5152d6041c134e4aa5952540ac2e112e",
+      "episode": "ep0015",
+      "counts": {
+        "omitted": 4
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 24,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 114,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 137,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 253,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/5152d6041c134e4aa5952540ac2e112e/e847eb5654784a3ebe7670adb58b43ce/episode/work/ep0009/trace/requests.jsonl",
+      "attempt": "e847eb5654784a3ebe7670adb58b43ce",
+      "job": "5152d6041c134e4aa5952540ac2e112e",
+      "episode": "ep0009",
+      "counts": {
+        "omitted": 3
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 24,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 36,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        },
+        {
+          "seq": 84,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/5152d6041c134e4aa5952540ac2e112e/e8804a1639c64b72a9e3747c624f4ef5/episode/work/ep0003/trace/requests.jsonl",
+      "attempt": "e8804a1639c64b72a9e3747c624f4ef5",
+      "job": "5152d6041c134e4aa5952540ac2e112e",
+      "episode": "ep0003",
+      "counts": {
+        "omitted": 1
+      },
+      "success": 0.0,
+      "calls": [
+        {
+          "seq": 24,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/fb27662f494049149a69867955701632/7b79ffa4a11547059f92d76ded19b625/episode/work/ep2965/trace/requests.jsonl",
+      "attempt": "7b79ffa4a11547059f92d76ded19b625",
+      "job": "fb27662f494049149a69867955701632",
+      "episode": "ep2965",
+      "counts": {
+        "omitted": 8
+      },
+      "success": 1.0,
+      "calls": [
+        {
+          "seq": 18,
+          "reset": "omitted",
+          "task_id": 1,
+          "error": false
+        },
+        {
+          "seq": 42,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 48,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 54,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 72,
+          "reset": "omitted",
+          "task_id": 2,
+          "error": false
+        },
+        {
+          "seq": 96,
+          "reset": "omitted",
+          "task_id": 3,
+          "error": false
+        },
+        {
+          "seq": 121,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": true
+        },
+        {
+          "seq": 128,
+          "reset": "omitted",
+          "task_id": 4,
+          "error": false
+        }
+      ],
+      "reset_exposed": true,
+      "reset_on_recorded_segments": {}
+    },
+    {
+      "path": "/home/holo/robots/nav-harness/state/runs/0a8faf4f77784a21b91271ddbf22250f/1884467c55c04f29a2921f93b8481c51/episode/work/ep0000/trace/requests.jsonl",
+      "attempt": "1884467c55c04f29a2921f93b8481c51",
+      "job": "0a8faf4f77784a21b91271ddbf22250f",
+      "episode": "ep0000",
+      "counts": {
+        "omitted": 1
+      },
+      "success": null,
+      "calls": [
+        {
+          "seq": 24,
+          "reset": "omitted",
+          "task_id": null,
+          "error": false
+        }
+      ],
+      "reset_exposed": false,
+      "reset_on_recorded_segments": {}
+    }
+  ],
+  "reset_exposed_summary": {
+    "attempts": 70,
+    "counts": {
+      "omitted": 285,
+      "false": 19,
+      "true": 24
+    }
+  }
+}

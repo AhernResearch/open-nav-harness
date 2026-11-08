@@ -39,7 +39,7 @@ def main():
         a.output.parent.mkdir(parents=True, exist_ok=True)
         with sqlite3.connect(root / "platform.sqlite3") as source, sqlite3.connect(a.output) as target:
             source.backup(target)
-        print("Metadata backup written; preserve runs/ and admin-password separately.")
+        print("Metadata backup written; preserve runs/ and private deployment settings separately.")
     else:
         from nav_harness.platform.api import create_app
 
@@ -48,7 +48,7 @@ def main():
             print(json.dumps(app.openapi()))
         elif a.command == "init":
             atomic_json(root / "settings.example.json", settings.model_dump())
-            print("Initialized. Administrator password file:", root / "admin-password")
+            print("Initialized. Console and API are accessible without a password.")
         else:
             import uvicorn
 

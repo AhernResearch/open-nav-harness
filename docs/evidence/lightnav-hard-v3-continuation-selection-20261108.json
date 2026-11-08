@@ -1,0 +1,41 @@
+{
+  "split": "train",
+  "purpose": "development",
+  "selection": "four distinct scenes and trajectories; multi-flight stairs, multi-room instruction, long multi-turn route, ordinal endpoint",
+  "source_sha256": "340a80133b2157520354ab055a91d98feb2f42e4bbda17b200c911f8788492ea",
+  "routes": [
+    {
+      "index": 2050,
+      "episode_id": 2054,
+      "trajectory_id": 1332,
+      "scene_id": "mp3d/5LpN3gDmAk7/5LpN3gDmAk7.glb",
+      "instruction": "Turn 45 degrees to your and move into the bedroom. Move forward with the bed to your right. Go toward the doorway with the white chair and footstool to your right. Pass through the doorway and turn 45 degrees to the left. Move forward with the glass railing to your right. Pass through the doorway and turn to your left when you reach the large artwork on the wall. Move through the bedroom with the bed on your right and the black chair and footstool on your left. Stop when you reach the entryway to the outside patio. ",
+      "reference_m": 16.79,
+      "height_m": 0.06,
+      "direction_count": 10,
+      "words": 98
+    },
+    {
+      "index": 6907,
+      "episode_id": 6917,
+      "trajectory_id": 4594,
+      "scene_id": "mp3d/E9uDoFAP3SH/E9uDoFAP3SH.glb",
+      "instruction": "With the window behind you and a solid wall to your right, move forward to exit the room. Upon exiting, turn ninety degrees to the left and move forward. Then turn ninety degrees to the right after entering the room. Move forward past two large circular tables to your left and a display case on your right while walking to the stairs leading downwards. Walk past the stairs with the stairs on your left and stop at the vaulted hallway on your right. ",
+      "reference_m": 20.71,
+      "height_m": 0.0,
+      "direction_count": 9,
+      "words": 83
+    },
+    {
+      "index": 6955,
+      "episode_id": 6965,
+      "trajectory_id": 4628,
+      "scene_id": "mp3d/PuKPg4mmafe/PuKPg4mmafe.glb",
+      "instruction": "Cross the table and continue down the hallway. Turn left passed the piano. Go to the couches and go straight until you reach the second to last couch. ",
+      "reference_m": 25.22,
+      "height_m": 0.2,
+      "direction_count": 2,
+      "words": 28
+    }
+  ]
+}

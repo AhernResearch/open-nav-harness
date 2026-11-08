@@ -14,7 +14,7 @@ export function ServicesPage({
   const [modelName, setModelName] = useState("Qwen3.6-27B-MM"),
     [serviceName, setServiceName] = useState("qwen27b"),
     [serviceUrl, setServiceUrl] = useState("http://127.0.0.1:8001/v1"),
-    [kind, setKind] = useState<"planner" | "environment" | "vla">("planner");
+    [kind, setKind] = useState<"planner" | "environment" | "vla" | "execution">("planner");
   const [managed, setManaged] = useState(false),
     [template, setTemplate] = useState(""),
     [gpuIds, setGpuIds] = useState("3"),
@@ -23,7 +23,11 @@ export function ServicesPage({
     "openai_compatible" | "codex" | "claude"
   >("openai_compatible");
   const [contextLimit, setContextLimit] = useState(16384),
-    [outputTokens, setOutputTokens] = useState(2048);
+    [outputTokens, setOutputTokens] = useState(2048),
+    [concurrency, setConcurrency] = useState(1),
+    [shared, setShared] = useState(false),
+    [environmentUrl, setEnvironmentUrl] = useState(""),
+    [inferenceUrl, setInferenceUrl] = useState("");
   const [contextPolicy, setContextPolicy] = useState<"bounded" | "full">(
       "bounded",
     ),
@@ -34,6 +38,9 @@ export function ServicesPage({
       kind,
       url: serviceUrl,
       managed,
+      max_concurrency: concurrency,
+      metadata: kind === "execution" ? { environment_url: environmentUrl, inference_url: inferenceUrl }
+        : kind === "vla" ? { shared_inference: shared } : {},
       template: managed ? template : null,
       gpu_ids: managed && gpuIds.trim() ? gpuIds.split(",").map(Number) : [],
       reserve_mib: managed ? reserve : 0,
@@ -51,7 +58,7 @@ export function ServicesPage({
               thinking,
               temperature: 0,
               request_timeout_s: 120,
-              max_concurrency: 1,
+              max_concurrency: concurrency,
             }
           : null,
     };
@@ -173,6 +180,7 @@ export function ServicesPage({
               <option value="planner">Planner</option>
               <option value="environment">Environment</option>
               <option value="vla">VLA</option>
+              <option value="execution">Execution</option>
             </select>
           </label>
           <label>
@@ -287,6 +295,16 @@ export function ServicesPage({
               </label>
             </>
           )}
+        </div>
+        <div className="form-grid">
+          {(kind === "planner" || kind === "vla") && <label>并发容量
+            <input type="number" min={1} max={32} value={concurrency} onChange={e => setConcurrency(Number(e.target.value))} />
+          </label>}
+          {kind === "vla" && <label><input type="checkbox" checked={shared} onChange={e => setShared(e.target.checked)} />共享推理服务</label>}
+          {kind === "execution" && <>
+            <label>环境地址<input value={environmentUrl} onChange={e => setEnvironmentUrl(e.target.value)} /></label>
+            <label>共享推理地址<input value={inferenceUrl} onChange={e => setInferenceUrl(e.target.value)} /></label>
+          </>}
         </div>
         <button onClick={() => perform(register)}>注册服务</button>
       </section>

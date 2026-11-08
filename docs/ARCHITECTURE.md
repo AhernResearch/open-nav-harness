@@ -59,9 +59,12 @@ task state, pruning fails explicitly. It never synthesizes a summary from future
 The full audit journal survives pruning. The context-selection record and model-request
 record identify precisely what the model was given.
 
-The existing actor context manager replaces context at task boundaries and preserves
-causal current-task frames plus boundary context. `policy_context` events carry frame
-IDs and the exact local instruction. All images needed for replay are stored locally.
+Actor input contracts are selected by `navgpt/vla/profiles.py`, independently of
+Planner context pruning. NavGPT VLA uses bounded replacement at task boundaries.
+LightNav retains its native continuous episode buffer and SlowFast sampler; task
+changes only revise instruction text. `policy_context` events preserve source frame
+IDs. The client appends unseen frames, and re-inference at a stationary endpoint
+reuses the last observation instead of inventing another timestep.
 
 Simulator metrics, goals and reference paths are evaluation artifacts. They are never
 added to Planner or actor requests. The UI labels evaluator trajectory plots separately.
@@ -136,9 +139,10 @@ owned-service recovery, not an implicit model reset.
 ## Model-owned workflow
 
 `harness.mode: agentic` keeps plan/state/history provenance but removes strict review
-permissions. The model selects the task, remaining instruction, segment budgets, and
-actor history window (1–16 groups with 0–4 boundary groups). The current frame is always
-retained. It can repair or revise without first calling a review tool, retrieve node
+permissions. The model selects the task and remaining instruction; execution and
+history budgets belong to runtime configuration. NavGPT VLA retains a bounded
+window (1–16 groups with 0–4 boundary groups). LightNav uses its native episode
+history. The current frame is always retained. It can repair or revise without first calling a review tool, retrieve node
 images, and stop independently of plan checkboxes. Initial observation/decomposition
 and evidence-based handoff review are prompting guidance. `subtask` preserves the
 previous strict workflow for comparisons; `global` preserves full-route delegation.

@@ -47,6 +47,7 @@ def run_episode(cfg: RunConfig, index: int, run_dir: Path) -> dict:
     metrics: dict = {}
     steps = 0
     stopped = False
+    forced_stop = False
     prev_pose, stuck = None, False
     t0 = time.time()
     try:
@@ -63,9 +64,17 @@ def run_episode(cfg: RunConfig, index: int, run_dir: Path) -> dict:
         # NavGPT VLA never emits STOP, so the loop owns stopping entirely:
         # two consecutive collapsed-horizon reads, exactly as VLNCE-EVAL's
         # episode_runner does it.
-        for _ in range(cfg.step_budget):
+        for step in range(cfg.step_budget):
             if time.time() - t0 > cfg.episode_timeout:
                 raise TimeoutError("VLA episode exceeded planner.episode_timeout_s")
+            if vla.input_profile.force_stop_at_budget and step == cfg.step_budget - 1:
+                # Official LightNav Habitat runner uses its last budgeted action
+                # for STOP. Label this separately from a learned policy STOP.
+                call_function(url, '{}__step_discrete'.format(cfg.verb_prefix), {"action": 0})
+                steps += 1
+                stopped = forced_stop = True
+                sink.emit('tool_use', {'name': 'vla_forced_stop', 'input': {'reason': 'step_budget'}})
+                break
             pano = call_function(url, "{}__observe_pano".format(cfg.verb_prefix), {})
             views, pose = pano.get("raw_views") or {}, pano.get("pose") or {}
             advice = vla.act(
@@ -137,6 +146,7 @@ def run_episode(cfg: RunConfig, index: int, run_dir: Path) -> dict:
             "tool_calls": {"vla_step": steps},
             "env_steps": steps,
             "called_stop": stopped,
+            "forced_stop": forced_stop,
             "end_reason": "stop_called" if stopped else "budget_or_truncated",
             "cost_usd": 0.0,         # no LLM in this condition
             "usage": {},

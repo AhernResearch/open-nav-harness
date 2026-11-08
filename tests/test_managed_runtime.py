@@ -70,7 +70,6 @@ async def run_fake(tmp_path, monkeypatch, responses, names=None):
 
     monkeypatch.setattr(module, "CompatibleClient", Client)
     monkeypatch.setattr(module, "open_tools", transport)
-    monkeypatch.setattr(module, "expected_tools", lambda *_: names)
     ctx = EpisodeContext(
         "system",
         "first",
@@ -80,7 +79,7 @@ async def run_fake(tmp_path, monkeypatch, responses, names=None):
         {},
         None,
         [],
-        {"NAVGPT_CONDITION": "planner_subtask"},
+        {"NAVGPT_CONDITION": "planner_subtask", "NAVGPT_TOOLS": json.dumps(names)},
         tmp_path,
         20,
     )
@@ -97,6 +96,23 @@ async def test_multi_call_response_counts_once_and_stops(tmp_path, monkeypatch):
     assert executed == ["observe_panorama", "terminate_episode"]
     assert outcome.error is None
     assert outcome.turns == 1
+
+
+async def test_explicit_ablation_contract_reaches_model_loop(tmp_path, monkeypatch):
+    from navgpt.settings import AGENTIC_TOOLS
+
+    names = [name for name in AGENTIC_TOOLS if name != "navigate_relative"]
+    executed, outcome = await run_fake(
+        tmp_path, monkeypatch,
+        [[call("1", "navigate_relative")], [call("2", "terminate_episode")]],
+        names=names,
+    )
+    assert outcome.error is None
+    assert executed == ["terminate_episode"]
+    rows = [json.loads(line) for line in (tmp_path / "trace/requests.jsonl").read_text().splitlines()]
+    start = next(row for row in rows if row["kind"] == "session_start")
+    assert {t["function"]["name"] for t in start["tools"]} == set(names)
+    assert any(row["kind"] == "tool_validation_error" for row in rows)
 
 
 async def test_invalid_batch_never_partially_executes(tmp_path, monkeypatch):

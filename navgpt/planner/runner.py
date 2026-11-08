@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
+from navgpt.vla.profiles import input_profile
 
 from .config import has_places, RunConfig, needs_vla
 from .prompts import build_briefing_for, first_prompt_for
@@ -338,7 +339,7 @@ def parse_episodes(spec: str) -> list[int]:
 # expose terminate_episode. The rest follow the capability flags in mcp_tools.py.
 EXPECTED_TOOLS = {
     "planner_agentic": ["execute_subtask", "navigate_relative", "navigate_to_node",
-                        "observe_forward", "observe_map", "observe_node", "observe_panorama",
+                        "observe", "observe_map",
                         "terminate_episode", "update_memory", "update_plan", "read_memory"],
     "planner_subtask": ["annotate_node", "execute_subtask", "navigate_relative",
                         "navigate_to_node", "observe_forward", "observe_map",
@@ -361,6 +362,13 @@ def expected_tools(condition, bundle='full'):
         from .tools.ablation import CAPABILITIES
         return list(CAPABILITIES[bundle])
     return EXPECTED_TOOLS.get(condition)
+
+
+def expected_tools_from_env(env):
+    """Use the frozen explicit surface across provider and transport boundaries."""
+    if "NAVGPT_TOOLS" in env:
+        return json.loads(env["NAVGPT_TOOLS"])
+    return expected_tools(env["NAVGPT_CONDITION"], env.get("NAVGPT_CAPABILITY_BUNDLE", "full"))
 
 
 # Briefing for the controlled ablations (any non-standard interface). One
@@ -481,7 +489,7 @@ def preflight(cfg: RunConfig) -> dict[str, Any]:
                     "`python -m navgpt.vla --config ...`".format(cfg.vla_url, exc)) from exc
             if not info.get('history_observe') or not info.get('seeded_reset'):
                 raise PreflightError('VLA must support history-only observation for repair/resume')
-    want = expected_tools(cfg.condition, cfg.capability_bundle)
+    want = cfg.tools or expected_tools(cfg.condition, cfg.capability_bundle)
     if want is None:
         raise PreflightError(
             "condition {!r} has no expected tool set — add it to EXPECTED_TOOLS "
@@ -547,19 +555,16 @@ def preflight(cfg: RunConfig) -> dict[str, Any]:
                     cfg.condition, cfg.vla_url, exc)
             ) from exc
         report["vla"] = info
+        _check_history_cameras(cfg.vla_backend, health)
         if cfg.execution_url:
-            from nav_harness.core.version import implementation_digest
-            if cfg.execution_url.rstrip("/") != cfg.vla_url.rstrip("/"):
-                raise PreflightError("Tool execution must use the leased VLA worker endpoint")
-            if info.get("implementation_digest") != implementation_digest():
-                raise PreflightError("Actor worker source differs from the frozen local implementation")
-            if info.get("environment_url") != cfg.env_url:
-                raise PreflightError("Actor worker environment differs from the leased environment endpoint")
-            if info.get("session_id") or info.get("failed"):
-                raise PreflightError("Actor worker has an unresolved session; reconcile before running")
-        if cfg.harness_mode in ('subtask', 'agentic') and (not info.get('context_replace')
-                                             or info.get('max_context_groups') != 16):
-            raise PreflightError('Subtask mode requires a VLA with 16-group context replacement')
+            _check_execution(cfg, info)
+        profile = input_profile(cfg.vla_backend)
+        if cfg.harness_mode in ('subtask', 'agentic'):
+            if profile.history == 'episode':
+                if info.get('history_mode') != 'episode' or info.get('context_replace'):
+                    raise PreflightError('This actor requires continuous native episode history')
+            elif not info.get('context_replace') or info.get('max_context_groups') != 16:
+                raise PreflightError('This actor requires 16-group context replacement')
         if cfg.vla_backend == 'lightnav':
             if info.get('backend') != 'lightnav':
                 raise PreflightError('Expected a LightNav bridge, got a different VLA service')
@@ -757,7 +762,40 @@ def _probe_model(model: str, attempts: int = 3) -> dict[str, Any]:
     )
 
 
+def _check_history_cameras(backend, health):
+    expected = ["policy_front"] if backend == "lightnav" else ["front", "right", "back", "left"]
+    actual = health.get("history_cameras")
+    if actual is None:
+        # Older owned environments choose passive-history cameras this way.
+        actual = ["policy_front"] if health.get("policy_camera") else ["front", "right", "back", "left"]
+    if set(actual) != set(expected):
+        raise PreflightError(f"Environment history cameras {actual} do not match {backend}: {expected}")
+
+
+def _check_execution(cfg, inference_info):
+    from nav_harness.core.version import implementation_digest
+    info = inference_info
+    if cfg.execution_url.rstrip("/") != cfg.vla_url.rstrip("/"):
+        if not info.get("shared_inference") or info.get("protocol_version") != 2:
+            raise PreflightError("Separate execution requires shared inference protocol v2")
+        if info.get("implementation_digest") != implementation_digest():
+            raise PreflightError("Inference source differs from the frozen local implementation")
+        response = requests.get(cfg.execution_url.rstrip("/") + "/info", timeout=30)
+        response.raise_for_status()
+        info = response.json()
+        if info.get("inference_url", "").rstrip("/") != cfg.vla_url.rstrip("/"):
+            raise PreflightError("Execution worker is bound to a different inference service")
+    if info.get("implementation_digest") != implementation_digest():
+        raise PreflightError("Actor worker source differs from the frozen local implementation")
+    if info.get("environment_url") != cfg.env_url:
+        raise PreflightError("Actor worker environment differs from the leased environment endpoint")
+    if info.get("session_id") or info.get("failed"):
+        raise PreflightError("Actor worker has an unresolved session; reconcile before running")
+
+
 def _reset_vla(cfg: RunConfig, index=0) -> None:
+    if cfg.execution_url:
+        return  # The execution worker resets only its owned actor session on open.
     # Ablation cells seed the VLA per episode so repeated initial rollouts can be
     # paired across cells; standard runs keep the unseeded reset.
     seed = {"seed": cfg.ablation_seed + index} if cfg.interface_variant != "standard" else {}
@@ -769,7 +807,7 @@ def _reset_vla(cfg: RunConfig, index=0) -> None:
 def mcp_env_for(cfg: RunConfig, live_dir: Path | None,
                    episode_id: str | None = None,
                    instruction: str | None = None,
-                   labels_path: Path | None = None) -> dict[str, str]:
+                   labels_path: Path | None = None, actor_seed: int | None = None) -> dict[str, str]:
     env = {
         "NAVGPT_INTERFACE_VARIANT": cfg.interface_variant,
         "NAVGPT_CAPABILITY_BUNDLE": cfg.capability_bundle,
@@ -779,12 +817,17 @@ def mcp_env_for(cfg: RunConfig, live_dir: Path | None,
         "NAVGPT_STEP_BUDGET": str(cfg.step_budget),
         # The MCP tool server registers tools from this; registration is the real gate.
         "NAVGPT_CONDITION": cfg.condition,
+        "NAVGPT_TOOLS": json.dumps(cfg.tools or expected_tools(cfg.condition, cfg.capability_bundle)),
         "NAVGPT_VLA_URL": cfg.vla_url,
         "NAVGPT_VLA_BACKEND": cfg.vla_backend,
         "NAVGPT_SUBTASK_MAX_DISTANCE": str(cfg.subtask_max_distance_m),
         "NAVGPT_SUBTASK_MAX_TURN": str(cfg.subtask_max_turn_deg),
         "NAVGPT_SUBTASK_MAX_ACTIONS": str(cfg.subtask_max_actions),
+        "NAVGPT_ACTOR_HISTORY_POLICY": cfg.actor_history_policy,
+        "NAVGPT_ALLOW_CONTEXT_RESET": "1" if cfg.allow_context_reset else "0",
         "NAVGPT_VLA_MAX_STEPS": str(cfg.vla_max_steps_per_call),
+        "NAVGPT_HISTORY_FRAMES": str(cfg.history_frames),
+        "NAVGPT_BOUNDARY_FRAMES": str(cfg.boundary_frames),
         "NAVGPT_VLA_MAP": "1" if cfg.vla_map_enabled() else "0",
         "NAVGPT_PLACE_LISTING_MAX": str(cfg.place_listing_max),
         "NAVGPT_MOVE_ROUTES": "1" if cfg.move_routes else "0",
@@ -794,6 +837,8 @@ def mcp_env_for(cfg: RunConfig, live_dir: Path | None,
     }
     if cfg.execution_url:
         env["NAVGPT_EXECUTION_URL"] = cfg.execution_url
+    if actor_seed is not None:
+        env["NAVGPT_ACTOR_SEED"] = str(actor_seed)
     if labels_path is not None:
         # The MCP tool server holds the place names; the NavGPT Environment service has never seen one. Without
         # this, episode_places records the geometry and drops every name and caption.
@@ -848,7 +893,9 @@ async def run_episode(adapter, cfg: RunConfig, index: int, run_dir: Path) -> dic
                     cfg.vla_url, exc)) from exc
 
     briefing = build_briefing_for(cfg.condition, instruction, cfg.step_budget,
-                                  move_routes=cfg.move_routes)
+                                  move_routes=cfg.move_routes, tools=cfg.tools or None,
+                                  allow_context_reset=cfg.allow_context_reset,
+                                  actor_history=input_profile(cfg.vla_backend).history)
     if cfg.vla_backend == 'lightnav':
         briefing = briefing.replace('NavGPT VLA', 'LightNav-0')
     if cfg.interface_variant != 'standard':
@@ -857,7 +904,7 @@ async def run_episode(adapter, cfg: RunConfig, index: int, run_dir: Path) -> dic
     # Every tool the briefing names by call syntax has to be one the MCP tool server
     # registers, or the agent is instructed to call something that does not exist.
     named = {m.group(1) for m in re.finditer(r"\b([a-z_][a-z_0-9]*)\(", briefing)}
-    want = set(expected_tools(cfg.condition, cfg.capability_bundle) or [])
+    want = set(cfg.tools or expected_tools(cfg.condition, cfg.capability_bundle) or [])
     promised_but_absent = sorted(
         named & {"navigate_relative", "navigate_to_node", "annotate_node",
                  "observe_panorama", "observe_map", "observe_forward", "navigate_primitive",
@@ -886,7 +933,8 @@ async def run_episode(adapter, cfg: RunConfig, index: int, run_dir: Path) -> dic
         effort=cfg.effort,
         betas=list(cfg.betas),
         mcp_env=mcp_env_for(cfg, live_dir, ep.get("episode_id"),
-                                  instruction, labels_path=labels_path),
+                                  instruction, labels_path=labels_path,
+                                  actor_seed=cfg.ablation_seed + index if cfg.interface_variant != "standard" else None),
         workdir=workdir,
         timeout=cfg.episode_timeout,
     )

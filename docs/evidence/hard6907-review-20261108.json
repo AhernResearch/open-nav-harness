@@ -1,0 +1,9 @@
+{
+  "episode_index": 6907,
+  "node3_straight_line_goal_distance_m": 14.126689908994173,
+  "minimum_sampled_trajectory_straight_line_goal_distance_m": 5.724845416549737,
+  "captioned_edges": 2,
+  "total_edges": 34,
+  "distance_definition": "3D Euclidean; distinct from benchmark geodesic NE",
+  "reference_use": "post-hoc analysis only; not sent to planner"
+}

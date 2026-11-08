@@ -1,0 +1,187 @@
+{
+  "release": "/data/nav_storage/nav-harness/releases/async-795d5eb1da9c",
+  "implementation_digest": "795d5eb1da9c08fc0d51851085f20135864fd4179eaa90f0ebd7cb2127df336f",
+  "upstream_commit": "3015508b70fb6e30bbd66701e94c9b916dcb8df8",
+  "upstream_snapshot": "/data/nav_storage/nav-harness/releases/async-795d5eb1da9c/vendor/lightnav",
+  "service_ids": [
+    "457941e1ef2448f28537209c16de106e",
+    "2e7bd465f9ac473ba75313fa3c5afc4d",
+    "20d3792f5f7c45f587d77fac6f19b9b0",
+    "339b2b74985a4b0aba3144eea9705249",
+    "e950bb08bcd540d795fac907cdbf6194",
+    "d1fdc31244874534a5c8299aeaf1d742",
+    "c10b40fb9e9140f3b9444521fc788b1e",
+    "c09ae78998624a99b962333d6a275c4b",
+    "2c84605389974f618def4e68baaf3216"
+  ],
+  "created": 1794164568.672378,
+  "source_sha256": {
+    "src/lightnav/inference/policies.py": "05c6a37b11911498d25812a2320084994a0fefd965ca883c7f55c8dbf8b57c03",
+    "src/lightnav/inference/samples.py": "6e9c24fc70526f7dd910d4a2601d14c856e698850eba5c50c71f2bea7d0ced69",
+    "src/lightnav/inference/engine.py": "0c955a7bee0df7363165c64f5e4b20bd065c1f132c36c50967fe9b2530c67ec0",
+    "src/lightnav/serving/tracking_service.py": "88a1912ce2b3ad7dede12c28f08475bbb9115756c3e5cd9b8e6018768fe17add",
+    "src/lightnav/tracking.py": "59de24911956821e00f80ca82d4cfad4b15ab0de4d85e85244436694ea805b69",
+    "src/lightnav/velocity.py": "aa155b4a674298c1bf234679be4295ff6d387a87818dc66d407dfa74d2ca076f",
+    "src/lightnav/habitat/policy.py": "1e7231de07a61f11719116d12c715df9f55e83ffcece88498f087b68f8edd3db",
+    "src/lightnav/habitat/runner.py": "6c9a7816af291128495cf3f7fa75d27162a8cf8dde8306bdd6816a8c13e08957",
+    "src/lightnav/prompts.py": "9968adadffeed91327edbe2c04bd355171c32d51b2abad63755e24009aa0fd41"
+  },
+  "dependencies": {
+    "vllm": "0.19.1",
+    "torch": "2.10.0",
+    "transformers": "5.8.0",
+    "numpy": "2.2.6"
+  },
+  "checkpoint_eval_config": {
+    "version": 1,
+    "common": {
+      "max_seq_len": 8192,
+      "video_size": [
+        256,
+        448
+      ],
+      "pool_enable": true,
+      "pool_spatial": 2,
+      "pool_mode": "avg",
+      "pool_stage": "post_vit",
+      "native_resolution": false,
+      "native_max_pixels": 1048576
+    },
+    "tasks": {
+      "vlnce": {
+        "num_history_frames": 64,
+        "predict_horizon": 10,
+        "action_tokenizer": {
+          "method": "rvq",
+          "bundle_path": "action_tokenizer"
+        },
+        "slowfast_tiers": [
+          {
+            "name": "current",
+            "age_lo": 0,
+            "age_hi": 1,
+            "mode": "dense",
+            "pool_spatial": 1
+          },
+          {
+            "name": "fast",
+            "age_lo": 2,
+            "age_hi": 33,
+            "mode": "dense",
+            "pool_spatial": 2
+          },
+          {
+            "name": "mid",
+            "age_lo": 34,
+            "age_hi": 89,
+            "mode": "burst",
+            "pair_stride": 6,
+            "pool_spatial": 2
+          },
+          {
+            "name": "long",
+            "age_lo": 90,
+            "age_hi": 1000000,
+            "mode": "span",
+            "num_pairs": 14,
+            "pool_spatial": 4
+          },
+          {
+            "name": "anchor",
+            "age_lo": 0,
+            "age_hi": 0,
+            "mode": "anchor",
+            "num_frames": 2,
+            "pool_spatial": 4
+          }
+        ],
+        "prompt_style": "unified_traj",
+        "timestamp_relative": true,
+        "video_fps": 4
+      },
+      "trackvla": {
+        "num_history_frames": 64,
+        "predict_horizon": 10,
+        "action_tokenizer": {
+          "method": "rvq",
+          "bundle_path": "action_tokenizer"
+        },
+        "slowfast_tiers": [
+          {
+            "name": "current",
+            "age_lo": 0,
+            "age_hi": 1,
+            "mode": "dense",
+            "pool_spatial": 1
+          },
+          {
+            "name": "fast",
+            "age_lo": 2,
+            "age_hi": 33,
+            "mode": "dense",
+            "pool_spatial": 2
+          },
+          {
+            "name": "mid",
+            "age_lo": 34,
+            "age_hi": 89,
+            "mode": "burst",
+            "pair_stride": 6,
+            "pool_spatial": 2
+          },
+          {
+            "name": "long",
+            "age_lo": 90,
+            "age_hi": 1000000,
+            "mode": "span",
+            "num_pairs": 14,
+            "pool_spatial": 4
+          },
+          {
+            "name": "anchor",
+            "age_lo": 0,
+            "age_hi": 0,
+            "mode": "anchor",
+            "num_frames": 2,
+            "pool_spatial": 4
+          }
+        ],
+        "prompt_style": "unified_traj",
+        "timestamp_relative": true,
+        "video_fps": 4
+      }
+    }
+  },
+  "checkpoint_eval_config_sha256": "7f475edbef4a13d2db99fa12eff5e9dedf48916969ec777f75e6e85e2a492b57",
+  "parity_evidence": "lightnav-official-parity-20261109.json",
+  "live_batch_evidence": "lightnav-official-live-batch-20261109.json",
+  "contract_changes": [
+    "Native full-episode SlowFast history; no rolling context replacement",
+    "Plain selected instruction; no appended memory caption",
+    "No manual reset for LightNav; changing tasks retains history",
+    "Same-endpoint re-inference does not append another timestep",
+    "Official64-token generation budget and explicit decode-error zero STOP",
+    "VLA-only last-budget forced STOP recorded separately from learned STOP"
+  ],
+  "scope": "Planner-selected subtasks remain an intentional extension, not an official benchmark evaluation.",
+  "smoke_evidence": "lightnav-official-smoke-20261109.json",
+  "validation": {
+    "pytest": 134,
+    "subtests": 4,
+    "ruff": "passed",
+    "mypy": "passed",
+    "frontend_build": "passed",
+    "gpu_parity_checkpoints": 8,
+    "gpu_history_frames": 500,
+    "controller_cases": 101,
+    "live_concurrent_sessions": 8,
+    "largest_live_batch": 7,
+    "smoke_successes": 2,
+    "smoke_total": 2
+  },
+  "final_queue": {
+    "active_attempts": 0,
+    "historical_50_job": "paused",
+    "historical_50_completed": 8
+  }
+}

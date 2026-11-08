@@ -247,17 +247,20 @@ async def test_wire_requests_and_model_retry_are_recorded(tmp_path):
     assert events[1]["kind"] == "model_response"
 
 
-def test_api_auth_csrf_and_unknown_templates(tmp_path):
+def test_api_open_access_and_unknown_templates(tmp_path):
     app = create_app(tmp_path)
+    assert not (tmp_path / "admin-password").exists()
     with TestClient(app) as c:
-        assert c.get("/api/services").status_code == 401
-        password = (tmp_path / "admin-password").read_text()
-        assert c.post("/api/login", json={"password": password}).status_code == 200
         assert c.get("/api/services").status_code == 200
-        assert c.post("/api/logout").status_code == 403
-        assert c.post("/api/logout", headers={"Origin": "http://testserver"}).status_code == 200
-        assert c.get("/api/services").status_code == 401
-        assert c.get("/api/services", headers={"Authorization": "Bearer " + password}).status_code == 200
+        spec = {"name": "test-env", "kind": "environment", "url": "http://localhost:19200"}
+        response = c.post("/api/services", json=spec)
+        assert response.status_code == 201
+        assert c.get("/api/services").json()[0]["id"] == response.json()["id"]
+        assert c.post(
+            "/api/services", json={**spec, "managed": True, "template": "unknown"}
+        ).status_code == 422
+        assert "/api/login" not in app.openapi()["paths"]
+        assert "/api/logout" not in app.openapi()["paths"]
 
 
 def test_session_state_and_tool_contract_are_isolated(monkeypatch):

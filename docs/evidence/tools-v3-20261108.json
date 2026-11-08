@@ -1,0 +1,227 @@
+{
+  "contract": "topology_memory_v3",
+  "implementation_digest": "09166ef508df2837f779f10de4156814d232b1a5569abe953e2b2025c1968528",
+  "validation": "scripted integration, not autonomous planner evaluation",
+  "planner_tokens": null,
+  "remote_session_workers_redeployed": false,
+  "checks": {
+    "lightnav": {
+      "transport": "direct_local_gpu_http",
+      "checks": [
+        {
+          "tool": "observe",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "update_plan",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "navigate_relative",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "execute_subtask",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "navigate_to_node",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "read_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "read_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "read_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "terminate_episode",
+          "expected_rejection": false,
+          "passed": true
+        }
+      ],
+      "nodes": 3,
+      "edges": 3,
+      "model_predictions": 2,
+      "artifacts": "/home/holo/robots/nav-harness/state/probes/tools-v3-20261108/lightnav"
+    },
+    "navgpt": {
+      "transport": "mcp_local_gpu_http",
+      "checks": [
+        {
+          "tool": "observe",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "update_plan",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "navigate_relative",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "execute_subtask",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": true,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "navigate_to_node",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "observe_map",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "update_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "read_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "read_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "read_memory",
+          "expected_rejection": false,
+          "passed": true
+        },
+        {
+          "tool": "terminate_episode",
+          "expected_rejection": false,
+          "passed": true
+        }
+      ],
+      "nodes": 3,
+      "edges": 3,
+      "model_predictions": 2,
+      "artifacts": "/home/holo/robots/nav-harness/state/probes/tools-v3-20261108/navgpt"
+    }
+  }
+}

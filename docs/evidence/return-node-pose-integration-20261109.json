@@ -1,0 +1,343 @@
+{
+  "started": 1794167991.611679,
+  "deployment": {
+    "release": "/data/nav_storage/nav-harness/releases/async-b2431f1b457e",
+    "implementation_digest": "b2431f1b457e267ad147aac8654b9f41b6d85634cb00a1d9e962b7bd33345ef7",
+    "upstream_commit": "3015508b70fb6e30bbd66701e94c9b916dcb8df8",
+    "upstream_snapshot": "/data/nav_storage/nav-harness/releases/async-b2431f1b457e/vendor/lightnav",
+    "service_ids": [
+      "457941e1ef2448f28537209c16de106e",
+      "2e7bd465f9ac473ba75313fa3c5afc4d",
+      "20d3792f5f7c45f587d77fac6f19b9b0",
+      "339b2b74985a4b0aba3144eea9705249",
+      "e950bb08bcd540d795fac907cdbf6194",
+      "d1fdc31244874534a5c8299aeaf1d742",
+      "c10b40fb9e9140f3b9444521fc788b1e",
+      "c09ae78998624a99b962333d6a275c4b",
+      "2c84605389974f618def4e68baaf3216"
+    ],
+    "created": 1794167770.3803031,
+    "deployment_note": "Shared inference checks whole implementation digest; aligned inference release as required.",
+    "initial_probe_blocked": {
+      "reason": "Shared inference implementation or backend mismatch",
+      "environment_movement_dispatched": false,
+      "resolution": "Aligned owned LightNav inference release and restarted the failed development worker; no automatic motion retry."
+    }
+  },
+  "session_id": "8a3c9ece45174e8c856c7a86b91827fc",
+  "remote_root": "/data/nav_storage/nav-harness/releases/async-b2431f1b457e/artifacts/lightnav-7/8a3c9ece45174e8c856c7a86b91827fc",
+  "episode": 0,
+  "purpose": "Development tool integration; no planner or VLA inference and no benchmark score",
+  "checks": [
+    {
+      "case": "rotation_only",
+      "before": {
+        "position": [
+          -16.267200469970703,
+          0.1518409252166748,
+          0.7207760214805603
+        ],
+        "rotation_wxyz": [
+          -1.0,
+          0.0,
+          5.551115123125783e-17,
+          -0.0
+        ],
+        "heading_rad": -1.1102230246251565e-16,
+        "step_index": 0,
+        "done": false
+      },
+      "after": {
+        "position": [
+          -16.267200469970703,
+          0.1518409252166748,
+          0.7207760214805603
+        ],
+        "rotation_wxyz": [
+          -0.7071067690849304,
+          -0.0,
+          0.7071067690849304,
+          -0.0
+        ],
+        "heading_rad": -1.5707963267948966,
+        "step_index": 0,
+        "done": false
+      },
+      "position_error_m": 0.0,
+      "rotation_error_deg": 0.0,
+      "policy_image_matches_reference": true,
+      "result": {
+        "arrived": true,
+        "step_count": 0,
+        "terminated": false,
+        "truncated": false,
+        "target_node_id": 0,
+        "termination_reason": "returned"
+      }
+    },
+    {
+      "case": "leave_and_return",
+      "before": {
+        "position": [
+          -15.267200469970703,
+          0.1518409252166748,
+          0.7207760214805603
+        ],
+        "rotation_wxyz": [
+          -0.7071067690849304,
+          -0.0,
+          0.7071067690849304,
+          -0.0
+        ],
+        "heading_rad": -1.5707963267948966,
+        "step_index": 4,
+        "done": false
+      },
+      "after": {
+        "position": [
+          -16.267200469970703,
+          0.1518409252166748,
+          0.7207760214805603
+        ],
+        "rotation_wxyz": [
+          -0.7071067690849304,
+          -0.0,
+          0.7071067690849304,
+          -0.0
+        ],
+        "heading_rad": -1.5707963267948966,
+        "step_index": 8,
+        "done": false
+      },
+      "position_error_m": 0.0,
+      "rotation_error_deg": 0.0,
+      "policy_image_matches_reference": true,
+      "result": {
+        "arrived": true,
+        "step_count": 8,
+        "terminated": false,
+        "truncated": false,
+        "target_node_id": 0,
+        "termination_reason": "returned"
+      }
+    },
+    {
+      "case": "repeat_rotation",
+      "before": {
+        "position": [
+          -16.267200469970703,
+          0.1518409252166748,
+          0.7207760214805603
+        ],
+        "rotation_wxyz": [
+          -5.551115123125783e-17,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "heading_rad": -3.141592653589793,
+        "step_index": 8,
+        "done": false
+      },
+      "after": {
+        "position": [
+          -16.267200469970703,
+          0.1518409252166748,
+          0.7207760214805603
+        ],
+        "rotation_wxyz": [
+          -0.7071067690849304,
+          -0.0,
+          0.7071067690849304,
+          -0.0
+        ],
+        "heading_rad": -1.5707963267948966,
+        "step_index": 8,
+        "done": false
+      },
+      "position_error_m": 0.0,
+      "rotation_error_deg": 0.0,
+      "policy_image_matches_reference": true,
+      "result": {
+        "arrived": true,
+        "step_count": 8,
+        "terminated": false,
+        "truncated": false,
+        "target_node_id": 0,
+        "termination_reason": "returned"
+      }
+    }
+  ],
+  "reference_pose": {
+    "position": [
+      -16.267200469970703,
+      0.1518409252166748,
+      0.7207760214805603
+    ],
+    "rotation_wxyz": [
+      -0.7071067690849304,
+      -0.0,
+      0.7071067690849304,
+      -0.0
+    ],
+    "heading_rad": -1.5707963267948966,
+    "step_index": 0,
+    "done": false
+  },
+  "canonical_pose_preserved": true,
+  "latest_actor_observation_pose_restored": true,
+  "passed": true,
+  "finished": 1794167997.2273915,
+  "validation": {
+    "pytest_passed": 144,
+    "subtests_passed": 4,
+    "ruff": "passed",
+    "mypy": "passed",
+    "frontend_build": "passed",
+    "diff_check": "passed",
+    "tool_contracts": [
+      {
+        "backend": "lightnav",
+        "tool_count": 9,
+        "all_tool_schemas_and_descriptions_unchanged": true,
+        "sha256": "7c6cdad5fad5e38d831865d98bbda8e6955b0ec4b7813325de5eab7c96939078"
+      },
+      {
+        "backend": "navgpt",
+        "tool_count": 9,
+        "all_tool_schemas_and_descriptions_unchanged": true,
+        "sha256": "e2f93cf428839a82f023bcbd227f86db367bba571a39b80a330a1a7f0dbb734d"
+      }
+    ],
+    "retrace_checks": [
+      {
+        "case": "normal",
+        "result": {
+          "arrived": true,
+          "retraced_m": 1.0,
+          "steps_charged": 4,
+          "step_count": 4,
+          "terminated": false,
+          "truncated": false,
+          "pose": {
+            "position": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "rotation_wxyz": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "heading_rad": -0.0
+          }
+        }
+      },
+      {
+        "case": "rotation_only",
+        "result": {
+          "arrived": true,
+          "retraced_m": 0.0,
+          "steps_charged": 0,
+          "step_count": 0,
+          "terminated": false,
+          "truncated": false,
+          "pose": {
+            "position": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "rotation_wxyz": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "heading_rad": -0.0
+          }
+        }
+      },
+      {
+        "case": "truncated",
+        "result": {
+          "arrived": false,
+          "retraced_m": 0.5,
+          "steps_charged": 2,
+          "step_count": 2,
+          "terminated": false,
+          "truncated": true,
+          "pose": {
+            "position": [
+              0.5,
+              0.0,
+              0.0
+            ],
+            "rotation_wxyz": [
+              0.7071067811865476,
+              0.0,
+              0.7071067811865475,
+              0.0
+            ],
+            "heading_rad": 1.5707963267948963
+          }
+        }
+      }
+    ]
+  },
+  "services": [
+    {
+      "port": 18381,
+      "implementation_digest": "b2431f1b457e267ad147aac8654b9f41b6d85634cb00a1d9e962b7bd33345ef7",
+      "ready": true
+    },
+    {
+      "port": 19680,
+      "implementation_digest": "b2431f1b457e267ad147aac8654b9f41b6d85634cb00a1d9e962b7bd33345ef7",
+      "ready": true
+    },
+    {
+      "port": 19681,
+      "implementation_digest": "b2431f1b457e267ad147aac8654b9f41b6d85634cb00a1d9e962b7bd33345ef7",
+      "ready": true
+    },
+    {
+      "port": 19682,
+      "implementation_digest": "b2431f1b457e267ad147aac8654b9f41b6d85634cb00a1d9e962b7bd33345ef7",
+      "ready": true
+    },
+    {
+      "port": 19683,
+      "implementation_digest": "b2431f1b457e267ad147aac8654b9f41b6d85634cb00a1d9e962b7bd33345ef7",
+      "ready": true
+    },
+    {
+      "port": 19688,
+      "implementation_digest": "b2431f1b457e267ad147aac8654b9f41b6d85634cb00a1d9e962b7bd33345ef7",
+      "ready": true
+    },
+    {
+      "port": 19689,
+      "implementation_digest": "b2431f1b457e267ad147aac8654b9f41b6d85634cb00a1d9e962b7bd33345ef7",
+      "ready": true
+    },
+    {
+      "port": 19690,
+      "implementation_digest": "b2431f1b457e267ad147aac8654b9f41b6d85634cb00a1d9e962b7bd33345ef7",
+      "ready": true
+    },
+    {
+      "port": 19691,
+      "implementation_digest": "b2431f1b457e267ad147aac8654b9f41b6d85634cb00a1d9e962b7bd33345ef7",
+      "ready": true
+    }
+  ],
+  "final_queue": {
+    "active_attempts": 0,
+    "inference_sessions": 0,
+    "historical_50_job": "paused",
+    "historical_50_completed": 8
+  }
+}

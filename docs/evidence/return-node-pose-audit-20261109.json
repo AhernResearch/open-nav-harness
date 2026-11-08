@@ -1,0 +1,152 @@
+{
+  "created": 1794167430.2612422,
+  "source": "lightnav-completion-crop-paired-20261109.json",
+  "scope": "Read-only audit of deployed return behavior; no movement or service changes",
+  "deployed_environment_release": "/data/nav_storage/nav-harness/releases/async-434e09bdce5f",
+  "deployed_execution_release": "/data/nav_storage/nav-harness/releases/async-88fa16a679ba",
+  "findings": {
+    "node_storage": "position and observation_refs; no canonical rotation",
+    "request": "retrace_path(position=node.position,match_3d=True); omits rotation_wxyz",
+    "travel": "reverse recorded position path; append positions and charge distance; set simulator pose once at endpoint",
+    "endpoint_rotation": "last return segment direction, or previous orientation if no movement; original orientation only when rotation_wxyz supplied",
+    "visual_history": "endpoint motion capture, not per-path-point replay images",
+    "arrival_check": "not truncated; no orientation check"
+  },
+  "rows": [
+    {
+      "policy": "episode",
+      "episode": 456,
+      "attempt_id": "d79677121725490d9470b8db4e79bb12",
+      "node_id": 4,
+      "reference_frame": "frame-000083",
+      "reference_pose": {
+        "position": [
+          0.6036171913146973,
+          -1.662827968597412,
+          2.175804853439331
+        ],
+        "rotation_wxyz": [
+          -0.9115423560142517,
+          0.0,
+          0.41120627522468567,
+          0.0
+        ],
+        "heading_rad": -0.8475539737516993
+      },
+      "returned_pose": {
+        "position": [
+          0.6036171913146973,
+          -1.662827968597412,
+          2.175804853439331
+        ],
+        "rotation_wxyz": [
+          0.41120633482933044,
+          0.0,
+          0.9115422964096069,
+          0.0
+        ],
+        "heading_rad": 2.2940385221541755
+      },
+      "position_error_m": 0.0,
+      "rotation_error_deg": 179.99999096537698,
+      "trajectory_points": 25,
+      "frame_refs": [
+        "frame-000107",
+        "frame-000108"
+      ],
+      "termination_reason": "returned",
+      "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/d79677121725490d9470b8db4e79bb12/episode/work/ep0456/trace/requests.jsonl",
+      "replay_url": "http://192.168.66.221:18889/?attempt=d79677121725490d9470b8db4e79bb12"
+    },
+    {
+      "policy": "episode",
+      "episode": 7006,
+      "attempt_id": "8c9760ab36054efda43899a68025bb39",
+      "node_id": 2,
+      "reference_frame": "frame-000030",
+      "reference_pose": {
+        "position": [
+          -13.342636108398438,
+          3.151840925216675,
+          5.619529724121094
+        ],
+        "rotation_wxyz": [
+          0.7834697961807251,
+          0.0,
+          0.6214299201965332,
+          0.0
+        ],
+        "heading_rad": 1.3411329411865605
+      },
+      "returned_pose": {
+        "position": [
+          -13.342636108398438,
+          3.151840925216675,
+          5.619529724121094
+        ],
+        "rotation_wxyz": [
+          0.6214293837547302,
+          0.0,
+          -0.7834701538085938,
+          0.0
+        ],
+        "heading_rad": -1.8004609974564305
+      },
+      "position_error_m": 0.0,
+      "rotation_error_deg": 179.99992637187532,
+      "trajectory_points": 19,
+      "frame_refs": [
+        "frame-000048",
+        "frame-000049"
+      ],
+      "termination_reason": "returned",
+      "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/8c9760ab36054efda43899a68025bb39/episode/work/ep7006/trace/requests.jsonl",
+      "replay_url": "http://192.168.66.221:18889/?attempt=8c9760ab36054efda43899a68025bb39"
+    },
+    {
+      "policy": "completed_subtask",
+      "episode": 7006,
+      "attempt_id": "1ff378d26da447138fd484de0b42a8b9",
+      "node_id": 2,
+      "reference_frame": "frame-000036",
+      "reference_pose": {
+        "position": [
+          -14.011958122253418,
+          3.151840925216675,
+          5.3891119956970215
+        ],
+        "rotation_wxyz": [
+          0.7855687737464905,
+          0.0,
+          0.6187744140625,
+          0.0
+        ],
+        "heading_rad": 1.3343631761150239
+      },
+      "returned_pose": {
+        "position": [
+          -14.011958122253418,
+          3.151840925216675,
+          5.3891119956970215
+        ],
+        "rotation_wxyz": [
+          0.7340307235717773,
+          0.0,
+          -0.6791163086891174,
+          0.0
+        ],
+        "heading_rad": -1.4931160896355329
+      },
+      "position_error_m": 0.0,
+      "rotation_error_deg": 162.00262858825582,
+      "trajectory_points": 13,
+      "frame_refs": [
+        "frame-000049",
+        "frame-000050"
+      ],
+      "termination_reason": "returned",
+      "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/45d4fcb0d1a14071820c5e1a0f1be2e9/1ff378d26da447138fd484de0b42a8b9/episode/work/ep7006/trace/requests.jsonl",
+      "replay_url": "http://192.168.66.221:18889/?attempt=1ff378d26da447138fd484de0b42a8b9"
+    }
+  ]
+}

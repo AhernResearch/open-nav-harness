@@ -95,6 +95,36 @@ class Database:
                 raise ValueError("Service kind mismatch: " + field)
         if spec.purpose == "collection" and spec.config.get("dataset", {}).get("split") != "train":
             raise ValueError("Collection requires the explicit train split; held-out data is evaluation-only")
+        pool = []
+        for binding in spec.execution_pool:
+            env = self.service(binding.environment_service)
+            worker = self.service(binding.execution_service)
+            if env.kind != "environment" or worker.kind != "execution":
+                raise ValueError("Execution pool service kind mismatch")
+            if worker.metadata.get("environment_url") != env.url:
+                raise ValueError("Execution worker environment binding mismatch")
+            if worker.metadata.get("inference_url") != services["vla_service"].url:
+                raise ValueError("Execution worker inference binding mismatch")
+            pool.append(
+                {
+                    **binding.model_dump(),
+                    "services": {
+                        "environment_service": env.model_dump(),
+                        "execution_service": worker.model_dump(),
+                    },
+                }
+            )
+        if pool:
+            vla = services["vla_service"]
+            if not vla.metadata.get("shared_inference") or vla.metadata.get("tool_execution"):
+                raise ValueError("Execution pool requires shared inference protocol")
+            services["environment_service"] = self.service(pool[0]["environment_service"])
+        if (
+            not pool
+            and services.get("vla_service")
+            and services["vla_service"].metadata.get("shared_inference")
+        ):
+            raise ValueError("Shared inference requires an execution pool")
         cfg = dict(spec.config)
         # Build effective config now: workers use exactly this frozen snapshot.
         cfg["environment"] = {**cfg.get("environment", {}), "url": services["environment_service"].url}
@@ -102,6 +132,11 @@ class Database:
             cfg["vla"] = {**cfg.get("vla", {}), "url": services["vla_service"].url}
             if services["vla_service"].metadata.get("tool_execution"):
                 cfg["harness"] = {**cfg.get("harness", {}), "execution_url": services["vla_service"].url}
+        if pool:
+            cfg["harness"] = {
+                **cfg.get("harness", {}),
+                "execution_url": pool[0]["services"]["execution_service"]["url"],
+            }
         if "planner_service" in services:
             profile = services["planner_service"].planner
             cfg["planner"] = {
@@ -123,8 +158,11 @@ class Database:
 
         if (needs_vla(run.condition) or run.condition == VLA_ONLY) and not spec.vla_service:
             raise ValueError("This mode requires a VLA service")
+        if pool and run.condition == VLA_ONLY:
+            raise ValueError("Execution pool requires a planner tool runtime")
         frozen = spec.model_dump()
         frozen["config"] = cfg
+        frozen["execution_pool"] = pool
         from nav_harness.core.version import implementation_digest
 
         frozen["implementation_digest"] = implementation_digest()
@@ -185,7 +223,8 @@ class Database:
                 )
             if action in ("pause", "cancel"):
                 active = c.execute(
-                    text("SELECT 1 FROM attempts WHERE job_id=:id AND status='running'"), {"id": jid}
+                    text("SELECT 1 FROM attempts WHERE job_id=:id AND status IN ('running','blocked')"),
+                    {"id": jid},
                 ).first()
                 if not active:
                     status = "cancelled" if action == "cancel" else "paused"
@@ -212,9 +251,9 @@ class Database:
                 running = c.execute(
                     text("SELECT id FROM attempts WHERE job_id=:j AND status='running'"), {"j": jid}
                 ).first()
-                if running:
-                    continue
                 if job["cancel_requested"] or job["pause_requested"]:
+                    if running:
+                        continue
                     status = "cancelled" if job["cancel_requested"] else "paused"
                     c.execute(
                         text("UPDATE jobs SET status=:s,updated=:t WHERE id=:j"),
@@ -224,60 +263,89 @@ class Database:
                     continue
                 done = set(
                     c.execute(
-                        text("SELECT episode FROM attempts WHERE job_id=:j AND status='completed'"),
+                        text(
+                            "SELECT episode FROM attempts WHERE job_id=:j AND status IN ('completed','running','blocked')"
+                        ),
                         {"j": jid},
                     ).scalars()
                 )
                 pending = [ep for ep in spec["episodes"] if ep not in done]
                 if not pending:
+                    if running:
+                        continue
                     c.execute(
                         text("UPDATE jobs SET status='completed',updated=:t WHERE id=:j"),
                         {"t": time.time(), "j": jid},
                     )
                     self.emit(c, "job_completed", jid, {})
                     continue
-                service_ids = [
-                    spec[k] for k in ("environment_service", "vla_service", "planner_service") if spec.get(k)
-                ]
-                unavailable = []
-                for sid in service_ids:
+
+                def ready(sid):
                     service = (
                         c.execute(text("SELECT spec,status FROM services WHERE id=:id"), {"id": sid})
                         .mappings()
                         .one()
                     )
-                    if json.loads(service["spec"])["managed"] and service["status"] != "ready":
-                        unavailable.append(sid)
-                if unavailable:
-                    c.execute(
-                        text("UPDATE jobs SET error='Waiting for managed services to be ready' WHERE id=:j"),
-                        {"j": jid},
-                    )
-                    continue
-                resources = [spec["environment_service"]]
-                if spec.get("vla_service"):
-                    resources.append(spec["vla_service"])
-                if any(
-                    c.execute(text("SELECT 1 FROM leases WHERE resource=:r"), {"r": r}).first()
-                    for r in resources
-                ):
-                    continue
-                planner = spec.get("planner_service")
-                if planner:
-                    slots = spec["services"]["planner_service"]["planner"]["max_concurrency"]
-                    free = next(
+                    return not json.loads(service["spec"])["managed"] or service["status"] == "ready"
+
+                def free(resource):
+                    return not c.execute(
+                        text("SELECT 1 FROM leases WHERE resource=:r"), {"r": resource}
+                    ).first()
+
+                binding = None
+                pool = spec.get("execution_pool") or []
+                if pool:
+                    binding = next(
                         (
-                            f"{planner}:{i}"
-                            for i in range(slots)
-                            if not c.execute(
-                                text("SELECT 1 FROM leases WHERE resource=:r"), {"r": f"{planner}:{i}"}
-                            ).first()
+                            b
+                            for b in pool
+                            if all(
+                                ready(b[k]) and free(b[k])
+                                for k in ("environment_service", "execution_service")
+                            )
                         ),
                         None,
                     )
-                    if free is None:
+                    if binding is None:
                         continue
-                    resources.append(free)
+                    resources = [binding["environment_service"], binding["execution_service"]]
+                else:
+                    resources = [spec["environment_service"]]
+                    if spec.get("vla_service"):
+                        resources.append(spec["vla_service"])
+                    if not all(free(r) and ready(r) for r in resources):
+                        continue
+                shared = [
+                    key
+                    for key in ("planner_service", "vla_service")
+                    if spec.get(key) and (key == "planner_service" or pool)
+                ]
+                admitted = True
+                for key in shared:
+                    sid = spec[key]
+                    frozen = spec["services"][key]
+                    current = json.loads(
+                        c.execute(text("SELECT spec FROM services WHERE id=:id"), {"id": sid}).scalar_one()
+                    )
+                    if key == "planner_service":
+                        frozen, current = frozen["planner"], current["planner"]
+                    slots = min(frozen.get("max_concurrency", 1), current.get("max_concurrency", 1))
+                    slot = next((f"{sid}:{i}" for i in range(slots) if free(f"{sid}:{i}")), None)
+                    if slot is None or not ready(sid) or not free(sid):
+                        admitted = False
+                        break
+                    resources.append(slot)
+                if not admitted:
+                    continue
+                if binding:
+                    spec["environment_service"] = binding["environment_service"]
+                    spec["execution_service"] = binding["execution_service"]
+                    spec["services"].update(binding["services"])
+                    spec["config"]["environment"]["url"] = binding["services"]["environment_service"]["url"]
+                    spec["config"]["harness"]["execution_url"] = binding["services"]["execution_service"][
+                        "url"
+                    ]
                 episode = pending[0]
                 aid = ident()
                 now = time.time()
@@ -291,9 +359,17 @@ class Database:
                 out = str(self.root / "runs" / jid / aid)
                 c.execute(
                     text(
-                        "INSERT INTO attempts(id,job_id,episode,ordinal,status,output,created,updated) VALUES(:a,:j,:e,:o,'running',:p,:t,:t)"
+                        "INSERT INTO attempts(id,job_id,episode,ordinal,status,output,created,updated,binding) VALUES(:a,:j,:e,:o,'running',:p,:t,:t,:b)"
                     ),
-                    {"a": aid, "j": jid, "e": episode, "o": ordinal, "p": out, "t": now},
+                    {
+                        "a": aid,
+                        "j": jid,
+                        "e": episode,
+                        "o": ordinal,
+                        "p": out,
+                        "t": now,
+                        "b": json.dumps(binding) if binding else None,
+                    },
                 )
                 for resource in resources:
                     c.execute(
@@ -328,7 +404,7 @@ class Database:
             )
             self.emit(c, "attempt_blocked", aid, {"error": error})
 
-    def release_reconciled(self, aid):
+    def release_reconciled(self, aid, *, check_only=False, inference_reconciled=False):
         with self.transaction() as c:
             a = (
                 c.execute(
@@ -347,7 +423,14 @@ class Database:
             if process_matches(dict(a)):
                 raise ValueError("Attempt process is still alive")
             spec = json.loads(a["spec"])
-            for field in ("environment_service", "vla_service"):
+            binding = json.loads(a["binding"]) if a["binding"] else None
+            if binding:
+                spec.update(binding)
+            for field in (
+                ("environment_service", "execution_service")
+                if binding
+                else ("environment_service", "vla_service")
+            ):
                 if not spec.get(field):
                     continue
                 service = (
@@ -359,6 +442,10 @@ class Database:
                     raise ValueError(
                         "Stop all platform-owned environment and VLA services before reconciliation; external resources require operator recovery"
                     )
+            if check_only:
+                return dict(a)
+            if binding and not inference_reconciled:
+                raise ValueError("Close this attempt's shared inference session before reconciliation")
             c.execute(
                 text("UPDATE attempts SET status=:s,updated=:t WHERE id=:id"),
                 {
@@ -372,7 +459,7 @@ class Database:
             c.execute(text("DELETE FROM leases WHERE attempt_id=:id"), {"id": aid})
             c.execute(
                 text(
-                    "UPDATE jobs SET status=CASE WHEN cancel_requested=1 THEN 'cancelled' ELSE 'interrupted' END, updated=:t WHERE id=:id"
+                    "UPDATE jobs SET status=CASE WHEN cancel_requested=1 AND NOT EXISTS (SELECT 1 FROM attempts WHERE job_id=:id AND status IN ('running','blocked')) THEN 'cancelled' ELSE 'interrupted' END, updated=:t WHERE id=:id"
                 ),
                 {"id": a["job_id"], "t": time.time()},
             )

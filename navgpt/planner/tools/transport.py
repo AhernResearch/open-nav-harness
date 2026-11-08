@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import asyncio
 import base64
+import json
 from contextlib import asynccontextmanager
 from pathlib import Path, PurePosixPath
 import uuid
-import requests
+import httpx
 
 from .registry import ToolResult
 from .session import NavigationSession
@@ -21,28 +21,32 @@ class RemoteTools:
         registry = NavigationSession(env=env).tools
         self.definitions, self.functions = registry.definitions, registry.functions
         self.url = env["NAVGPT_EXECUTION_URL"].rstrip("/")
-        self.http = requests.Session()
-        self.http.trust_env = False
+        self.http = httpx.AsyncClient(trust_env=False, timeout=1800)
         self.session_id = None
         self.failed = False
 
-    def request(self, method, path, data=None):
+    async def request(self, method, path, data=None):
         # No retries. A lost motion response is an uncertain resource, not a retryable inference.
-        response = self.http.request(method, self.url + path, json=data, timeout=1800)
+        response = await self.http.request(method, self.url + path, json=data)
         response.raise_for_status()
         return response.json()
 
-    def start(self):
-        reply = self.request("POST", "/sessions", {"env": self.env})
-        self.session_id = reply["session_id"]
+    async def start(self):
+        self.session_id = uuid.uuid4().hex
+        receipt = Path(self.env["NAVGPT_LIVE_DIR"]) / "execution_session.json"
+        receipt.parent.mkdir(parents=True, exist_ok=True)
+        receipt.write_text(json.dumps({"session_id": self.session_id, "execution_url": self.url}))
+        reply = await self.request("POST", "/sessions", {"env": self.env, "session_id": self.session_id})
+        if reply["session_id"] != self.session_id:
+            raise RuntimeError("Execution session identity mismatch")
         self.root = reply["root"]
         actual = {t["name"]: t for t in reply["tools"]}
         expected = {k: v.model_dump() for k, v in self.definitions.items()}
         if actual != expected:
             raise RuntimeError("Remote navigation tool schema differs from this frozen implementation")
 
-    def sync(self):
-        reply = self.request("GET", "/sessions/" + self.session_id + "/artifacts")
+    async def sync(self):
+        reply = await self.request("GET", "/sessions/" + self.session_id + "/artifacts")
         root = Path(self.env["NAVGPT_LIVE_DIR"])
         labels = (
             Path(self.env["NAVGPT_PLACE_LABELS"])
@@ -69,21 +73,21 @@ class RemoteTools:
             temporary = path.with_suffix(path.suffix + ".sync-tmp")
             temporary.write_bytes(raw)
             temporary.replace(path)
-        self.request("POST", "/sessions/" + self.session_id + "/ack", {"cursor": reply["cursor"]})
+        await self.request("POST", "/sessions/" + self.session_id + "/ack", {"cursor": reply["cursor"]})
 
-    def invoke(self, name, arguments):
+    async def invoke(self, name, arguments):
         try:
             if self.failed:
                 raise RuntimeError("Remote tool outcome uncertain; do not continue this episode")
             if self.session_id is None:
-                self.start()
-            reply = self.request(
+                await self.start()
+            reply = await self.request(
                 "POST",
                 "/sessions/" + self.session_id + "/call",
                 {"request_id": uuid.uuid4().hex, "name": name, "arguments": arguments},
             )
             result = ToolResult.model_validate(reply["result"])
-            self.sync()
+            await self.sync()
             return result
         except BaseException:
             self.failed = True
@@ -91,23 +95,27 @@ class RemoteTools:
 
     async def call_tool(self, name, arguments):
         try:
-            return await asyncio.to_thread(self.invoke, name, arguments)
+            return await self.invoke(name, arguments)
         except BaseException:
             self.failed = True
+            if self.session_id:
+                try:
+                    await self.http.post(self.url + "/sessions/" + self.session_id + "/cancel", timeout=5)
+                except httpx.HTTPError:
+                    pass  # Retain ownership; cancellation acknowledgement is not proof of idle.
             raise
 
     async def list_tools(self):
         return list(self.definitions.values())
 
-    def close(self):
+    async def close(self):
         try:
             # A cancelled/in-flight call retains remote ownership until explicit recovery.
             if self.session_id and not self.failed:
-                self.sync()
-                self.request("POST", "/sessions/" + self.session_id + "/close", {})
+                await self.sync()
+                await self.request("POST", "/sessions/" + self.session_id + "/close", {})
         finally:
-            if not self.failed:
-                self.http.close()
+            await self.http.aclose()
 
 
 @asynccontextmanager
@@ -117,6 +125,6 @@ async def open_tools(env):
         try:
             yield tools
         finally:
-            await asyncio.to_thread(tools.close)
+            await tools.close()
     else:
         yield NavigationSession(env=env).tools

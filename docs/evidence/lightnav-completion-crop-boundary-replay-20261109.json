@@ -1,0 +1,952 @@
+{
+  "started": 1794166694.0970154,
+  "source": "lightnav-completion-crop-paired-20261109.json",
+  "service": {
+    "model_name": "lightnav-0",
+    "model_version": "LightNav-0",
+    "backend": "lightnav",
+    "policy_url": null,
+    "execution": "owned_vllm",
+    "context_replace": false,
+    "history_mode": "episode",
+    "max_context_groups": null,
+    "input_contract": "lightnav_official_episode_v1",
+    "history_observe": true,
+    "seeded_reset": false,
+    "control": {
+      "control_dt_s": 0.1,
+      "max_linear_mps": 2.5,
+      "max_angular_dps": 300.0
+    },
+    "waypoint_count": 10,
+    "policy_camera": {
+      "width": 480,
+      "height": 270,
+      "height_m": 0.88,
+      "hfov": 120.0
+    },
+    "native_input": {
+      "num_history_frames": 64,
+      "slowfast_tiers": [
+        {
+          "name": "current",
+          "age_lo": 0,
+          "age_hi": 1,
+          "mode": "dense",
+          "pool_spatial": 1,
+          "pool_mode": "avg"
+        },
+        {
+          "name": "fast",
+          "age_lo": 2,
+          "age_hi": 33,
+          "mode": "dense",
+          "pool_spatial": 2,
+          "pool_mode": "avg"
+        },
+        {
+          "name": "mid",
+          "age_lo": 34,
+          "age_hi": 89,
+          "mode": "burst",
+          "pool_spatial": 2,
+          "pool_mode": "avg",
+          "pair_stride": 6
+        },
+        {
+          "name": "long",
+          "age_lo": 90,
+          "age_hi": 1000000,
+          "mode": "span",
+          "pool_spatial": 4,
+          "pool_mode": "avg",
+          "num_pairs": 14
+        },
+        {
+          "name": "anchor",
+          "age_lo": 0,
+          "age_hi": 0,
+          "mode": "anchor",
+          "pool_spatial": 4,
+          "pool_mode": "avg",
+          "num_frames": 2
+        }
+      ],
+      "video_size": [
+        256,
+        448
+      ],
+      "video_fps": 4,
+      "max_new_tokens": 64,
+      "history_buffer": "full_episode"
+    },
+    "protocol_version": 2,
+    "implementation_digest": "88fa16a679ba7a77bfa85144601ade8359be5ca6e12ff47f62b548a6d403f16a",
+    "shared_inference": true,
+    "max_sessions": 16,
+    "max_pending": 16,
+    "sessions": 0,
+    "pending_requests": 0,
+    "completed_requests": 622,
+    "accepting": true,
+    "waiting_requests": 0,
+    "active_operations": 0
+  },
+  "cases": [
+    {
+      "episode": 456,
+      "boundary": 21,
+      "end_frame": 21,
+      "instruction": "Walk through the television room toward the hallway doorway ahead",
+      "repeats": [
+        [
+          {
+            "policy": "episode",
+            "history_frames": 22,
+            "raw_text": "<apos_932><opos_0><act_l0_16><act_l1_0><act_l2_208><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 1.4566482603549957,
+              "angular_rps": 2.6177448034286495,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 52.24302317947149,
+              "prepare_inputs_ms": 4.227612633258104,
+              "vit_ms": 101.7182688228786,
+              "post_vit_pool_ms": 0.5070660263299942,
+              "cpu_copy_ms": 0.4081190563738346,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 11.0,
+              "vit_cache_size": 11.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.451714128255844,
+              "build_sample_ms": 2.1850382909178734,
+              "llm_ms": 76.48643804714084,
+              "decode_waypoints_ms": 0.7295580580830574,
+              "batch_total_ms": 181.16957880556583,
+              "session_id": "cad25b1aacfa4650a8f211822bcabc1f",
+              "request_id": "fe6914aa6a014265b6589125e0afadcc",
+              "queue_ms": 0.16489112749695778,
+              "execution_ms": 225.84492480382323
+            }
+          },
+          {
+            "policy": "completed_subtask",
+            "history_frames": 1,
+            "raw_text": "<apos_932><opos_0><act_l0_16><act_l1_0><act_l2_208><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 1.4566482603549957,
+              "angular_rps": 2.6177448034286495,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 19.218359142541885,
+              "prepare_inputs_ms": 1.41814723610878,
+              "vit_ms": 46.048237942159176,
+              "post_vit_pool_ms": 0.04792725667357445,
+              "cpu_copy_ms": 0.15304191038012505,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 1.0,
+              "vit_cache_size": 1.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.340767066925764,
+              "build_sample_ms": 0.6959009915590286,
+              "llm_ms": 59.16445795446634,
+              "decode_waypoints_ms": 0.40815724059939384,
+              "batch_total_ms": 106.34715482592583,
+              "session_id": "0d1ef7eae15040aa9a9dbd45d9ca3b8d",
+              "request_id": "3720bd0eb42a4d62afb5eb90761d4ceb",
+              "queue_ms": 0.17453404143452644,
+              "execution_ms": 150.6516830995679
+            }
+          }
+        ],
+        [
+          {
+            "policy": "completed_subtask",
+            "history_frames": 1,
+            "raw_text": "<apos_932><opos_0><act_l0_16><act_l1_0><act_l2_208><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 1.4566482603549957,
+              "angular_rps": 2.6177448034286495,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 18.14562827348709,
+              "prepare_inputs_ms": 1.3860147446393967,
+              "vit_ms": 45.243116561323404,
+              "post_vit_pool_ms": 0.047661829739809036,
+              "cpu_copy_ms": 0.1536882482469082,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 1.0,
+              "vit_cache_size": 1.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.353890333324671,
+              "build_sample_ms": 0.6458689458668232,
+              "llm_ms": 59.91279613226652,
+              "decode_waypoints_ms": 0.4914291203022003,
+              "batch_total_ms": 106.3290280289948,
+              "session_id": "4368dfb3f17d496b818a6060d9b71ff9",
+              "request_id": "ccd8c74ee73b40ff885e728918e4ecb3",
+              "queue_ms": 0.16904063522815704,
+              "execution_ms": 151.2925592251122
+            }
+          },
+          {
+            "policy": "episode",
+            "history_frames": 22,
+            "raw_text": "<apos_932><opos_0><act_l0_16><act_l1_0><act_l2_208><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 1.4566482603549957,
+              "angular_rps": 2.6177448034286495,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 53.19486279040575,
+              "prepare_inputs_ms": 4.013072233647108,
+              "vit_ms": 102.38835215568542,
+              "post_vit_pool_ms": 0.5099917761981487,
+              "cpu_copy_ms": 0.4028701223433018,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 11.0,
+              "vit_cache_size": 11.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.37063504755497,
+              "build_sample_ms": 2.0442288368940353,
+              "llm_ms": 76.31311612203717,
+              "decode_waypoints_ms": 0.7201912812888622,
+              "batch_total_ms": 181.51518469676375,
+              "session_id": "7adb86b1e65a45a4a707c4e0245369b0",
+              "request_id": "a2dd3ea1276b4231a22d3e996a53523e",
+              "queue_ms": 0.18596090376377106,
+              "execution_ms": 220.61331383883953
+            }
+          }
+        ]
+      ],
+      "stable_within_policy": true,
+      "output_changed": false
+    },
+    {
+      "episode": 456,
+      "boundary": 53,
+      "end_frame": 53,
+      "instruction": "Turn left to face the stairs and go up the stairs, stopping on the fourth stair from the top",
+      "repeats": [
+        [
+          {
+            "policy": "episode",
+            "history_frames": 54,
+            "raw_text": "<apos_1297><opos_0><act_l0_71><act_l1_205><act_l2_26><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 0.0,
+              "angular_rps": 3.1416478753089905,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 90.78213898465037,
+              "prepare_inputs_ms": 9.327774867415428,
+              "vit_ms": 163.222199305892,
+              "post_vit_pool_ms": 0.8745309896767139,
+              "cpu_copy_ms": 0.6349710747599602,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 21.0,
+              "vit_cache_size": 21.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.3554088547825813,
+              "build_sample_ms": 3.678044304251671,
+              "llm_ms": 87.91236625984311,
+              "decode_waypoints_ms": 0.787635799497366,
+              "batch_total_ms": 255.6544141843915,
+              "session_id": "1a327654200b46a788aa4f7ce6436036",
+              "request_id": "ca84f34597a14b4d87b03f82a3f3d9d4",
+              "queue_ms": 0.1647607423365116,
+              "execution_ms": 287.38679829984903
+            }
+          },
+          {
+            "policy": "completed_subtask",
+            "history_frames": 1,
+            "raw_text": "<apos_1297><opos_0><act_l0_107><act_l1_205><act_l2_5><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 0.0009911906090565026,
+              "angular_rps": 3.1460946798324585,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 19.984060898423195,
+              "prepare_inputs_ms": 1.530736219137907,
+              "vit_ms": 47.20325814560056,
+              "post_vit_pool_ms": 0.0559869222342968,
+              "cpu_copy_ms": 0.16726180911064148,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 1.0,
+              "vit_cache_size": 1.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.3856493644416332,
+              "build_sample_ms": 0.6549069657921791,
+              "llm_ms": 58.72497195377946,
+              "decode_waypoints_ms": 0.4229876212775707,
+              "batch_total_ms": 107.03793400898576,
+              "session_id": "e16b6fc0c9d64e7098c00eb879efbb00",
+              "request_id": "9509073307d54801baea79ee7e4f802b",
+              "queue_ms": 0.16828486695885658,
+              "execution_ms": 150.10057482868433
+            }
+          }
+        ],
+        [
+          {
+            "policy": "completed_subtask",
+            "history_frames": 1,
+            "raw_text": "<apos_1297><opos_0><act_l0_107><act_l1_205><act_l2_5><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 0.0009911906090565026,
+              "angular_rps": 3.1460946798324585,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 18.067780882120132,
+              "prepare_inputs_ms": 1.3273358345031738,
+              "vit_ms": 43.905993923544884,
+              "post_vit_pool_ms": 0.04990026354789734,
+              "cpu_copy_ms": 0.15308288857340813,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 1.0,
+              "vit_cache_size": 1.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.361387014389038,
+              "build_sample_ms": 0.6529721431434155,
+              "llm_ms": 57.552380952984095,
+              "decode_waypoints_ms": 0.4002349451184273,
+              "batch_total_ms": 102.54447069019079,
+              "session_id": "3d4931521bb146ff88cc6a05343aef5b",
+              "request_id": "2df33863d5db4186adec4c5f4091382b",
+              "queue_ms": 0.16587786376476288,
+              "execution_ms": 144.52331513166428
+            }
+          },
+          {
+            "policy": "episode",
+            "history_frames": 54,
+            "raw_text": "<apos_1297><opos_0><act_l0_71><act_l1_205><act_l2_26><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 0.0,
+              "angular_rps": 3.1416478753089905,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 93.06656802073121,
+              "prepare_inputs_ms": 6.067865993827581,
+              "vit_ms": 160.42745811864734,
+              "post_vit_pool_ms": 0.8880151435732841,
+              "cpu_copy_ms": 0.6413147784769535,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 21.0,
+              "vit_cache_size": 21.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.3608417250216007,
+              "build_sample_ms": 9.736738167703152,
+              "llm_ms": 88.11518317088485,
+              "decode_waypoints_ms": 0.796416774392128,
+              "batch_total_ms": 259.13503719493747,
+              "session_id": "1f1eb4e25b75491ca503c19294d44bdd",
+              "request_id": "a6dd529542394cb0a94a2b5053067973",
+              "queue_ms": 0.1770760864019394,
+              "execution_ms": 297.1841241233051
+            }
+          }
+        ]
+      ],
+      "stable_within_policy": true,
+      "output_changed": true
+    },
+    {
+      "episode": 7006,
+      "boundary": 8,
+      "end_frame": 8,
+      "instruction": "Make a left on the stair landing and walk along the hallway",
+      "repeats": [
+        [
+          {
+            "policy": "episode",
+            "history_frames": 9,
+            "raw_text": "<apos_1033><opos_0><act_l0_36><act_l1_48><act_l2_44><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 1.5247966349124908,
+              "angular_rps": -0.9113515913486481,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 25.309499818831682,
+              "prepare_inputs_ms": 2.329353243112564,
+              "vit_ms": 53.72427077963948,
+              "post_vit_pool_ms": 0.4438511095941067,
+              "cpu_copy_ms": 0.2521490678191185,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 5.0,
+              "vit_cache_size": 5.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.360982820391655,
+              "build_sample_ms": 1.1442536488175392,
+              "llm_ms": 63.699445221573114,
+              "decode_waypoints_ms": 0.509945210069418,
+              "batch_total_ms": 119.11571677774191,
+              "session_id": "4a876f2c224343a2a96eafb88d142542",
+              "request_id": "1dfda6f7b7864b939aa4f13f19a4aa9b",
+              "queue_ms": 0.18281489610671997,
+              "execution_ms": 147.01293827965856
+            }
+          },
+          {
+            "policy": "completed_subtask",
+            "history_frames": 1,
+            "raw_text": "<apos_1129><opos_0><act_l0_99><act_l1_156><act_l2_133><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 1.410442590713501,
+              "angular_rps": -2.6264595985412598,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 16.277318354696035,
+              "prepare_inputs_ms": 1.3946392573416233,
+              "vit_ms": 42.83014917746186,
+              "post_vit_pool_ms": 0.04968792200088501,
+              "cpu_copy_ms": 0.1507052220404148,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 1.0,
+              "vit_cache_size": 1.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.3420159704983234,
+              "build_sample_ms": 0.5672359839081764,
+              "llm_ms": 59.07696392387152,
+              "decode_waypoints_ms": 0.494224950671196,
+              "batch_total_ms": 103.00316335633397,
+              "session_id": "42ad6e0c07d84111b9b0dc8070d55218",
+              "request_id": "984ff352f24b44189ed211e910624cc4",
+              "queue_ms": 0.17528608441352844,
+              "execution_ms": 142.6872187294066
+            }
+          }
+        ],
+        [
+          {
+            "policy": "completed_subtask",
+            "history_frames": 1,
+            "raw_text": "<apos_1129><opos_0><act_l0_99><act_l1_156><act_l2_133><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 1.410442590713501,
+              "angular_rps": -2.6264595985412598,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 18.188271205872297,
+              "prepare_inputs_ms": 1.4476412907242775,
+              "vit_ms": 44.23528118059039,
+              "post_vit_pool_ms": 0.04846416413784027,
+              "cpu_copy_ms": 0.1518717035651207,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 1.0,
+              "vit_cache_size": 1.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.382843755185604,
+              "build_sample_ms": 0.6753089837729931,
+              "llm_ms": 59.49228396639228,
+              "decode_waypoints_ms": 0.49574626609683037,
+              "batch_total_ms": 104.93450984358788,
+              "session_id": "39945434d8534274a152071beb2fb032",
+              "request_id": "889d18dc8e75473888e2ed630a8bcf8e",
+              "queue_ms": 0.16690464690327644,
+              "execution_ms": 145.60357900336385
+            }
+          },
+          {
+            "policy": "episode",
+            "history_frames": 9,
+            "raw_text": "<apos_1033><opos_0><act_l0_36><act_l1_48><act_l2_44><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 1.5247966349124908,
+              "angular_rps": -0.9113515913486481,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 26.1246501468122,
+              "prepare_inputs_ms": 2.557461615651846,
+              "vit_ms": 56.22217804193497,
+              "post_vit_pool_ms": 0.4527391865849495,
+              "cpu_copy_ms": 0.25425106287002563,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 5.0,
+              "vit_cache_size": 5.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.367536071687937,
+              "build_sample_ms": 1.1153686791658401,
+              "llm_ms": 66.10223697498441,
+              "decode_waypoints_ms": 0.5128327757120132,
+              "batch_total_ms": 123.9895299077034,
+              "session_id": "8235a3c81bdd4acb8fe9a731e158e549",
+              "request_id": "15f97ccc82c54544b72decdf0f2cc40d",
+              "queue_ms": 0.16628997400403023,
+              "execution_ms": 152.46089920401573
+            }
+          }
+        ]
+      ],
+      "stable_within_policy": true,
+      "output_changed": true
+    },
+    {
+      "episode": 7006,
+      "boundary": 36,
+      "end_frame": 36,
+      "instruction": "Turn left and go through the open door into the bedroom",
+      "repeats": [
+        [
+          {
+            "policy": "episode",
+            "history_frames": 37,
+            "raw_text": "<apos_1298><opos_0><act_l0_118><act_l1_83><act_l2_254><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 0.0029341151821427047,
+              "angular_rps": -3.1411096453666687,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 81.34950185194612,
+              "prepare_inputs_ms": 5.508235190063715,
+              "vit_ms": 141.45920472219586,
+              "post_vit_pool_ms": 0.7305918261408806,
+              "cpu_copy_ms": 0.5603702738881111,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 18.0,
+              "vit_cache_size": 18.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.3608501069247723,
+              "build_sample_ms": 8.22217483073473,
+              "llm_ms": 86.04747988283634,
+              "decode_waypoints_ms": 0.7831910625100136,
+              "batch_total_ms": 236.5653500892222,
+              "session_id": "b22677bf922c4e93a28c2dbdabf446e6",
+              "request_id": "d7d063e90e5241c1b4bd7fe53765f644",
+              "queue_ms": 0.1675332896411419,
+              "execution_ms": 274.25204077735543
+            }
+          },
+          {
+            "policy": "completed_subtask",
+            "history_frames": 1,
+            "raw_text": "<apos_1297><opos_0><act_l0_83><act_l1_97><act_l2_203><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 0.0,
+              "angular_rps": 3.1411349773406982,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 16.735700890421867,
+              "prepare_inputs_ms": 1.3232259079813957,
+              "vit_ms": 41.7547021061182,
+              "post_vit_pool_ms": 0.04863599315285683,
+              "cpu_copy_ms": 0.15123002231121063,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 1.0,
+              "vit_cache_size": 1.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.3632519878447056,
+              "build_sample_ms": 0.641407910734415,
+              "llm_ms": 57.13320896029472,
+              "decode_waypoints_ms": 0.4394599236547947,
+              "batch_total_ms": 100.00222828239202,
+              "session_id": "65beb6c9d6f54f3598fbce469cca0456",
+              "request_id": "baf1bceba66942ad8c99efa1618d9d2e",
+              "queue_ms": 0.16878126189112663,
+              "execution_ms": 143.43112986534834
+            }
+          }
+        ],
+        [
+          {
+            "policy": "completed_subtask",
+            "history_frames": 1,
+            "raw_text": "<apos_1297><opos_0><act_l0_83><act_l1_97><act_l2_203><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 0.0,
+              "angular_rps": 3.1411349773406982,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 18.905987963080406,
+              "prepare_inputs_ms": 1.3592862524092197,
+              "vit_ms": 47.222382854670286,
+              "post_vit_pool_ms": 0.04799291491508484,
+              "cpu_copy_ms": 0.15179673209786415,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 1.0,
+              "vit_cache_size": 1.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.372554037719965,
+              "build_sample_ms": 0.6999298930168152,
+              "llm_ms": 57.80250998213887,
+              "decode_waypoints_ms": 0.41276589035987854,
+              "batch_total_ms": 106.16875812411308,
+              "session_id": "b6fe1122ae574f13af02777f1d01fc18",
+              "request_id": "af56651e258f48c8ae8e30e6f1e92b83",
+              "queue_ms": 0.2748393453657627,
+              "execution_ms": 145.70952067151666
+            }
+          },
+          {
+            "policy": "episode",
+            "history_frames": 37,
+            "raw_text": "<apos_1298><opos_0><act_l0_118><act_l1_83><act_l2_254><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 0.0029341151821427047,
+              "angular_rps": -3.1411096453666687,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 84.06948624178767,
+              "prepare_inputs_ms": 5.7394057512283325,
+              "vit_ms": 144.64528113603592,
+              "post_vit_pool_ms": 0.7398100569844246,
+              "cpu_copy_ms": 0.5594007670879364,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 18.0,
+              "vit_cache_size": 18.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.347114961594343,
+              "build_sample_ms": 7.698505185544491,
+              "llm_ms": 86.2374329008162,
+              "decode_waypoints_ms": 0.7055029273033142,
+              "batch_total_ms": 239.33632904663682,
+              "session_id": "3d7caf8b39c74a4ebb80b37d2dc2aa79",
+              "request_id": "f0fc4783e4e74477bc68c9658efc6473",
+              "queue_ms": 0.16606878489255905,
+              "execution_ms": 277.08559203892946
+            }
+          }
+        ]
+      ],
+      "stable_within_policy": true,
+      "output_changed": true
+    },
+    {
+      "episode": 7006,
+      "boundary": 63,
+      "end_frame": 63,
+      "instruction": "Walk to the foot of the bed",
+      "repeats": [
+        [
+          {
+            "policy": "episode",
+            "history_frames": 64,
+            "raw_text": "<apos_1033><opos_748><act_l0_0><act_l1_131><act_l2_174><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 1.5002694725990295,
+              "angular_rps": 0.00030184362913132645,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 92.01599331572652,
+              "prepare_inputs_ms": 6.816253997385502,
+              "vit_ms": 168.26640767976642,
+              "post_vit_pool_ms": 0.9093410335481167,
+              "cpu_copy_ms": 0.6819511763751507,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 23.0,
+              "vit_cache_size": 23.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.3526218719780445,
+              "build_sample_ms": 3.8458388298749924,
+              "llm_ms": 93.51411601528525,
+              "decode_waypoints_ms": 0.7904930971562862,
+              "batch_total_ms": 266.4727480150759,
+              "session_id": "1ca25c0384bd4b5d8e2827de0169bb45",
+              "request_id": "b94e835198f74794836f361300dca0ad",
+              "queue_ms": 0.17342576757073402,
+              "execution_ms": 295.6317728385329
+            }
+          },
+          {
+            "policy": "completed_subtask",
+            "history_frames": 1,
+            "raw_text": "<apos_1086><opos_654><act_l0_9><act_l1_39><act_l2_246><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 1.4469154179096222,
+              "angular_rps": -2.633731663227081,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 18.6428502202034,
+              "prepare_inputs_ms": 1.3789408840239048,
+              "vit_ms": 46.91520193591714,
+              "post_vit_pool_ms": 0.04704901948571205,
+              "cpu_copy_ms": 0.15047378838062286,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 1.0,
+              "vit_cache_size": 1.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.351440954953432,
+              "build_sample_ms": 0.6856229156255722,
+              "llm_ms": 57.20442580059171,
+              "decode_waypoints_ms": 0.3845016472041607,
+              "batch_total_ms": 105.22080212831497,
+              "session_id": "1fb521dee65f40cf98d460d802517553",
+              "request_id": "07240fb7ee934d53b73781ebb0073394",
+              "queue_ms": 0.16609905287623405,
+              "execution_ms": 146.67000388726592
+            }
+          }
+        ],
+        [
+          {
+            "policy": "completed_subtask",
+            "history_frames": 1,
+            "raw_text": "<apos_1086><opos_654><act_l0_9><act_l1_39><act_l2_246><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 1.4469154179096222,
+              "angular_rps": -2.633731663227081,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 17.0187228359282,
+              "prepare_inputs_ms": 1.239017117768526,
+              "vit_ms": 42.688524816185236,
+              "post_vit_pool_ms": 0.04756823182106018,
+              "cpu_copy_ms": 0.14992384240031242,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 1.0,
+              "vit_cache_size": 1.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.349468879401684,
+              "build_sample_ms": 0.6882841698825359,
+              "llm_ms": 57.336896657943726,
+              "decode_waypoints_ms": 0.49669714644551277,
+              "batch_total_ms": 101.24614089727402,
+              "session_id": "6333b7050f3e4e8a9bff1cd8667eb93b",
+              "request_id": "b7e4599d9f614601ad5512d82a23cd63",
+              "queue_ms": 0.16579777002334595,
+              "execution_ms": 141.90765237435699
+            }
+          },
+          {
+            "policy": "episode",
+            "history_frames": 64,
+            "raw_text": "<apos_1033><opos_748><act_l0_0><act_l1_131><act_l2_174><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 1.5002694725990295,
+              "angular_rps": 0.00030184362913132645,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 95.46688199043274,
+              "prepare_inputs_ms": 6.762220058590174,
+              "vit_ms": 170.51293794065714,
+              "post_vit_pool_ms": 0.8931439369916916,
+              "cpu_copy_ms": 0.6828866899013519,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 23.0,
+              "vit_cache_size": 23.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.351901028305292,
+              "build_sample_ms": 9.325694758445024,
+              "llm_ms": 92.14618802070618,
+              "decode_waypoints_ms": 0.7052323780953884,
+              "batch_total_ms": 272.73985696956515,
+              "session_id": "90a4c0ee885d45e695e3338717e6829d",
+              "request_id": "c64cfd7b824548579f9775b418fc184b",
+              "queue_ms": 0.16703084111213684,
+              "execution_ms": 308.3708779886365
+            }
+          }
+        ]
+      ],
+      "stable_within_policy": true,
+      "output_changed": true
+    },
+    {
+      "episode": 7648,
+      "boundary": 11,
+      "end_frame": 11,
+      "instruction": "Turn left and walk down the stairs to the bottom",
+      "repeats": [
+        [
+          {
+            "policy": "episode",
+            "history_frames": 12,
+            "raw_text": "<apos_1272><opos_0><act_l0_0><act_l1_97><act_l2_174><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 1.5016520023345947,
+              "angular_rps": -1.802981387299951e-05,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 26.617806870490313,
+              "prepare_inputs_ms": 2.561973873525858,
+              "vit_ms": 55.11333327740431,
+              "post_vit_pool_ms": 0.4444359801709652,
+              "cpu_copy_ms": 0.27647707611322403,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 6.0,
+              "vit_cache_size": 6.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.365552820265293,
+              "build_sample_ms": 1.3688099570572376,
+              "llm_ms": 63.63401096314192,
+              "decode_waypoints_ms": 0.487626064568758,
+              "batch_total_ms": 120.64161105081439,
+              "session_id": "adfdf268683f42fba1f76daee1e6b219",
+              "request_id": "2a0d86839c48494b89f6ad45722ce81c",
+              "queue_ms": 0.17909472808241844,
+              "execution_ms": 152.3611661978066
+            }
+          },
+          {
+            "policy": "completed_subtask",
+            "history_frames": 1,
+            "raw_text": "<apos_1297><opos_0><act_l0_5><act_l1_159><act_l2_140><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 0.0,
+              "angular_rps": 3.1345844268798824,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 15.38480119779706,
+              "prepare_inputs_ms": 1.3054488226771355,
+              "vit_ms": 40.953699965029955,
+              "post_vit_pool_ms": 0.04781689494848251,
+              "cpu_copy_ms": 0.15197088941931725,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 1.0,
+              "vit_cache_size": 1.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.335237804800272,
+              "build_sample_ms": 0.5770712159574032,
+              "llm_ms": 59.107501059770584,
+              "decode_waypoints_ms": 0.3916691057384014,
+              "batch_total_ms": 101.05971992015839,
+              "session_id": "1826dcd773b04b2cb32662dc1c0c1a21",
+              "request_id": "e5c71c2c58ba4a4fb85d39c1bf7a0c92",
+              "queue_ms": 0.1830100081861019,
+              "execution_ms": 143.12117220833898
+            }
+          }
+        ],
+        [
+          {
+            "policy": "completed_subtask",
+            "history_frames": 1,
+            "raw_text": "<apos_1297><opos_0><act_l0_5><act_l1_159><act_l2_140><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 0.0,
+              "angular_rps": 3.1345844268798824,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 15.883641317486763,
+              "prepare_inputs_ms": 1.4246231876313686,
+              "vit_ms": 42.31443628668785,
+              "post_vit_pool_ms": 0.04853075370192528,
+              "cpu_copy_ms": 0.15281327068805695,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 1.0,
+              "vit_cache_size": 1.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.3421216756105423,
+              "build_sample_ms": 0.6222771480679512,
+              "llm_ms": 59.106430038809776,
+              "decode_waypoints_ms": 0.4951111041009426,
+              "batch_total_ms": 102.57307719439268,
+              "session_id": "1dff1f21a2ca43118e963596c8caf94c",
+              "request_id": "e873914b83b0415096b6378fcadd1aca",
+              "queue_ms": 0.16046594828367233,
+              "execution_ms": 142.59927300736308
+            }
+          },
+          {
+            "policy": "episode",
+            "history_frames": 12,
+            "raw_text": "<apos_1272><opos_0><act_l0_0><act_l1_97><act_l2_174><|im_end|>",
+            "action": "VELOCITY_CONTROL",
+            "action_args": {
+              "linear_mps": 1.5016520023345947,
+              "angular_rps": -1.802981387299951e-05,
+              "dt_s": 0.1
+            },
+            "stop": false,
+            "cold_inference_metrics": {
+              "process_sample_ms": 27.900198008865118,
+              "prepare_inputs_ms": 2.7486057952046394,
+              "vit_ms": 58.02945885807276,
+              "post_vit_pool_ms": 0.45934924855828285,
+              "cpu_copy_ms": 0.2815527841448784,
+              "vit_cache_hits": 0.0,
+              "vit_cache_misses": 6.0,
+              "vit_cache_size": 6.0,
+              "batch_size": 1.0,
+              "queue_wait_ms": 2.3605599999427795,
+              "build_sample_ms": 1.5089432708919048,
+              "llm_ms": 66.64251210168004,
+              "decode_waypoints_ms": 0.5945200100541115,
+              "batch_total_ms": 126.81748997420073,
+              "session_id": "f82b4e02399c424da7af9e641d984ab3",
+              "request_id": "bf67dca642a44863bf4f2c12d3c8c5ce",
+              "queue_ms": 0.16625411808490753,
+              "execution_ms": 158.02640607580543
+            }
+          }
+        ]
+      ],
+      "stable_within_policy": true,
+      "output_changed": true
+    }
+  ],
+  "scope": "Fixed recorded images and next instruction; only contiguous history changes. No navigation performance claim. Cold-cache latency is not a production speed estimate.",
+  "finished": 1794166725.6400037,
+  "remaining_sessions": 0
+}

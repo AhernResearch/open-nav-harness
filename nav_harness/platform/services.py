@@ -4,6 +4,7 @@ import asyncio
 import shlex
 import json
 import time
+from pathlib import Path
 import httpx
 from sqlalchemy import text
 from nav_harness.core.config import PlatformSettings
@@ -36,7 +37,9 @@ class ServiceManager:
         spec = self.db.service(sid)
         if spec.kind == "planner" and spec.planner.runtime != "openai_compatible":
             return {"ok": None, "status": "SDK login and model access are checked during preflight"}
-        suffix = {"planner": "/models", "environment": "/health", "vla": "/info"}[spec.kind]
+        suffix = {"planner": "/models", "environment": "/health", "vla": "/info", "execution": "/info"}[
+            spec.kind
+        ]
         try:
             async with httpx.AsyncClient(timeout=5, trust_env=False) as client:
                 r = await client.get(spec.url.rstrip("/") + suffix)
@@ -82,6 +85,38 @@ class ServiceManager:
         ):
             raise ValueError("Remote unit ownership could not be verified")
         return state
+
+    async def reconcile_attempt(self, aid):
+        # Validate motion services are stopped before touching shared actor state.
+        attempt = self.db.release_reconciled(aid, check_only=True)
+        if attempt["binding"]:
+            spec = json.loads(attempt["spec"])
+            vla = self.db.service(spec["vla_service"])
+            status = self.db.rows("SELECT status FROM services WHERE id=:id", id=spec["vla_service"])[0][
+                "status"
+            ]
+            if not (vla.managed and status == "stopped"):
+                receipts = list(Path(attempt["output"]).rglob("execution_session.json"))
+                if len(receipts) > 1:
+                    raise ValueError("Ambiguous execution session receipts")
+                if receipts:
+                    ident = json.loads(receipts[0].read_text())["session_id"]
+                    if len(ident) != 32 or any(c not in "0123456789abcdef" for c in ident):
+                        raise ValueError("Invalid session receipt")
+                    async with httpx.AsyncClient(trust_env=False, timeout=10) as client:
+                        url = vla.url.rstrip("/") + "/sessions/" + ident
+                        response = await client.get(url)
+                        if response.status_code != 404:
+                            response.raise_for_status()
+                            (await client.post(url + "/cancel")).raise_for_status()
+                            # A 409 means CUDA work is still in flight; retain all leases.
+                            response = await client.post(url + "/close")
+                            if response.status_code == 409:
+                                raise ValueError(
+                                    "Inference is still running; retain the lease until it drains"
+                                )
+                            response.raise_for_status()
+        self.db.release_reconciled(aid, inference_reconciled=True)
 
     async def operate(self, sid, action):
         if action not in ("start", "stop"):

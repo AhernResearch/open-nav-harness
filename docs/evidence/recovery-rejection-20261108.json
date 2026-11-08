@@ -1,0 +1,57 @@
+{
+  "original_attempt": "7b79ffa4a11547059f92d76ded19b625",
+  "original_result_preserved": true,
+  "metrics": {
+    "distance_to_goal": 0.5348,
+    "success": 1.0,
+    "spl": 0.9697,
+    "oracle_success": 1.0,
+    "ndtw": 0.8895,
+    "sdtw": 0.8895,
+    "path_length": 9.7763,
+    "steps_taken": 64.0,
+    "stop_called": 1.0,
+    "collisions": 0.0,
+    "teleports": 0.0,
+    "teleport_fallbacks": 0.0,
+    "velocity_steps": 63.0
+  },
+  "wall_s": 483.0,
+  "agent": {
+    "turns": 26,
+    "turn_unit": "environment_feedback_response_v1",
+    "tool_calls": {
+      "observe": 1,
+      "update_plan": 5,
+      "execute_subtask": 8,
+      "observe_map": 5,
+      "update_memory": 6,
+      "terminate_episode": 1
+    },
+    "env_steps": 64,
+    "called_stop": true,
+    "end_reason": "stop_called",
+    "cost_usd": null,
+    "usage": {
+      "input_tokens": 282890,
+      "cached_input_tokens": 0,
+      "output_tokens": 4235
+    },
+    "review": {},
+    "initial_rollout": null,
+    "places_total": 7,
+    "places_named": 0,
+    "clauses_bound": 0,
+    "annotate_node_calls": 0,
+    "update_memory_calls": 6,
+    "read_memory_calls": 0,
+    "navigate_to_node_calls": 0,
+    "terminate_episode_calls": 1,
+    "observe_node_calls": 0
+  },
+  "original_resource_state": "unknown",
+  "corrected_classifier_on_original_trace": "idle",
+  "fix_digest": "61c52f1668bc195c4a541b9f1cfdf1d8c59ed7e6a6f5eee4bf3c15964e25818b",
+  "validation": "93 tests plus 4 subtests; mypy, ruff and frontend build passed",
+  "recovery": "owned actor/environment stopped and original attempt reconciled; completed route not retried"
+}

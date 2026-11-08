@@ -1,0 +1,212 @@
+aiohappyeyeballs==2.6.1
+aiohttp==3.13.5
+aiosignal==1.4.0
+annotated-doc==0.0.4
+annotated-types==0.7.0
+anthropic==0.96.0
+anyio==4.13.0
+apache-tvm-ffi @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/apache_tvm_ffi-0.1.9-cp310-cp310-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl#sha256=eefcd17f61bf503ff0f4ad429e03ef6c241c7d13682f58281d883218b854c9bd
+astor==0.8.1
+async-timeout==5.0.1
+attrs==26.1.0
+backports.strenum @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/backports_strenum-1.3.1-py3-none-any.whl#sha256=cdcfe36dc897e2615dc793b7d3097f54d359918fc448754a517e6f23044ccf83
+blake3==1.0.8
+cachetools==7.0.6
+cbor2==5.9.0
+certifi==2026.4.22
+cffi==2.0.0
+charset-normalizer==3.4.7
+click==8.3.3
+cloudpickle==3.1.2
+compressed-tensors @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/compressed_tensors-0.17.0-py3-none-any.whl#sha256=4a1b89b508f7efb8ffb4eee8a6e69e0452d9b080cae130146025c64fbe9fa9aa
+cryptography==46.0.7
+cuda-bindings @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/cuda_bindings-13.4.4-cp310-cp310-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl#sha256=85d961133658fff3167cfcf69de1beac8e46453c15fd4bcaa4a96d3ef1110c69
+cuda-core @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/cuda_core-1.2.2-cp310-cp310-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl#sha256=2e73547ea81ba0de8af9b48b17da86045735b7d5003251b001553c4eb83c9ebd
+cuda-pathfinder==1.5.3
+cuda-python @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/cuda_python-13.4.4-py3-none-any.whl#sha256=2a4a35c7f102e3c51b9e18e65b34a24b82d7363893b6e2f228978c18bafa1957
+cuda-tile @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/cuda_tile-1.3.0-cp310-cp310-manylinux2014_x86_64.whl#sha256=8c71c2fd9b96c054c126a218f9927c8c8dde72441a532464551b865b416d452a
+cuda-toolkit @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/cuda_toolkit-13.0.2-py2.py3-none-any.whl#sha256=b198824cf2f54003f50d64ada3a0f184b42ca0846c1c94192fa269ecd97a66eb
+depyf==0.20.0
+dill==0.4.1
+diskcache==5.6.3
+distro==1.9.0
+dnspython==2.8.0
+docstring_parser==0.18.0
+einops==0.8.2
+email-validator==2.3.0
+exceptiongroup==1.3.1
+fastapi==0.136.0
+fastapi-cli==0.0.24
+fastapi-cloud-cli==0.17.0
+fastar==0.11.0
+fastsafetensors @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/fastsafetensors-0.5.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=c36fd85d0f28dd2ab335eeb3846d1751935babfae336c4b5a0dccec3e93b93cd
+filelock==3.29.0
+flashinfer-cubin @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/flashinfer_cubin-0.6.13-py3-none-any.whl#sha256=41e4848c2d09d220e8394489b2fb6cfec6b6ad09f897b5ab8b39fc23055f6c24
+flashinfer-python @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/flashinfer_python-0.6.13-py3-none-any.whl#sha256=239e6ddc3cbbaf0bee251861a8c7c69438b1171830d69ddfa133ddea4494850d
+frozenlist==1.8.0
+fsspec==2026.3.0
+gguf==0.18.0
+googleapis-common-protos==1.74.0
+grpcio==1.80.0
+h11==0.16.0
+hf-xet==1.4.3
+httpcore==1.0.9
+httptools==0.7.1
+httpx==0.28.1
+httpx-sse==0.4.3
+huggingface_hub==1.11.0
+humming-kernels @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/humming_kernels-0.1.10-py3-none-any.whl#sha256=4ded0998ff085afeddde70baf93f97c2929969ec3d4a63a52cfec5072bc972b4
+idna==3.13
+ijson==3.5.0
+importlib_metadata==8.7.1
+interegular==0.3.3
+Jinja2==3.1.6
+jiter==0.14.0
+jmespath==1.1.0
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+lark==1.2.2
+llguidance @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/llguidance-1.7.6-cp39-abi3-manylinux_2_31_x86_64.whl#sha256=ceec951d29a74309984e3be0fe7f5f56c1362434cd937abd517b259a60908b1e
+llvmlite @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/llvmlite-0.47.0-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=f9d118bc1dd7623e0e65ca9ac485ec6dd543c3b77bc9928ddc45ebd34e1e30a7
+lm-format-enforcer==0.11.3
+loguru==0.7.3
+markdown-it-py==4.0.0
+MarkupSafe==3.0.3
+mcp==1.27.0
+mdurl==0.1.2
+mistral_common @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/mistral_common-1.12.0-py3-none-any.whl#sha256=fa4504b66c30c0201ae4578c0340c5ee2abd22151c271532f62e373b985a53cf
+ml_dtypes @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/ml_dtypes-0.6.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=6ec0d244a5bba12239025389ad88bbfb45f9f10e25ab4f678e9a4768ebd47532
+model-hosting-container-standards==0.1.14
+modelscope==1.36.1
+mpmath==1.3.0
+msgspec==0.21.1
+multidict==6.7.1
+networkx==3.4.2
+ninja==1.13.0
+numba @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/numba-0.65.0-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=4c894c94afa5ffd627c7e3b693df10cb0d905bd5eb06de3dfc31775140cf4f89
+numpy==2.2.6
+nvidia-cublas @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cublas-13.1.0.3-py3-none-manylinux_2_27_x86_64.whl#sha256=ee8722c1f0145ab246bccb9e452153b5e0515fd094c3678df50b2a0888b8b171
+nvidia-cublas-cu12==12.8.4.1
+nvidia-cuda-cccl @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cuda_cccl-13.3.5.0.6-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=d5230098fa2df5021e1a00c0c4eee41797671a91119d31e892463e5ccf3ee326
+nvidia-cuda-crt @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cuda_crt-13.5.37-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=e898b7f73d3035fa89915a3f7bf3b54a73e90249746111aed295822c4729bb29
+nvidia-cuda-cupti @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cuda_cupti-13.0.85-py3-none-manylinux_2_25_x86_64.whl#sha256=4eb01c08e859bf924d222250d2e8f8b8ff6d3db4721288cf35d14252a4d933c8
+nvidia-cuda-cupti-cu12==12.8.90
+nvidia-cuda-nvcc @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cuda_nvcc-13.2.86-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=7d3f56c8d705bad35bbba69eb0470d90856fd5d4dc48c6a6173aaf1e9f887cf5
+nvidia-cuda-nvrtc @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cuda_nvrtc-13.0.88-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl#sha256=ad9b6d2ead2435f11cbb6868809d2adeeee302e9bb94bcf0539c7a40d80e8575
+nvidia-cuda-nvrtc-cu12==12.8.93
+nvidia-cuda-runtime @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cuda_runtime-13.0.96-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=7f82250d7782aa23b6cfe765ecc7db554bd3c2870c43f3d1821f1d18aebf0548
+nvidia-cuda-runtime-cu12==12.8.90
+nvidia-cuda-tileiras @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cuda_tileiras-13.2.86-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=832f360aa8ce478ff878c4e6630cd767349a597ea54382e7c07a835b0daead96
+nvidia-cudnn-cu12==9.10.2.21
+nvidia-cudnn-cu13 @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cudnn_cu13-9.19.0.56-py3-none-manylinux_2_27_x86_64.whl#sha256=d20e1734305e9d68889a96e3f35094d733ff1f83932ebe462753973e53a572bf
+nvidia-cudnn-frontend @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cudnn_frontend-1.28.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=2c92499c388665ab93a492705c591856f8c04014f5dac0e2fb593355bc0d888f
+nvidia-cufft @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cufft-12.0.0.61-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=6c44f692dce8fd5ffd3e3df134b6cdb9c2f72d99cf40b62c32dde45eea9ddad3
+nvidia-cufft-cu12==11.3.3.83
+nvidia-cufile @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cufile-1.15.1.6-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=08a3ecefae5a01c7f5117351c64f17c7c62efa5fffdbe24fc7d298da19cd0b44
+nvidia-cufile-cu12==1.13.1.3
+nvidia-curand @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_curand-10.4.0.35-py3-none-manylinux_2_27_x86_64.whl#sha256=1aee33a5da6e1db083fe2b90082def8915f30f3248d5896bcec36a579d941bfc
+nvidia-curand-cu12==10.3.9.90
+nvidia-cusolver @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cusolver-12.0.4.66-py3-none-manylinux_2_27_x86_64.whl#sha256=0a759da5dea5c0ea10fd307de75cdeb59e7ea4fcb8add0924859b944babf1112
+nvidia-cusolver-cu12==11.7.3.90
+nvidia-cusparse @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cusparse-12.6.3.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=2b3c89c88d01ee0e477cb7f82ef60a11a4bcd57b6b87c33f789350b59759360b
+nvidia-cusparse-cu12==12.5.8.93
+nvidia-cusparselt-cu12==0.7.1
+nvidia-cusparselt-cu13 @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cusparselt_cu13-0.8.0-py3-none-manylinux2014_x86_64.whl#sha256=25e30a8a7323935d4ad0340b95a0b69926eee755767e8e0b1cf8dd85b197d3fd
+nvidia-cutlass-dsl @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cutlass_dsl-4.5.2-py3-none-any.whl#sha256=68ed1b63ca74aae87955012da9dfd7fdaae471329d0028b229b841c7192ccf52
+nvidia-cutlass-dsl-libs-base @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cutlass_dsl_libs_base-4.5.2-cp310-cp310-manylinux_2_28_x86_64.whl#sha256=386e832427e3670479049a1560e4d8d2e565d8c0f37a6852c6d7043d046548f1
+nvidia-cutlass-dsl-libs-cu13 @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_cutlass_dsl_libs_cu13-4.5.2-cp310-cp310-manylinux_2_28_x86_64.whl#sha256=587494d0ab615b805fac86b43a3c1b855182f455681c9cc4ddb1b8973f44a7cc
+nvidia-ml-py==13.595.45
+nvidia-nccl-cu12==2.27.5
+nvidia-nccl-cu13 @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_nccl_cu13-2.28.9-py3-none-manylinux_2_18_x86_64.whl#sha256=e4553a30f34195f3fa1da02a6da3d6337d28f2003943aa0a3d247bbc25fefc42
+nvidia-nvjitlink @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_nvjitlink-13.0.88-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl#sha256=13a74f429e23b921c1109976abefacc69835f2f433ebd323d3946e11d804e47b
+nvidia-nvjitlink-cu12==12.8.93
+nvidia-nvshmem-cu12==3.4.5
+nvidia-nvshmem-cu13 @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_nvshmem_cu13-3.4.5-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=290f0a2ee94c9f3687a02502f3b9299a9f9fe826e6d0287ee18482e78d495b80
+nvidia-nvtx @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_nvtx-13.0.85-py3-none-manylinux1_x86_64.manylinux_2_5_x86_64.whl#sha256=4936d1d6780fbe68db454f5e72a42ff64d1fd6397df9f363ae786930fd5c1cd4
+nvidia-nvtx-cu12==12.8.90
+nvidia-nvvm @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvidia_nvvm-13.2.86-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl#sha256=a9244f3209922d655612c11ebb4117ea1f80983cb2b215c9cccded127282cebc
+nvtx @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/nvtx-0.2.15-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl#sha256=5f3362f0db4252514719326c9d5662b0f93d254659ba97b9c8dbe556286e0e3e
+openai==2.32.0
+openai-harmony==0.0.8
+opencv-python-headless==4.13.0.92
+opentelemetry-api==1.41.0
+opentelemetry-exporter-otlp==1.41.0
+opentelemetry-exporter-otlp-proto-common==1.41.0
+opentelemetry-exporter-otlp-proto-grpc==1.41.0
+opentelemetry-exporter-otlp-proto-http==1.41.0
+opentelemetry-proto==1.41.0
+opentelemetry-sdk==1.41.0
+opentelemetry-semantic-conventions==0.62b0
+opentelemetry-semantic-conventions-ai==0.5.1
+outlines_core @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/outlines_core-0.2.14-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=0e4b5b7c8e50489bea444b095692ddb5d8fb92ea6b949c4a6a3381eca9b691a7
+packaging==26.1
+partial-json-parser==0.2.1.1.post7
+pillow==12.2.0
+prometheus-fastapi-instrumentator @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/prometheus_fastapi_instrumentator-8.1.0-py3-none-any.whl#sha256=b9f40b2cff3f7891ca0610b3ae4fc6ec723fd326b04bb659819aaeb821a0fc7d
+prometheus_client==0.25.0
+propcache==0.4.1
+protobuf==6.33.6
+psutil==7.2.2
+py-cpuinfo==9.0.0
+pybase64==1.4.3
+pycountry==26.2.16
+pycparser==3.0
+pydantic==2.13.3
+pydantic-extra-types==2.11.1
+pydantic-settings==2.14.0
+pydantic_core==2.46.3
+pyelftools @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/pyelftools-0.33-py3-none-any.whl#sha256=f215ad5f47d3f1373a21496a6c9e0707c622840d0622f23ff7ce08678b020036
+Pygments==2.20.0
+PyJWT==2.12.1
+pynvvideocodec @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/pynvvideocodec-2.0.4-cp310-cp310-manylinux_2_28_x86_64.whl#sha256=7af1d9ab37f7415168c23be00539094e7b21774661af2a0a2b9bb574670bc75e
+python-dotenv==1.2.2
+python-json-logger==4.1.0
+python-multipart==0.0.26
+PyYAML==6.0.3
+pyzmq==27.1.0
+quack-kernels==0.3.11
+referencing==0.37.0
+regex==2026.4.4
+requests==2.33.1
+rich==15.0.0
+rich-toolkit==0.19.7
+rignore==0.7.6
+rpds-py==0.30.0
+safetensors==0.7.0
+sentencepiece==0.2.1
+sentry-sdk==2.58.0
+setproctitle==1.3.7
+shellingham==1.5.4
+sniffio==1.3.1
+sse-starlette==3.3.4
+starlette @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/starlette-1.7.0-py3-none-any.whl#sha256=67f8e99895493dd2911a03f11314af6ceebeae4e704bb9f43dfc6a9db151c93e
+supervisor==4.3.0
+sympy==1.14.0
+tabulate==0.10.0
+tiktoken==0.12.0
+tilelang @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/tilelang-0.1.9-cp38-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=4bbccfe9035aed775ffafb6dc25a5994504b24e2c5d95d0f39643edfafa7bf12
+tokenizers==0.22.2
+tokenspeed-mla @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/tokenspeed_mla-0.1.2-py3-none-manylinux_2_28_x86_64.whl#sha256=c9466a351fe039792e56cf49f3e79744c1dc28c7af10306a02e62b8e92fa5985
+tokenspeed-triton @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/tokenspeed_triton-3.8.10.post20260920-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=bc74f2cd06431ace60b77764052680dd018ae6b0c5a42d0d3d693d74e4d1995c
+tomli==2.4.1
+torch @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/torch-2.11.0-cp310-cp310-manylinux_2_28_x86_64.whl#sha256=1b32ceda909818a03b112006709b02be1877240c31750a8d9c6b7bf5f2d8a6e5
+torch_c_dlpack_ext==0.1.5
+torchaudio @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/torchaudio-2.11.0-cp310-cp310-manylinux_2_28_x86_64.whl#sha256=5847fe2022b17c6580aeb39c8797a443411cc09edfd9183cd50ac1a3b8ccf97c
+torchcodec @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/torchcodec-0.17.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=ba26d900b3941eac8176b5c42bed0e2315cc154f07037a385e211ec39af989bf
+torchvision @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/torchvision-0.26.0-cp310-cp310-manylinux_2_28_x86_64.whl#sha256=b6f9ad1ecc0eab52647298b379ee9426845f8903703e6127973f8f3d049a798b
+tqdm==4.67.3
+transformers==5.6.0
+triton==3.6.0
+typer==0.24.2
+typing-inspection==0.4.2
+typing_extensions==4.15.0
+urllib3==2.6.3
+uvicorn==0.45.0
+uvloop==0.22.1
+vllm @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/vllm-0.25.0-cp38-abi3-manylinux_2_28_x86_64.whl#sha256=c82e96b01af2142ef398ca92f1e9c5f4ffc119f2cc09fe68ea28865323532f0c
+watchfiles==1.1.1
+websockets==16.0
+xgrammar @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/xgrammar-0.2.3-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=b257973b2878bcb2c02f24057d174c0d9715cdc02e8ce29149a350184e619f86
+yarl==1.23.0
+z3-solver @ file:///data/nav_storage/nav-harness/deployment/nvfp4-20261108/wheels/z3_solver-4.15.4.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=7e103a6f203f505b8b8b8e5c931cc407c95b61556512d4921c1ddc0b3f41b08e
+zipp==3.23.1

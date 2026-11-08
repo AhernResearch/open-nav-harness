@@ -1,0 +1,317 @@
+{
+  "purpose": "two paired development runs on the same train route; not a benchmark or causal ablation",
+  "runs": [
+    {
+      "backend": "lightnav",
+      "experiment_id": "792a710a4dd1478a9ec6e401baec9e5b",
+      "job_id": "4f0d46e1e4d540679cfe02891a083d4c",
+      "attempt_id": "75f12ed2a47544eaac5b8e0db2bd854c",
+      "metrics": {
+        "distance_to_goal": 1.2633,
+        "success": 1.0,
+        "spl": 1.0,
+        "oracle_success": 1.0,
+        "ndtw": 0.3354,
+        "sdtw": 0.3354,
+        "path_length": 5.5602,
+        "steps_taken": 39.0,
+        "stop_called": 1.0,
+        "collisions": 0.0,
+        "teleports": 0.0,
+        "teleport_fallbacks": 0.0,
+        "velocity_steps": 38.0
+      },
+      "wall_s": 198.1,
+      "turns": 12,
+      "usage": {
+        "input_tokens": 105373,
+        "cached_input_tokens": 0,
+        "output_tokens": 1742
+      },
+      "tool_calls": {
+        "observe": 1,
+        "update_plan": 2,
+        "execute_subtask": 3,
+        "observe_map": 2,
+        "update_memory": 3,
+        "terminate_episode": 1
+      },
+      "errors": [
+        {
+          "tool": "update_memory",
+          "feedback": "{\"error\": \"precondition_failed\", \"message\": \"Call observe_map and read its image after the latest movement before update_memory\", \"state_changed\": false}"
+        }
+      ],
+      "memory": [
+        {
+          "start": 0,
+          "end": 1,
+          "caption": "Moved 2.5m along the right side of the kitchen island, keeping the island on my right. Approaching the end of the island where there appears to be an opening/doorway to the right leading to another room."
+        },
+        {
+          "start": 1,
+          "end": 2,
+          "caption": null
+        },
+        {
+          "start": 2,
+          "end": 3,
+          "caption": "Moved forward and turned right to approach the doorway on the right side. This doorway leads to a dining area with a dining table and chairs visible, and there's a large mirror in that room. I am now stopped by this doorway."
+        }
+      ],
+      "vla_predictions": 40,
+      "image_counts": [
+        {
+          "tool": "observe",
+          "images": 4
+        },
+        {
+          "tool": "update_plan",
+          "images": 0
+        },
+        {
+          "tool": "execute_subtask",
+          "images": 12
+        },
+        {
+          "tool": "observe_map",
+          "images": 1
+        },
+        {
+          "tool": "update_memory",
+          "images": 0
+        },
+        {
+          "tool": "execute_subtask",
+          "images": 12
+        },
+        {
+          "tool": "execute_subtask",
+          "images": 11
+        },
+        {
+          "tool": "update_memory",
+          "images": 0
+        },
+        {
+          "tool": "observe_map",
+          "images": 1
+        },
+        {
+          "tool": "update_memory",
+          "images": 0
+        },
+        {
+          "tool": "update_plan",
+          "images": 0
+        },
+        {
+          "tool": "terminate_episode",
+          "images": 0
+        }
+      ],
+      "source": "/home/holo/robots/nav-harness/state/runs/4f0d46e1e4d540679cfe02891a083d4c/75f12ed2a47544eaac5b8e0db2bd854c",
+      "implementation_digest": "09166ef508df2837f779f10de4156814d232b1a5569abe953e2b2025c1968528",
+      "link": "http://192.168.66.221:8878/?attempt=75f12ed2a47544eaac5b8e0db2bd854c",
+      "observation_requests": [
+        {
+          "views": [
+            "front",
+            "right",
+            "back",
+            "left"
+          ]
+        }
+      ],
+      "final_plan": [
+        {
+          "id": 1,
+          "instruction": "Move forward along the right side of the kitchen island, keeping the island on my right",
+          "completion_criterion": "I have passed the center island and am approaching the area beyond it",
+          "status": "completed"
+        },
+        {
+          "id": 2,
+          "instruction": "Look for and approach the right side doorway that contains a dining table and mirror",
+          "completion_criterion": "I am stopped by the doorway with the dining table and mirror visible in it",
+          "status": "completed"
+        }
+      ],
+      "resource_state": "idle"
+    },
+    {
+      "backend": "navgpt",
+      "experiment_id": "ba773aed55a749748c471784e4f79538",
+      "job_id": "c977aa551d4e43238f6ada0acc556efd",
+      "attempt_id": "b9cd476dd67844c282a5b5436814815e",
+      "metrics": {
+        "distance_to_goal": 0.3844,
+        "success": 1.0,
+        "spl": 1.0,
+        "oracle_success": 1.0,
+        "ndtw": 0.9311,
+        "sdtw": 0.9311,
+        "path_length": 6.3101,
+        "steps_taken": 51.0,
+        "stop_called": 1.0,
+        "collisions": 0.0,
+        "teleports": 50.0,
+        "teleport_fallbacks": 0.0,
+        "velocity_steps": 0.0
+      },
+      "wall_s": 343.4,
+      "turns": 17,
+      "usage": {
+        "input_tokens": 175688,
+        "cached_input_tokens": 0,
+        "output_tokens": 2416
+      },
+      "tool_calls": {
+        "observe": 1,
+        "update_plan": 2,
+        "execute_subtask": 4,
+        "observe_map": 4,
+        "update_memory": 5,
+        "terminate_episode": 1
+      },
+      "errors": [
+        {
+          "tool": "update_memory",
+          "feedback": "{\"error\": \"precondition_failed\", \"message\": \"Call observe_map and read its image after the latest movement before update_memory\", \"state_changed\": false}"
+        }
+      ],
+      "memory": [
+        {
+          "start": 0,
+          "end": 1,
+          "caption": "Started at kitchen entrance, moved along the right side of the large kitchen island. The island is on my left, wall cabinets and appliances (refrigerator, ovens) are on my right. I've progressed about 0.7m along this narrow passage."
+        },
+        {
+          "start": 1,
+          "end": 2,
+          "caption": "Continued along the right side of the kitchen island, passing the refrigerator and wall cabinets. I've reached near the end of the island. I can see openings to adjacent rooms - one appears to lead to a dining area with a mirror visible."
+        },
+        {
+          "start": 2,
+          "end": 3,
+          "caption": "Successfully went around the right end of the kitchen island. I'm now in the open area beyond the island. To my right, I can see a doorway leading to a dining room with a dining table and chairs, and a large mirror on the wall - this matches the target location."
+        },
+        {
+          "start": 3,
+          "end": 4,
+          "caption": "Moved to the right side doorway. I'm now positioned at the doorway that leads to the dining room. Through the doorway, I can clearly see the dining table with chairs and a large mirror on the wall - this is the target location specified in the task."
+        }
+      ],
+      "vla_predictions": 50,
+      "image_counts": [
+        {
+          "tool": "observe",
+          "images": 4
+        },
+        {
+          "tool": "update_plan",
+          "images": 0
+        },
+        {
+          "tool": "execute_subtask",
+          "images": 10
+        },
+        {
+          "tool": "observe_map",
+          "images": 1
+        },
+        {
+          "tool": "update_memory",
+          "images": 0
+        },
+        {
+          "tool": "execute_subtask",
+          "images": 12
+        },
+        {
+          "tool": "observe_map",
+          "images": 1
+        },
+        {
+          "tool": "update_memory",
+          "images": 0
+        },
+        {
+          "tool": "execute_subtask",
+          "images": 12
+        },
+        {
+          "tool": "update_memory",
+          "images": 0
+        },
+        {
+          "tool": "observe_map",
+          "images": 1
+        },
+        {
+          "tool": "update_memory",
+          "images": 0
+        },
+        {
+          "tool": "update_plan",
+          "images": 0
+        },
+        {
+          "tool": "execute_subtask",
+          "images": 9
+        },
+        {
+          "tool": "observe_map",
+          "images": 1
+        },
+        {
+          "tool": "update_memory",
+          "images": 0
+        },
+        {
+          "tool": "terminate_episode",
+          "images": 0
+        }
+      ],
+      "source": "/home/holo/robots/nav-harness/state/runs/c977aa551d4e43238f6ada0acc556efd/b9cd476dd67844c282a5b5436814815e",
+      "implementation_digest": "09166ef508df2837f779f10de4156814d232b1a5569abe953e2b2025c1968528",
+      "link": "http://192.168.66.221:8878/?attempt=b9cd476dd67844c282a5b5436814815e",
+      "observation_requests": [
+        {
+          "views": [
+            "front",
+            "right",
+            "back",
+            "left"
+          ]
+        }
+      ],
+      "final_plan": [
+        {
+          "id": 1,
+          "instruction": "Navigate along the right side of the kitchen island toward the far end",
+          "completion_criterion": "Reach the end of the kitchen island on its right side",
+          "status": "completed"
+        },
+        {
+          "id": 2,
+          "instruction": "Go around the right end of the center island",
+          "completion_criterion": "Pass the right end of the island and enter the open area beyond",
+          "status": "completed"
+        },
+        {
+          "id": 3,
+          "instruction": "Find and stop by the right side doorway with dining table and mirror",
+          "completion_criterion": "Be positioned at the doorway that shows a dining table and mirror",
+          "status": "in_progress"
+        }
+      ],
+      "resource_state": "idle"
+    }
+  ],
+  "deployment": {
+    "release": "/data/nav_storage/nav-harness/releases/tools-v3-09166ef508df",
+    "implementation_digest": "09166ef508df2837f779f10de4156814d232b1a5569abe953e2b2025c1968528"
+  },
+  "remote_workers_upgraded": true
+}

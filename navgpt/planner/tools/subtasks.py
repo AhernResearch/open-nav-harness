@@ -182,8 +182,10 @@ class SubtaskManager:
         indices = boundary + active
         return [self.frames[i] for i in indices]
 
-    def policy_instruction(self):
+    def policy_instruction(self, include_memory=True):
         task = self.current()
+        if not include_memory:
+            return task['instruction']
         background = ('\nCompleted navigation history (background only; do not repeat): '
                       + self.summary) if self.summary else ''
         return (task['instruction']

@@ -18,13 +18,11 @@ def tasks():
         {
             "id": 1,
             "instruction": "Cross the doorway",
-            "completion_criterion": "Beyond the door",
             "status": "pending",
         },
         {
             "id": 2,
             "instruction": "Turn left into the hall",
-            "completion_criterion": "Facing the hall",
             "status": "pending",
         },
     ]
@@ -80,7 +78,7 @@ def test_agentic_tools_and_prompt_match_without_altering_strict_contract(tmp_pat
     assert schema["required"] == ["task_id"]
     strict = NavigationSession(env={"NAVGPT_CONDITION": "planner_subtask"})
     assert strict.tools.definitions["execute_subtask"].inputSchema["properties"] == {}
-    assert "observe_node" in session.tools.definitions and "observe_node" not in strict.tools.definitions
+    assert "observe" in session.tools.definitions and "observe_node" not in session.tools.definitions
     prompt = build_briefing_for("planner_agentic", "Exit the room", 500)
     assert "no review call is required" in prompt and "Exit the room" in prompt
     data = {"planner": {"runtime": "codex"}, "harness": {"mode": "agentic"}}
@@ -90,23 +88,113 @@ def test_agentic_tools_and_prompt_match_without_altering_strict_contract(tmp_pat
         Settings(Path("test.json"), {"harness": {"mode": "agentic"}}, {}).run_config()
 
 
+@pytest.mark.parametrize("reason,stopped", [("vla_stop", True), ("turn_budget", False)])
+def test_actor_handoff_is_not_presented_as_arrival_verification(reason, stopped):
+    original = ["endpoint camera", json.dumps({
+        "subtask_return": reason, "vla_suggests_arrival": stopped,
+        "arrival_note": "Not verified arrival", "distance_travelled_m": 0.5,
+        "turn_travelled_deg": 30, "episode_over": False,
+    })]
+    result = NavigationSession._compact_motion_result(original)
+    status = json.loads(result[1])
+    assert status == {"subtask_return": reason, "distance_travelled_m": 0.5,
+                      "turn_travelled_deg": 30, "episode_over": False}
+    assert result[0] == "endpoint camera"
+    assert "vla_suggests_arrival" in json.loads(original[1])
+
+
 def test_repair_is_not_blocked_by_task_lifecycle_and_limits_restore(monkeypatch):
     s = NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic"})
     s._tasks = manager()
     calls = []
     monkeypatch.setattr(
-        s, "vla_navigate", lambda instruction: calls.append((instruction, dict(s._rollout_limits))) or []
+        s, "vla_navigate", lambda instruction: calls.append(instruction) or []
     )
-    s.execute_agentic_task(1, max_distance_m=8, max_actions=120, reset_context=True)
-    assert calls[0][1]["max_distance_m"] == 8 and calls[0][1]["max_actions"] == 120
+    s.execute_agentic_task(1, reset_context=True)
+    assert calls[0].startswith("Cross the doorway")
     assert s._rollout_limits is None
     s._tasks.needs_review = True
     s._tasks.needs_replan = True
     s.execute_agentic_task(1, instruction="Finish crossing the threshold")
     assert len(calls) == 2
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         s.execute_agentic_task(1, max_actions=501)
     assert len(calls) == 2
+
+
+@pytest.mark.parametrize("allow_reset", [True, False])
+def test_execution_surface_and_reset_ablation(allow_reset):
+    from pydantic import ValidationError
+    from navgpt.planner.runner import mcp_env_for
+
+    cfg = Settings(Path("test.json"), {
+        "planner": {"runtime": "codex"},
+        "harness": {"mode": "agentic", "allow_context_reset": allow_reset},
+    }, {}).run_config()
+    session = NavigationSession(env=mcp_env_for(cfg, None))
+    tool = session.tools.definitions["execute_subtask"]
+    fields = {"task_id", "instruction"} | ({"reset_context"} if allow_reset else set())
+    assert set(tool.inputSchema["properties"]) == fields
+    assert tool.inputSchema["required"] == ["task_id"]
+    for key in ["max_actions", "max_distance_m", "max_turn_deg"] + ([] if allow_reset else ["reset_context"]):
+        with pytest.raises(ValidationError):
+            session.tools.invoke("execute_subtask", {"task_id": 1, key: True if key == "reset_context" else 1})
+    prompt = build_briefing_for("planner_agentic", "Enter", 500, allow_context_reset=allow_reset)
+    assert ("reset_context" in prompt) is allow_reset
+    assert ("reset_context" in tool.description) is allow_reset
+
+
+def test_explicit_reset_only_changes_same_task_anchor_when_requested():
+    m = manager()
+    m.begin(1)
+    initial = m.anchor
+    m.observe({"policy_front": "Zw=="}, {}, 1)
+    m.begin(1, "Continue through door")
+    assert m.anchor == initial
+    m.begin(1, "Try again", reset_context=True)
+    assert m.anchor == 1
+    m.observe({"policy_front": "aA=="}, {}, 2)
+    m.begin(2)
+    assert m.anchor == 2  # Automatic task switch survives both experiment variants.
+
+
+@pytest.mark.parametrize("ending", ["policy", "blocked", "global"])
+def test_agentic_rollout_uses_global_protection_not_old_segment_caps(monkeypatch, ending):
+    import math
+    from types import SimpleNamespace
+
+    count = 0
+    pose = {"position": [0., 0., 0.], "rotation_wxyz": [1., 0., 0., 0.]}
+    def act(**kwargs):
+        return {"should_stop": ending == "policy" and count == 90,
+                "velocity": {"linear_mps": 1., "angular_rps": 1., "dt_s": .1}}
+
+    s = NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic", "NAVGPT_VLA_BACKEND": "lightnav"},
+                          actor=SimpleNamespace(act=act, prepare_context=lambda *args: None))
+    s._tasks = manager()
+    monkeypatch.setattr(s, "_pano", lambda: {"pose": pose, "views": {}, "raw_views": {}})
+    monkeypatch.setattr(s, "_clearance_summary", lambda *args: {})
+    monkeypatch.setattr(s, "_pano_frames", lambda *args: [])
+    monkeypatch.setattr(s, "_frame_here", lambda: None)
+    def move(name, inputs):
+        nonlocal count, pose
+        count += 1
+        pose = {"position": [count * .1, 0., 0.],
+                "rotation_wxyz": [math.cos(count * .2), 0., math.sin(count * .2), 0.]}
+        return {"pose": pose, "step_count": count, "navigable": ending != "blocked",
+                "truncated": ending == "global" and count == 90}
+    monkeypatch.setattr(s, "_call", move)
+    result = s.execute_agentic_task(1)
+    status = next(json.loads(x) for x in result if isinstance(x, str) and '"subtask_return"' in x)
+    assert count == (3 if ending == "blocked" else 90)
+    if ending == "policy":
+        assert status["subtask_return"] == "vla_stop"
+        assert status["distance_travelled_m"] > 3
+        assert status["turn_travelled_deg"] > 180
+    elif ending == "blocked":
+        assert status["subtask_return"] == "blocked"
+    else:
+        assert status["episode_over"]
 
 
 def test_protocol_feedback_does_not_swallow_failure_after_motion_dispatch(monkeypatch):
@@ -138,7 +226,7 @@ def test_rollout_records_actor_output_before_dispatch_and_matches_execution(
     }
     if backend == "lightnav":
         advice["velocity"] = {"linear_mps": 1.0, "angular_rps": 0.0, "dt_s": 0.1}
-    actor = SimpleNamespace(replace_context=lambda *args: None, act=lambda **kwargs: advice)
+    actor = SimpleNamespace(prepare_context=lambda *args: None, act=lambda **kwargs: advice)
     s = NavigationSession(
         env={
             "NAVGPT_CONDITION": "planner_agentic",
@@ -166,7 +254,8 @@ def test_rollout_records_actor_output_before_dispatch_and_matches_execution(
         return {"pose": pose, "step_count": 1, "navigable": True}
 
     monkeypatch.setattr(s, "_call", move)
-    s.execute_agentic_task(1, max_actions=1)
+    s.VLA_MAX_STEPS = 1  # Runtime test cap; not a planner-selected tool argument.
+    s.execute_agentic_task(1)
     step = [e for e in events() if e.get("prediction_id") == 1]
     assert [e["kind"] for e in step] == [
         "policy_context",
@@ -177,3 +266,49 @@ def test_rollout_records_actor_output_before_dispatch_and_matches_execution(
     assert step[1]["advice"]["navigation"] == navigation
     assert step[1]["waypoint_count"] == horizon and step[1]["resampled"] is False
     assert step[-1]["feedback"]["step_count"] == 1
+
+
+def test_instruction_only_plan_contract_and_actor_prompt():
+    from pydantic import ValidationError
+    session = NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic"})
+    session._tasks = manager()
+    schema = session.tools.definitions['update_plan'].inputSchema
+    assert set(schema['$defs']['PlanItem']['properties']) == {'id', 'instruction', 'status'}
+    for field in ('completion_criterion', 'assessment'):
+        with pytest.raises(ValidationError):
+            session.tools.invoke('update_plan', {'subtasks': [{**tasks()[0], field: 'Invented condition'}],
+                                                 'reason': 'Old field should be rejected'})
+    session._tasks.begin(1)
+    assert session._tasks.policy_instruction() == tasks()[0]['instruction']
+    session._tasks.begin(1, 'Cross the doorway and stop inside the room')
+    assert session._tasks.policy_instruction() == 'Cross the doorway and stop inside the room'
+    assert session._tasks.tasks[0]['instruction'] == tasks()[0]['instruction']
+    prompt = build_briefing_for('planner_agentic', 'Exit the room', 500)
+    assert 'completion_criterion' not in prompt and 'completion criterion' not in prompt
+    assert 'completion_criterion' not in str(session._tasks.snapshot())
+
+
+def test_no_relative_ablation_freezes_surface_and_matches_briefing():
+    from navgpt.settings import AGENTIC_TOOLS
+    from navgpt.planner.runner import mcp_env_for
+
+    selected = [name for name in AGENTIC_TOOLS if name != 'navigate_relative']
+    config = Settings(Path('test.json'), {
+        'planner': {'runtime': 'codex', 'tools': selected},
+        'harness': {'mode': 'agentic'},
+    }, {}).run_config()
+    session = NavigationSession(env=mcp_env_for(config, live_dir=None))
+    assert set(session.tools.definitions) == set(selected)
+    assert {'execute_subtask', 'navigate_to_node', 'update_memory'} <= set(session.tools.functions)
+    with pytest.raises(ValueError, match='Unknown navigation tool'):
+        session.tools.invoke('navigate_relative', {'turn_deg': 0.0, 'distance_m': 0.5})
+    prompt = build_briefing_for(config.condition, 'Find the stairs', 500, tools=config.tools)
+    assert 'navigate_relative' not in prompt
+    assert 'execute_subtask for forward progress and local repairs' in prompt
+    assert 'navigate_relative' in NavigationSession(env={'NAVGPT_CONDITION': 'planner_agentic'}).tools.functions
+    # Other accidental omissions are still configuration errors, not silent ablations.
+    with pytest.raises(SettingsError):
+        Settings(Path('test.json'), {
+            'planner': {'runtime': 'codex', 'tools': [n for n in selected if n != 'update_memory']},
+            'harness': {'mode': 'agentic'},
+        }, {}).run_config()

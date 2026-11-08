@@ -1,0 +1,17 @@
+{
+  "job_id": "fc21827e81f74b84b06e4cb58c4fb3fb",
+  "user_scope": "Run only the eight already-started routes; leave the remaining 42 unscheduled",
+  "action": "pause after active attempts drain",
+  "pause_requested": 1,
+  "recorded": 1794149623.1122468,
+  "episodes": [
+    6298,
+    4132,
+    456,
+    5782,
+    7648,
+    1179,
+    3478,
+    7006
+  ]
+}

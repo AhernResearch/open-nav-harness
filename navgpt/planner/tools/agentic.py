@@ -20,7 +20,6 @@ class PlanItem(TypedDict):
 
     id: int
     instruction: str
-    completion_criterion: str
     status: Literal["pending", "in_progress", "completed"]
 
 
@@ -29,6 +28,7 @@ class AgenticTasks(SubtaskManager):
         super().__init__(*args, **kwargs)
         self.active_id = None
         self.completion_claim = None
+        self.completed_boundary = None
         self.memory = TopologyMemory(self.directory)
 
     def snapshot(self):
@@ -40,8 +40,9 @@ class AgenticTasks(SubtaskManager):
             "active_id": self.active_id,
             "completion_claim": self.completion_claim,
             "workflow": "model_owned",
-            "tool_contract": "topology_memory_v2",
+            "tool_contract": "topology_memory_v4",
             "memory_context": self.memory.context(self.active_id),
+            "latest_memory": next((self.memory.brief(e) for e in reversed(self.memory.edges) if e["caption"]), None),
         }
 
     def update_plan(self, subtasks, reason):
@@ -59,17 +60,28 @@ class AgenticTasks(SubtaskManager):
                 raise ValueError("Task IDs must be distinct positive integers")
             ids.add(ident)
             task = {"id": ident}
-            for key in ("instruction", "completion_criterion"):
-                value = source.get(key)
-                if not isinstance(value, str) or not value.strip():
-                    raise ValueError("Task needs " + key)
-                task[key] = value.strip()
+            value = source.get("instruction")
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError("Task needs instruction")
+            task["instruction"] = value.strip()
             task["status"] = source.get("status", "pending")
             if task["status"] not in ("pending", "in_progress", "completed"):
                 raise ValueError("Task status must be pending, in_progress or completed")
             updated.append(task)
         if sum(t["status"] == "in_progress" for t in updated) > 1:
             raise ValueError("At most one task may be in_progress")
+        # Only completion of the last executed task creates a boundary. Keep the
+        # completion observation even if the planner later retraces before delegating.
+        completed = {t['id'] for t in updated if t['status'] == 'completed'}
+        previous = {t['id'] for t in self.tasks if t['status'] == 'completed'}
+        if self.completed_boundary and self.completed_boundary['task_id'] not in completed:
+            self.completed_boundary = None
+        if self.anchor_task_id in completed - previous:
+            self.completed_boundary = {
+                'task_id': self.anchor_task_id, 'frame_index': len(self.frames) - 1,
+                'frame_id': self.frames[-1]['id'],
+            }
+            self._event('task_completion_boundary', **self.completed_boundary)
         self.tasks = updated
         self.active_id = next((t["id"] for t in updated if t["status"] == "in_progress"), None)
         self.revision += 1
@@ -99,9 +111,10 @@ class AgenticTasks(SubtaskManager):
         if task["status"] == "completed":
             raise ValueError("Reopen the task with update_plan before executing it")
         self.active_id = task["id"]
-        if instruction.strip():
-            task["instruction"] = instruction.strip()
-        if reset_context or self.anchor is None or self.anchor_task_id != task["id"]:
+        self.execution_instruction = instruction.strip() or task["instruction"]
+        reset_reason = ("explicit" if reset_context else "initial" if self.anchor is None
+                        else "task_change" if self.anchor_task_id != task["id"] else "continue")
+        if reset_reason != "continue":
             self.anchor = len(self.frames) - 1
             self.anchor_task_id = task["id"]
             self.context_key = f"task-{task['id']}-frame-{self.anchor}"
@@ -114,6 +127,8 @@ class AgenticTasks(SubtaskManager):
             task_id=task["id"],
             context_key=self.context_key,
             anchor_frame_id=self.frames[self.anchor]["id"],
+            reset_requested=reset_context,
+            reset_reason=reset_reason,
         )
         return task
 
@@ -132,16 +147,14 @@ class AgenticTasks(SubtaskManager):
             self.memory.observe(pose, frame_id)
         return frame_id
 
-    def policy_instruction(self):
+    def policy_instruction(self, include_memory=True):
         task = self.current()
         latest = next((e for e in reversed(self.memory.edges) if e["caption"]), None)
-        background = ("\nLatest executed-segment memory (model assessment, not an action): "
+        background = (f"\nHistorical memory (not current state; current node {self.memory.current_node_id}): "
                       + f"{latest['start_node_id']} -> {latest['end_node_id']}: {latest['caption']}"
-                      if latest else "")
+                      if latest and include_memory else "")
         return (
-            task["instruction"]
-            + "\nStop this local operation when: "
-            + task["completion_criterion"]
+            getattr(self, "execution_instruction", task["instruction"])
             + background
         )
 
