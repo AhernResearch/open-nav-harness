@@ -2342,7 +2342,7 @@ class R2RCEEnv:
             return out
 
     @on_sim_thread
-    def retrace_path(self, position, rotation_wxyz=None):
+    def retrace_path(self, position, rotation_wxyz=None, match_3d=False):
         """Walk back along the recorded path to a point the robot passed.
 
         The VLA-rollout counterpart of ``retrace_to``: the target is a pose the
@@ -2364,8 +2364,8 @@ class R2RCEEnv:
             if not path:
                 return {"error": "no poses yet"}
             target = [float(v) for v in position]
-            dists = [math.hypot(float(q[0]) - target[0], float(q[2]) - target[2])
-                     for q in path]
+            dists = [(math.dist(q, target) if match_3d else
+                      math.hypot(float(q[0]) - target[0], float(q[2]) - target[2])) for q in path]
             best = min(dists)
             if best > 0.5:
                 return {"error": "that point is {:.1f} m from anywhere on the recorded "
@@ -2432,7 +2432,7 @@ class R2RCEEnv:
             }
 
     @on_sim_thread
-    def observed_map(self):
+    def observed_map(self, memory_nodes=None, segment_path=None):
         """What the robot has actually seen, in colour, on a fixed global frame.
 
         Cells are painted with the mean RGB of the pixels that landed in them,
@@ -2644,6 +2644,12 @@ class R2RCEEnv:
                        tuple(int(round(START[c] + (END[c] - START[c]) * t))
                              for c in range(3)))
 
+            # Highlight the current execution along its actual trajectory, never
+            # a straight chord between nodes that could cut through a wall.
+            if segment_path:
+                for a, b in zip(segment_path, segment_path[1:]):
+                    stroke(to_px(a), to_px(b), 0.06 * ppm, (80, 235, 235))
+
             # where it started: a blue dot, the same blue the path begins with
             disc(pts[0][0], pts[0][1], 0.20 * ppm + 1.0, EDGE)
             disc(pts[0][0], pts[0][1], 0.20 * ppm, START)
@@ -2682,7 +2688,7 @@ class R2RCEEnv:
             #
             # Drawn after the trail (a badge on the route must not be buried) and
             # before the arrow (the robot must never be buried by a badge).
-            graph = self._graph()
+            graph = {"nodes": memory_nodes} if memory_nodes is not None else self._graph()
             places_px = {}
             nearest_id, nearest_d = None, None
             for n in graph["nodes"]:
@@ -2842,6 +2848,8 @@ class R2RCEEnv:
                 # handle is the metric one — xy in metres from the start, which the
                 # place table carries and which never shifts.
                 "places_px": places_px,
+                "node_layer": "memory" if memory_nodes is not None else "geometric",
+                "segment_legend": "cyan line = latest execution, toward the current red arrow" if memory_nodes is not None else None,
                 "you_are_at_xy": self._place_xy(here),
                 "straight_line_from_start_m": round(from_start, 2),
                 # The CROPPED extent.

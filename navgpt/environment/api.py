@@ -214,14 +214,15 @@ def _retrace_to(env, inputs):
 def _retrace_path(env, inputs):
     if "position" not in inputs:
         raise ValueError("retrace_path requires 'position' (xyz)")
-    out = env.retrace_path(inputs["position"], inputs.get("rotation_wxyz"))
+    out = env.retrace_path(inputs["position"], inputs.get("rotation_wxyz"),
+                           **({"match_3d": True} if inputs.get("match_3d") else {}))
     if "error" in out:
         raise RuntimeError(out["error"])
     return out
 
 
 def _observed_map(env, inputs):
-    out = env.observed_map()
+    out = env.observed_map(**{k: inputs[k] for k in ("memory_nodes", "segment_path") if k in inputs})
     if "error" in out:
         raise RuntimeError(out["error"])
     return out

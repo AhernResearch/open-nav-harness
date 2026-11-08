@@ -48,7 +48,9 @@ def test_model_can_continue_repair_reorder_and_stop_without_review_gates():
     m.update_plan(tasks(), "Refined local landmarks")
     m.begin(2)
     assert m.current()["id"] == 2
-    m.remember(0, "Door crossing remains uncertain.", {"map_call": 1})
+    m.memory.begin({"position": [0, 0, 0]}, "f0", "execute_subtask")
+    m.memory.finish({"position": [0, 0, 0]}, "f1", "vla_stop")
+    m.remember(0, 0, "Door crossing remains uncertain.", {"map_call": 1})
     assert "uncertain" in m.policy_instruction()
     m.finish("complete")
     assert m.snapshot()["completion_claim"] == "complete"
@@ -114,6 +116,7 @@ def test_protocol_feedback_does_not_swallow_failure_after_motion_dispatch(monkey
         s._motion_epoch += 1
         raise ValueError("invalid movement response")
 
+    s._last_pose = {"position": [0, 0, 0]}
     # Wrappers resolve the captured bound function; force its environment call to fail.
     monkeypatch.setattr(s, "_call", bad_reply)
     with pytest.raises(RuntimeError, match="after dispatching movement"):

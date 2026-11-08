@@ -12,6 +12,7 @@ from typing import Literal
 from typing_extensions import TypedDict
 
 from .subtasks import SubtaskManager
+from .memory import TopologyMemory
 
 
 class PlanItem(TypedDict):
@@ -28,8 +29,7 @@ class AgenticTasks(SubtaskManager):
         super().__init__(*args, **kwargs)
         self.active_id = None
         self.completion_claim = None
-        self.memories = {}
-        self.memory_revision = 0
+        self.memory = TopologyMemory(self.directory)
 
     def snapshot(self):
         state = super().snapshot()
@@ -40,9 +40,8 @@ class AgenticTasks(SubtaskManager):
             "active_id": self.active_id,
             "completion_claim": self.completion_claim,
             "workflow": "model_owned",
-            "tool_contract": "plan_memory_v1",
-            "memory_revision": self.memory_revision,
-            "memories": [dict(value) for value in self.memories.values()],
+            "tool_contract": "topology_memory_v2",
+            "memory_context": self.memory.context(self.active_id),
         }
 
     def update_plan(self, subtasks, reason):
@@ -121,31 +120,24 @@ class AgenticTasks(SubtaskManager):
     def returned(self, reason):
         self._event("return", reason=reason)
 
-    def remember(self, node_id, caption, evidence):
-        """One bounded caption per map node. Task status belongs only to update_plan."""
-        if type(node_id) is not int or node_id < 0:
-            raise ValueError("node_id must be a nonnegative integer")
-        if not isinstance(caption, str) or not caption.strip() or len(caption) > 800:
-            raise ValueError("caption must contain 1-800 characters")
-        entry = {"node_id": node_id, "caption": caption.strip(), **evidence}
-        updated = {**self.memories, node_id: entry}
-        if sum(len(m["caption"]) for m in updated.values()) > 4000:
-            raise ValueError("Memory exceeds 4000 characters; shorten existing node captions first")
-        previous = self.memories.get(node_id)
-        self.memories = updated
-        self.memory_revision += 1
-        self.summary = f"Node {node_id}: {caption.strip()}"
-        self.needs_review = False
-        self._event("memory_update", previous=previous, memory=entry, memory_revision=self.memory_revision)
+    def remember(self, start_node_id, end_node_id, caption, evidence):
+        previous, entry = self.memory.remember(start_node_id, end_node_id, caption, evidence)
+        self._event("memory_update", previous_caption=previous, memory=entry,
+                    evidence=evidence, memory_revision=self.memory.revision)
         return entry
+
+    def observe(self, views, pose, steps):
+        frame_id = super().observe(views, pose, steps)
+        if pose.get("position"):
+            self.memory.observe(pose, frame_id)
+        return frame_id
 
     def policy_instruction(self):
         task = self.current()
-        background = (
-            ("\nLatest observed-place memory (may contain uncertainty; not an action): " + self.summary)
-            if self.summary
-            else ""
-        )
+        latest = next((e for e in reversed(self.memory.edges) if e["caption"]), None)
+        background = ("\nLatest executed-segment memory (model assessment, not an action): "
+                      + f"{latest['start_node_id']} -> {latest['end_node_id']}: {latest['caption']}"
+                      if latest else "")
         return (
             task["instruction"]
             + "\nStop this local operation when: "
@@ -173,7 +165,9 @@ TOOL_DESCRIPTIONS = {
         "Inspect the observed top-down colour map, travelled path, current pose and numbered visited nodes. "
         "Unknown cells are unobserved, not free space. Path colour runs blue (start) to red (recent); "
         "the red arrow is current pose. The map keeps a fixed world orientation but its crop can change. "
-        "The result supplies scale, coordinates, bearings and node distances. Does not move or reveal the goal."
+        "IDs identify execution-boundary places, including revisits; captions belong to directed traversals. "
+        "Returns the pending start -> end segment, recent memory and an index for read_memory. "
+        "Read this map in a separate turn before update_memory. Does not move or reveal the goal."
     ),
     "navigate_relative": (
         "Turn by turn_deg (positive left, negative right) and attempt distance_m metres of walking. "

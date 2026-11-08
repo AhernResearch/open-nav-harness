@@ -143,50 +143,75 @@ images, and stop independently of plan checkboxes. Initial observation/decomposi
 and evidence-based handoff review are prompting guidance. `subtask` preserves the
 previous strict workflow for comparisons; `global` preserves full-route delegation.
 
-### Plan/memory tool contract v1
+### Topology memory contract v2
 
-Agentic mode exposes ten tools. `update_plan` and `update_memory` replace the previous
-plan/review/annotation surface; `annotate_node` and `review_subtask` remain only in legacy
-profiles. Existing frozen experiments require a new configuration/source fingerprint.
-The state records `tool_contract: plan_memory_v1`.
+Agentic mode exposes eleven tools, including `update_plan`, `update_memory` and
+`read_memory`. Legacy profiles retain their old interfaces. New experiments must freeze
+new configuration/source fingerprints; old traces are not reinterpreted as v2. The
+pre-change implementation and annotation audit are preserved at commit `b281792`.
 
-`update_plan(subtasks, reason)` replaces the complete ordered plan. Each item requires
-`id` (positive integer), `instruction`, `completion_criterion`, and `status`:
-`pending`, `in_progress`, or `completed`. IDs must be unique, with at most one item
-in progress. Fields outside this schema are rejected. Retained tasks keep their IDs;
-incorrect completions can be reopened through a new plan. Validation precedes mutation.
-The old `active`/`accepted` statuses are not silently accepted in this contract.
-Executing a selected unfinished task marks it in progress; only a plan update can
-mark it completed. The plan never starts movement by itself.
+`update_plan(subtasks, reason)` replaces the ordered plan. Each task has a unique positive
+`id`, `instruction`, `completion_criterion`, and `status` (`pending`, `in_progress`,
+`completed`), with at most one in progress. Only plan updates mark completion.
 
-`update_memory(node_id, caption)` takes exactly those two required fields. `node_id`
-is the existing integer map-node ID. `caption` combines spatial description, execution
-review, failed attempts and uncertainty. It replaces only that node's previous caption,
-without changing task status, node geometry, return anchors or recorded photographs.
-Captions contain 1–800 characters, with a 4000-character total budget. An overflow is a
-recoverable error asking the model to shorten existing captions, never silent truncation.
+One `TopologyMemory` owns the graph in `live/subtasks/topology.json`, independent of the
+legacy dense geometric graph. Nodes contain stable IDs, actual 3D positions and frame
+references; a new boundary reuses the closest node within 0.25 m in 3D, or creates a node.
+This is conservative geometric matching, not visual room recognition. Observe calls do
+not create new nodes after initialization. Every public movement (`execute_subtask`,
+`navigate_relative`, `navigate_to_node`) records one directed execution edge, including
+zero-displacement/self-loop and unsuccessful attempts. Parallel and reverse traversals
+remain distinct. The dense actual trajectory is retained for execution and retracing,
+not exposed as additional memory nodes. Return uses a 3D match on the recorded path;
+it never infers a shortcut through unknown ground.
 
-Only a successful **explicit** `observe_map` grants memory-write access. The session
-records its call number, image SHA-256, shown node IDs, motion epoch and camera frame.
-The target must be among that map's node IDs. Failed reads revoke access. Any dispatched
-movement/rotation or new VLA execution invalidates the receipt, even if the VLA immediately
-stops. Automatically returned rollout/retrace maps do not grant access. Several nodes
-may be annotated from one valid read. Rejections change no captions or task state and
-return tool-error feedback; unknown movement outcomes still retain ownership.
+System-owned edge fields are internal ID/order, actual start/end nodes and poses, tool,
+arguments, task snapshot, trajectory, ordered frame references, execution status and stop
+reason. The **only model-authored memory field is caption**. Failure/exploration/return
+interpretations belong in that caption, not a system-invented semantic classification.
+A missing motion response leaves an uncertain, unclosed edge and retains ownership;
+it cannot invent an endpoint or retry. Validation before movement cancels the tentative
+edge. Backend STOP and budget expiry never establish task completion.
 
-The managed loop rejects an entire response containing both `observe_map` and
-`update_memory` before executing it: the model must receive the image in a preceding
-turn. The shared session gate applies equally to direct, RPC and MCP calls. MCP alone
-does not expose the SDK's model-request boundaries; it verifies a completed map read
-before a write, while the preceding-model-turn check is enforced by the managed loop.
-Do not describe SDK-only traces as proof of exact model-input visibility.
+`update_memory(start_node_id, end_node_id, caption)` has exactly three required fields.
+IDs are the numbers on the map, not task IDs or internal edge IDs. It writes only the
+pending execution; repeat calls revise that execution, never earlier trips with the
+same endpoints. Beginning a new execution closes the prior write window. Captions are
+1–800 characters; storage has no old 4000-character global cap. Full previous captions
+and map-read evidence remain in the event journal. No parallel node-caption store exists.
 
-Memory updates keep previous captions in the event journal, write current captions to
-the same node-label store, and include the latest memory catalog in task state. That
-catalog survives bounded context pruning. The most recently updated caption, including
-its node ID and uncertainty, is passed as background to the next VLA call. There is no
-hidden summarizer or automatic claim of task completion. Tool schemas, state transition
-rules, map gating and transport behavior are covered by contract tests.
+Only an explicit successful `observe_map` grants write access. The receipt records image
+SHA-256, shown IDs, frame, motion epoch and pending execution. Both endpoints must be
+shown and match the pending edge. Every motion or VLA call invalidates it; automatic
+handoff maps, `read_memory` and failed map reads do not grant access. The managed loop
+rejects batches containing both map read and memory write before executing any tool.
+MCP enforces completed tool-read-before-write but cannot independently certify SDK
+model-request boundaries.
+
+The same map renderer draws the memory node layer for agentic mode (with a capability
+check preventing old dense IDs from being mistaken for memory IDs). The latest actual
+execution path is cyan; numbered nodes and the current heading remain visible. VLA
+keyframes and endpoint views are still returned automatically. `observe_map` also returns
+current execution, selected captions and an omitted-history index through task state.
+
+Context selection is deterministic: current execution always retained; latest three
+recorded executions; up to five additional current-node-adjacent records, prioritizing
+same-task association then recency, with directed-pair deduplication. No hidden semantic
+classifier claims to recognize all failures. Whole older records are removed to fit a
+6000 UTF-8-byte memory budget (a conservative byte-tokenizer bound); up to twelve hidden
+pair counts advertise retrieval. Complete history stays persisted. The serving tokenizer
+still checks the entire request. Uncaptioned executions are explicit, not omitted as if
+they never happened. The managed loop replaces repeated task/map summary snapshots with
+one current persisted state, while preserving original tool responses in the trace.
+SDK-managed conversation compaction is external; do not claim identical prompt replacement
+there. The most recent caption is bounded background for the VLA, not a new instruction.
+
+`read_memory(node_id, other_node_id=None, include_images=False, offset=0)` selects incident
+history, or only the specified directed pair. It returns five executions newest-first,
+explicit pagination and system facts plus model captions. Optional images are capped at
+four sampled chronological frames across the page; references/counts disclose omissions.
+`observe_node` remains a lightweight single-place-image lookup using the same memory IDs.
+The memory read does not move, write, or grant map-read permission.
 
 Malformed tool arguments reject the whole unexecuted batch and return repair feedback.
 The next model call can correct them. A repeated call ID, uncertain movement, truncated

@@ -24,7 +24,7 @@ class ContextWindow:
         self.start = 0
 
     def append(self, messages: list[dict], state=None):
-        self.blocks.append(messages)
+        self.blocks.append(copy.deepcopy(messages))
         if state is not None:
             self.state = copy.deepcopy(state)
 
@@ -33,7 +33,8 @@ class ContextWindow:
         stride = 1
         while True:
             messages = list(self.prefix)
-            if start and self.state:
+            topology = bool(self.state and self.state.get("tool_contract") == "topology_memory_v2")
+            if self.state and (start or topology):
                 messages.append(
                     {
                         "role": "user",
@@ -41,7 +42,25 @@ class ContextWindow:
                         + json.dumps(self.state, ensure_ascii=False),
                     }
                 )
-            messages += [m for block in self.blocks[start:] for m in block]
+            for block in self.blocks[start:]:
+                for original in block:
+                    message = original
+                    if topology and original.get("role") == "tool":
+                        # The wire journal keeps the full response. Model input has
+                        # one authoritative current state, not repeated map summaries.
+                        message = copy.deepcopy(original)
+                        lines = []
+                        for line in message.get("content", "").splitlines():
+                            try:
+                                value = json.loads(line)
+                            except ValueError:
+                                value = None
+                            if isinstance(value, dict) and "subtask_state" in value:
+                                lines.append("[State snapshot superseded by current persisted state above.]")
+                            else:
+                                lines.append(line)
+                        message["content"] = "\n".join(lines)
+                    messages.append(message)
             image_count = 0
             for message in messages:
                 content = message.get("content")

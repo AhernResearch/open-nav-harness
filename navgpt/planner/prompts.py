@@ -484,7 +484,7 @@ Observe the initial scene and write a plan of meaningful local goals. Preserve r
 order, directions, counts and endpoint qualifiers; do not invent unseen landmarks.
 An initial room description is context, not an action. Keep a turn with its destination.
 The VLA receives only the chosen local instruction, its completion criterion and your
-latest node memory. It does not know the original full route or global plan.
+latest executed-segment memory. It does not know the original full route or global plan.
 
 Use update_plan to replace your full task list and update completion statuses. Each task has a stable id, instruction and
 completion_criterion; status is pending, in_progress or completed (at most one in_progress). Select the task with
@@ -498,19 +498,30 @@ navigate_relative or navigate_to_node; no review call is required to unlock move
 Use observe_node to retrieve a previous node's image when its caption is insufficient.
 Avoid fetching observations already provided by the preceding tool unless necessary.
 
-Use update_memory(node_id, caption) for place descriptions AND execution reviews:
-record observed progress, failed attempts and uncertainties against a numbered map node.
-First explicitly call observe_map and read its image in a preceding model turn. The node
-must appear on that map. Any movement, rotation or VLA execution requires a new map read.
-Maps returned automatically by execution do not replace this explicit read requirement.
-Never batch observe_map and update_memory in one response. A caption replaces only that
-node's previous memory; keep still-relevant facts. Memory persists through context pruning,
-and the latest caption is background for the next VLA call. Update task status only through
-update_plan. Do not describe unexecuted future clauses as completed history. Task switches
-start a new VLA context with nearby boundary frames. You can set reset_context and
-history_frames/boundary_frames to control what the VLA sees. Earlier images remain
-in the trace and node images can be retrieved, but not all old conversation
-images remain in the model's bounded context.
+Use update_memory(start_node_id, end_node_id, caption) to summarize the CURRENT execution.
+Nodes are places at execution boundaries; captions describe directed experiences between
+places, not the places themselves. Both IDs must be the numbers printed on observe_map
+and must match its pending segment. First call observe_map after the latest movement,
+then read it in a preceding model turn. Never batch observe_map and update_memory.
+Automatically returned maps and read_memory do not satisfy this read requirement.
+Summarize what was done, what changed, unfinished conditions and uncertainty. For an
+exploration describe the question and observed discoveries; for a failed attempt describe
+what was not achieved and the evidence; for a return explain why and where you returned.
+Not finding the target does not establish that a passage is impassable.
+A second write revises only this execution; the next movement closes it. Repeated trips
+between the same nodes remain separate. Update task status only through update_plan.
+Unwritten segments are explicitly marked, and movement is not gated on caption writing.
+
+observe_map supplies bounded recent memory and history related to your current node,
+plus an index of omitted records. read_memory(node_id) retrieves incoming/outgoing history;
+read_memory(node_id, other_node_id) retrieves that direction only. Use next_offset for
+older pages and include_images=true when past visual evidence could change your decision.
+Memory captions are prior model assessments, not unquestionable facts. When an old branch,
+failed approach or ambiguous location matters, consult its history before repeating it.
+The latest map memory context supersedes earlier snapshots. Full history stays in storage.
+Task switches start a new VLA context with nearby boundary frames. You can set reset_context
+and history_frames/boundary_frames to control what the VLA sees. Current execution keyframes
+are provided automatically; older images can be retrieved without carrying them every turn.
 
 A doorway visible ahead does not establish that it was crossed. Similar beds or rooms
 are not interchangeable: use ordered transitions and spatial continuity to identify

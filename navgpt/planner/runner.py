@@ -339,7 +339,7 @@ def parse_episodes(spec: str) -> list[int]:
 EXPECTED_TOOLS = {
     "planner_agentic": ["execute_subtask", "navigate_relative", "navigate_to_node",
                         "observe_forward", "observe_map", "observe_node", "observe_panorama",
-                        "terminate_episode", "update_memory", "update_plan"],
+                        "terminate_episode", "update_memory", "update_plan", "read_memory"],
     "planner_subtask": ["annotate_node", "execute_subtask", "navigate_relative",
                         "navigate_to_node", "observe_forward", "observe_map",
                         "observe_panorama", "review_subtask", "terminate_episode", "update_plan"],
@@ -861,7 +861,7 @@ async def run_episode(adapter, cfg: RunConfig, index: int, run_dir: Path) -> dic
     promised_but_absent = sorted(
         named & {"navigate_relative", "navigate_to_node", "annotate_node",
                  "observe_panorama", "observe_map", "observe_forward", "navigate_primitive",
-                 "navigate_by_instruction", "observe_node", "update_plan", "execute_subtask", "review_subtask", "update_memory",
+                 "navigate_by_instruction", "observe_node", "update_plan", "execute_subtask", "review_subtask", "update_memory", "read_memory",
                  "terminate_episode"} - want)
     if promised_but_absent:
         raise RuntimeError(
@@ -965,11 +965,16 @@ async def run_episode(adapter, cfg: RunConfig, index: int, run_dir: Path) -> dic
             try:
                 graph = await asyncio.to_thread(
                     call_function, url, "{}__places".format(cfg.verb_prefix), {})
+                if cfg.condition == "planner_agentic":
+                    topology_path = Path(ctx.mcp_env['NAVGPT_SUBTASK_DIR']) / 'topology.json'
+                    topology = json.loads(topology_path.read_text())
+                    sink.emit("episode_topology", topology)
+                    graph = {"places": list(topology["nodes"].values()), "node_layer": "memory"}
                 # Merge the names/captions/clause bindings the MCP tool server holds. The Environment
                 # server never sees a label, so without this the recorded graph is
                 # geometry only and "did it caption, and did the caption sit where it
                 # thought" is unanswerable without a rerun.
-                if labels_path is not None and labels_path.exists():
+                if cfg.condition != "planner_agentic" and labels_path is not None and labels_path.exists():
                     try:
                         labels = json.loads(labels_path.read_text())
                     except Exception:  # noqa: BLE001
@@ -1015,6 +1020,7 @@ async def run_episode(adapter, cfg: RunConfig, index: int, run_dir: Path) -> dic
             "clauses_bound": clauses_bound,
             "annotate_node_calls": sink.tool_calls.get("annotate_node", 0),
             "update_memory_calls": sink.tool_calls.get("update_memory", 0),
+            "read_memory_calls": sink.tool_calls.get("read_memory", 0),
             "navigate_to_node_calls": sink.tool_calls.get("navigate_to_node", 0),
             "terminate_episode_calls": sink.tool_calls.get("terminate_episode", 0),
             "observe_node_calls": sink.tool_calls.get("observe_node", 0),

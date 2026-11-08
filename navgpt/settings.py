@@ -131,7 +131,7 @@ ALL_TOOLS = ["observe_forward", "observe_panorama", "observe_map", "navigate_by_
 SUBTASK_TOOLS = [tool for tool in ALL_TOOLS if tool != 'navigate_by_instruction'] + [
     'update_plan', 'execute_subtask', 'review_subtask']
 AGENTIC_TOOLS = [t for t in SUBTASK_TOOLS if t not in ('annotate_node', 'review_subtask')] + [
-    'observe_node', 'update_memory']
+    'observe_node', 'update_memory', 'read_memory']
 
 
 def tool_set(tools) -> tuple[str, str]:

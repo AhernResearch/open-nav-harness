@@ -19,13 +19,15 @@ def tool_feedback(result, call_id):
     recorded in the wire request, never hidden from trace consumers.
     """
     texts, images = [], []
+    image_label = ""
     for item in result.content:
         if item.type == "text":
             texts.append(item.text)
+            image_label = item.text if len(item.text) <= 300 else ""
         elif item.type == "image":
             images.extend(
                 [
-                    {"type": "text", "text": "Observation from tool call " + call_id},
+                    {"type": "text", "text": "Observation from tool call " + call_id + (": " + image_label if image_label else "")},
                     {"type": "image_url", "image_url": {"url": f"data:{item.mimeType};base64,{item.data}"}},
                 ]
             )

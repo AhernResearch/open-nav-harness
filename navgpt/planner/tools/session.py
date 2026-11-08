@@ -152,6 +152,7 @@ class NavigationSession:
             self._register("update_plan", self.update_agentic_plan.__doc__, self.update_agentic_plan)
             self._register("execute_subtask", self.execute_agentic_task.__doc__, self.execute_agentic_task)
             self._register("update_memory", self.update_memory.__doc__, self.update_memory)
+            self._register("read_memory", self.read_memory.__doc__, self.read_memory)
         elif self._SUBTASK:
             self._register("update_plan", self.update_plan.__doc__, self.update_plan)
             self._register("execute_subtask", self.execute_subtask.__doc__, self.execute_subtask)
@@ -299,6 +300,8 @@ class NavigationSession:
                 detail = resp.text[:200]
             raise RuntimeError(detail or "{} {}".format(resp.status_code, resp.reason))
         output = resp.json()["outputs"]
+        if output.get("error") and self._AGENTIC:
+            raise RuntimeError(str(output["error"]))
         if (
             self._SUBTASK
             and motion
@@ -307,6 +310,13 @@ class NavigationSession:
             and (not (motion == "step_discrete" and inputs.get("action") == 0))
         ):
             self._tasks.mark_motion()
+        if self._AGENTIC:
+            for frame in output.get("motion_history", []):
+                if frame.get("pose", {}).get("position"):
+                    self._tasks.memory.record(frame["pose"])
+            if output.get("pose", {}).get("position"):
+                self._last_pose = output["pose"]
+                self._tasks.memory.record(output["pose"])
         if capture:
             self._feed_passive_history(output.pop("motion_history", []))
         return output
@@ -523,6 +533,8 @@ class NavigationSession:
 
     def _auto_label_start(self) -> None:
         """Node 0 is where the episode began; say so without spending a turn on it."""
+        if self._AGENTIC:
+            return None
         if not self._HAS_PLACES or 0 in self._place_labels:
             return
         try:
@@ -556,8 +568,8 @@ class NavigationSession:
             dist = float(distance_m)
         except (TypeError, ValueError):
             return ["invalid arguments — turn_deg and distance_m must be numbers"]
-        if dist < 0:
-            return ["distance_m must be >= 0 (use turn_deg to turn around)"]
+        if not math.isfinite(bearing) or not math.isfinite(dist) or dist < 0:
+            raise ValueError("Finite turn_deg and nonnegative distance_m are required")
         predicted = None
         try:
             fresh = self._pano().get("scan")
@@ -617,7 +629,16 @@ class NavigationSession:
         drift into describing the same picture differently.
         """
         try:
-            out = self._call("{}__observed_map".format(self.VERB_PREFIX), {})
+            inputs = {}
+            if self._AGENTIC:
+                memory = self._tasks.memory
+                edge = memory.edges[memory.pending] if memory.pending is not None else None
+                inputs = {"memory_nodes": [{"id": n["id"], "position": n["position"]}
+                                           for n in memory.nodes.values()],
+                          "segment_path": edge["trajectory"] if edge else []}
+            out = self._call("{}__observed_map".format(self.VERB_PREFIX), inputs)
+            if self._AGENTIC and out.get("node_layer") != "memory":
+                raise RuntimeError("Environment lacks topology memory map support; update the owned environment")
             png = base64.b64decode(out["png"])
             if self._SUBTASK:
                 self._tasks.mark_map()
@@ -642,6 +663,7 @@ class NavigationSession:
                 fields[key] = out[src]
         if self._AGENTIC:
             fields["places_px"] = out.get("places_px", {})
+            fields["segment_legend"] = out.get("segment_legend")
         if self._ABLATION:
             for key in (
                 "places_px",
@@ -692,6 +714,8 @@ class NavigationSession:
         Keeps, per place, the frame whose pose is CLOSEST to it, so a picture is never
         attributed to a place the camera was two metres from when a nearer one exists.
         """
+        if self._AGENTIC:
+            return None
         if not (self._HAS_PLACES and trace) or self.LIVE_DIR is None:
             return
         payload = self._fetch_places()
@@ -730,6 +754,8 @@ class NavigationSession:
 
     def _frame_here(self) -> None:
         """Remember the picture taken at the place the robot is standing on. Free."""
+        if self._AGENTIC:
+            return None
         if not (self._HAS_PLACES and self._recent_frames):
             return
         payload = self._fetch_places()
@@ -851,6 +877,8 @@ class NavigationSession:
         fact the agent must choose to fetch tends to be ignored, and the moment that
         matters is precisely while it is walking away from a place it named.
         """
+        if self._AGENTIC:
+            return None
         payload = self._fetch_places()
         if not payload or not payload.get("places"):
             return None
@@ -904,7 +932,7 @@ class NavigationSession:
         (png, status) = got
         self._bump_obs(png, "map", kind="map")
         table = None
-        if self._HAS_PLACES:
+        if self._HAS_PLACES and not self._AGENTIC:
             payload = self._fetch_places()
             if payload and payload.get("places"):
                 table = self._format_places(payload)
@@ -923,6 +951,7 @@ class NavigationSession:
                 "map_sha256": hashlib.sha256(png).hexdigest(),
                 "node_ids": sorted(int(n) for n in status.get("places_px", {})),
                 "frame_id": self._tasks.frames[-1]["id"] if self._tasks.frames else None,
+                "pending_edge_id": self._tasks.memory.pending,
             }
             self._tasks._event("memory_map_read", **self._memory_map_read)
             status["memory_read"] = dict(self._memory_map_read)
@@ -1165,7 +1194,7 @@ class NavigationSession:
             content.append(label)
             content.append(Image(data=png, format="png"))
         map_fields: dict[str, Any] = {}
-        if self.VLA_MAP:
+        if self.VLA_MAP and not self._AGENTIC:
             got = self._fetch_map()
             if got[0] is not None:
                 (map_png, map_fields) = got
@@ -1245,6 +1274,8 @@ class NavigationSession:
         return content
 
     def go(self, target: Any) -> list:
+        if self._AGENTIC:
+            return self._return_memory_node(target)
         """Walk back to a recorded place, or to a waypoint of the last VLA rollout
         ("wp N"). See _GO_DESC."""
         self._tool_enter("navigate_to_node")
@@ -1561,6 +1592,8 @@ class NavigationSession:
         list then reads as the journey, which is the frame the instruction is written in.
         Numbers lead, because retrieval is mostly by number.
         """
+        if self._AGENTIC:
+            return None
         payload = self._fetch_places()
         if not payload:
             return None
@@ -1599,6 +1632,11 @@ class NavigationSession:
         )
 
     def recall(self, place: Any) -> list:
+        if self._AGENTIC:
+            if type(place) is not int or place not in self._tasks.memory.nodes:
+                raise ValueError("Use a node ID printed on observe_map")
+            refs = self._tasks.memory.nodes[place]["observation_refs"]
+            return self._memory_images(refs[-1:]) or ["No image recorded at this node"]
         """The frame a place was recorded at. On demand, never in a listing."""
         self._tool_enter("observe_node")
         try:
@@ -1657,11 +1695,49 @@ class NavigationSession:
             def task_call(*args, **kwargs):
                 with self._scheduler.lock:
                     before_motion = self._motion_epoch
+                    segment = self._AGENTIC and name in ("execute_subtask", "navigate_relative", "navigate_to_node")
+                    begun = False
                     try:
+                        if segment:
+                            if self._episode_over:
+                                raise ValueError("Episode is already over")
+                            pose = self._last_pose or (self._tasks.frames[-1]["pose"] if self._tasks.frames else {})
+                            task_id = kwargs.get("task_id", self._tasks.active_id)
+                            task = next((t for t in self._tasks.tasks if t["id"] == task_id), None)
+                            self._tasks.memory.begin(pose, self._tasks.frames[-1]["id"] if self._tasks.frames else None,
+                                                     name, task, kwargs)
+                            begun = True
+                            self._memory_map_read = None
                         if not self._AGENTIC and name in ("navigate_relative", "navigate_to_node"):
                             self._tasks.begin()
                         result = fn(*args, **kwargs)
+                        if segment:
+                            reason = "tool_return"
+                            for item in result:
+                                if isinstance(item, str) and item.startswith("{"):
+                                    status = json.loads(item)
+                                    reason = status.get("subtask_return", status.get("end_reason", status.get("termination_reason", reason)))
+                                    if status.get("blocked"):
+                                        reason = "blocked"
+                            pose = self._last_pose
+                            if not pose:
+                                raise RuntimeError("Execution ended without a confirmed pose")
+                            frame = self._tasks.frames[-1] if self._tasks.frames else None
+                            frame_id = (frame["id"] if frame and frame["motion_version"] == self._tasks.motion_version
+                                        and frame["pose"].get("position") == pose.get("position") else None)
+                            self._tasks.memory.finish(pose, frame_id, reason)
+                            self._tasks._event("execution_memory", **self._tasks.memory.status())
+                            got = self._fetch_map()
+                            if got[0] is not None:
+                                self._bump_obs(got[0], "map", kind="map")
+                                result.extend(["Execution-boundary map; use observe_map before writing memory.",
+                                               Image(data=got[0], format="png")])
                     except ValueError as exc:
+                        if begun:
+                            if self._motion_epoch != before_motion:
+                                self._tasks.memory.uncertain(str(exc))
+                            else:
+                                self._tasks.memory.cancel()
                         if self._motion_epoch != before_motion:
                             raise RuntimeError("Tool failed after dispatching movement; retain the lease") from exc
                         if self._AGENTIC:
@@ -1670,6 +1746,10 @@ class NavigationSession:
                                 TextContent(text=json.dumps({"subtask_state": self._tasks.snapshot()})),
                             ])
                         result = [json.dumps({"protocol_error": str(exc)})]
+                    except Exception as exc:
+                        if begun:
+                            self._tasks.memory.uncertain(str(exc))
+                        raise
                     result.append(json.dumps({"subtask_state": self._tasks.snapshot()}))
                     return result
 
@@ -1799,35 +1879,84 @@ class NavigationSession:
         finally:
             self._rollout_limits = None
 
-    def update_memory(self, node_id: int, caption: str) -> list:
-        """Write or replace the caption of a numbered map node (1-800 characters).
+    def update_memory(self, start_node_id: int, end_node_id: int, caption: str) -> list:
+        """Summarize the current execution from start_node_id to end_node_id (1-800 characters).
 
-        First call observe_map and read its returned image in a preceding model turn.
-        The node must appear on that map. Movement, rotation or VLA execution invalidates
-        the read: call observe_map again. Automatically returned maps do not grant access.
-        Describe this place, observed progress, failed attempts and uncertainty together.
-        Replaces this node's previous caption; preserve still-relevant facts. Total memory
-        is limited to 4000 characters. Does not change node geometry or task status.
-        Use update_plan for task completion. Memory survives Planner pruning and the latest
-        caption is background for the next VLA delegation.
+        Both IDs are the numbers printed on observe_map, not task IDs. First call observe_map
+        AFTER the latest motion and read it in a preceding model turn; automatic maps and
+        read_memory do not grant write access. IDs must match the pending segment on that map.
+        Describe progress, discoveries, failed conditions, return reasons and uncertainty
+        supported by this segment's ordered images. Exploration and return are different
+        experiences; failure to find an object does not prove a passage is blocked.
+        Only the current segment is writable. Repeating this call revises its caption;
+        starting another movement closes it. Earlier traversals are never overwritten.
+        Geometry/evidence are system-owned. Task status belongs to update_plan.
         """
         self._tool_enter("update_memory")
         read = self._memory_map_read
         if not read or read["motion_epoch"] != self._motion_epoch:
             raise ValueError("Call observe_map and read its image after the latest movement before update_memory")
-        if node_id not in read["node_ids"]:
-            raise ValueError("node_id must be present on the last explicitly observed map")
+        if any(n not in read["node_ids"] for n in (start_node_id, end_node_id)):
+            raise ValueError("Both node IDs must appear on the last explicitly observed map")
+        if read["pending_edge_id"] != self._tasks.memory.pending:
+            raise ValueError("Read observe_map for the current execution segment first")
         evidence = {key: value for key, value in read.items() if key != "node_ids"}
-        entry = self._tasks.remember(node_id, caption, evidence)
-        # Keep existing geometric anchors and node photographs. Never attach the current
-        # robot pose/image to an arbitrary historical node when changing its caption.
-        label = dict(self._place_labels.get(node_id) or {})
-        label.setdefault("name", f"node {node_id}")
-        label["caption"] = entry["caption"]
-        self._place_labels[node_id] = label
-        self._dump_labels()
-        self._live_log({"update_memory": node_id, "memory_revision": self._tasks.memory_revision})
-        return [json.dumps({"updated_memory": entry, "memory_revision": self._tasks.memory_revision})]
+        entry = self._tasks.remember(start_node_id, end_node_id, caption, evidence)
+        self._live_log({"update_memory": [start_node_id, end_node_id],
+                        "memory_revision": self._tasks.memory.revision})
+        return [json.dumps({"updated_memory": entry})]
+
+    def read_memory(self, node_id: int, other_node_id: int | None = None,
+                    include_images: bool = False, offset: int = 0) -> list:
+        """Read recorded history using map node IDs; does not move or grant memory-write access.
+
+        node_id alone selects all incoming/outgoing experiences. With other_node_id,
+        select only node_id -> other_node_id, never the reverse direction. Returns up to
+        5 records newest-first, including unsummarized executions and actual stop reasons.
+        Pass returned next_offset for older records. include_images loads at most 4 ordered
+        keyframes across this page, with sequence/frame labels; omitted frames stay stored.
+        Captions are model assessments, not verified success or permanent traversability.
+        """
+        self._tool_enter("read_memory")
+        page = self._tasks.memory.read(node_id, other_node_id, offset)
+        images = []
+        if include_images:
+            candidates = [(record["sequence"], ref) for record in page["records"]
+                          for ref in record["frame_refs"]]
+            chosen = self._tasks.memory.sample(candidates, self._tasks.memory.IMAGE_LIMIT)
+            for sequence, ref in chosen:
+                images.extend([f"Execution {sequence}, {ref}", *self._memory_images([ref])])
+            page["image_selection"] = chosen
+            page["image_limit"] = self._tasks.memory.IMAGE_LIMIT
+        return [json.dumps(page, ensure_ascii=False), *images]
+
+    def _memory_images(self, refs):
+        images = []
+        for ref in refs:
+            frame = next((f for f in self._tasks.frames if f["id"] == ref), None)
+            if frame:
+                views = frame["views"]
+                value = views.get("policy_front") or views.get("front")
+                if value:
+                    images.append(Image(data=base64.b64decode(value), format="png"))
+        return images
+
+    def _return_memory_node(self, node_id):
+        self._tool_enter("navigate_to_node")
+        if type(node_id) is not int or node_id not in self._tasks.memory.nodes:
+            raise ValueError("navigate_to_node requires a node ID printed on observe_map")
+        node = self._tasks.memory.nodes[node_id]
+        result = self._call(self.VERB_PREFIX + "__retrace_path",
+                            {"position": node["position"], "match_3d": True})
+        if result.get("error"):
+            raise RuntimeError(result["error"])
+        self._steps_taken = int(result.get("step_count", self._steps_taken))
+        if result.get("truncated") or result.get("terminated"):
+            self._episode_over, self._end_reason = True, "step_budget_exhausted"
+        pano = self._pano()
+        result["target_node_id"] = node_id
+        result["termination_reason"] = "returned" if result.get("arrived") else "stopped_short"
+        return [json.dumps(result), *self._pano_content(pano)]
 
     def finish_agentic_episode(self, status: str = "complete", reason: str = "") -> list:
         """Permanently STOP here. Declare complete or abort and explain the endpoint evidence.
