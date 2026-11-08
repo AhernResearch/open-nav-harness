@@ -175,14 +175,8 @@ class NavigationSession:
             if self.env.get("NAVGPT_ALLOW_CONTEXT_RESET", "1") == "0" or not self._input_profile.manual_reset:
                 execute = self.execute_agentic_task_without_reset
                 description = description.replace(
-                    "reset_context also starts a new segment within this task.",
-                    "Within the same task, visual history is retained.",
-                )
-            if self._input_profile.history == "episode":
-                description = description.replace(
-                    "History budgets are runtime configuration. Task switches\n        reset the context anchor; Within the same task, visual history is retained.",
-                    "Visual history is runtime-managed using native policy sampling. "
-                    "Within a task it remains continuous; no map captions are sent to the policy.",
+                    "reset_context restarts visual history for this task.\n        ",
+                    "",
                 )
             self._register("execute_subtask", description, execute)
             self._register("update_memory", self.update_memory.__doc__, self.update_memory)
@@ -1245,11 +1239,10 @@ class NavigationSession:
                     continue
                 seen.add(j)
                 fr = trace[j]
-                back = travelled - fr["travelled"]
                 keyframes.append(
                     (
-                        "waypoint {n}/{tot}: step {s}, {inm:.1f} m into the route, {back:.1f} m before where it stopped".format(
-                            n=len(keyframes) + 1, tot=k, s=fr["step"], inm=fr["travelled"], back=back
+                        "Process frame {n}/{tot}: step {s}, travelled {inm:.1f} m".format(
+                            n=len(keyframes) + 1, tot=k, s=fr["step"], inm=fr["travelled"]
                         ),
                         fr["png"],
                     )
@@ -1259,7 +1252,7 @@ class NavigationSession:
         pano = self._pano()
         end_clear = self._clearance_summary(pano.get("scan"), pano)
         end_frames = self._pano_frames(
-            pano, end_clear, "where NavGPT VLA stopped, after {} steps".format(executed)
+            pano, end_clear, "Endpoint after {} steps".format(executed)
         )
         end_pose = pano.get("pose") or {}
         net = 0.0
@@ -1951,28 +1944,21 @@ class NavigationSession:
         return self.arrive("here")
 
     def update_agentic_plan(self, subtasks: list[PlanItem], reason: str) -> list:
-        """Write or revise your plan. Each task needs id, instruction and status.
+        """Replace the full plan; preserve IDs of retained tasks and briefly explain the revision.
 
-        Replace the full plan, preserving IDs for retained tasks and explaining the change.
-        Each status is pending, in_progress or completed; at most one is in_progress.
-        Preserve the original route requirements when changing the approach. Statuses are
-        your assessments, not verification; a failed action is not a completed requirement.
-        Reopen incorrect completions here. This records task state; it does not execute movement.
+        IDs are distinct positive integers. At most one task is in_progress.
+        Reopen completed tasks here before executing them again. Does not move.
         """
         self._tasks.update_plan(subtasks, reason)
         return [json.dumps({"plan_updated": True, "revision": self._tasks.revision})]
 
     def execute_agentic_task(self, task_id: int, instruction: str = "",
                              reset_context: bool = False) -> list:
-        """Delegate one chosen task. Optionally rewrite its remaining instruction from the current pose.
+        """Execute a task by ID. Empty instruction uses the plan; otherwise override this call only.
 
-        Runs until policy stop, blockage or runtime/global limits; no per-call distance or turn cap.
-        VLA stop returns control, not
-        global success: subtask_return=vla_stop means only that the policy requested a stop.
-        History budgets are runtime configuration. Task switches
-        reset the context anchor; reset_context also starts a new segment within this task.
-        Returns route evidence and endpoint views. Request observe_map separately. You choose whether to review, repair,
-        continue, replan or stop; there is no mandatory review gate.
+        reset_context restarts visual history for this task.
+        Runs until VLA stop, blockage or runtime limits. Returns process frames, endpoint
+        views and movement statistics. The episode remains active unless episode_over is true.
         """
         if reset_context and not self._input_profile.manual_reset:
             raise ValueError('This policy retains episode history; task-local reset is unsupported')
@@ -2016,19 +2002,13 @@ class NavigationSession:
         return self.execute_agentic_task(task_id, instruction)
 
     def update_memory(self, start_node_id: int, end_node_id: int, caption: str) -> list:
-        """Summarize the current execution from start_node_id to end_node_id (1-800 characters).
+        """Write a 1-800 character caption for the current traversal.
 
-        Both IDs are the numbers printed on observe_map, not task IDs. First call observe_map
-        AFTER the latest motion and read it in a preceding model turn; automatic maps and
-        read_memory do not grant write access. IDs must match the pending segment on that map.
-        Describe progress, discoveries, failed conditions, return reasons and uncertainty
-        supported by this segment's ordered images. Exploration and return are different
-        experiences; failure to find an object does not prove a passage is blocked.
-        Only the current segment is writable. Repeating this call revises its caption;
-        starting another movement closes it. Earlier traversals are never overwritten.
-        Geometry/evidence are system-owned. Task status belongs to update_plan.
-        Separate observed transitions from inferred identity/completion in the caption;
-        captions are model assessments and do not independently verify plan completion.
+        First call observe_map after the latest movement and read it in a separate model
+        turn; read_memory does not satisfy this requirement. start_node_id and end_node_id
+        must match the pending segment's IDs printed on that map.
+        Describe observed progress, discoveries, failure or return reasons and uncertainty.
+        Repeating this call revises only this segment; the next movement closes it.
         """
         self._tool_enter("update_memory")
         read = self._memory_map_read
@@ -2049,13 +2029,13 @@ class NavigationSession:
                     images: Literal["none", "endpoint", "trajectory"] = "none",
                     views: list[Literal["front", "right", "back", "left"]] | None = None,
                     offset: int = 0) -> list:
-        """Read historical experiences, never move or grant memory-write access.
+        """Read up to five experiences, newest first. Does not move.
 
-        node_id selects incoming/outgoing history; other_node_id restricts node_id -> other_node_id.
-        Five records newest-first; next_offset retrieves older pages. Captions are model assessments.
-        images=endpoint returns one saved snapshot (latest node visit, or newest matched segment's
-        endpoint); views selects its directions, default front. Missing directions are reported,
-        never borrowed from another visit. trajectory returns up to four ordered process frames.
+        node_id selects incoming/outgoing history; other_node_id filters node_id -> other_node_id.
+        Pass returned next_offset as offset for older records. images=none returns text;
+        endpoint adds the latest node visit or newest matching endpoint; trajectory adds
+        up to four process frames. views applies only to endpoint (default front).
+        Missing saved views are reported.
         """
         if views is not None and images != "endpoint":
             raise ValueError("views is only valid with images=endpoint")
@@ -2126,10 +2106,7 @@ class NavigationSession:
         return [json.dumps(result), *self._pano_content(pano)]
 
     def finish_agentic_episode(self, status: Literal["complete", "abort"], reason: str) -> list:
-        """Permanently STOP here. Declare complete or abort and explain the endpoint evidence.
-
-        This is your decision, independent of plan checkboxes. Evaluation measures actual
-        success separately; a completion declaration cannot make a route successful.
+        """Permanently STOP at the current pose. Declare complete or abort and briefly explain why.
         """
         if not reason.strip():
             raise ValueError("Explain why the episode should end")

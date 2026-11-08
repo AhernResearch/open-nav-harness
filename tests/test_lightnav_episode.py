@@ -80,10 +80,9 @@ def test_lightnav_task_instruction_has_no_map_caption_and_no_manual_reset_tool()
     assert "wrong room" in m.policy_instruction()  # Native actor contract unchanged.
     definition = session.tools.definitions["execute_subtask"]
     assert set(definition.inputSchema["properties"]) == {"task_id", "instruction"}
-    assert "runtime-managed" in definition.description
     assert "reset_context" not in definition.description
     briefing = build_briefing_for("planner_agentic", "Go", 500, actor_history="episode")
-    assert "reset_context" not in briefing and "runtime-managed" in briefing
+    assert "reset_context" not in briefing and "only the chosen instruction and visual history" in briefing
     with pytest.raises(ValueError, match="unsupported"):
         session.execute_agentic_task(1, reset_context=True)
 

@@ -194,7 +194,7 @@ async def test_current_context_replaces_old_snapshots_without_erasing_trace(sess
     assert sum("Current persisted" in m["content"] for m in messages) == 1
 
 
-async def test_memory_write_guidance_tracks_actual_map_gate_and_preserves_original(session, tmp_path):
+async def test_memory_write_state_tracks_actual_map_gate_and_preserves_original(session, tmp_path):
     segment(session._tasks.memory, pose(), pose(2))
     window = ContextWindow("system", "Walk down the steps, then enter the room.", "bounded", 1500, 100)
 
@@ -211,12 +211,35 @@ async def test_memory_write_guidance_tracks_actual_map_gate_and_preserves_origin
         window.append([{"role": "tool", "content": json.dumps({"subtask_state": state})}], state)
         messages = await window.build(counter, [], Journal(tmp_path / str(read_map)))
         assert messages[1]["content"] == "Walk down the steps, then enter the room."
-        assert "not verified completion" in messages[-1]["content"]
         projection = json.loads(messages[-1]["content"].split("\n", 1)[1])
         assert projection["map_read_valid"] is read_map
-        assert ("update_memory is unavailable" in projection["memory_write_hint"]) is not read_map
         assert not any(m.get("content") == "old" for m in messages)
     assert window.blocks[0][0]["content"] == "old"
+
+
+async def test_old_map_summaries_pruned_without_losing_images_or_audit(session, tmp_path):
+    segment(session._tasks.memory, pose(), pose(2), "Old assessment.")
+    window = ContextWindow("system", "route", "bounded", 1500, 100)
+    image = {"role": "user", "content": [{"type": "image_url", "image_url": {"url": "old-map"}}]}
+    old = json.dumps({"places_px": {"0": [1, 2]}, "memory_context": session._tasks.memory.context()})
+    window.append([{"role": "tool", "content": old}, image], session._tasks.snapshot())
+    session._tasks.memory.remember(0, 1, "Corrected assessment.", {})
+    new = json.dumps({"places_px": {"1": [3, 4]}, "memory_context": session._tasks.memory.context()})
+    window.append([{"role": "tool", "content": new}], session._tasks.snapshot())
+
+    async def count(messages, _):
+        return 300
+
+    journal = Journal(tmp_path / "trace")
+    for _ in range(2):
+        messages = await window.build(count, [], journal)
+        maps = [json.loads(m['content']) for m in messages if m['role'] == 'tool']
+        assert maps[0] == {"places_px": {"0": [1, 2]}, "historical_map": True}
+        assert maps[1] == json.loads(new)
+        assert image in messages
+        assert "Old assessment" not in json.dumps(messages)
+        assert "Corrected assessment" in json.dumps(messages)
+        assert window.blocks[0][0]['content'] == old
 
 
 async def test_mcp_rpc_gate_and_history_do_not_fence_recoverable_rejections(tmp_path, monkeypatch):

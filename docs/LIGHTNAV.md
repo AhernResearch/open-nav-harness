@@ -15,6 +15,29 @@ image. The legacy context-replacement endpoint is rejected. Planner tools expose
 Only the chosen instruction goes into the native prompt; topology captions and
 Planner summaries are not appended. NavGPT VLA retains its separate bounded profile.
 
+The agentic Planner writes self-contained local navigation goals: an action,
+necessary robot-relative direction, an identifiable destination and a stopping
+location when relevant. It keeps related turns/crossings together and grounds
+added landmarks in observations. Repairs describe the remaining route from the
+current pose, rather than repeatedly asking for "more steps" without a destination.
+Original counts, route constraints and endpoint qualifiers remain mandatory; a
+difficult ordinal cannot be replaced with an easier goal. These wording guidelines
+draw on the upstream [Prompt Guide](https://github.com/lightorigins/LightNav-0#%EF%B8%8F-prompt-guide).
+They are Planner guidance, not schema restrictions or changes to LightNav's native
+prompt. Existing plans and traces stay frozen. Navigation improvement from this
+wording change has not yet been measured.
+
+The Planner prompt and eight active tool descriptions were subsequently condensed
+from 875/566 to 356/323 whitespace-delimited words (using a fixed instruction
+placeholder). Tool schemas and the explicit map-read prerequisite are unchanged.
+Each camera label now appears once beside its image, with the originating call ID;
+structured execution status remains in the tool response. Process images are labelled
+as observed frames rather than predicted waypoints. The context window retains only
+the latest requested map-memory summary; earlier map images and geometry remain
+historical evidence, while full records remain available through `read_memory` and
+the audit trace. Current plan/memory state is injected once without repeated prose
+guidance. These are text/context changes, not measured navigation gains.
+
 An opt-in development ablation sets `harness.actor_history_policy` to
 `completed_subtask` (default: `episode`; agentic LightNav only). When `update_plan`
 marks the last executed task completed, the harness records the current frame as

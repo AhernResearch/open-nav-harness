@@ -1,0 +1,185 @@
+{
+  "created": 1794168920.5691793,
+  "review_commit": "15720e0367fda8c9e6eb300dc1d268b9c0fd7bdc",
+  "scope": "Code review and existing trace audit; no implementation or deployment changes; synthetic terminal-loop probe uses no model or movement.",
+  "rollout_caveat": "The eight rollouts precede the node-pose restoration fix. Current release has tool-level pose validation but no new closed-loop paired runs. Historical success differences are not current-release benchmark evidence.",
+  "timing": {
+    "generation_request_s": 1400.9247300792485,
+    "token_count_s": 70.87367505626753,
+    "summed_episode_wall_s": 1909.0999999999997,
+    "planner_requests": 172,
+    "generation_request_s_fraction": 0.7338142214023617,
+    "token_count_s_fraction": 0.03712412920028681
+  },
+  "rows": [
+    {
+      "policy": "episode",
+      "episode": 0,
+      "success": 1.0,
+      "ne": 0.7152,
+      "wall_s": 155.8,
+      "planner_requests": 14,
+      "generation_request_s": 114.11503500910476,
+      "token_count_s": 3.7177637063432485,
+      "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/910d395a8c0e41b48bbda9f8f1c70d3d/episode/work/ep0000/trace/requests.jsonl",
+      "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/910d395a8c0e41b48bbda9f8f1c70d3d/episode/live/ep0000/subtasks/events.jsonl"
+    },
+    {
+      "policy": "episode",
+      "episode": 456,
+      "success": 1.0,
+      "ne": 2.5972,
+      "wall_s": 433.9,
+      "planner_requests": 43,
+      "generation_request_s": 304.19889334985055,
+      "token_count_s": 21.561517876107246,
+      "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/d79677121725490d9470b8db4e79bb12/episode/work/ep0456/trace/requests.jsonl",
+      "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/d79677121725490d9470b8db4e79bb12/episode/live/ep0456/subtasks/events.jsonl"
+    },
+    {
+      "policy": "episode",
+      "episode": 7006,
+      "success": 0.0,
+      "ne": 5.9524,
+      "wall_s": 309.9,
+      "planner_requests": 28,
+      "generation_request_s": 230.26533818268217,
+      "token_count_s": 9.690612788312137,
+      "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/8c9760ab36054efda43899a68025bb39/episode/work/ep7006/trace/requests.jsonl",
+      "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/8c9760ab36054efda43899a68025bb39/episode/live/ep7006/subtasks/events.jsonl"
+    },
+    {
+      "policy": "episode",
+      "episode": 7648,
+      "success": 0.0,
+      "ne": 10.3456,
+      "wall_s": 175.6,
+      "planner_requests": 16,
+      "generation_request_s": 123.02708540926687,
+      "token_count_s": 4.9111722693778574,
+      "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/01a7045bc13f40bb84098ac8490a31ef/episode/work/ep7648/trace/requests.jsonl",
+      "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/15255edd53a74958ba8b5fbf7a1e74a3/01a7045bc13f40bb84098ac8490a31ef/episode/live/ep7648/subtasks/events.jsonl"
+    },
+    {
+      "policy": "completed_subtask",
+      "episode": 0,
+      "success": 1.0,
+      "ne": 1.211,
+      "wall_s": 99.6,
+      "planner_requests": 10,
+      "generation_request_s": 70.44011217681691,
+      "token_count_s": 2.3637744940351695,
+      "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/45d4fcb0d1a14071820c5e1a0f1be2e9/501d612398774154bd275f1cc05c9885/episode/work/ep0000/trace/requests.jsonl",
+      "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/45d4fcb0d1a14071820c5e1a0f1be2e9/501d612398774154bd275f1cc05c9885/episode/live/ep0000/subtasks/events.jsonl"
+    },
+    {
+      "policy": "completed_subtask",
+      "episode": 456,
+      "success": 1.0,
+      "ne": 2.0506,
+      "wall_s": 355.4,
+      "planner_requests": 25,
+      "generation_request_s": 281.8867010367103,
+      "token_count_s": 9.827022584155202,
+      "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/45d4fcb0d1a14071820c5e1a0f1be2e9/7307c9214fed473e904e9b0c9217793c/episode/work/ep0456/trace/requests.jsonl",
+      "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/45d4fcb0d1a14071820c5e1a0f1be2e9/7307c9214fed473e904e9b0c9217793c/episode/live/ep0456/subtasks/events.jsonl"
+    },
+    {
+      "policy": "completed_subtask",
+      "episode": 7006,
+      "success": 0.0,
+      "ne": 5.9349,
+      "wall_s": 267.8,
+      "planner_requests": 25,
+      "generation_request_s": 200.23432818474248,
+      "token_count_s": 15.850903544342145,
+      "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/45d4fcb0d1a14071820c5e1a0f1be2e9/1ff378d26da447138fd484de0b42a8b9/episode/work/ep7006/trace/requests.jsonl",
+      "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/45d4fcb0d1a14071820c5e1a0f1be2e9/1ff378d26da447138fd484de0b42a8b9/episode/live/ep7006/subtasks/events.jsonl"
+    },
+    {
+      "policy": "completed_subtask",
+      "episode": 7648,
+      "success": 1.0,
+      "ne": 1.1679,
+      "wall_s": 111.1,
+      "planner_requests": 11,
+      "generation_request_s": 76.75723673007451,
+      "token_count_s": 2.9509077935945243,
+      "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/45d4fcb0d1a14071820c5e1a0f1be2e9/c7122424ee93470dbeaf7b0319f10468/episode/work/ep7648/trace/requests.jsonl",
+      "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/45d4fcb0d1a14071820c5e1a0f1be2e9/c7122424ee93470dbeaf7b0319f10468/episode/live/ep7648/subtasks/events.jsonl"
+    }
+  ],
+  "findings": [
+    {
+      "priority": "P1",
+      "title": "Environment termination does not end the planner loop unless explicit STOP succeeds",
+      "code": "nav_harness/providers/runtime.py:197",
+      "synthetic_reproduction": {
+        "generated": [
+          "execute_subtask",
+          "terminate_episode",
+          "terminate_episode",
+          "terminate_episode"
+        ],
+        "executed": [
+          "execute_subtask",
+          "terminate_episode",
+          "terminate_episode",
+          "terminate_episode"
+        ],
+        "error": "planner_turn_budget_exhausted",
+        "last_step_result": {
+          "steps_taken_total": 500,
+          "episode_over": true,
+          "end_reason": "step_budget_exhausted"
+        },
+        "uses_real_model_or_movement": false
+      },
+      "historical_example": {
+        "episode": 456,
+        "with_reset_terminate_calls": 81,
+        "without_reset_terminate_calls": 52,
+        "error": "episode_timeout after 900s"
+      },
+      "recommendation": "End the loop on authoritative terminal environment state; preserve budget failure and explicit_stop=false, never convert it into successful STOP."
+    },
+    {
+      "priority": "P1",
+      "title": "Return restores endpoint pose but provides no continuous return-camera timeline",
+      "code": "navgpt/environment/r2r.py:2386",
+      "evidence": "The loop appends path coordinates; set_state and motion capture occur once after it. Prior 7006 returns have 19/13 trajectory points but only start/end frame references.",
+      "recommendation": "Evaluate continuous return observations or an explicit VLA history boundary as a separate ablation; do not silently mix this with completion cropping."
+    },
+    {
+      "priority": "P2",
+      "title": "Planner completion claims contradict recorded motion and route identity",
+      "code": "navgpt/planner/tools/session.py:1293",
+      "evidence": {
+        "episode_7648_last_segment_height_delta_m": 2.1863,
+        "episode_7648_whole_route_height_delta_m": 1.1974,
+        "caption": "Successfully walked down the stairs",
+        "episode_7006": "A real bed is visible at the final camera; offline reference path enters the opposite side of the hallway. Do not classify the visible bed as hallucinated."
+      },
+      "recommendation": "Supply concise observed motion facts, such as signed height change and before/after visual evidence. Keep completion model-owned; no new completion_criterion fields or hard-coded semantic acceptance."
+    },
+    {
+      "priority": "P2",
+      "title": "Planner context is trimmed by capacity rather than task relevance",
+      "code": "nav_harness/core/context.py:97",
+      "evidence": {
+        "episode_7006_full_images_mean": 23.8571428571,
+        "episode_7006_full_images_max": 32,
+        "episode_7006_crop_images_mean": 21.44,
+        "episode_7006_crop_images_max": 30,
+        "context_peak_tokens_approx": 14000
+      },
+      "recommendation": "Measure a task-aware Planner image-retention policy preserving original instruction, current plan/memory and fresh execution/map evidence. Do not infer server prefill/queue/decode timing from aggregate HTTP latency."
+    }
+  ],
+  "recommended_order": [
+    "Fix terminal-loop lifecycle",
+    "Establish post-pose-fix closed-loop baseline, including 456 and 7006",
+    "Test return/history continuity independently",
+    "Test concise motion evidence and task-aware Planner context separately"
+  ]
+}

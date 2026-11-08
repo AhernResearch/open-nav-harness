@@ -1,0 +1,1416 @@
+{
+  "created": 1794169663.1271052,
+  "implementation_digest": "297ccc1234ef1739a2c4e5b57497212a2c83e9c6e8287cc737ff9afa3d488c78",
+  "release": "/data/nav_storage/nav-harness/releases/async-297ccc1234ef",
+  "episodes": [
+    456,
+    7006
+  ],
+  "arms": [
+    {
+      "policy": "completed_subtask",
+      "experiment_id": "8564bff6880e431e8bd81abfacfa9189",
+      "spec": {
+        "name": "LightNav pose+terminal fix / completed_subtask / baseline2",
+        "planner_service": "eaa85c5c908141f6b57e16a231cdc511",
+        "vla_service": "457941e1ef2448f28537209c16de106e",
+        "execution_pool": [
+          {
+            "environment_service": "7c9024ce60574f8c87f6adab5b0326b0",
+            "execution_service": "c10b40fb9e9140f3b9444521fc788b1e"
+          },
+          {
+            "environment_service": "4aeca142cfde48fe95a540edd017ed37",
+            "execution_service": "c09ae78998624a99b962333d6a275c4b"
+          }
+        ],
+        "episodes": [
+          456,
+          7006
+        ],
+        "purpose": "development",
+        "config": {
+          "dataset": {
+            "name": "r2r",
+            "split": "train"
+          },
+          "environment": {
+            "max_steps": 500,
+            "forward_view_px": 512,
+            "panorama_view_px": 400
+          },
+          "vla": {
+            "backend": "lightnav"
+          },
+          "planner": {
+            "max_turns": 100,
+            "episode_timeout_s": 900,
+            "tools": [
+              "observe_map",
+              "navigate_to_node",
+              "terminate_episode",
+              "update_plan",
+              "execute_subtask",
+              "observe",
+              "update_memory",
+              "read_memory"
+            ]
+          },
+          "harness": {
+            "mode": "agentic",
+            "allow_context_reset": false,
+            "vla_steps_per_call": 0,
+            "actor_history_policy": "completed_subtask"
+          }
+        }
+      },
+      "job_id": "cdadf47253414093acc3c01d3faa3ee1",
+      "included_in_review": true,
+      "rows": [
+        {
+          "attempt_id": "75dffad2580147919908b2e23a2b40b3",
+          "episode": 456,
+          "attempt": 1,
+          "status": "completed",
+          "success": 1.0,
+          "ne": 1.7874,
+          "spl": 1.0,
+          "ndtw": 0.8964,
+          "distance_m": 10.8036,
+          "wall_s": 218.8,
+          "tool_calls": 26,
+          "turns": 26,
+          "vla_calls": 91,
+          "input_tokens": 276276,
+          "cached_input_tokens": 0,
+          "output_tokens": 3793,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/rPc6DW4iMge/rPc6DW4iMge.glb",
+          "episode_id": "457",
+          "training_status": "evaluation_only",
+          "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/cdadf47253414093acc3c01d3faa3ee1/75dffad2580147919908b2e23a2b40b3/episode/work/ep0456/trace/requests.jsonl",
+          "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/cdadf47253414093acc3c01d3faa3ee1/75dffad2580147919908b2e23a2b40b3/episode/live/ep0456/subtasks/events.jsonl",
+          "replay_url": "http://192.168.66.221:18889/?attempt=75dffad2580147919908b2e23a2b40b3",
+          "metrics": {
+            "distance_to_goal": 1.7874,
+            "success": 1.0,
+            "spl": 1.0,
+            "oracle_success": 1.0,
+            "ndtw": 0.8964,
+            "sdtw": 0.8964,
+            "path_length": 10.8036,
+            "steps_taken": 85.0,
+            "stop_called": 1.0,
+            "collisions": 0.0,
+            "teleports": 0.0,
+            "teleport_fallbacks": 0.0,
+            "velocity_steps": 84.0
+          },
+          "tool_counts": {
+            "observe": 3,
+            "update_plan": 5,
+            "execute_subtask": 7,
+            "update_memory": 5,
+            "observe_map": 5,
+            "terminate_episode": 1
+          },
+          "segments": [
+            {
+              "arguments": {
+                "instruction": "Exit the bathroom through the doorway to the left",
+                "task_id": 1
+              },
+              "wall_s": 6.914160251617432,
+              "steps_the_vla_took": 13,
+              "step_budget_for_this_call": 500,
+              "distance_travelled_m": 1.33,
+              "net_displacement_m": 1.31,
+              "blocked_events": 0,
+              "steps_taken_total": 13,
+              "steps_remaining_approx": 487,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 103.42
+            },
+            {
+              "arguments": {
+                "instruction": "Walk through the television room toward the hallway",
+                "task_id": 2
+              },
+              "wall_s": 15.695626258850098,
+              "steps_the_vla_took": 29,
+              "step_budget_for_this_call": 487,
+              "distance_travelled_m": 3.14,
+              "net_displacement_m": 2.88,
+              "blocked_events": 0,
+              "steps_taken_total": 42,
+              "steps_remaining_approx": 458,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 238.57
+            },
+            {
+              "arguments": {
+                "instruction": "Enter the hallway and approach the stairs",
+                "task_id": 3
+              },
+              "wall_s": 9.888116836547852,
+              "steps_the_vla_took": 19,
+              "step_budget_for_this_call": 458,
+              "distance_travelled_m": 2.53,
+              "net_displacement_m": 2.43,
+              "blocked_events": 0,
+              "steps_taken_total": 61,
+              "steps_remaining_approx": 439,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 70.98
+            },
+            {
+              "arguments": {
+                "instruction": "Climb up the stairs, counting steps, and stop on the fourth stair from the top",
+                "task_id": 4
+              },
+              "wall_s": 10.627682209014893,
+              "steps_the_vla_took": 22,
+              "step_budget_for_this_call": 439,
+              "distance_travelled_m": 3.66,
+              "net_displacement_m": 3.33,
+              "blocked_events": 0,
+              "steps_taken_total": 83,
+              "steps_remaining_approx": 417,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 84.87
+            },
+            {
+              "arguments": {
+                "instruction": "Continue climbing up the stairs a few more steps to reach the fourth stair from the top",
+                "task_id": 4
+              },
+              "wall_s": 1.7727203369140625,
+              "steps_the_vla_took": 1,
+              "step_budget_for_this_call": 417,
+              "distance_travelled_m": 0.16,
+              "net_displacement_m": 0.16,
+              "blocked_events": 0,
+              "steps_taken_total": 84,
+              "steps_remaining_approx": 416,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 13.06
+            },
+            {
+              "arguments": {
+                "instruction": "Climb up 2 more steps on the stairs",
+                "task_id": 4
+              },
+              "wall_s": 1.2867119312286377,
+              "steps_the_vla_took": 0,
+              "step_budget_for_this_call": 416,
+              "distance_travelled_m": 0.0,
+              "net_displacement_m": 0.0,
+              "blocked_events": 0,
+              "steps_taken_total": 84,
+              "steps_remaining_approx": 416,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 0.0
+            },
+            {
+              "arguments": {
+                "instruction": "Walk forward up the stairs",
+                "task_id": 4
+              },
+              "wall_s": 1.3151729106903076,
+              "steps_the_vla_took": 0,
+              "step_budget_for_this_call": 416,
+              "distance_travelled_m": 0.0,
+              "net_displacement_m": 0.0,
+              "blocked_events": 0,
+              "steps_taken_total": 84,
+              "steps_remaining_approx": 416,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 0.0
+            }
+          ],
+          "actor_predictions": 91,
+          "crops": [
+            {
+              "event": 97,
+              "kind": "actor_history_crop",
+              "reason": "completed_subtask",
+              "completed_task_id": 1,
+              "next_task_id": 2,
+              "start_frame_id": "frame-000013",
+              "discarded_frames": 13,
+              "retained_frames": 1
+            },
+            {
+              "event": 286,
+              "kind": "actor_history_crop",
+              "reason": "completed_subtask",
+              "completed_task_id": 2,
+              "next_task_id": 3,
+              "start_frame_id": "frame-000042",
+              "discarded_frames": 29,
+              "retained_frames": 1
+            },
+            {
+              "event": 415,
+              "kind": "actor_history_crop",
+              "reason": "completed_subtask",
+              "completed_task_id": 3,
+              "next_task_id": 4,
+              "start_frame_id": "frame-000061",
+              "discarded_frames": 19,
+              "retained_frames": 1
+            }
+          ],
+          "crop_count": 3,
+          "completion_boundaries": [
+            {
+              "event": 94,
+              "kind": "task_completion_boundary",
+              "task_id": 1,
+              "frame_index": 13,
+              "frame_id": "frame-000013"
+            },
+            {
+              "event": 283,
+              "kind": "task_completion_boundary",
+              "task_id": 2,
+              "frame_index": 42,
+              "frame_id": "frame-000042"
+            },
+            {
+              "event": 412,
+              "kind": "task_completion_boundary",
+              "task_id": 3,
+              "frame_index": 61,
+              "frame_id": "frame-000061"
+            },
+            {
+              "event": 594,
+              "kind": "task_completion_boundary",
+              "task_id": 4,
+              "frame_index": 84,
+              "frame_id": "frame-000084"
+            }
+          ],
+          "available_history_frames": {
+            "count": 91,
+            "mean": 12.648351648351648,
+            "p50": 12,
+            "p95": 26,
+            "sum": 1151
+          },
+          "inference_and_context_s": {
+            "count": 91,
+            "mean": 0.1621370989010989,
+            "p50": 0.149225,
+            "p95": 0.237866,
+            "sum": 14.754476000000004
+          },
+          "actor_latency_ms": {
+            "count": 91,
+            "mean": 121.42421832758482,
+            "p50": 116.93882802501321,
+            "p95": 170.96481658518314,
+            "sum": 11049.60386781022
+          },
+          "inference_metrics": {
+            "batch_size": {
+              "count": 91,
+              "mean": 1.021978021978022,
+              "p50": 1.0,
+              "p95": 1.0,
+              "sum": 93.0
+            },
+            "queue_wait_ms": {
+              "count": 91,
+              "mean": 14.370503257141335,
+              "p50": 2.386466134339571,
+              "p95": 97.66478277742863,
+              "sum": 1307.7157963998616
+            },
+            "queue_ms": {
+              "count": 91,
+              "mean": 0.29382209938306075,
+              "p50": 0.2210172824561596,
+              "p95": 0.3232075832784176,
+              "sum": 26.737811043858528
+            },
+            "llm_ms": {
+              "count": 91,
+              "mean": 70.29505718785983,
+              "p50": 64.45346120744944,
+              "p95": 115.11921789497137,
+              "sum": 6396.850204095244
+            },
+            "vit_ms": {
+              "count": 91,
+              "mean": 51.129161139725,
+              "p50": 49.275241792201996,
+              "p95": 68.62872699275613,
+              "sum": 4652.753663714975
+            },
+            "process_sample_ms": {
+              "count": 91,
+              "mean": 22.486619006555813,
+              "p50": 22.782964166253805,
+              "p95": 30.525289941579103,
+              "sum": 2046.282329596579
+            },
+            "vit_cache_hits": {
+              "count": 91,
+              "mean": 5.208791208791209,
+              "p50": 5.0,
+              "p95": 12.0,
+              "sum": 474.0
+            },
+            "vit_cache_misses": {
+              "count": 91,
+              "mean": 1.3626373626373627,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 124.0
+            },
+            "execution_ms": {
+              "count": 91,
+              "mean": 153.96760026463767,
+              "p50": 141.26697508618236,
+              "p95": 227.7612891048193,
+              "sum": 14011.051624082029
+            }
+          },
+          "planner_requests": 26,
+          "planner_elapsed_s": 148.6043845829554,
+          "planner_tokens": {
+            "prompt_tokens": 276276,
+            "completion_tokens": 3793
+          },
+          "initial_request_sha256": "0d62dfc29a8da72974357a0ebf7ecdfbdc6a7d5b41926f87a101da3bc6ad15af",
+          "initial_plan": {
+            "reason": "Initial plan based on observations. I'm in a bathroom and need to exit through the doorway to my left, then navigate through the television room to the hallway, find stairs, and go up to the fourth from the top stair.",
+            "subtasks": [
+              {
+                "id": 1,
+                "instruction": "Exit the bathroom through the doorway to the left",
+                "status": "pending"
+              },
+              {
+                "id": 2,
+                "instruction": "Walk through the television room toward the hallway",
+                "status": "pending"
+              },
+              {
+                "id": 3,
+                "instruction": "Enter the hallway and find the stairs",
+                "status": "pending"
+              },
+              {
+                "id": 4,
+                "instruction": "Go up the stairs and stop on the fourth from the top stair",
+                "status": "pending"
+              }
+            ]
+          },
+          "first_execution": {
+            "instruction": "Exit the bathroom through the doorway to the left",
+            "task_id": 1
+          },
+          "contiguous_history_verified": true,
+          "plain_instruction_verified": true,
+          "lifecycle_events": [
+            {
+              "schema_version": 1,
+              "seq": 158,
+              "time": 1794169884.570292,
+              "kind": "environment_end",
+              "end_reason": "stop_called",
+              "explicit_stop": true,
+              "source_tool": "terminate_episode",
+              "call_id": "chatcmpl-tool-9e5d6ad7fb59f65a",
+              "steps_taken_total": 85
+            },
+            {
+              "schema_version": 1,
+              "seq": 159,
+              "time": 1794169884.7758803,
+              "kind": "session_end",
+              "error": null,
+              "explicit_stop": true,
+              "environment_end_reason": "stop_called",
+              "usage": {
+                "input_tokens": 276276,
+                "cached_input_tokens": 0,
+                "output_tokens": 3793
+              }
+            }
+          ],
+          "zero_motion_executions": 2,
+          "execution_tool_wall_s": 47.50019073486328,
+          "node_returns": 0
+        },
+        {
+          "attempt_id": "47f928a9d47f4bf3bb7de234f5c2cb1f",
+          "episode": 7006,
+          "attempt": 1,
+          "status": "completed",
+          "success": 1.0,
+          "ne": 0.267,
+          "spl": 0.8594,
+          "ndtw": 0.8175,
+          "distance_m": 8.2318,
+          "wall_s": 164.3,
+          "tool_calls": 19,
+          "turns": 19,
+          "vla_calls": 66,
+          "input_tokens": 193717,
+          "cached_input_tokens": 0,
+          "output_tokens": 2570,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/7y3sRwLe3Va/7y3sRwLe3Va.glb",
+          "episode_id": "7016",
+          "training_status": "evaluation_only",
+          "trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/cdadf47253414093acc3c01d3faa3ee1/47f928a9d47f4bf3bb7de234f5c2cb1f/episode/work/ep7006/trace/requests.jsonl",
+          "events": "/home/holo/robots/nav-harness-async/state/async-integration/runs/cdadf47253414093acc3c01d3faa3ee1/47f928a9d47f4bf3bb7de234f5c2cb1f/episode/live/ep7006/subtasks/events.jsonl",
+          "replay_url": "http://192.168.66.221:18889/?attempt=47f928a9d47f4bf3bb7de234f5c2cb1f",
+          "metrics": {
+            "distance_to_goal": 0.267,
+            "success": 1.0,
+            "spl": 0.8594,
+            "oracle_success": 1.0,
+            "ndtw": 0.8175,
+            "sdtw": 0.8175,
+            "path_length": 8.2318,
+            "steps_taken": 63.0,
+            "stop_called": 1.0,
+            "collisions": 0.0,
+            "teleports": 0.0,
+            "teleport_fallbacks": 0.0,
+            "velocity_steps": 62.0
+          },
+          "tool_counts": {
+            "observe": 1,
+            "update_plan": 5,
+            "execute_subtask": 4,
+            "observe_map": 4,
+            "update_memory": 4,
+            "terminate_episode": 1
+          },
+          "segments": [
+            {
+              "arguments": {
+                "instruction": "Walk up the stairs",
+                "task_id": 1
+              },
+              "wall_s": 4.699029922485352,
+              "steps_the_vla_took": 8,
+              "step_budget_for_this_call": 500,
+              "distance_travelled_m": 1.24,
+              "net_displacement_m": 1.23,
+              "blocked_events": 0,
+              "steps_taken_total": 8,
+              "steps_remaining_approx": 492,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 43.12
+            },
+            {
+              "arguments": {
+                "instruction": "Make a left on the stair landing and proceed along the hallway",
+                "task_id": 2
+              },
+              "wall_s": 13.186002254486084,
+              "steps_the_vla_took": 28,
+              "step_budget_for_this_call": 492,
+              "distance_travelled_m": 4.12,
+              "net_displacement_m": 3.62,
+              "blocked_events": 0,
+              "steps_taken_total": 36,
+              "steps_remaining_approx": 464,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 93.36
+            },
+            {
+              "arguments": {
+                "instruction": "Make a left through the open door on the left into the bedroom",
+                "task_id": 3
+              },
+              "wall_s": 6.595426082611084,
+              "steps_the_vla_took": 12,
+              "step_budget_for_this_call": 464,
+              "distance_travelled_m": 1.21,
+              "net_displacement_m": 1.19,
+              "blocked_events": 0,
+              "steps_taken_total": 48,
+              "steps_remaining_approx": 452,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 102.59
+            },
+            {
+              "arguments": {
+                "instruction": "Walk to the foot of the bed and wait there",
+                "task_id": 4
+              },
+              "wall_s": 7.292188882827759,
+              "steps_the_vla_took": 14,
+              "step_budget_for_this_call": 452,
+              "distance_travelled_m": 1.67,
+              "net_displacement_m": 1.67,
+              "blocked_events": 0,
+              "steps_taken_total": 62,
+              "steps_remaining_approx": 438,
+              "episode_over": false,
+              "subtask_return": "vla_stop",
+              "turn_travelled_deg": 39.84
+            }
+          ],
+          "actor_predictions": 66,
+          "crops": [
+            {
+              "event": 67,
+              "kind": "actor_history_crop",
+              "reason": "completed_subtask",
+              "completed_task_id": 1,
+              "next_task_id": 2,
+              "start_frame_id": "frame-000008",
+              "discarded_frames": 8,
+              "retained_frames": 1
+            },
+            {
+              "event": 250,
+              "kind": "actor_history_crop",
+              "reason": "completed_subtask",
+              "completed_task_id": 2,
+              "next_task_id": 3,
+              "start_frame_id": "frame-000036",
+              "discarded_frames": 28,
+              "retained_frames": 1
+            },
+            {
+              "event": 337,
+              "kind": "actor_history_crop",
+              "reason": "completed_subtask",
+              "completed_task_id": 3,
+              "next_task_id": 4,
+              "start_frame_id": "frame-000048",
+              "discarded_frames": 12,
+              "retained_frames": 1
+            }
+          ],
+          "crop_count": 3,
+          "completion_boundaries": [
+            {
+              "event": 64,
+              "kind": "task_completion_boundary",
+              "task_id": 1,
+              "frame_index": 8,
+              "frame_id": "frame-000008"
+            },
+            {
+              "event": 247,
+              "kind": "task_completion_boundary",
+              "task_id": 2,
+              "frame_index": 36,
+              "frame_id": "frame-000036"
+            },
+            {
+              "event": 334,
+              "kind": "task_completion_boundary",
+              "task_id": 3,
+              "frame_index": 48,
+              "frame_id": "frame-000048"
+            },
+            {
+              "event": 433,
+              "kind": "task_completion_boundary",
+              "task_id": 4,
+              "frame_index": 62,
+              "frame_id": "frame-000062"
+            }
+          ],
+          "available_history_frames": {
+            "count": 66,
+            "mean": 10.469696969696969,
+            "p50": 9.0,
+            "p95": 26,
+            "sum": 691
+          },
+          "inference_and_context_s": {
+            "count": 66,
+            "mean": 0.1724713787878788,
+            "p50": 0.16237800000000002,
+            "p95": 0.262571,
+            "sum": 11.383111000000005
+          },
+          "actor_latency_ms": {
+            "count": 66,
+            "mean": 124.12508222923586,
+            "p50": 115.98581378348172,
+            "p95": 166.9468069449067,
+            "sum": 8192.255427129567
+          },
+          "inference_metrics": {
+            "batch_size": {
+              "count": 66,
+              "mean": 1.0909090909090908,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 72.0
+            },
+            "queue_wait_ms": {
+              "count": 66,
+              "mean": 22.67481779651434,
+              "p50": 2.5791756343096495,
+              "p95": 93.56202743947506,
+              "sum": 1496.5379745699465
+            },
+            "queue_ms": {
+              "count": 66,
+              "mean": 0.42874206591284636,
+              "p50": 0.23432890884578228,
+              "p95": 1.125822775065899,
+              "sum": 28.29697635024786
+            },
+            "llm_ms": {
+              "count": 66,
+              "mean": 69.50357780707154,
+              "p50": 62.25663237273693,
+              "p95": 97.71774616092443,
+              "sum": 4587.236135266721
+            },
+            "vit_ms": {
+              "count": 66,
+              "mean": 54.62150442216432,
+              "p50": 50.0806060153991,
+              "p95": 76.0040357708931,
+              "sum": 3605.0192918628454
+            },
+            "process_sample_ms": {
+              "count": 66,
+              "mean": 21.24574609016153,
+              "p50": 22.119552362710238,
+              "p95": 27.54379389807582,
+              "sum": 1402.219241950661
+            },
+            "vit_cache_hits": {
+              "count": 66,
+              "mean": 4.090909090909091,
+              "p50": 3.0,
+              "p95": 12.0,
+              "sum": 270.0
+            },
+            "vit_cache_misses": {
+              "count": 66,
+              "mean": 1.4090909090909092,
+              "p50": 1.0,
+              "p95": 2.0,
+              "sum": 93.0
+            },
+            "execution_ms": {
+              "count": 66,
+              "mean": 164.35038713935876,
+              "p50": 153.98206003010273,
+              "p95": 252.37052282318473,
+              "sum": 10847.125551197678
+            }
+          },
+          "planner_requests": 19,
+          "planner_elapsed_s": 117.28713384573348,
+          "planner_tokens": {
+            "prompt_tokens": 193717,
+            "completion_tokens": 2570
+          },
+          "initial_request_sha256": "87020dbf0ca8a1dcf5dc26341b4865c323719daff1d2880a818e4191988d3109",
+          "initial_plan": {
+            "reason": "Initial plan based on observations: I'm at the bottom of stairs that go up to my right. I need to walk up, turn left on landing, find open door on left, and wait at foot of bed.",
+            "subtasks": [
+              {
+                "id": 1,
+                "instruction": "Walk up the stairs",
+                "status": "pending"
+              },
+              {
+                "id": 2,
+                "instruction": "Make a left on the stair landing",
+                "status": "pending"
+              },
+              {
+                "id": 3,
+                "instruction": "Make a left through the open door on the left",
+                "status": "pending"
+              },
+              {
+                "id": 4,
+                "instruction": "Wait at the foot of the bed",
+                "status": "pending"
+              }
+            ]
+          },
+          "first_execution": {
+            "instruction": "Walk up the stairs",
+            "task_id": 1
+          },
+          "contiguous_history_verified": true,
+          "plain_instruction_verified": true,
+          "lifecycle_events": [
+            {
+              "schema_version": 1,
+              "seq": 116,
+              "time": 1794169830.2182677,
+              "kind": "environment_end",
+              "end_reason": "stop_called",
+              "explicit_stop": true,
+              "source_tool": "terminate_episode",
+              "call_id": "chatcmpl-tool-b4461fc01a09cbef",
+              "steps_taken_total": 63
+            },
+            {
+              "schema_version": 1,
+              "seq": 117,
+              "time": 1794169830.4296415,
+              "kind": "session_end",
+              "error": null,
+              "explicit_stop": true,
+              "environment_end_reason": "stop_called",
+              "usage": {
+                "input_tokens": 193717,
+                "cached_input_tokens": 0,
+                "output_tokens": 2570
+              }
+            }
+          ],
+          "zero_motion_executions": 0,
+          "execution_tool_wall_s": 31.77264714241028,
+          "node_returns": 0
+        }
+      ],
+      "aggregate": {
+        "n": 2,
+        "successes": 2,
+        "mean_ne": 1.0272000000000001,
+        "mean_wall_s": 191.55,
+        "actor_predictions": 157,
+        "crop_count": 6,
+        "total_inference_and_context_s": 26.13758700000001
+      }
+    }
+  ],
+  "purpose": "Post-pose-fix and terminal-lifecycle development baseline; no new history strategies",
+  "comparison_caveats": [
+    "One rollout per route and policy.",
+    "Both fixes differ from previous runs; not an isolated estimate of either fix.",
+    "Four concurrent episodes versus eight in prior paired4 run.",
+    "Same per-route execution lanes and model configurations as prior paired run."
+  ],
+  "scope_update": {
+    "time": 1794169708.573864,
+    "instruction": "Only rerun completed_subtask history policy",
+    "cancelled_job": "f9e957a15b234e88855be85a59f273fa"
+  },
+  "excluded_arms": [
+    {
+      "policy": "episode",
+      "experiment_id": "33ca281d122b4bb0968a605b3ccf0a51",
+      "spec": {
+        "name": "LightNav pose+terminal fix / episode / baseline2",
+        "planner_service": "eaa85c5c908141f6b57e16a231cdc511",
+        "vla_service": "457941e1ef2448f28537209c16de106e",
+        "execution_pool": [
+          {
+            "environment_service": "ba97ba0f106f47d983d2b9ecff4a07d8",
+            "execution_service": "20d3792f5f7c45f587d77fac6f19b9b0"
+          },
+          {
+            "environment_service": "5e54bafdfe224410b5c1720ba63601f4",
+            "execution_service": "339b2b74985a4b0aba3144eea9705249"
+          }
+        ],
+        "episodes": [
+          456,
+          7006
+        ],
+        "purpose": "development",
+        "config": {
+          "dataset": {
+            "name": "r2r",
+            "split": "train"
+          },
+          "environment": {
+            "max_steps": 500,
+            "forward_view_px": 512,
+            "panorama_view_px": 400
+          },
+          "vla": {
+            "backend": "lightnav"
+          },
+          "planner": {
+            "max_turns": 100,
+            "episode_timeout_s": 900,
+            "tools": [
+              "observe_map",
+              "navigate_to_node",
+              "terminate_episode",
+              "update_plan",
+              "execute_subtask",
+              "observe",
+              "update_memory",
+              "read_memory"
+            ]
+          },
+          "harness": {
+            "mode": "agentic",
+            "allow_context_reset": false,
+            "vla_steps_per_call": 0,
+            "actor_history_policy": "episode"
+          }
+        }
+      },
+      "job_id": "f9e957a15b234e88855be85a59f273fa",
+      "included_in_review": false
+    }
+  ],
+  "finished": 1794169949.9791088,
+  "validation": {
+    "pytest": 150,
+    "subtests": 4,
+    "ruff": "passed",
+    "mypy": "passed",
+    "frontend_build": "passed"
+  },
+  "caveats": [
+    "Two development routes, one rollout each; crop policy only; no statistical significance claim.",
+    "Shared concurrent model services; full-history arm cancelled during run at user request; latency is load-sensitive.",
+    "Both node-pose and terminal-loop fixes differ from prior measurements; previous results are descriptive comparisons only.",
+    "Available history size is not the native sampled image count or token count."
+  ],
+  "terminal_budget_probe": {
+    "generated": [
+      "execute_subtask"
+    ],
+    "executed": [
+      "execute_subtask"
+    ],
+    "error": null,
+    "last_step_result": {
+      "steps_taken_total": 500,
+      "episode_over": true,
+      "end_reason": "step_budget_exhausted"
+    },
+    "uses_real_model_or_movement": false
+  },
+  "prior_crop_reference": {
+    "evidence": "lightnav-completion-crop-paired-20261109.json",
+    "rows": [
+      {
+        "episode": 456,
+        "success": 1,
+        "ne": 2.0506,
+        "wall_s": 355.4
+      },
+      {
+        "episode": 7006,
+        "success": 0,
+        "ne": 5.9349,
+        "wall_s": 267.8
+      }
+    ]
+  },
+  "observations": [
+    "Both rollouts explicitly stopped; neither hit the environment step budget. Budget termination is covered by the isolated probe and regression tests, not these rollouts.",
+    "Neither rollout called navigate_to_node; these results do not validate or isolate the pose restoration fix.",
+    "Episode 456 made two zero-motion execute_subtask calls on the final task after a one-step correction; success within the benchmark radius does not establish precise stair-count compliance.",
+    "Every crop retained one boundary frame; continued calls within the same unfinished subtask retained their history."
+  ],
+  "final_platform_state": {
+    "restored_services": [
+      {
+        "id": "ba97ba0f106f47d983d2b9ecff4a07d8",
+        "status": "ready",
+        "health": {
+          "ok": true,
+          "details": {
+            "dataset": "r2r",
+            "split": "train",
+            "languages": [],
+            "roles": [],
+            "episode_count": 10819,
+            "gt_covered": 10819,
+            "episode_sources": [
+              "/data/nav_storage/nav-harness/data/r2r/train/train.json.gz"
+            ],
+            "gt_sources": [
+              "/data/nav_storage/nav-harness/data/r2r/train/train_gt.json.gz"
+            ],
+            "dataset_fingerprint": "d1cb3be146292dc437873c2fea6206af6053c522a8414bf43261807d55079188",
+            "name": "r2rce",
+            "interface_variant": "standard",
+            "gpu_device_id": 0,
+            "status": "ok",
+            "history_cameras": [
+              "policy_front"
+            ],
+            "policy_camera": {
+              "width": 480,
+              "height": 270,
+              "height_m": 0.88,
+              "hfov": 120.0
+            },
+            "velocity_control": {
+              "control_dt_s": 0.1,
+              "max_linear_mps": 2.5,
+              "max_angular_dps": 300.0
+            },
+            "max_steps": 500,
+            "blind": false,
+            "episode_index": -1,
+            "gt_paths": 10819,
+            "caliber": {
+              "policy_camera": {
+                "width": 480,
+                "height": 270,
+                "height_m": 0.88,
+                "hfov": 120.0
+              },
+              "velocity_control": {
+                "control_dt_s": 0.1,
+                "max_linear_mps": 2.5,
+                "max_angular_dps": 300.0
+              },
+              "turn_angle_deg": 15,
+              "step_size_m": 0.25,
+              "allow_sliding": true,
+              "success_distance": 3.0,
+              "max_steps": 500
+            },
+            "episodes_file": null,
+            "episodes_sha256": null,
+            "gt_sha256": null,
+            "config": {
+              "rgb_size": 512,
+              "hfov": 90.0,
+              "camera_height": 1.25,
+              "step_size_m": 0.25,
+              "turn_angle_deg": 15,
+              "success_distance": 3.0,
+              "max_steps": 500,
+              "seed": 42,
+              "allow_sliding": true,
+              "pano_size": 400,
+              "pano_hfov": 120.0,
+              "depth_max": 10.0,
+              "scan_bins": 360,
+              "scan_floor_clear_m": 0.15,
+              "scan_ceiling_clear_m": 1.8,
+              "map_mpp": 0.02,
+              "map_ceiling_m": 1.6,
+              "map_pixel_stride": 4,
+              "map_splat_max_m": 0.1,
+              "map_target_px": 760,
+              "map_margin_m": 1.5,
+              "map_min_span_m": 6.0,
+              "place_spacing_m": 2.5,
+              "place_snap_frac": 0.6,
+              "place_jump_m": 0.5,
+              "place_max_nodes": 64,
+              "policy_camera": {
+                "width": 480,
+                "height": 270,
+                "height_m": 0.88,
+                "hfov": 120.0
+              },
+              "velocity_control": {
+                "control_dt_s": 0.1,
+                "max_linear_mps": 2.5,
+                "max_angular_dps": 300.0
+              }
+            },
+            "functions": [
+              "r2rce__agent_state",
+              "r2rce__evaluate",
+              "r2rce__observe_egocentric",
+              "r2rce__observe_pano",
+              "r2rce__observed_map",
+              "r2rce__places",
+              "r2rce__reset",
+              "r2rce__retrace_path",
+              "r2rce__retrace_to",
+              "r2rce__step_discrete",
+              "r2rce__step_hightolow",
+              "r2rce__step_velocity",
+              "r2rce__teleport",
+              "r2rce__trajectory"
+            ]
+          }
+        }
+      },
+      {
+        "id": "20d3792f5f7c45f587d77fac6f19b9b0",
+        "status": "ready",
+        "health": {
+          "ok": true,
+          "details": {
+            "model_name": "lightnav-0",
+            "model_version": "LightNav-0",
+            "backend": "lightnav",
+            "policy_url": null,
+            "execution": "owned_vllm",
+            "context_replace": false,
+            "history_mode": "episode",
+            "max_context_groups": null,
+            "input_contract": "lightnav_official_episode_v1",
+            "history_observe": true,
+            "seeded_reset": false,
+            "control": {
+              "control_dt_s": 0.1,
+              "max_linear_mps": 2.5,
+              "max_angular_dps": 300.0
+            },
+            "waypoint_count": 10,
+            "policy_camera": {
+              "width": 480,
+              "height": 270,
+              "height_m": 0.88,
+              "hfov": 120.0
+            },
+            "native_input": {
+              "num_history_frames": 64,
+              "slowfast_tiers": [
+                {
+                  "name": "current",
+                  "age_lo": 0,
+                  "age_hi": 1,
+                  "mode": "dense",
+                  "pool_spatial": 1,
+                  "pool_mode": "avg"
+                },
+                {
+                  "name": "fast",
+                  "age_lo": 2,
+                  "age_hi": 33,
+                  "mode": "dense",
+                  "pool_spatial": 2,
+                  "pool_mode": "avg"
+                },
+                {
+                  "name": "mid",
+                  "age_lo": 34,
+                  "age_hi": 89,
+                  "mode": "burst",
+                  "pool_spatial": 2,
+                  "pool_mode": "avg",
+                  "pair_stride": 6
+                },
+                {
+                  "name": "long",
+                  "age_lo": 90,
+                  "age_hi": 1000000,
+                  "mode": "span",
+                  "pool_spatial": 4,
+                  "pool_mode": "avg",
+                  "num_pairs": 14
+                },
+                {
+                  "name": "anchor",
+                  "age_lo": 0,
+                  "age_hi": 0,
+                  "mode": "anchor",
+                  "pool_spatial": 4,
+                  "pool_mode": "avg",
+                  "num_frames": 2
+                }
+              ],
+              "video_size": [
+                256,
+                448
+              ],
+              "video_fps": 4,
+              "max_new_tokens": 64,
+              "history_buffer": "full_episode"
+            },
+            "protocol_version": 1,
+            "implementation_digest": "297ccc1234ef1739a2c4e5b57497212a2c83e9c6e8287cc737ff9afa3d488c78",
+            "shared_inference": true,
+            "max_sessions": 16,
+            "max_pending": 16,
+            "sessions": 0,
+            "pending_requests": 0,
+            "completed_requests": 260,
+            "accepting": true,
+            "waiting_requests": 0,
+            "active_operations": 0,
+            "tool_execution": "in_process",
+            "environment_url": "http://127.0.0.1:19581",
+            "inference_url": "http://127.0.0.1:18381",
+            "session_id": null,
+            "failed": false
+          }
+        }
+      },
+      {
+        "id": "5e54bafdfe224410b5c1720ba63601f4",
+        "status": "ready",
+        "health": {
+          "ok": true,
+          "details": {
+            "dataset": "r2r",
+            "split": "train",
+            "languages": [],
+            "roles": [],
+            "episode_count": 10819,
+            "gt_covered": 10819,
+            "episode_sources": [
+              "/data/nav_storage/nav-harness/data/r2r/train/train.json.gz"
+            ],
+            "gt_sources": [
+              "/data/nav_storage/nav-harness/data/r2r/train/train_gt.json.gz"
+            ],
+            "dataset_fingerprint": "d1cb3be146292dc437873c2fea6206af6053c522a8414bf43261807d55079188",
+            "name": "r2rce",
+            "interface_variant": "standard",
+            "gpu_device_id": 0,
+            "status": "ok",
+            "history_cameras": [
+              "policy_front"
+            ],
+            "policy_camera": {
+              "width": 480,
+              "height": 270,
+              "height_m": 0.88,
+              "hfov": 120.0
+            },
+            "velocity_control": {
+              "control_dt_s": 0.1,
+              "max_linear_mps": 2.5,
+              "max_angular_dps": 300.0
+            },
+            "max_steps": 500,
+            "blind": false,
+            "episode_index": -1,
+            "gt_paths": 10819,
+            "caliber": {
+              "policy_camera": {
+                "width": 480,
+                "height": 270,
+                "height_m": 0.88,
+                "hfov": 120.0
+              },
+              "velocity_control": {
+                "control_dt_s": 0.1,
+                "max_linear_mps": 2.5,
+                "max_angular_dps": 300.0
+              },
+              "turn_angle_deg": 15,
+              "step_size_m": 0.25,
+              "allow_sliding": true,
+              "success_distance": 3.0,
+              "max_steps": 500
+            },
+            "episodes_file": null,
+            "episodes_sha256": null,
+            "gt_sha256": null,
+            "config": {
+              "rgb_size": 512,
+              "hfov": 90.0,
+              "camera_height": 1.25,
+              "step_size_m": 0.25,
+              "turn_angle_deg": 15,
+              "success_distance": 3.0,
+              "max_steps": 500,
+              "seed": 42,
+              "allow_sliding": true,
+              "pano_size": 400,
+              "pano_hfov": 120.0,
+              "depth_max": 10.0,
+              "scan_bins": 360,
+              "scan_floor_clear_m": 0.15,
+              "scan_ceiling_clear_m": 1.8,
+              "map_mpp": 0.02,
+              "map_ceiling_m": 1.6,
+              "map_pixel_stride": 4,
+              "map_splat_max_m": 0.1,
+              "map_target_px": 760,
+              "map_margin_m": 1.5,
+              "map_min_span_m": 6.0,
+              "place_spacing_m": 2.5,
+              "place_snap_frac": 0.6,
+              "place_jump_m": 0.5,
+              "place_max_nodes": 64,
+              "policy_camera": {
+                "width": 480,
+                "height": 270,
+                "height_m": 0.88,
+                "hfov": 120.0
+              },
+              "velocity_control": {
+                "control_dt_s": 0.1,
+                "max_linear_mps": 2.5,
+                "max_angular_dps": 300.0
+              }
+            },
+            "functions": [
+              "r2rce__agent_state",
+              "r2rce__evaluate",
+              "r2rce__observe_egocentric",
+              "r2rce__observe_pano",
+              "r2rce__observed_map",
+              "r2rce__places",
+              "r2rce__reset",
+              "r2rce__retrace_path",
+              "r2rce__retrace_to",
+              "r2rce__step_discrete",
+              "r2rce__step_hightolow",
+              "r2rce__step_velocity",
+              "r2rce__teleport",
+              "r2rce__trajectory"
+            ]
+          }
+        }
+      },
+      {
+        "id": "339b2b74985a4b0aba3144eea9705249",
+        "status": "ready",
+        "health": {
+          "ok": true,
+          "details": {
+            "model_name": "lightnav-0",
+            "model_version": "LightNav-0",
+            "backend": "lightnav",
+            "policy_url": null,
+            "execution": "owned_vllm",
+            "context_replace": false,
+            "history_mode": "episode",
+            "max_context_groups": null,
+            "input_contract": "lightnav_official_episode_v1",
+            "history_observe": true,
+            "seeded_reset": false,
+            "control": {
+              "control_dt_s": 0.1,
+              "max_linear_mps": 2.5,
+              "max_angular_dps": 300.0
+            },
+            "waypoint_count": 10,
+            "policy_camera": {
+              "width": 480,
+              "height": 270,
+              "height_m": 0.88,
+              "hfov": 120.0
+            },
+            "native_input": {
+              "num_history_frames": 64,
+              "slowfast_tiers": [
+                {
+                  "name": "current",
+                  "age_lo": 0,
+                  "age_hi": 1,
+                  "mode": "dense",
+                  "pool_spatial": 1,
+                  "pool_mode": "avg"
+                },
+                {
+                  "name": "fast",
+                  "age_lo": 2,
+                  "age_hi": 33,
+                  "mode": "dense",
+                  "pool_spatial": 2,
+                  "pool_mode": "avg"
+                },
+                {
+                  "name": "mid",
+                  "age_lo": 34,
+                  "age_hi": 89,
+                  "mode": "burst",
+                  "pool_spatial": 2,
+                  "pool_mode": "avg",
+                  "pair_stride": 6
+                },
+                {
+                  "name": "long",
+                  "age_lo": 90,
+                  "age_hi": 1000000,
+                  "mode": "span",
+                  "pool_spatial": 4,
+                  "pool_mode": "avg",
+                  "num_pairs": 14
+                },
+                {
+                  "name": "anchor",
+                  "age_lo": 0,
+                  "age_hi": 0,
+                  "mode": "anchor",
+                  "pool_spatial": 4,
+                  "pool_mode": "avg",
+                  "num_frames": 2
+                }
+              ],
+              "video_size": [
+                256,
+                448
+              ],
+              "video_fps": 4,
+              "max_new_tokens": 64,
+              "history_buffer": "full_episode"
+            },
+            "protocol_version": 1,
+            "implementation_digest": "297ccc1234ef1739a2c4e5b57497212a2c83e9c6e8287cc737ff9afa3d488c78",
+            "shared_inference": true,
+            "max_sessions": 16,
+            "max_pending": 16,
+            "sessions": 0,
+            "pending_requests": 0,
+            "completed_requests": 260,
+            "accepting": true,
+            "waiting_requests": 0,
+            "active_operations": 0,
+            "tool_execution": "in_process",
+            "environment_url": "http://127.0.0.1:19582",
+            "inference_url": "http://127.0.0.1:18381",
+            "session_id": null,
+            "failed": false
+          }
+        }
+      }
+    ],
+    "jobs": [
+      {
+        "id": "cdadf47253414093acc3c01d3faa3ee1",
+        "status": "completed"
+      },
+      {
+        "id": "f9e957a15b234e88855be85a59f273fa",
+        "status": "cancelled"
+      },
+      {
+        "id": "fc21827e81f74b84b06e4cb58c4fb3fb",
+        "status": "paused"
+      }
+    ],
+    "attempt_counts": [
+      {
+        "job_id": "cdadf47253414093acc3c01d3faa3ee1",
+        "status": "completed",
+        "n": 2
+      },
+      {
+        "job_id": "f9e957a15b234e88855be85a59f273fa",
+        "status": "interrupted",
+        "n": 2
+      },
+      {
+        "job_id": "fc21827e81f74b84b06e4cb58c4fb3fb",
+        "status": "completed",
+        "n": 8
+      }
+    ],
+    "active_attempts": [],
+    "leases": []
+  }
+}

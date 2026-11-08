@@ -200,7 +200,6 @@ class TopologyMemory:
                  for (a, b), count in counts.items()]
         result["history_index"] = index[:self.INDEX_SIZE]
         result["unlisted_pair_count"] = max(0, len(index) - self.INDEX_SIZE)
-        result["retrieval"] = "read_memory(node_id, other_node_id?, include_images?, offset?)"
         # Reserve index space within the same budget.
         while len(json.dumps(result, ensure_ascii=False).encode()) > self.CONTEXT_BYTES:
             if result["history_index"]:

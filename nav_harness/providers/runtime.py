@@ -18,22 +18,28 @@ def tool_feedback(result, call_id):
     Every image retains its originating call id. This explicit mapping is
     recorded in the wire request, never hidden from trace consumers.
     """
-    texts, images = [], []
+    texts, images, feedback_texts = [], [], []
     image_label = ""
     for item in result.content:
         if item.type == "text":
             texts.append(item.text)
-            image_label = item.text if len(item.text) <= 300 else ""
+            feedback_texts.append(item.text)
+            # Only short prose immediately preceding an image is its label.
+            # Structured status stays in the tool response for lifecycle handling.
+            image_label = item.text if len(item.text) <= 300 and not item.text.lstrip().startswith(("{", "[")) else ""
         elif item.type == "image":
+            if image_label:
+                feedback_texts.pop()
             images.extend(
                 [
-                    {"type": "text", "text": "Observation from tool call " + call_id + (": " + image_label if image_label else "")},
+                    {"type": "text", "text": "Tool " + call_id + (": " + image_label if image_label else "")},
                     {"type": "image_url", "image_url": {"url": f"data:{item.mimeType};base64,{item.data}"}},
                 ]
             )
+            image_label = ""
         else:
             raise ModelProtocolError("Unsupported tool result content: " + item.type)
-    return {"role": "tool", "tool_call_id": call_id, "content": "\n".join(texts)}, images, texts
+    return {"role": "tool", "tool_call_id": call_id, "content": "\n".join(feedback_texts)}, images, texts
 
 
 class ManagedRuntime:
@@ -68,6 +74,7 @@ class ManagedRuntime:
         seen_ids = set()
         error = None
         stopped = False
+        terminal_reason = None
         try:
             async with open_tools(ctx.mcp_env) as session:
                 listed = await session.list_tools()
@@ -194,19 +201,22 @@ class ManagedRuntime:
                                     state = value.get("subtask_state", state)
                             except ValueError:
                                 pass
-                        if (
-                            name == "terminate_episode"
-                            and sink.last_step_result
-                            and sink.last_step_result.get("end_reason") == "stop_called"
-                        ):
-                            stopped = True
+                        last = sink.last_step_result or {}
+                        if last.get("episode_over") is True:
+                            terminal_reason = last.get("end_reason") or "environment_ended"
+                            stopped = terminal_reason == "stop_called"
+                            journal.emit(
+                                "environment_end", end_reason=terminal_reason,
+                                explicit_stop=stopped, source_tool=name, call_id=ident,
+                                steps_taken_total=last.get("steps_taken_total"),
+                            )
                             break
                     if observations:
                         block.append({"role": "user", "content": observations})
                     window.append(block, state)
-                    if stopped:
+                    if terminal_reason is not None:
                         break
-                if not stopped:
+                if terminal_reason is None:
                     error = "planner_turn_budget_exhausted"
         except Exception as exc:
 
@@ -220,10 +230,12 @@ class ManagedRuntime:
             journal.emit("session_error", error=error, traceback="".join(traceback.format_exception(exc)))
         finally:
             await client.close()
-        journal.emit("session_end", error=error, explicit_stop=stopped, usage=usage)
+        journal.emit("session_end", error=error, explicit_stop=stopped,
+                     environment_end_reason=terminal_reason, usage=usage)
         return SessionOutcome(
             turns=sink.planner_turns.count,
             usage=usage,
             error=error,
-            extra={"input_visibility": "exact_wire_requests", "trace": str(journal.path)},
+            extra={"input_visibility": "exact_wire_requests", "trace": str(journal.path),
+                   "environment_end_reason": terminal_reason, "explicit_stop": stopped},
         )

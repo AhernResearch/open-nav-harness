@@ -15,7 +15,7 @@ def call(ident, name):
     return {"id": ident, "type": "function", "function": {"name": name, "arguments": "{}"}}
 
 
-async def run_fake(tmp_path, monkeypatch, responses, names=None):
+async def run_fake(tmp_path, monkeypatch, responses, names=None, results=None):
     names = names or ["observe_panorama", "terminate_episode"]
     executed = []
 
@@ -62,6 +62,8 @@ async def run_fake(tmp_path, monkeypatch, responses, names=None):
                 "episode_over": name == "terminate_episode",
                 "end_reason": "stop_called" if name == "terminate_episode" else "",
             }
+            if results and name in results:
+                value = results[name]
             return CallToolResult(content=[TextContent(type="text", text=json.dumps(value))])
 
     @asynccontextmanager
@@ -147,6 +149,23 @@ def test_multimodal_tool_feedback_preserves_call_provenance():
     assert feedback["tool_call_id"] == "call-7"
     assert "call-7" in images[0]["text"]
     assert images[1]["image_url"]["url"] == "data:image/png;base64,aGVsbG8="
+    assert feedback['content'] == ''
+    assert texts == ['observation']  # Full original text still reaches the audit sink.
+    assert images[0]['text'].count('observation') == 1
+
+
+def test_image_label_dedup_preserves_status_and_unlabelled_images():
+    status = '{"episode_over": true, "steps_taken_total": 500}'
+    image = ImageContent(type="image", data="aGVsbG8=", mimeType="image/png")
+    feedback, images, texts = tool_feedback(CallToolResult(content=[
+        TextContent(text="Front view"), image, image,
+        TextContent(text=status), image, TextContent(text="No image follows"),
+    ]), "call-8")
+    assert feedback['content'] == status + '\nNo image follows'
+    assert texts == ['Front view', status, 'No image follows']
+    assert images[0]['text'] == 'Tool call-8: Front view'
+    assert images[2]['text'] == images[4]['text'] == 'Tool call-8'
+    assert sum(i['type'] == 'image_url' for i in images) == 3
 
 
 async def test_map_and_memory_cannot_be_precomputed_in_one_model_response(tmp_path, monkeypatch):
@@ -165,3 +184,69 @@ async def test_map_and_memory_cannot_be_precomputed_in_one_model_response(tmp_pa
     assert outcome.error is None
     events = [json.loads(line) for line in (tmp_path / "trace/requests.jsonl").read_text().splitlines()]
     assert any("separate model turns" in str(e) for e in events if e["kind"] == "tool_validation_error")
+
+
+@pytest.mark.parametrize('name,status', [
+    ('execute_subtask', {'steps_taken_total': 500, 'episode_over': True,
+                         'end_reason': 'step_budget_exhausted', 'subtask_return': 'action_budget'}),
+    ('navigate_relative', {'steps_taken_total': 500, 'episode_over': True,
+                          'end_reason': 'step_budget_exhausted'}),
+    ('navigate_to_node', {'step_count': 499, 'truncated': True, 'terminated': False,
+                         'arrived': False, 'termination_reason': 'stopped_short'}),
+])
+async def test_environment_budget_ends_loop_and_skips_remaining_batch(tmp_path, monkeypatch, name, status):
+    executed, outcome = await run_fake(
+        tmp_path, monkeypatch,
+        [[call('move', name), call('unused', 'observe_panorama')]],
+        names=[name, 'observe_panorama', 'terminate_episode'], results={name: status},
+    )
+    assert executed == [name]  # No more model requests, observations or STOP calls.
+    assert outcome.turns == 1
+    assert outcome.error is None  # A scored navigation failure, not an infrastructure error.
+    assert outcome.extra['environment_end_reason'] == 'step_budget_exhausted'
+    assert outcome.extra['explicit_stop'] is False
+    rows = [json.loads(l) for l in (tmp_path / 'trace/requests.jsonl').read_text().splitlines()]
+    terminal = next(r for r in rows if r['kind'] == 'environment_end')
+    assert terminal['source_tool'] == name and terminal['steps_taken_total'] in (499, 500)
+    assert rows[-1]['kind'] == 'session_end' and rows[-1]['explicit_stop'] is False
+
+
+async def test_vla_stop_is_only_a_handoff_not_episode_termination(tmp_path, monkeypatch):
+    executed, outcome = await run_fake(
+        tmp_path, monkeypatch,
+        [[call('vla', 'execute_subtask')], [call('stop', 'terminate_episode')]],
+        names=['execute_subtask', 'terminate_episode'],
+        results={'execute_subtask': {'steps_taken_total': 12, 'episode_over': False,
+                                     'subtask_return': 'vla_stop'}},
+    )
+    assert executed == ['execute_subtask', 'terminate_episode']
+    assert outcome.error is None and outcome.extra['explicit_stop'] is True
+    assert outcome.extra['environment_end_reason'] == 'stop_called'
+
+
+async def test_planner_turn_exhaustion_remains_distinct(tmp_path, monkeypatch):
+    executed, outcome = await run_fake(
+        tmp_path, monkeypatch, [[call(str(i), 'observe_panorama')] for i in range(5)],
+    )
+    assert len(executed) == 5 and outcome.error == 'planner_turn_budget_exhausted'
+    assert outcome.extra['environment_end_reason'] is None
+    assert outcome.extra['explicit_stop'] is False
+
+
+def test_return_telemetry_keeps_last_status_and_budget_failure_is_scored():
+    from navgpt.planner.runner import is_scored
+    from nav_harness.platform.results import aggregate, metrics
+    retrace = {'step_count': 499, 'truncated': True, 'terminated': False, 'arrived': False}
+    parsed = EventSink._parse_step_result([json.dumps(retrace)])
+    assert parsed['steps_taken_total'] == 499 and parsed['episode_over'] is True
+    assert parsed['end_reason'] == 'step_budget_exhausted'
+    stop = {'steps_taken_total': 500, 'episode_over': True, 'end_reason': 'stop_called'}
+    assert EventSink._parse_step_result([json.dumps(retrace), json.dumps(stop)]) == stop
+    result = {'agent': {'env_steps': 499, 'end_reason': parsed['end_reason'], 'called_stop': False},
+              'metrics': {'success': 0, 'stop_called': 0, 'distance_to_goal': 2}, 'error': None}
+    assert is_scored(result)
+    row = metrics({'id': 'a', 'episode': 0, 'ordinal': 1, 'status': 'completed',
+                   'result': json.dumps(result)})
+    summary = aggregate([row])
+    assert summary['routes_completed'] == 1 and summary['sr'] == 0
+    assert summary['execution_errors'] == 0

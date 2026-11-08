@@ -156,6 +156,17 @@ class EventSink:
                 continue
             if isinstance(data, dict) and "steps_taken_total" in data:
                 found = data
+            elif isinstance(data, dict) and "step_count" in data and (
+                "truncated" in data or "terminated" in data
+            ):
+                # Retracing reports the environment's step_count/termination flags.
+                # Normalize telemetry here without changing the planner tool contract.
+                ended = bool(data.get("truncated") or data.get("terminated"))
+                found = {**data, "steps_taken_total": data["step_count"], "episode_over": ended}
+                if ended:
+                    found["end_reason"] = (
+                        "stop_called" if data.get("terminated") else "step_budget_exhausted"
+                    )
         return found
 
     @property

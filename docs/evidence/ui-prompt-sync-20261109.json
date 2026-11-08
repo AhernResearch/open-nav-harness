@@ -1,0 +1,46 @@
+{
+  "upstream": {
+    "source": "/home/holo/robots/nav-harness-async",
+    "upstream_head": "15720e0367fda8c9e6eb300dc1d268b9c0fd7bdc",
+    "sha256": {
+      "docs/LIGHTNAV.md": "761310249fc29c699094ebfa0ae3ec25832c939cd2572e5c9cc829ffd0686530",
+      "docs/OPERATIONS.md": "58a5dd03b2694f5b460a923ee1d89b2f53fb2ec17a346226a6311a5bde252de0",
+      "nav_harness/core/context.py": "ea88239676a2e75b139847c01e6998c6410aaa35b7ddb791d3f89036d1ee5777",
+      "nav_harness/providers/runtime.py": "a41e01d87ea1d1ad198cdba2ae8afae45dd7630cd8f6d3d787bc49cc0fad2479",
+      "navgpt/planner/prompts.py": "a09aabf3918833b47de7a08047652dc0fbd8b7829b37fbb05825c0efe9987c3d",
+      "navgpt/planner/runner.py": "4577b795da4052b6777144bb6b21823e88904ab88854437221b2ffaec80d12fd",
+      "navgpt/planner/tools/agentic.py": "53414e8be6342421bfadbe7f9a8e3f4ba857d667fd7b7439f9fae684a65f6def",
+      "navgpt/planner/tools/memory.py": "a73d9bb0dfc0cfcb844115cbada62610a62e3545445ba91ab7a27642926be6de",
+      "navgpt/planner/tools/session.py": "9b8cbe7f9761cda8940a94ddee76c2ff436673fbcdfc1830170fbecc78b00eb6",
+      "tests/test_agentic.py": "8e9c5c8e0136dfb5d1f8983dbe69ae264a57ee02adb55663c023168f25d28ca6",
+      "tests/test_lightnav_episode.py": "81915c690a7015b3b3ffe237fe411831adb41d4257e0e04de102db93d6e02d16",
+      "tests/test_managed_runtime.py": "551d0edb03c1cba7efa4b7a415b7756295b19636a27b3a65475cc10b2e86b163",
+      "tests/test_memory_contract.py": "9787b2448b68889c64d3b789db9d4b51e639093382c8ffeef284a25e342be07c",
+      "docs/evidence/harness-next-review-20261109.json": "2044b92811f2a881d4be5ebb11f62a955b509a915931bcbbccbf260e0d51f0c0",
+      "docs/evidence/terminal-lifecycle-crop-baseline-20261109.json": "a8acb0754012023d707192c5aa75a3d6c1bff2c056d178f68485b0fa450b8398"
+    },
+    "patch_sha256": "0b93d0afcdaf17ab27bbafc48b2bb05ddaf2035ee828764c69335bc85dcba39e"
+  },
+  "changes": [
+    "Align walkability probe bearings with Habitat positive-left camera and movement convention.",
+    "Synchronize frozen async Planner prompts, tool feedback, map context and terminal lifecycle changes."
+  ],
+  "validation": {
+    "pytest_passed": 190,
+    "pytest_subtests_passed": 4,
+    "ruff_nav_harness": "passed",
+    "mypy_nav_harness": "passed",
+    "ruff_navgpt_F821_F823": "passed",
+    "frontend_build": "passed",
+    "playwright_passed": 13,
+    "playwright_browser": "/usr/bin/google-chrome"
+  },
+  "runtime_policy": {
+    "actor_history_policy": "episode",
+    "planner_direct_movement_default": false,
+    "automatic_movement_retries": false
+  },
+  "limitations": [
+    "No claim that prompt changes or bearing fix resolve the previously observed VLA STOP loop; no closed-loop navigation benchmark was run."
+  ]
+}

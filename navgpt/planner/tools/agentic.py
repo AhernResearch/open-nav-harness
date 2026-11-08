@@ -175,12 +175,10 @@ TOOL_DESCRIPTIONS = {
         "the whole image spans a field of view, not a single direction."
     ),
     "observe_map": (
-        "Inspect the observed top-down colour map, travelled path, current pose and numbered visited nodes. "
-        "Unknown cells are unobserved, not free space. Path colour runs blue (start) to red (recent); "
-        "the red arrow is current pose. The map keeps a fixed world orientation but its crop can change. "
-        "IDs identify execution-boundary places, including revisits; captions belong to directed traversals. "
-        "Returns the pending start -> end segment, recent memory and an index for read_memory. "
-        "Read this map in a separate turn before update_memory. Does not move or reveal the goal."
+        "View the observed map, visited node IDs and current pose. Path: blue to red over time; "
+        "red arrow: current pose. World orientation is fixed; crop may change. Unknown cells "
+        "are unobserved. Returns the pending start -> end segment, recent memory and history "
+        "index. Does not move or reveal the goal."
     ),
     "navigate_relative": (
         "Turn by turn_deg (positive left, negative right) and attempt distance_m metres of walking. "

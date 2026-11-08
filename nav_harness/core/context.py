@@ -40,14 +40,6 @@ class ContextWindow:
                 "current_node_id": memory.get("current_node_id"),
                 "pending_segment": {k: v for k, v in (current or {}).items() if k != "caption"},
                 "latest_memory": latest, "map_read_valid": state.get("map_read_valid", False),
-                "memory_write_hint": (
-                    "No finished segment to annotate."
-                    if not current or current.get("end_node_id") is None else
-                    "Map read is current; update_memory may describe this segment."
-                    if state.get("map_read_valid") else
-                    "update_memory is unavailable: call observe_map and read its image first. "
-                    "You may continue navigating without writing memory."
-                ),
                 "steps_remaining": state.get("steps_remaining"),
                 "completion_claim": state.get("completion_claim")}
 
@@ -59,18 +51,14 @@ class ContextWindow:
             topology = bool(self.state and self.state.get("tool_contract") in ("topology_memory_v2", "topology_memory_v3", "topology_memory_v4"))
             state_message = None
             if self.state and (start or topology):
-                label = "Current persisted task state and previously written work summary"
-                if topology:
-                    label += (
-                        ". Plan statuses and memory captions are your assessments, not verified completion. "
-                        "The original instruction remains the task; use observations to check these assessments"
-                    )
+                label = "Current persisted state"
                 state_message = {
                     "role": "user",
                     "content": label + ":\n" + json.dumps(self._projection(), ensure_ascii=False),
                 }
                 if not topology:
                     messages.append(state_message)
+            map_snapshots = []
             for block in self.blocks[start:]:
                 for original in block:
                     message = original
@@ -78,7 +66,7 @@ class ContextWindow:
                         # The wire journal keeps the full response. Model input has
                         # one authoritative current state, not repeated map summaries.
                         message = copy.deepcopy(original)
-                        lines = []
+                        lines: list[str] = []
                         for line in message.get("content", "").splitlines():
                             try:
                                 value = json.loads(line)
@@ -87,9 +75,20 @@ class ContextWindow:
                             if isinstance(value, dict) and "subtask_state" in value:
                                 pass
                             else:
+                                if isinstance(value, dict) and "memory_context" in value:
+                                    map_snapshots.append((message, len(lines), value))
                                 lines.append(line)
                         message["content"] = "\n".join(lines)
                     messages.append(message)
+            # Keep the newest requested map summary. Older map images/geometry remain
+            # historical evidence; omitted memories can still be read from the store.
+            # Only edit copied messages, preserving the complete audit history.
+            for message, index, value in map_snapshots[:-1]:
+                del value["memory_context"]
+                value["historical_map"] = True
+                lines = message["content"].splitlines()
+                lines[index] = json.dumps(value, ensure_ascii=False)
+                message["content"] = "\n".join(lines)
             if topology and state_message:
                 # Latest state follows historical claims and observations, without
                 # splitting assistant/tool pairs or duplicating the snapshot.

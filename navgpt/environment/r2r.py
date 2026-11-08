@@ -43,6 +43,7 @@ from pathlib import Path
 import numpy as np
 
 from .datasets import load_episode_set
+from .geometry import bearing_direction
 
 log = logging.getLogger("navgpt.environment.r2r")
 
@@ -1350,13 +1351,8 @@ class R2RCEEnv:
         if self._pathfinder is None:
             return None
         fwd = self._forward_vector(rot)
-        fx, fz = float(fwd[0]), float(fwd[2])
-        norm = math.hypot(fx, fz) or 1.0
-        fx, fz = fx / norm, fz / norm
-        lx, lz = -fz, fx
-        cb, sb = math.cos(bearing_rad), math.sin(bearing_rad)
-        return self._walkable_from(pos, cb * fx + sb * lx, cb * fz + sb * lz,
-                                   max_m, step)
+        dx, dz = bearing_direction(float(fwd[0]), float(fwd[2]), bearing_rad)
+        return self._walkable_from(pos, dx, dz, max_m, step)
 
     def _walkable_from(self, pos, dx, dz, max_m=8.0, step=0.25):
         """The same march, from any point, along any world direction."""

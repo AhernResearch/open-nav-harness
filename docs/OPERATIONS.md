@@ -285,3 +285,37 @@ Evidence: [deployment snapshot](evidence/nvfp4-planner-deployment-20261108.json)
 Administrative scripts, dependency wheels and installation reports are retained
 under `state/deployment/nvfp4` locally and
 `/data/nav_storage/nav-harness/deployment/nvfp4-20261108` on A100.
+
+## Terminal lifecycle and cropped-history baseline, 2026-11-09
+
+The Planner loop now exits when a movement tool reports that the environment has
+ended, including step-budget exhaustion. Exhaustion remains a scored navigation
+failure without an implicit STOP or an infrastructure error. A VLA STOP that only
+hands control back to the Planner does not end the episode. Return-tool terminal
+flags are normalized into the same lifecycle state. The isolated terminal probe
+now executes one tool instead of continuing to issue STOP calls; regression tests
+also cover remaining calls in a generated tool batch. Validation: 150 tests plus
+4 subtests, required static checks and frontend build passed.
+
+Only the `completed_subtask` history policy was retained for the requested
+development rerun. The full-history job was cancelled and excluded. Source digest:
+`297ccc1234ef1739a2c4e5b57497212a2c83e9c6e8287cc737ff9afa3d488c78`.
+
+| Train episode | Success | NE (m) | Wall time (s) | execute_subtask calls | VLA predictions | History crops |
+| --- | --- | --- | --- | --- | --- | --- |
+| 456 | 1 | 1.7874 | 218.8 | 7 | 91 | 3 |
+| 7006 | 1 | 0.2670 | 164.3 | 4 | 66 | 3 |
+
+Each crop retained one boundary frame; repeated calls within the same unfinished
+subtask retained their history. Both episodes ended through an explicit Planner
+STOP, so step-budget termination was verified by the isolated probe and tests,
+not triggered by these rollouts. Neither episode returned to a node. Episode 456
+still made two final zero-motion calls: benchmark success does not demonstrate
+precise compliance with the requested stair position.
+
+These are two single-rollout development checks, not a success-rate estimate.
+Compared with the previous crop run, both pose restoration and lifecycle handling
+changed, and concurrent load decreased during cancellation. Neither outcome nor
+latency changes can be attributed to one fix. Detailed traces, metrics, crop
+boundaries and limitations are in the
+[baseline evidence](evidence/terminal-lifecycle-crop-baseline-20261109.json).

@@ -475,67 +475,45 @@ The episode has a global budget of {budget} low-level actions. No user can answe
 """
 
 AGENTIC_SYSTEM_PROMPT = """\
-You navigate with a local trajectory model. You own task decomposition, evidence-based
-progress assessment, corrections, memory and the final stop decision.
+You navigate with a local trajectory model (VLA). You own planning, progress assessment,
+recovery, memory and the final stop decision.
 Original instruction:
 {instruction}
 
-Observe the initial scene and write a plan of meaningful local goals. Preserve route
-order, directions, counts and endpoint qualifiers; do not invent unseen landmarks.
-An initial room description is context, not an action. Keep a turn with its destination.
-The VLA receives only the chosen local instruction and your latest executed-segment memory. It does not know the original full route or global plan.
+Observe the initial scene, then use update_plan to organize meaningful local goals.
+Preserve the original route order, directions, counts and endpoint qualifiers when
+revising the plan. Treat initial scene descriptions as context, not movements.
+The VLA receives the chosen instruction, visual history and recent segment memory;
+it does not know the full route or plan.
 
-Use update_plan to replace your full task list and update completion statuses. Each task has a stable id, instruction and status; status is pending, in_progress or completed (at most one in_progress). Select the task with
-execute_subtask(task_id). You may override the instruction for this call without modifying the plan. Do not repeat a turn or doorway crossing already
-completed. A VLA stop is a request for your judgment, not proof of success.
-Revise how to achieve the original route, not what it requires: do not replace an
-unachieved action with a description of where you already are. Reopen unsupported completions.
-Execution ends at policy stop, blockage or runtime/global limits. There are no model-selected
-distance, angle or action caps. A runtime limit does not establish completion.
+Write self-contained local instructions: action, necessary robot-relative direction,
+identifiable destination and stopping location when relevant. Keep related turns and
+crossings together. Ground added details in observations; do not invent landmarks or
+metric offsets. Prefer clear directions or salient landmark relations over introducing
+counts. Preserve any count and counting direction required by the original instruction,
+even when difficult; do not substitute an easier endpoint. Omit Planner reasoning and
+map node IDs from instructions.
 
-At each handoff examine the returned route evidence and endpoint views. Decide
-whether to continue, repair, inspect, update the plan or finish. You can directly use
-navigate_relative or navigate_to_node; no review call is required to unlock movement.
-Use observe(views=["front", "left"]) to select current camera directions without rotation.
-Use read_memory(node_id, images="endpoint", views=["front"]) for historical node views.
-Avoid fetching observations already provided by the preceding tool unless necessary.
+Use execute_subtask for forward progress and local repairs. Describe the remaining
+route from the observed current pose, omitting completed movements. Inspect returned
+process frames and endpoint views before deciding what comes next. VLA STOP, a runtime
+limit, plan status and memory captions are not proof of completion: judge progress
+from observed transitions and the original requirements. Reopen unsupported completions.
+If an attempt produces no progress, reassess the evidence or approach instead of
+repeatedly paraphrasing the same command. Use navigate_to_node to return to a visited
+place when another approach is needed.
 
-Use update_memory(start_node_id, end_node_id, caption) to summarize the CURRENT execution.
-Nodes are places at execution boundaries; captions describe directed experiences between
-places, not the places themselves. Both IDs must be the numbers printed on observe_map
-and must match its pending segment. First call observe_map after the latest movement,
-then read it in a preceding model turn. Never batch observe_map and update_memory.
-Maps are requested explicitly; read_memory does not satisfy this read requirement.
-Summarize what was done, what changed, unfinished conditions and uncertainty. For an
-exploration describe the question and observed discoveries; for a failed attempt describe
-what was not achieved and the evidence; for a return explain why and where you returned.
-Not finding the target does not establish that a passage is impassable.
-A second write revises only this execution; the next movement closes it. Repeated trips
-between the same nodes remain separate. Update task status only through update_plan.
-Unwritten segments are explicitly marked, and movement is not gated on caption writing.
+Request observe for additional current views, observe_map for topology and read_memory
+for past experiences or images when they can resolve uncertainty. Reuse evidence already
+provided. Consult relevant failed attempts before repeating a branch. Record useful
+progress, discoveries, failure or return reasons and uncertainty with update_memory;
+read the current map first as its tool contract requires. Memory describes directed
+travel between nodes. Keep plan status in update_plan; memory writing is optional.
+The latest persisted state supersedes older snapshots, but its assessments may be wrong.
 
-observe_map supplies bounded recent memory and history related to your current node,
-plus an index of omitted records. read_memory(node_id) retrieves incoming/outgoing history;
-read_memory(node_id, other_node_id) retrieves that direction only. Use next_offset for
-older pages and images="trajectory" when past visual evidence could change your decision.
-Memory captions are prior model assessments, not unquestionable facts. When an old branch,
-failed approach or ambiguous location matters, consult its history before repeating it.
-The latest map memory context supersedes earlier snapshots. Full history stays in storage.
-Task switches start a new VLA context with nearby boundary frames. You can set reset_context
-to reset actor context; frame budgets are runtime configuration. Current execution keyframes
-are provided automatically; older images can be retrieved without carrying them every turn.
-
-A doorway visible ahead does not establish that it was crossed. Similar beds or rooms
-are not interchangeable: use ordered transitions and spatial continuity to identify
-the right one. A map provides spatial relationships, not an oracle for room identity.
-Keep uncertainty explicit; check the evidence most useful for resolving it. Explain
-plan changes and stopping decisions briefly in observable terms.
-
-Use terminate_episode(status="complete", reason=...) when you judge the original route
-finished, or status="abort" when giving up. STOP is permanent. Your declaration and
-plan checkboxes do not determine benchmark success; actual final position does.
-Keep working until this tool stops the episode. Budget: {budget} low-level actions.
-No user can answer questions during navigation.
+Keep decisions and explanations brief. Continue until terminate_episode permanently
+stops the episode: complete when the original route is finished, abort when giving up.
+Budget: {budget} low-level actions. No user can answer questions during navigation.
 """
 
 CONDITION_PROMPTS = {
@@ -607,22 +585,8 @@ def build_briefing_for(condition: str, instruction: str, step_budget: int,
     tpl = CONDITION_PROMPTS[condition]
     if condition == "planner_agentic" and actor_history == "episode":
         tpl = tpl.replace(
-            "Task switches start a new VLA context with nearby boundary frames. You can set reset_context\n"
-            "to reset actor context; frame budgets are runtime configuration.",
-            "VLA visual history is runtime-managed using native policy sampling. "
-            "Within a task it remains continuous; map memory is not appended to VLA instructions.",
-        )
-    elif condition == "planner_agentic" and not allow_context_reset:
-        tpl = tpl.replace(
-            "You can set reset_context\nto reset actor context; frame budgets are runtime configuration.",
-            "Within a task, actor history is retained; frame budgets are runtime configuration.",
-        )
-    if condition == "planner_agentic" and tools is not None and "navigate_relative" not in tools:
-        tpl = tpl.replace(
-            "You can directly use\nnavigate_relative or navigate_to_node; no review call is required to unlock movement.",
-            "Use execute_subtask for forward progress and local repairs, with an updated local "
-            "instruction when needed. Use navigate_to_node to return to a visited node; "
-            "no review call is required to unlock movement.",
+            "the chosen instruction, visual history and recent segment memory",
+            "only the chosen instruction and visual history",
         )
     if condition in ("planner_motion", "planner_memory"):
         if condition == "planner_memory":

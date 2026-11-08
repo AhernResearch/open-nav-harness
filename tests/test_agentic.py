@@ -80,7 +80,7 @@ def test_agentic_tools_and_prompt_match_without_altering_strict_contract(tmp_pat
     assert strict.tools.definitions["execute_subtask"].inputSchema["properties"] == {}
     assert "observe" in session.tools.definitions and "observe_node" not in session.tools.definitions
     prompt = build_briefing_for("planner_agentic", "Exit the room", 500)
-    assert "no review call is required" in prompt and "Exit the room" in prompt
+    assert "review_subtask" not in prompt and "Exit the room" in prompt
     data = {"planner": {"runtime": "codex"}, "harness": {"mode": "agentic"}}
     config = Settings(Path("test.json"), data, {}).run_config()
     assert config.condition == "planner_agentic" and config.vla_map_enabled()
@@ -140,7 +140,7 @@ def test_execution_surface_and_reset_ablation(allow_reset):
         with pytest.raises(ValidationError):
             session.tools.invoke("execute_subtask", {"task_id": 1, key: True if key == "reset_context" else 1})
     prompt = build_briefing_for("planner_agentic", "Enter", 500, allow_context_reset=allow_reset)
-    assert ("reset_context" in prompt) is allow_reset
+    assert "Enter" in prompt
     assert ("reset_context" in tool.description) is allow_reset
 
 
