@@ -1,0 +1,21 @@
+{
+  "name": "gpt-direct",
+  "kind": "planner",
+  "url": "https://api.openai.com/v1",
+  "managed": false,
+  "max_concurrency": 2,
+  "planner": {
+    "runtime": "openai_compatible",
+    "api_format": "responses",
+    "model": "gpt-6.1-sol",
+    "base_url": "https://api.openai.com/v1",
+    "credential_env": "NAVH_GPT_API_KEY",
+    "token_count_mode": "remote",
+    "context_limit": 65536,
+    "output_tokens": 4096,
+    "max_images": 24,
+    "temperature": null,
+    "effort": "low",
+    "max_concurrency": 2
+  }
+}

@@ -135,6 +135,21 @@ def updates(events, call_id):
     return [e["item"] for e in events if e["type"] == "item.updated" and e["item"]["id"] == call_id]
 
 
+def test_responses_trace_shows_model_text_and_tool_execution(tmp_path):
+    a = Attempt(tmp_path)
+    a.journal('model_response', response={'object': 'response', 'status': 'completed',
+        'output': [{'type': 'message', 'content': [{'type': 'output_text', 'text': 'Inspect the map.'}]},
+                   {'type': 'function_call', 'call_id': 'call_map', 'name': 'observe_map', 'arguments': '{}'}],
+        'usage': {'input_tokens': 100, 'output_tokens': 20}})
+    a.call('call_map', 'observe_map')
+    a.result('call_map', 'observe_map')
+    events = Feed(tmp_path, EP).poll()
+    turn = next(e for e in events if e['type'] == 'turn.completed')
+    assert turn['text'] == 'Inspect the map.'
+    assert turn['usage']['input_tokens'] == 100
+    assert any(e['type'] == 'item.completed' and e['item']['id'] == 'call_map' for e in events)
+
+
 def test_tail_waits_for_complete_lines_and_detects_truncation(tmp_path):
     path = tmp_path / "x.jsonl"
     tail = JsonlTail(path)

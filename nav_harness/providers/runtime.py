@@ -137,6 +137,8 @@ class ManagedRuntime:
                             "observe_map and update_memory require separate model turns: read the map first"
                         )
                     block = [{"role": "assistant", "content": message.get("content"), "tool_calls": calls}]
+                    if 'provider_items' in message:
+                        block[0]['provider_items'] = message['provider_items']
                     if validation_errors:
                         # Reject the ENTIRE batch before any movement, then let the model
                         # repair its arguments in a new call. Never replay an executed call.

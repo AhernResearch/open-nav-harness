@@ -70,9 +70,26 @@ an episode. All command-line management flags precede the subcommand.
 ## Model configuration
 
 A `PlannerProfile` records the runtime, model ID, endpoint, context/output/image
-budgets, thinking mode, sampling, timeout and concurrency. API Planners require
-multimodal Chat Completions, function calls and a matching `/tokenize` processor.
-An optional `token_count_url` supports a separately exposed counter.
+budgets, thinking mode, sampling, timeout and concurrency. API Planners share one
+managed tool loop. `api_format: "chat_completions"` uses multimodal Chat Completions
+and a matching `/tokenize` processor. `api_format: "responses"` calls `/responses`
+directly, without Codex SDK or a second agent loop. It preserves function-call IDs
+and encrypted reasoning items across turns and uses `/responses/input_tokens`
+for counting. An optional `token_count_url` overrides the counting endpoint.
+
+See `deployment/planner-responses.example.json` for an external GPT service profile.
+Set `NAVH_GPT_API_KEY` in both API and worker process environments using a private
+environment file outside the repository/releases; snapshots contain only the
+variable name. Register the profile with `POST /api/services` after deploying this
+code. The existing model picker uses registered Planner profiles unchanged.
+
+For gateways without a token-count API, explicitly set `token_count_mode: "estimate"`.
+This uses UTF-8 byte length plus `image_token_estimate` (default 4096) per image,
+excluding image base64. It is a conservative budget heuristic, not an exact count
+or a guaranteed upper bound for arbitrary images; it can prune history earlier.
+Actual usage still comes from the generation response. Remote counting failures
+never silently fall back to estimation. Use `temperature: null` for models that
+do not accept temperature and `effort` for Responses reasoning effort.
 
 New model families implementing this protocol need a profile, not a new navigation
 loop. A different wire protocol belongs in `nav_harness/providers/`. New actors

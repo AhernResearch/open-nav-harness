@@ -35,6 +35,26 @@ def db(tmp_path):
     d.engine.dispose()
 
 
+async def test_external_planner_health_uses_credential_env(db, monkeypatch):
+    sid = db.register_service(ServiceSpec(
+        name='gpt', kind='planner', url='https://gateway.test/v1',
+        planner=PlannerProfile(model='gpt', api_format='responses',
+                               base_url='https://gateway.test/v1',
+                               credential_env='NAVH_TEST_KEY'),
+    ))
+    services = ServiceManager(db, PlatformSettings())
+    monkeypatch.delenv('NAVH_TEST_KEY', raising=False)
+    assert (await services.health(sid))['ok'] is False
+    monkeypatch.setenv('NAVH_TEST_KEY', 'test-secret')
+    get = AsyncMock(return_value=httpx.Response(200, json={'data': [{'id': 'gpt'}]},
+        request=httpx.Request('GET', 'https://gateway.test/v1/models')))
+    monkeypatch.setattr(httpx.AsyncClient, 'get', get)
+    assert (await services.health(sid))['ok'] is True
+    get.assert_awaited_once_with('https://gateway.test/v1/models',
+                               headers={'Authorization': 'Bearer test-secret'})
+    assert 'test-secret' not in db.service(sid).model_dump_json()
+
+
 def experiment(db, *, env=None, managed=False, purpose="development", split="train"):
     env = env or db.register_service(
         ServiceSpec(

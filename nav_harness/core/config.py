@@ -11,6 +11,9 @@ class StrictModel(BaseModel):
 
 class PlannerProfile(StrictModel):
     runtime: Literal["openai_compatible", "codex", "claude"] = "openai_compatible"
+    api_format: Literal["chat_completions", "responses"] = "chat_completions"
+    token_count_mode: Literal["remote", "estimate"] = "remote"
+    image_token_estimate: int = Field(default=4096, ge=256, le=32768)
     model: str = Field(min_length=1)
     base_url: str = "http://127.0.0.1:8001/v1"
     credential_env: str | None = None
@@ -20,7 +23,7 @@ class PlannerProfile(StrictModel):
     context_policy: Literal["full", "bounded"] = "bounded"
     thinking: bool = False
     effort: str | None = None
-    temperature: float = Field(default=0.0, ge=0, le=2)
+    temperature: float | None = Field(default=0.0, ge=0, le=2)
     request_timeout_s: int = Field(default=120, ge=5, le=1200)
     tokenizer_path: None = None  # Legacy null field; counting uses the serving processor.
     token_count_url: str | None = None

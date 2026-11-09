@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-09",
+  "model": "gpt-6.1-sol",
+  "api_format": "responses",
+  "agent_loop": "ManagedRuntime",
+  "sdk": false,
+  "token_count_mode": "estimate",
+  "remote_counter_http_status": 404,
+  "navigation_episode_run": false,
+  "tools": "Actual observe and terminate_episode schemas; simulated read-only tool results, no motion",
+  "result": {
+    "error": null,
+    "calls": [
+      {
+        "name": "observe",
+        "arguments": {
+          "views": [
+            "front"
+          ]
+        }
+      },
+      {
+        "name": "terminate_episode",
+        "arguments": {
+          "reason": "The front image is red. Aborting as required by the read-only protocol test.",
+          "status": "abort"
+        }
+      }
+    ],
+    "usage": {
+      "input_tokens": 671,
+      "cached_input_tokens": 0,
+      "output_tokens": 56
+    },
+    "extra": {
+      "input_visibility": "exact_wire_requests",
+      "trace": "/home/holo/robots/nav-harness/state/probes/gpt-direct-20261109/managed-loop/trace/requests.jsonl",
+      "environment_end_reason": "stop_called",
+      "explicit_stop": true
+    },
+    "simulator_movement": false,
+    "transport": "direct HTTP Responses; no SDK"
+  },
+  "validation": {
+    "pytest": 200,
+    "ruff": "passed",
+    "mypy": "passed",
+    "frontend_build": "passed",
+    "playwright_model_selection": "4 passed (system Chrome)"
+  },
+  "deployment": "Source integration verified; live services not switched."
+}

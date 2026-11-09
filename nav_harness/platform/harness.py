@@ -12,6 +12,7 @@ import cmath
 import json
 import struct
 from pathlib import Path
+from nav_harness.providers.responses import response_message
 
 MOTION = {"execute_subtask", "navigate_relative", "navigate_to_node"}
 ITEM_TYPES = {"update_plan": "plan", "update_memory": "memory_write", "read_memory": "memory_read",
@@ -157,7 +158,8 @@ class Feed:
         kind = r.get("kind")
         if kind == "model_response":
             body = r.get("response") or {}
-            message = (body.get("choices") or [{}])[0].get("message") or {}
+            message = (response_message(body) if body.get('object') == 'response' else
+                       (body.get("choices") or [{}])[0].get("message") or {})
             return [{"type": "turn.completed", "t": r["time"], "text": message.get("content"),
                      "reasoning": message.get("reasoning") or message.get("reasoning_content"),
                      "usage": body.get("usage"), "elapsed_s": r.get("elapsed_s")}]

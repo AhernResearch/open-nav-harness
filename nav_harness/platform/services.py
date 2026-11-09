@@ -4,6 +4,7 @@ import asyncio
 import shlex
 import json
 import time
+import os
 from pathlib import Path
 import httpx
 from sqlalchemy import text
@@ -41,8 +42,14 @@ class ServiceManager:
             spec.kind
         ]
         try:
+            headers = {}
+            if spec.kind == 'planner' and spec.planner.credential_env:
+                key = os.environ.get(spec.planner.credential_env)
+                if not key:
+                    return {'ok': False, 'error': 'Missing credential environment variable: ' + spec.planner.credential_env}
+                headers['Authorization'] = 'Bearer ' + key
             async with httpx.AsyncClient(timeout=5, trust_env=False) as client:
-                r = await client.get(spec.url.rstrip("/") + suffix)
+                r = await client.get(spec.url.rstrip("/") + suffix, headers=headers)
                 r.raise_for_status()
             return {"ok": True, "details": r.json()}
         except Exception as e:

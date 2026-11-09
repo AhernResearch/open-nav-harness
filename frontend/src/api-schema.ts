@@ -591,6 +591,23 @@ export interface components {
              * @enum {string}
              */
             runtime: "openai_compatible" | "codex" | "claude";
+            /**
+             * Api Format
+             * @default chat_completions
+             * @enum {string}
+             */
+            api_format: "chat_completions" | "responses";
+            /**
+             * Token Count Mode
+             * @default remote
+             * @enum {string}
+             */
+            token_count_mode: "remote" | "estimate";
+            /**
+             * Image Token Estimate
+             * @default 4096
+             */
+            image_token_estimate: number;
             /** Model */
             model: string;
             /**
@@ -632,7 +649,7 @@ export interface components {
              * Temperature
              * @default 0
              */
-            temperature: number;
+            temperature: number | null;
             /**
              * Request Timeout S
              * @default 120
