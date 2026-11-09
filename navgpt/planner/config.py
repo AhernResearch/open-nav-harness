@@ -58,6 +58,7 @@ class RunConfig:
     execution_url: str = ''
     allow_context_reset: bool = True
     actor_history_policy: str = "episode"
+    stall_return: str = "previous"  # agentic: nodes that release a no-progress pause
     subtask_max_distance_m: float = 3.0
     subtask_max_turn_deg: float = 180.0
     subtask_max_actions: int = 80

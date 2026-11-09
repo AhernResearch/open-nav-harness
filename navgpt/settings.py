@@ -37,7 +37,7 @@ KEYS = {
     "planner": {"runtime", "model", "effort", "service_tier", "tools", "max_turns",
                 "episode_timeout_s", "max_budget_usd", "profile"},
     "harness": {"interface", "review_every", "route_finding", "vla_steps_per_call",
-                "mode", "execution_url", "allow_context_reset", "actor_history_policy", "subtask_max_distance_m", "subtask_max_turn_deg", "subtask_max_actions"},
+                "mode", "execution_url", "allow_context_reset", "actor_history_policy", "stall_return", "subtask_max_distance_m", "subtask_max_turn_deg", "subtask_max_actions"},
     "output": {"dir", "save_frames"},
 }
 DOCS = "docs/USAGE.md#experiment-configs"
@@ -254,6 +254,9 @@ class Settings:
         cfg.actor_history_policy = harness.get('actor_history_policy', 'episode')
         if cfg.actor_history_policy not in ('episode', 'completed_subtask'):
             raise SettingsError('actor_history_policy must be episode or completed_subtask')
+        cfg.stall_return = harness.get('stall_return', 'previous')
+        if cfg.stall_return not in ('previous', 'any'):
+            raise SettingsError('stall_return must be previous or any')
         if cfg.actor_history_policy == 'completed_subtask' and (
             cfg.harness_mode != 'agentic' or cfg.vla_backend != 'lightnav'
         ):

@@ -79,12 +79,12 @@ def test_lightnav_task_instruction_has_no_map_caption_and_no_manual_reset_tool()
     assert m.policy_instruction(session._input_profile.include_memory) == "Cross the door"
     assert "wrong room" in m.policy_instruction()  # Native actor contract unchanged.
     definition = session.tools.definitions["execute_subtask"]
-    assert set(definition.inputSchema["properties"]) == {"task_id", "instruction"}
+    assert set(definition.inputSchema["properties"]) == {"task_id", "max_distance_m", "instruction"}
     assert "reset_context" not in definition.description
     briefing = build_briefing_for("planner_agentic", "Go", 500, actor_history="episode")
     assert "reset_context" not in briefing and "only the chosen instruction and visual history" in briefing
     with pytest.raises(ValueError, match="unsupported"):
-        session.execute_agentic_task(1, reset_context=True)
+        session.execute_agentic_task(1, 5.0, reset_context=True)
 
 
 def test_official_vla_only_budget_stop_is_not_reported_as_model_prediction(tmp_path, monkeypatch):
@@ -132,14 +132,14 @@ def test_completed_task_crop_retains_contiguous_retrace_and_never_crops_on_retur
             {'id': 2, 'instruction': 'Turn left', 'status': 'pending'}]
     observe(0)
     m.update_plan(plan, 'Initial')
-    session.execute_agentic_task(1)
+    session.execute_agentic_task(1, 5.0)
     for i in range(1, 21):
         observe(i)
-    session.execute_agentic_task(1, 'Keep going')
+    session.execute_agentic_task(1, 5.0, 'Keep going')
     assert model.resets == 1 and len(model.frames) == 21
     # A task switch without completion must also keep history.
-    session.execute_agentic_task(2)
-    session.execute_agentic_task(1)
+    session.execute_agentic_task(2, 5.0)
+    session.execute_agentic_task(1, 5.0)
     assert model.resets == 1
     plan[0]['status'] = 'completed'
     m.update_plan(plan, 'Door crossed')
@@ -147,11 +147,11 @@ def test_completed_task_crop_retains_contiguous_retrace_and_never_crops_on_retur
     assert model.resets == 1
     for i in range(21, 24):  # Passive movement between completion and next execution.
         observe(i)
-    session.execute_agentic_task(2)
+    session.execute_agentic_task(2, 5.0)
     expected = list(range(20 if policy == 'completed_subtask' else 0, 24))
     assert model.frames == [f'image-{i}' for i in expected]
     assert model.resets == expected_resets
-    session.execute_agentic_task(2, 'Continue')
+    session.execute_agentic_task(2, 5.0, 'Continue')
     assert model.resets == expected_resets
     assert bridge.state()['history_frames'] == len(expected)
     assert len(m.frames) == 24  # Planner evidence is never deleted.
@@ -162,7 +162,7 @@ def test_completed_task_crop_retains_contiguous_retrace_and_never_crops_on_retur
     plan[0]['status'] = 'pending'
     m.update_plan(plan, 'Correction: wrong room')
     assert m.completed_boundary is None
-    session.execute_agentic_task(1)
+    session.execute_agentic_task(1, 5.0)
     assert model.resets == expected_resets
 
 

@@ -158,14 +158,14 @@ def test_real_tool_boundary_zero_motion_rejection_and_lost_response(session, mon
     session._tasks.update_plan([{"id": 1, "instruction": "Enter"}], "Plan")
     monkeypatch.setattr(session, "vla_navigate", lambda instruction: [json.dumps({"subtask_return": "vla_stop"})])
     session.tools.invoke("observe_map", {})
-    assert not session.tools.invoke("execute_subtask", {"task_id": 1}).isError
+    assert not session.tools.invoke("execute_subtask", {"task_id": 1, 'max_distance_m': 5.0}).isError
     m = session._tasks.memory
     assert m.edges[-1]["start_node_id"] == m.edges[-1]["end_node_id"] == 0
     # v5: the map returned with the movement result authorizes its caption.
     assert session._memory_map_read["source"] == "movement"
     assert not session.tools.invoke("update_memory", args(end=0)).isError
     before = copy.deepcopy(m.edges)
-    assert session.tools.invoke("execute_subtask", {"task_id": 99}).isError
+    assert session.tools.invoke("execute_subtask", {"task_id": 99, 'max_distance_m': 5.0}).isError
     assert m.edges == before
 
     def lose(instruction):
@@ -174,7 +174,7 @@ def test_real_tool_boundary_zero_motion_rejection_and_lost_response(session, mon
 
     monkeypatch.setattr(session, "vla_navigate", lose)
     with pytest.raises(RuntimeError, match="lost motion"):
-        session.tools.invoke("execute_subtask", {"task_id": 1})
+        session.tools.invoke("execute_subtask", {"task_id": 1, 'max_distance_m': 5.0})
     assert m.edges[-1]["status"] == "uncertain" and m.edges[-1]["end_node_id"] is None
 
 
@@ -307,10 +307,10 @@ def test_execution_keeps_plan_and_unavailable_map_grants_no_caption(session, mon
     calls = []
     monkeypatch.setattr(session, 'vla_navigate', lambda instruction: calls.append(instruction) or [])
     monkeypatch.setattr(session, '_fetch_map', lambda: (None, 'renderer down'))
-    result = session.tools.invoke('execute_subtask', {'task_id': 1, 'instruction': 'Local correction'})
+    result = session.tools.invoke('execute_subtask', {'task_id': 1, 'max_distance_m': 5.0, 'instruction': 'Local correction'})
     assert not result.isError and calls[0].startswith('Local correction')
     assert session._tasks.tasks[0]['instruction'] == 'Original'
-    session.tools.invoke('execute_subtask', {'task_id': 1})
+    session.tools.invoke('execute_subtask', {'task_id': 1, 'max_distance_m': 5.0})
     assert calls[-1].startswith('Original')
     assert not [c for c in result.content if c.type == 'image']
     assert 'map unavailable' in text(result)
@@ -380,11 +380,11 @@ def test_movement_result_map_authorizes_caption_until_next_motion(session, monke
         return [json.dumps({"subtask_return": "vla_stop"})]
 
     monkeypatch.setattr(session, "vla_navigate", walk)
-    result = session.tools.invoke("execute_subtask", {"task_id": 1})
+    result = session.tools.invoke("execute_subtask", {"task_id": 1, 'max_distance_m': 5.0})
     assert [c for c in result.content if c.type == "image"], "movement result must carry the map"
     assert '"memory_context"' in text(result)
     assert not session.tools.invoke("update_memory", args()).isError
-    session.tools.invoke("execute_subtask", {"task_id": 1})
+    session.tools.invoke("execute_subtask", {"task_id": 1, 'max_distance_m': 5.0})
     session._motion_epoch += 1  # any later motion revokes the credential
     assert "Call observe_map" in text(session.tools.invoke("update_memory", args(1, 1)))
 
@@ -429,3 +429,64 @@ def test_repeated_stalled_relative_move_is_refused_before_motion(session, monkey
     assert refused.isError and "made no progress" in text(refused)
     assert len(calls) == session.RELATIVE_NO_PROGRESS_LIMIT
     assert not session.tools.invoke("navigate_relative", {"turn_deg": 90.0, "distance_m": 1.0}).isError
+
+
+def rpose(x):
+    return {"position": [x, 0, 0], "rotation_wxyz": [1.0, 0.0, 0.0, 0.0]}
+
+
+@pytest.mark.parametrize("policy,options", [("previous", [1]), ("any", [0, 1])])
+def test_repeated_no_progress_pauses_delegation_until_an_allowed_return(tmp_path, monkeypatch, policy, options):
+    s = configure(NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic", "NAVGPT_STALL_RETURN": policy,
+                                         "NAVGPT_LIVE_DIR": str(tmp_path / "live")}), monkeypatch)
+    s._last_pose = rpose(0)
+    s._tasks.update_plan([{"id": 1, "instruction": "Enter"}], "Plan")
+
+    def walk_to(x):
+        def vla(instruction):
+            net = abs(x - s._last_pose["position"][0])
+            s._motion_epoch += 1
+            s._last_pose = rpose(x)
+            return [json.dumps({"subtask_return": "vla_stop", "net_displacement_m": net})]
+        monkeypatch.setattr(s, "vla_navigate", vla)
+
+    def execute():
+        return s.tools.invoke("execute_subtask", {"task_id": 1, "max_distance_m": 5.0})
+
+    for x in (3, 6):  # 0 -> 1 -> 2
+        walk_to(x)
+        assert '"stall"' not in text(execute())
+    walk_to(6)
+    first = text(execute())
+    assert '"vla_moved": false' in first and '"locked"' not in first
+    locked = json.loads(next(line for line in text(execute()).splitlines() if '"stall"' in line))["stall"]
+    assert locked["locked"] and locked["return_options"] == options
+    assert "navigate_to_node" in text(execute())  # refused before moving
+    assert s._tasks.memory.active is None
+    current = s._tasks.memory.current_node_id
+    assert s.tools.invoke("navigate_to_node", {"node_id": current}).isError
+
+    def retrace(name, inputs):
+        s._motion_epoch += 1
+        s._last_pose = rpose(inputs["position"][0])
+        return {"arrived": True, "step_count": 9}
+
+    monkeypatch.setattr(s, "_call", retrace)
+    assert not s.tools.invoke("navigate_to_node", {"node_id": options[-1]}).isError
+    walk_to(9)
+    assert not execute().isError
+
+
+def test_short_moves_count_but_reaching_the_planner_cap_never_does():
+    from navgpt.planner.tools.agentic import StallGuard
+
+    memory = SimpleNamespace(current_node_id=0, nodes={0: {}}, edges=[])
+    guard = StallGuard()
+    for _ in range(5):  # stopping at the Planner's own small cap is progress
+        assert guard.record(0.3, 0.3, "distance_budget", memory) is None
+    assert guard.record(0.5, 4.0, "vla_stop", memory)["consecutive_no_progress"] == 1
+    assert guard.record(0.5, 4.0, "blocked", memory)["consecutive_no_progress"] == 2
+    third = guard.record(0.5, 4.0, "vla_stop", memory)
+    # No other node exists, so the guard warns instead of fencing the only position.
+    assert third["consecutive_no_progress"] == 3 and "locked" not in third
+    assert guard.record(2.0, 4.0, "vla_stop", memory) is None and guard.short == 0

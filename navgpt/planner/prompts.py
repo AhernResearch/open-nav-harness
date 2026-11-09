@@ -499,9 +499,12 @@ route from the observed current pose, omitting completed movements. Inspect retu
 process frames and endpoint views before deciding what comes next. VLA STOP, a runtime
 limit, plan status and memory captions are not proof of completion: judge progress
 from observed transitions and the original requirements. Reopen unsupported completions.
-If an attempt produces no progress, reassess the evidence or approach instead of
-repeatedly paraphrasing the same command. Use navigate_to_node to return to a visited
-place when another approach is needed.
+Give every execution a max_distance_m: how far this step should take the robot. Control
+returns when the VLA has walked that far, so a step you expect to be short cannot carry
+the robot past its target. If an attempt produces no progress, reassess the evidence or
+approach instead of repeatedly paraphrasing the same command from the same pose. After
+repeated no-progress attempts, delegation pauses until you return to a listed visited
+node with navigate_to_node or end the episode.
 
 Request observe for additional current views and observe_map for topology when they can
 resolve uncertainty. Reuse evidence already provided. Consult relevant failed attempts

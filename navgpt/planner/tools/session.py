@@ -135,6 +135,9 @@ class NavigationSession:
             if self._SUBTASK
             else None
         )
+        self._stall = _sibling("agentic", "StallGuard")(self.env.get("NAVGPT_STALL_RETURN", "previous"))
+        # Planner-chosen walking cap for the current agentic delegation; None outside one.
+        self._distance_cap = None
         self._vla_calls = 0
         self._policy_step = 0
         self._presentation_by_hash = {}
@@ -1065,6 +1068,16 @@ class NavigationSession:
             out.append(table)
         return out
 
+    def _stall_update(self, name, status, reason, kwargs):
+        """Account a finished segment in the no-progress guard; return its feedback."""
+        memory = self._tasks.memory
+        if name == "execute_subtask":
+            return self._stall.record(float(status.get("net_displacement_m") or 0.0),
+                                      kwargs["max_distance_m"], reason, memory)
+        if name == "navigate_to_node" and self._stall.allowed and memory.current_node_id in self._stall.allowed:
+            self._stall.released()
+        return None
+
     def _grant_map_read(self, png: bytes, status: dict, source: str) -> dict:
         """Record a returned map as the memory-write credential; return its model view.
 
@@ -1271,19 +1284,14 @@ class NavigationSession:
             if arrival or handoff == "scheduled":
                 subtask_return = "vla_stop" if arrival else "scheduled"
                 break
-            if self._SUBTASK and (
-                blocked_count >= 3
-                or (not self._AGENTIC and (
-                    travelled >= limits["max_distance_m"]
-                    or turned >= limits["max_turn_deg"]
-                ))
-            ):
+            # Agentic delegations stop only at the Planner's own distance cap; the strict
+            # subtask workflow keeps its configured distance and turn caps.
+            distance_cap = self._distance_cap if self._AGENTIC else limits["max_distance_m"]
+            over_distance = distance_cap is not None and travelled >= distance_cap
+            over_turn = not self._AGENTIC and turned >= limits["max_turn_deg"]
+            if self._SUBTASK and (blocked_count >= 3 or over_distance or over_turn):
                 subtask_return = (
-                    "blocked"
-                    if blocked_count >= 3
-                    else "distance_budget"
-                    if travelled >= limits["max_distance_m"]
-                    else "turn_budget"
+                    "blocked" if blocked_count >= 3 else "distance_budget" if over_distance else "turn_budget"
                 )
                 break
         keyframes: list[tuple[str, bytes]] = []
@@ -1357,6 +1365,8 @@ class NavigationSession:
         if self._SUBTASK:
             status["subtask_return"] = subtask_return
             status["turn_travelled_deg"] = round(turned, 2)
+        if self._AGENTIC and self._distance_cap is not None:
+            status["max_distance_m"] = self._distance_cap
         if self._ABLATION:
             status["handoff"] = handoff or "natural"
             status["review"] = self._scheduler.snapshot()
@@ -1830,7 +1840,7 @@ class NavigationSession:
                    "steps_remaining_approx", "episode_over", "subtask_return", "turn_travelled_deg",
                    "turned_deg", "requested_m", "walked_m", "blocked", "detour_m", "detoured",
                    "nearest_obstacle_before_m", "end_reason", "target_node_id", "termination_reason",
-                   "arrived", "step_count", "terminated", "truncated"}
+                   "arrived", "step_count", "terminated", "truncated", "max_distance_m"}
         compact = []
         for item in result:
             if isinstance(item, str) and item.startswith("{"):
@@ -1869,6 +1879,10 @@ class NavigationSession:
                         if segment:
                             if self._episode_over:
                                 raise ValueError("Episode is already over")
+                            if name == "navigate_to_node":
+                                self._stall.check_return(kwargs.get("node_id"))
+                            else:
+                                self._stall.check_delegation()
                             pose = self._last_pose or (self._tasks.frames[-1]["pose"] if self._tasks.frames else {})
                             task_id = kwargs.get("task_id", self._tasks.active_id)
                             task = next((t for t in self._tasks.tasks if t["id"] == task_id), None)
@@ -1880,7 +1894,7 @@ class NavigationSession:
                             self._tasks.begin()
                         result = fn(*args, **kwargs)
                         if segment:
-                            reason = "tool_return"
+                            reason, status = "tool_return", {}
                             for item in result:
                                 if isinstance(item, str) and item.startswith("{"):
                                     status = json.loads(item)
@@ -1897,6 +1911,9 @@ class NavigationSession:
                             self._tasks._event("execution_memory", **self._tasks.memory.status())
                             result = self._compact_motion_result(result)
                             result.append(json.dumps({"execution": self._tasks.memory.status()}))
+                            stall = self._stall_update(name, status, reason, kwargs)
+                            if stall:
+                                result.append(json.dumps({"stall": stall}))
                             result.extend(self._segment_map())
                     except (ValueError, MotionRejected) as exc:
                         if begun:
@@ -2018,14 +2035,19 @@ class NavigationSession:
             self._tasks.update_plan(subtasks, reason)
         return [json.dumps({"plan_updated": True, "revision": self._tasks.revision})]
 
-    def execute_agentic_task(self, task_id: int, instruction: str = "",
+    def execute_agentic_task(self, task_id: int, max_distance_m: float, instruction: str = "",
                              reset_context: bool = False) -> list:
         """Execute a task by ID. Empty instruction uses the plan; otherwise override this call only.
 
+        max_distance_m is how far the VLA may walk before control returns to you; choose it
+        from the distance you expect this step to need.
         reset_context restarts visual history for this task.
-        Runs until VLA stop, blockage or runtime limits. Returns process frames, endpoint
-        views and movement statistics. The episode remains active unless episode_over is true.
+        Runs until VLA stop, blockage, the distance cap or runtime limits. Returns process
+        frames, endpoint views and movement statistics. The episode remains active unless
+        episode_over is true.
         """
+        if not math.isfinite(max_distance_m) or max_distance_m <= 0:
+            raise ValueError("max_distance_m must be a positive finite distance in metres")
         if reset_context and not self._input_profile.manual_reset:
             raise ValueError('This policy retains episode history; task-local reset is unsupported')
         history_frames = int(self.env.get("NAVGPT_HISTORY_FRAMES", "16"))
@@ -2059,13 +2081,18 @@ class NavigationSession:
                           history_policy=self._actor_history_policy,
                           history_frames=history_frames if self._input_profile.history == "bounded" else None,
                           boundary_frames=boundary_frames if self._input_profile.history == "bounded" else 0)
-        result = self.vla_navigate(self._tasks.policy_instruction(self._input_profile.include_memory))
+        self._distance_cap = max_distance_m
+        try:
+            result = self.vla_navigate(self._tasks.policy_instruction(self._input_profile.include_memory))
+        finally:
+            self._distance_cap = None
         self._tasks.returned('execution_handoff')
         return result
 
-    def execute_agentic_task_without_reset(self, task_id: int, instruction: str = "") -> list:
+    def execute_agentic_task_without_reset(self, task_id: int, max_distance_m: float,
+                                           instruction: str = "") -> list:
         """Schema adapter for the reset ablation; execution has one implementation."""
-        return self.execute_agentic_task(task_id, instruction)
+        return self.execute_agentic_task(task_id, max_distance_m, instruction)
 
     def update_memory(self, start_node_id: int, end_node_id: int, caption: str) -> list:
         """Write a 1-800 character caption for the current traversal.

@@ -47,7 +47,7 @@ class AgenticTasks(SubtaskManager):
             "active_id": self.active_id,
             "completion_claim": self.completion_claim,
             "workflow": "model_owned",
-            "tool_contract": "topology_memory_v5",
+            "tool_contract": "topology_memory_v6",
             "memory_context": self.memory.context(self.active_id),
             "latest_memory": next((self.memory.brief(e) for e in reversed(self.memory.edges) if e["caption"]), None),
         }
@@ -213,3 +213,70 @@ TOOL_DESCRIPTIONS = {
         "This does not find unvisited goals."
     ),
 }
+
+
+class StallGuard:
+    """Hands control back after repeated delegations that do not move the robot.
+
+    A zero move has net displacement below ZERO_M. A short move ends by actor stop or
+    blockage below SHORT_FRACTION of the Planner's own distance cap; reaching that cap
+    is the Planner's choice and never counts. After ZERO_LIMIT consecutive zero moves or
+    SHORT_LIMIT consecutive short moves, further delegation is refused until the robot
+    returns to an allowed node or the episode ends. ``policy`` selects which nodes are
+    allowed: ``previous`` (the last node it moved away from) or ``any`` other visited node.
+    """
+
+    ZERO_M = 0.1
+    SHORT_FRACTION = 0.25
+    ZERO_LIMIT = 2
+    SHORT_LIMIT = 3
+    POLICIES = ("previous", "any")
+
+    def __init__(self, policy="previous"):
+        if policy not in self.POLICIES:
+            raise ValueError("stall_return must be previous or any")
+        self.policy = policy
+        self.zero = self.short = 0
+        self.allowed = None  # node IDs that release the lock; None means unlocked
+
+    def record(self, net_m, cap_m, reason, memory):
+        """Account one delegation; return model-facing feedback, or None after progress."""
+        zero = net_m < self.ZERO_M
+        short = zero or (reason in ("vla_stop", "blocked") and net_m < self.SHORT_FRACTION * cap_m)
+        self.zero = self.zero + 1 if zero else 0
+        self.short = self.short + 1 if short else 0
+        if not short:
+            return None
+        if self.zero >= self.ZERO_LIMIT or self.short >= self.SHORT_LIMIT:
+            self.allowed = self.return_nodes(memory) or None
+        feedback = {"vla_moved": not zero, "net_displacement_m": round(net_m, 2),
+                    "consecutive_no_progress": self.short,
+                    "note": "The actor made little or no progress. Rephrasing the same move from "
+                            "the same pose usually stops again."}
+        if self.allowed:
+            feedback.update(locked=True, return_options=self.allowed,
+                            note="Delegation is paused after repeated no-progress attempts. Call "
+                                 "navigate_to_node with one of return_options, or terminate_episode.")
+        return feedback
+
+    def return_nodes(self, memory):
+        current = memory.current_node_id
+        if self.policy == "any":
+            return sorted(n for n in memory.nodes if n != current)
+        moved = (e for e in reversed(memory.edges)
+                 if e["status"] == "recorded" and e["end_node_id"] != e["start_node_id"]
+                 and e["start_node_id"] is not None and e["start_node_id"] != current)
+        edge = next(moved, None)
+        return [edge["start_node_id"]] if edge else []
+
+    def check_delegation(self):
+        if self.allowed:
+            raise ValueError("Delegation is paused after repeated no-progress attempts: call "
+                             f"navigate_to_node with one of {self.allowed}, or terminate_episode")
+
+    def check_return(self, node_id):
+        if self.allowed and node_id not in self.allowed:
+            raise ValueError(f"After repeated no-progress attempts, return to one of {self.allowed}")
+
+    def released(self):
+        self.allowed, self.zero, self.short = None, 0, 0

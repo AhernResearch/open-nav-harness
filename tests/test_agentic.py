@@ -75,7 +75,7 @@ def test_agentic_tools_and_prompt_match_without_altering_strict_contract(tmp_pat
     session = NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic"})
     assert set(session.tools.definitions) == set(expected_tools("planner_agentic"))
     schema = session.tools.definitions["execute_subtask"].inputSchema
-    assert schema["required"] == ["task_id"]
+    assert schema["required"] == ["task_id", "max_distance_m"]
     strict = NavigationSession(env={"NAVGPT_CONDITION": "planner_subtask"})
     assert strict.tools.definitions["execute_subtask"].inputSchema["properties"] == {}
     assert "observe" in session.tools.definitions and "observe_node" not in session.tools.definitions
@@ -110,15 +110,15 @@ def test_repair_is_not_blocked_by_task_lifecycle_and_limits_restore(monkeypatch)
     monkeypatch.setattr(
         s, "vla_navigate", lambda instruction: calls.append(instruction) or []
     )
-    s.execute_agentic_task(1, reset_context=True)
+    s.execute_agentic_task(1, 5.0, reset_context=True)
     assert calls[0].startswith("Cross the doorway")
     assert s._rollout_limits is None
     s._tasks.needs_review = True
     s._tasks.needs_replan = True
-    s.execute_agentic_task(1, instruction="Finish crossing the threshold")
+    s.execute_agentic_task(1, 5.0, instruction="Finish crossing the threshold")
     assert len(calls) == 2
     with pytest.raises(TypeError):
-        s.execute_agentic_task(1, max_actions=501)
+        s.execute_agentic_task(1, 5.0, max_actions=501)
     assert len(calls) == 2
 
 
@@ -133,12 +133,12 @@ def test_execution_surface_and_reset_ablation(allow_reset):
     }, {}).run_config()
     session = NavigationSession(env=mcp_env_for(cfg, None))
     tool = session.tools.definitions["execute_subtask"]
-    fields = {"task_id", "instruction"} | ({"reset_context"} if allow_reset else set())
+    fields = {"task_id", "max_distance_m", "instruction"} | ({"reset_context"} if allow_reset else set())
     assert set(tool.inputSchema["properties"]) == fields
-    assert tool.inputSchema["required"] == ["task_id"]
-    for key in ["max_actions", "max_distance_m", "max_turn_deg"] + ([] if allow_reset else ["reset_context"]):
+    assert tool.inputSchema["required"] == ["task_id", "max_distance_m"]
+    for key in ["max_actions", "max_turn_deg"] + ([] if allow_reset else ["reset_context"]):
         with pytest.raises(ValidationError):
-            session.tools.invoke("execute_subtask", {"task_id": 1, key: True if key == "reset_context" else 1})
+            session.tools.invoke("execute_subtask", {"task_id": 1, 'max_distance_m': 5.0, key: True if key == "reset_context" else 1})
     prompt = build_briefing_for("planner_agentic", "Enter", 500, allow_context_reset=allow_reset)
     assert "Enter" in prompt
     assert ("reset_context" in tool.description) is allow_reset
@@ -184,7 +184,7 @@ def test_agentic_rollout_uses_global_protection_not_old_segment_caps(monkeypatch
         return {"pose": pose, "step_count": count, "navigable": ending != "blocked",
                 "truncated": ending == "global" and count == 90}
     monkeypatch.setattr(s, "_call", move)
-    result = s.execute_agentic_task(1)
+    result = s.execute_agentic_task(1, 100.0)  # far beyond this walk: no turn cap applies
     status = next(json.loads(x) for x in result if isinstance(x, str) and '"subtask_return"' in x)
     assert count == (3 if ending == "blocked" else 90)
     if ending == "policy":
@@ -255,7 +255,7 @@ def test_rollout_records_actor_output_before_dispatch_and_matches_execution(
 
     monkeypatch.setattr(s, "_call", move)
     s.VLA_MAX_STEPS = 1  # Runtime test cap; not a planner-selected tool argument.
-    s.execute_agentic_task(1)
+    s.execute_agentic_task(1, 5.0)
     step = [e for e in events() if e.get("prediction_id") == 1]
     assert [e["kind"] for e in step] == [
         "policy_context",
@@ -380,3 +380,46 @@ def test_completion_is_declared_only_after_confirmed_stop(monkeypatch, ending):
     monkeypatch.setattr(s, "arrive", arrive)
     s.finish_agentic_episode("complete", "the bed is in front")
     assert (s._tasks.completion_claim == "complete") is (ending == "stop_called")
+
+
+def test_agentic_delegation_stops_at_the_planner_distance_cap(monkeypatch):
+    import math
+    from types import SimpleNamespace
+
+    count = 0
+    pose = {"position": [0., 0., 0.], "rotation_wxyz": [1., 0., 0., 0.]}
+    s = NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic", "NAVGPT_VLA_BACKEND": "lightnav"},
+                          actor=SimpleNamespace(act=lambda **k: {"should_stop": False, "velocity": {
+                              "linear_mps": 1., "angular_rps": 0., "dt_s": .1}}, prepare_context=lambda *a: None))
+    s._tasks = manager()
+    monkeypatch.setattr(s, "_pano", lambda: {"pose": pose, "views": {}, "raw_views": {}})
+    monkeypatch.setattr(s, "_clearance_summary", lambda *args: {})
+    monkeypatch.setattr(s, "_pano_frames", lambda *args: [])
+    monkeypatch.setattr(s, "_frame_here", lambda: None)
+
+    def move(name, inputs):
+        nonlocal count, pose
+        count += 1
+        pose = {"position": [count * .25, 0., 0.], "rotation_wxyz": [1., 0., 0., 0.]}
+        return {"pose": pose, "step_count": count, "navigable": True}
+
+    monkeypatch.setattr(s, "_call", move)
+    for cap in (math.nan, 0.0, -1.0):
+        with pytest.raises(ValueError, match="max_distance_m"):
+            s.execute_agentic_task(1, cap)
+    status = next(json.loads(x) for x in s.execute_agentic_task(1, 1.0)
+                  if isinstance(x, str) and '"subtask_return"' in x)
+    assert count == 4 and status["subtask_return"] == "distance_budget" and status["max_distance_m"] == 1.0
+    assert s._distance_cap is None
+
+
+def test_stall_return_policy_is_validated_and_frozen_into_the_session():
+    from navgpt.planner.runner import mcp_env_for
+
+    def config(value):
+        return Settings(Path("test.json"), {"planner": {"runtime": "codex"},
+                                            "harness": {"mode": "agentic", "stall_return": value}}, {}).run_config()
+    with pytest.raises(SettingsError):
+        config("nearest")
+    session = NavigationSession(env=mcp_env_for(config("any"), None))
+    assert session._stall.policy == "any"

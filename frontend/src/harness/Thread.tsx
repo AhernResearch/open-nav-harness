@@ -13,7 +13,7 @@ function describe(item: Item): { icon: string; label: string } {
     case "update_plan":
       return { icon: "list", label: a.patch ? `更新计划 · 调整 ${a.patch.length} 项状态` : `更新计划 · ${a.subtasks?.length ?? 0} 项` };
     case "execute_subtask":
-      return { icon: "route", label: a.instruction || `执行任务 ${a.task_id}` };
+      return { icon: "route", label: `${a.instruction || `执行任务 ${a.task_id}`}${a.max_distance_m ? ` · ≤${a.max_distance_m} 米` : ""}` };
     case "navigate_relative":
       return { icon: "route", label: `转向 ${a.turn_deg ?? 0}°，前进 ${a.distance_m ?? 0} 米` };
     case "navigate_to_node":
