@@ -503,15 +503,16 @@ If an attempt produces no progress, reassess the evidence or approach instead of
 repeatedly paraphrasing the same command. Use navigate_to_node to return to a visited
 place when another approach is needed.
 
-Request observe for additional current views, observe_map for topology and read_memory
-for past experiences or images when they can resolve uncertainty. Reuse evidence already
-provided. Consult relevant failed attempts before repeating a branch. Record useful
-progress, discoveries, failure or return reasons and uncertainty with update_memory;
-read the current map first as its tool contract requires. Memory describes directed
-travel between nodes. Keep plan status in update_plan; memory writing is optional.
+Request observe for additional current views and observe_map for topology when they can
+resolve uncertainty. Reuse evidence already provided. Consult relevant failed attempts
+before repeating a branch. Every movement result ends with the current map: record useful
+progress, discoveries, failure or return reasons and uncertainty with update_memory from
+that map, in the same response as your next plan update and execution. Memory describes
+directed travel between nodes. Use update_plan with patch for status changes and with
+subtasks only to rewrite the plan; memory writing is optional.
 The latest persisted state supersedes older snapshots, but its assessments may be wrong.
 
-Keep decisions and explanations brief. Continue until terminate_episode permanently
+Before tool calls, write at most one short sentence; do not narrate the views. Continue until terminate_episode permanently
 stops the episode: complete when the original route is finished, abort when giving up.
 Budget: {budget} low-level actions. No user can answer questions during navigation.
 """

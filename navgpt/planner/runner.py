@@ -351,7 +351,7 @@ def parse_episodes(spec: str) -> list[int]:
 EXPECTED_TOOLS = {
     "planner_agentic": ["execute_subtask", "navigate_relative", "navigate_to_node",
                         "observe", "observe_map",
-                        "terminate_episode", "update_memory", "update_plan", "read_memory"],
+                        "terminate_episode", "update_memory", "update_plan"],
     "planner_subtask": ["annotate_node", "execute_subtask", "navigate_relative",
                         "navigate_to_node", "observe_forward", "observe_map",
                         "observe_panorama", "review_subtask", "terminate_episode", "update_plan"],

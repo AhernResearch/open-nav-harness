@@ -131,7 +131,9 @@ ALL_TOOLS = ["observe_forward", "observe_panorama", "observe_map", "navigate_by_
 SUBTASK_TOOLS = [tool for tool in ALL_TOOLS if tool != 'navigate_by_instruction'] + [
     'update_plan', 'execute_subtask', 'review_subtask']
 AGENTIC_TOOLS = [t for t in SUBTASK_TOOLS if t not in ('annotate_node', 'review_subtask', 'observe_forward', 'observe_panorama')] + [
-    'observe', 'update_memory', 'read_memory']
+    'observe', 'update_memory']
+# read_memory stays implemented for ablations; the default surface omits it (rarely used).
+AGENTIC_TOOLS_WITH_RECALL = AGENTIC_TOOLS + ['read_memory']
 
 
 def tool_set(tools) -> tuple[str, str]:
@@ -143,7 +145,8 @@ def tool_set(tools) -> tuple[str, str]:
     known: dict = {frozenset(v): (k, "full") for k, v in EXPECTED_TOOLS.items()}
     # Agentic movement ablation: preserve task/memory semantics and remove only
     # direct metric movement. The explicit tool list is frozen in the experiment.
-    known[frozenset(AGENTIC_TOOLS) - {"navigate_relative"}] = ("planner_agentic", "full")
+    for agentic in (AGENTIC_TOOLS, AGENTIC_TOOLS_WITH_RECALL):
+        known[frozenset(agentic)] = known[frozenset(agentic) - {"navigate_relative"}] = ("planner_agentic", "full")
     for bundle, names in CAPABILITIES.items():
         known.setdefault(frozenset(names), ("planner_vla_memory", bundle))
     every = sorted(set().union(*known))

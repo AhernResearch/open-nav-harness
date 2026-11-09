@@ -23,6 +23,13 @@ class PlanItem(TypedDict):
     status: Literal["pending", "in_progress", "completed"]
 
 
+class PlanPatch(TypedDict):
+    __pydantic_config__ = ConfigDict(extra="forbid")
+
+    id: int
+    status: Literal["pending", "in_progress", "completed"]
+
+
 class AgenticTasks(SubtaskManager):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -40,7 +47,7 @@ class AgenticTasks(SubtaskManager):
             "active_id": self.active_id,
             "completion_claim": self.completion_claim,
             "workflow": "model_owned",
-            "tool_contract": "topology_memory_v4",
+            "tool_contract": "topology_memory_v5",
             "memory_context": self.memory.context(self.active_id),
             "latest_memory": next((self.memory.brief(e) for e in reversed(self.memory.edges) if e["caption"]), None),
         }
@@ -89,6 +96,21 @@ class AgenticTasks(SubtaskManager):
         self._event("plan", reason=reason, plan=self.snapshot())
         return self.snapshot()
 
+    def patch_plan(self, patch, reason):
+        """Status-only revision; the full-plan path validates and records it."""
+        changes = {}
+        for item in patch:
+            if item["id"] in changes:
+                raise ValueError("Each task ID may appear once in a patch")
+            changes[item["id"]] = item["status"]
+        unknown = set(changes) - {t["id"] for t in self.tasks}
+        if not changes or unknown:
+            raise ValueError("Patch must name existing task IDs" + (f"; unknown: {sorted(unknown)}" if unknown else ""))
+        # Promoting a task demotes the previous in_progress one, as a full plan would require.
+        promoted = any(s == "in_progress" for s in changes.values())
+        return self.update_plan([{**t, "status": changes.get(t["id"], "pending" if promoted and t["status"] == "in_progress"
+                                                         else t["status"])} for t in self.tasks], reason)
+
     def current(self):
         if self.aborted:
             raise ValueError("Episode was aborted")
@@ -118,10 +140,15 @@ class AgenticTasks(SubtaskManager):
             self.anchor = len(self.frames) - 1
             self.anchor_task_id = task["id"]
             self.context_key = f"task-{task['id']}-frame-{self.anchor}"
-        for other in self.tasks:
-            if other["id"] != task["id"] and other["status"] == "in_progress":
-                other["status"] = "pending"
-        task["status"] = "in_progress"
+        # Executing a task makes it the in_progress one. This is a plan revision the model
+        # did not write, so it is recorded like one rather than changed silently.
+        if task["status"] != "in_progress":
+            for other in self.tasks:
+                if other["status"] == "in_progress":
+                    other["status"] = "pending"
+            task["status"] = "in_progress"
+            self.revision += 1
+            self._event("plan", reason=f"execute_subtask started task {task['id']}", plan=self.snapshot())
         self._event(
             "begin",
             task_id=task["id"],

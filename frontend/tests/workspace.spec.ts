@@ -26,7 +26,7 @@ test('open workspace, register services, freeze experiment and queue',async({pag
  await page.getByRole('button',{name:'校验并冻结配置'}).click();
  await expect(page.getByText('实验配置已冻结，可以加入队列。')).toBeVisible();
  const frozen=(await (await request.get('/api/experiments')).json()).find((e:any)=>e.spec.name==='Local Planner comparison');
- expect(frozen.spec.config.planner.tools).toHaveLength(8);
+ expect(frozen.spec.config.planner.tools).toHaveLength(7);
  expect(frozen.spec.config.planner.tools).not.toContain('navigate_relative');
  await page.locator('article').filter({has:page.getByRole('heading',{name:'Local Planner comparison',exact:true})}).getByRole('button',{name:'加入队列'}).click();
  await expect(page.getByRole('button',{name:'Local Planner comparison'})).toBeVisible();

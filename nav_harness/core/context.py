@@ -43,7 +43,7 @@ class ContextWindow:
 
     def _projection(self):
         state: dict = self.state or {}
-        if state.get("tool_contract") not in ("topology_memory_v3", "topology_memory_v4"):
+        if state.get("tool_contract") not in ("topology_memory_v3", "topology_memory_v4", "topology_memory_v5"):
             return state
         memory = state.get("memory_context", {})
         candidates = [memory.get("current_execution")] + list(reversed(memory.get("recent", [])))
@@ -62,7 +62,7 @@ class ContextWindow:
         budget = self.limit - self.reserve - 256
         while True:
             messages = list(self.prefix)
-            topology = bool(self.state and self.state.get("tool_contract") in ("topology_memory_v2", "topology_memory_v3", "topology_memory_v4"))
+            topology = bool(self.state and self.state.get("tool_contract") in ("topology_memory_v2", "topology_memory_v3", "topology_memory_v4", "topology_memory_v5"))
             state_message = None
             if self.state and (start or topology):
                 label = "Current persisted state"

@@ -11,6 +11,9 @@ from nav_harness.core.config import PlannerProfile
 from nav_harness.core.context import ContextWindow
 from .compatible import CompatibleClient, ModelProtocolError
 
+# Tools whose result carries a map and grants the memory-write credential.
+MAP_TOOLS = frozenset(("observe_map", "execute_subtask", "navigate_relative", "navigate_to_node"))
+
 # Tools validate with pydantic strict mode, where 2.0 is not an integer. Batch checks must
 # agree, or a call could pass here and fail only after earlier calls in its batch moved.
 StrictValidator = jsonschema.validators.extend(
@@ -141,9 +144,14 @@ class ManagedRuntime:
                             validation_errors.append(name + ": " + getattr(exc, "message", str(exc)))
                     if any(name == "terminate_episode" for _, name, _ in prepared[:-1]):
                         validation_errors.append("STOP must be the last tool in a response")
-                    if {"observe_map", "update_memory"} <= {name for _, name, _ in prepared}:
+                    # A map returned in this response is unseen by the model, so a caption
+                    # may only follow maps from earlier turns.
+                    names = [name for _, name, _ in prepared]
+                    last_caption = max((i for i, n in enumerate(names) if n == "update_memory"), default=0)
+                    if MAP_TOOLS & set(names[:last_caption]):
                         validation_errors.append(
-                            "observe_map and update_memory require separate model turns: read the map first"
+                            "update_memory must come before observe_map or movement in a response: "
+                            "caption only a map you have already read"
                         )
                     block = [{"role": "assistant", "content": message.get("content"), "tool_calls": calls}]
                     if 'provider_items' in message:

@@ -12,7 +12,6 @@ export function agenticPlanner(config: Row = {}): Row {
       "update_plan",
       "execute_subtask",
       "update_memory",
-      "read_memory",
     ],
   };
 }

@@ -11,7 +11,7 @@ function describe(item: Item): { icon: string; label: string } {
     case "observe_map":
       return { icon: "map", label: "查看地图" };
     case "update_plan":
-      return { icon: "list", label: `更新计划 · ${a.subtasks?.length ?? 0} 项` };
+      return { icon: "list", label: a.patch ? `更新计划 · 调整 ${a.patch.length} 项状态` : `更新计划 · ${a.subtasks?.length ?? 0} 项` };
     case "execute_subtask":
       return { icon: "route", label: a.instruction || `执行任务 ${a.task_id}` };
     case "navigate_relative":

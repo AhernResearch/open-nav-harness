@@ -57,7 +57,8 @@ test('choose a model and freeze its exact registered profile with the run', asyn
   expect(spec.episodes).toEqual([7]);
   expect(spec.config.harness.mode).toBe('agentic');
   expect(spec.config.planner.max_turns).toBe(70);
-  expect(spec.config.planner.tools).toHaveLength(8);
+  expect(spec.config.planner.tools).toHaveLength(7);
+  expect(spec.config.planner.tools).not.toContain('read_memory');
   expect(spec.config.planner.tools).not.toContain('navigate_relative');
   expect(spec.config.planner.tools).toContain('navigate_to_node');
   await expect(page.getByText('已加入队列，等待环境和 VLA 资源…')).toBeVisible();
@@ -148,6 +149,7 @@ test('shared VLA selects a matching execution lane and freezes the pool binding'
   expect(spec.execution_pool[0].execution_service).toBe(lanes[1].worker.id);
   expect(spec.config.harness.execution_url).toBe(lanes[1].worker.spec.url);
   expect(spec.config.environment.url).toBe(lanes[1].env.spec.url);
-  expect(spec.config.planner.tools).toHaveLength(8);
+  expect(spec.config.planner.tools).toHaveLength(7);
+  expect(spec.config.planner.tools).not.toContain('read_memory');
   expect(spec.config.planner.tools).not.toContain('navigate_relative');
 });

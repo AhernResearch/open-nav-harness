@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, Literal
 import requests
 from .registry import Image, TextContent, ToolRegistry, ToolResult
-from .agentic import PlanItem
+from .agentic import PlanItem, PlanPatch
 from navgpt.vla.profiles import input_profile
 
 
@@ -47,6 +47,11 @@ class MotionRejected(RuntimeError):
 
 class NavigationSession:
     """Episode-local navigation tool state. One instance per episode; no mutable module state."""
+
+    # After this many consecutive identical navigate_relative calls each walking less
+    # than RELATIVE_NO_PROGRESS_M, the next identical call is refused before moving.
+    RELATIVE_NO_PROGRESS_LIMIT = 3
+    RELATIVE_NO_PROGRESS_M = 0.1
 
     def __init__(self, env=None, actor=None, cancelled=None):
         self.env = dict(os.environ if env is None else env)
@@ -95,6 +100,8 @@ class NavigationSession:
         self._steps_taken = 0
         self._motion_epoch = 0
         self._memory_map_read = None
+        # Consecutive identical navigate_relative calls that barely moved (agentic only).
+        self._relative_streak = {"args": None, "epoch": -1, "count": 0}
         self._episode_over = False
         self._end_reason = ""
         self._OBSERVE_DESC = "Look through the robot's forward-facing camera and return the RGB view."
@@ -189,7 +196,9 @@ class NavigationSession:
                 )
             self._register("execute_subtask", description, execute)
             self._register("update_memory", self.update_memory.__doc__, self.update_memory)
-            self._register("read_memory", self.read_memory.__doc__, self.read_memory)
+            # Optional recall: registered only when an experiment explicitly selects it.
+            if self._enabled_tools is not None:
+                self._register("read_memory", self.read_memory.__doc__, self.read_memory)
         elif self._SUBTASK:
             self._register("update_plan", self.update_plan.__doc__, self.update_plan)
             self._register("execute_subtask", self.execute_subtask.__doc__, self.execute_subtask)
@@ -666,6 +675,11 @@ class NavigationSession:
             return ["invalid arguments — turn_deg and distance_m must be numbers"]
         if not math.isfinite(bearing) or not math.isfinite(dist) or dist < 0:
             raise ValueError("Finite turn_deg and nonnegative distance_m are required")
+        streak = self._relative_streak
+        if (self._AGENTIC and streak["args"] == (bearing, dist) and streak["epoch"] == self._motion_epoch
+                and streak["count"] >= self.RELATIVE_NO_PROGRESS_LIMIT):
+            raise ValueError("The same navigate_relative made no progress {} times; reassess the views "
+                             "or choose another approach".format(streak["count"]))
         predicted = None
         try:
             fresh = self._pano().get("scan")
@@ -678,11 +692,16 @@ class NavigationSession:
             vals = [fresh[(centre + k) % n] for k in range(-half, half + 1)]
             vals = [v for v in vals if v is not None]
             predicted = round(min(vals), 2) if vals else None
+        epoch_before = self._motion_epoch
         out = self._call(
             "{}__step_hightolow".format(self.VERB_PREFIX),
             {"angle_rad": math.radians(bearing), "distance_m": dist, "route": self.MOVE_ROUTES},
         )
         self._steps_taken = int(out.get("step_count") or self._steps_taken)
+        stalled = float(out.get("walked_m") or 0.0) < self.RELATIVE_NO_PROGRESS_M
+        repeated = streak["args"] == (bearing, dist) and streak["epoch"] == epoch_before
+        self._relative_streak = {"args": (bearing, dist), "epoch": self._motion_epoch,
+                                 "count": (streak["count"] + 1 if repeated else 1) if stalled else 0}
         if out.get("terminated") or out.get("truncated"):
             self._episode_over = True
             self._end_reason = "step_budget_exhausted"
@@ -1040,22 +1059,41 @@ class NavigationSession:
             }
         )
         if self._AGENTIC:
-            # Only this explicit tool grants write access, never an automatic rollout map.
-            self._memory_map_read = {
-                "motion_epoch": self._motion_epoch,
-                "map_call": self._tool_call_counts["observe_map"],
-                "map_sha256": hashlib.sha256(png).hexdigest(),
-                "node_ids": sorted(int(n) for n in status.get("places_px", {})),
-                "frame_id": self._tasks.frames[-1]["id"] if self._tasks.frames else None,
-                "pending_edge_id": self._tasks.memory.pending,
-            }
-            self._tasks._event("memory_map_read", **self._memory_map_read)
-            status = {"facing": status.get("facing"), "places_px": status.get("places_px"),
-                      "memory_context": self._tasks.memory.context(self._tasks.active_id)}
+            status = self._grant_map_read(png, status, "observe_map")
         out: list[Any] = [Image(data=png, format="png"), json.dumps(status)]
         if table:
             out.append(table)
         return out
+
+    def _grant_map_read(self, png: bytes, status: dict, source: str) -> dict:
+        """Record a returned map as the memory-write credential; return its model view.
+
+        The model reads it in the result, so a later update_memory may caption the
+        pending segment. Any movement after this map revokes it.
+        """
+        self._memory_map_read = {
+            "motion_epoch": self._motion_epoch,
+            "source": source,
+            "map_call": self._tool_call_counts.get(source, 0),
+            "map_sha256": hashlib.sha256(png).hexdigest(),
+            "node_ids": sorted(int(n) for n in status.get("places_px", {})),
+            "frame_id": self._tasks.frames[-1]["id"] if self._tasks.frames else None,
+            "pending_edge_id": self._tasks.memory.pending,
+        }
+        self._tasks._event("memory_map_read", **self._memory_map_read)
+        return {"facing": status.get("facing"), "places_px": status.get("places_px"),
+                "memory_context": self._tasks.memory.context(self._tasks.active_id)}
+
+    def _segment_map(self) -> list:
+        """The map after a recorded movement, so its caption needs no extra observe_map turn."""
+        if self._episode_over:
+            return []
+        got = self._fetch_map()
+        if got[0] is None:
+            return ["map unavailable after this movement ({}); call observe_map before update_memory".format(got[1])]
+        png, status = got
+        self._bump_obs(png, "map", kind="map")
+        return [Image(data=png, format="png"), json.dumps(self._grant_map_read(png, status, "movement"))]
 
     def vla_navigate(self, instruction: str = "") -> list:
         """Delegate a route to NavGPT VLA. See _VLA_DESC.
@@ -1859,6 +1897,7 @@ class NavigationSession:
                             self._tasks._event("execution_memory", **self._tasks.memory.status())
                             result = self._compact_motion_result(result)
                             result.append(json.dumps({"execution": self._tasks.memory.status()}))
+                            result.extend(self._segment_map())
                     except (ValueError, MotionRejected) as exc:
                         if begun:
                             if self._motion_epoch != before_motion:
@@ -1962,13 +2001,21 @@ class NavigationSession:
         self._tasks.finish(status)
         return self.arrive("here")
 
-    def update_agentic_plan(self, subtasks: list[PlanItem], reason: str) -> list:
-        """Replace the full plan; preserve IDs of retained tasks and briefly explain the revision.
+    def update_agentic_plan(self, reason: str, subtasks: list[PlanItem] | None = None,
+                            patch: list[PlanPatch] | None = None) -> list:
+        """Revise the plan and briefly explain why. Pass exactly one of subtasks or patch.
 
+        subtasks replaces the full plan; preserve IDs of retained tasks. patch only changes
+        the status of existing tasks by ID, e.g. marking one completed.
         IDs are distinct positive integers. At most one task is in_progress.
         Reopen completed tasks here before executing them again. Does not move.
         """
-        self._tasks.update_plan(subtasks, reason)
+        if (subtasks is None) == (patch is None):
+            raise ValueError("Pass exactly one of subtasks (full plan) or patch (status changes)")
+        if patch is not None:
+            self._tasks.patch_plan(patch, reason)
+        else:
+            self._tasks.update_plan(subtasks, reason)
         return [json.dumps({"plan_updated": True, "revision": self._tasks.revision})]
 
     def execute_agentic_task(self, task_id: int, instruction: str = "",
@@ -2023,16 +2070,16 @@ class NavigationSession:
     def update_memory(self, start_node_id: int, end_node_id: int, caption: str) -> list:
         """Write a 1-800 character caption for the current traversal.
 
-        First call observe_map after the latest movement and read it in a separate model
-        turn; read_memory does not satisfy this requirement. start_node_id and end_node_id
-        must match the pending segment's IDs printed on that map.
+        Use the map returned by the latest movement or observe_map, read in an earlier
+        response; read_memory does not satisfy this requirement. start_node_id and
+        end_node_id must match the pending segment's IDs printed on that map.
         Describe observed progress, discoveries, failure or return reasons and uncertainty.
         Repeating this call revises only this segment; the next movement closes it.
         """
         self._tool_enter("update_memory")
         read = self._memory_map_read
         if not read or read["motion_epoch"] != self._motion_epoch:
-            raise ValueError("Call observe_map and read its image after the latest movement before update_memory")
+            raise ValueError("Call observe_map before update_memory: no map has been returned since the latest movement")
         if any(n not in read["node_ids"] for n in (start_node_id, end_node_id)):
             raise ValueError("Both node IDs must appear on the last explicitly observed map")
         if read["pending_edge_id"] != self._tasks.memory.pending:

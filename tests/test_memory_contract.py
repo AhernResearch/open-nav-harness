@@ -12,6 +12,7 @@ from navgpt.planner.tools.memory import TopologyMemory
 from navgpt.planner.tools.mcp_tools import build_mcp
 from navgpt.planner.tools.transport import RemoteTools
 from navgpt.vla.worker import ActorWorker
+from navgpt.settings import AGENTIC_TOOLS_WITH_RECALL
 from nav_harness.core.artifacts import Journal
 from nav_harness.core.context import ContextWindow
 
@@ -43,7 +44,9 @@ def configure(s, monkeypatch):
 
 @pytest.fixture
 def session(tmp_path, monkeypatch):
+    # read_memory is opt-in; these contract tests select the recall surface.
     return configure(NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic",
+                                           "NAVGPT_TOOLS": json.dumps(AGENTIC_TOOLS_WITH_RECALL),
                                            "NAVGPT_LIVE_DIR": str(tmp_path / "live")}), monkeypatch)
 
 
@@ -158,8 +161,8 @@ def test_real_tool_boundary_zero_motion_rejection_and_lost_response(session, mon
     assert not session.tools.invoke("execute_subtask", {"task_id": 1}).isError
     m = session._tasks.memory
     assert m.edges[-1]["start_node_id"] == m.edges[-1]["end_node_id"] == 0
-    assert session.tools.invoke("update_memory", args(end=0)).isError
-    session.tools.invoke("observe_map", {})
+    # v5: the map returned with the movement result authorizes its caption.
+    assert session._memory_map_read["source"] == "movement"
     assert not session.tools.invoke("update_memory", args(end=0)).isError
     before = copy.deepcopy(m.edges)
     assert session.tools.invoke("execute_subtask", {"task_id": 99}).isError
@@ -246,6 +249,7 @@ async def test_mcp_rpc_gate_and_history_do_not_fence_recoverable_rejections(tmp_
     worker = ActorWorker(SimpleNamespace(info=lambda: {"backend": "lightnav"}, close=lambda: None, reset=lambda _: None), "lightnav",
                          tmp_path / "remote", "http://fixed-env")
     remote = RemoteTools({"NAVGPT_CONDITION": "planner_agentic", "NAVGPT_VLA_BACKEND": "lightnav",
+                          "NAVGPT_TOOLS": json.dumps(AGENTIC_TOOLS_WITH_RECALL),
                           "NAVGPT_EXECUTION_URL": "http://worker", "NAVGPT_LIVE_DIR": str(tmp_path / "local")})
     from unittest.mock import AsyncMock
     remote.request = AsyncMock(side_effect=worker.handle)
@@ -298,17 +302,18 @@ def test_v3_observation_selection_and_endpoint_history(session, monkeypatch):
     assert session._memory_map_read is None
 
 
-def test_v3_execution_keeps_plan_and_does_not_render_map(session, monkeypatch):
+def test_execution_keeps_plan_and_unavailable_map_grants_no_caption(session, monkeypatch):
     session._tasks.update_plan([{'id': 1, 'instruction': 'Original'}], 'Plan')
     calls = []
     monkeypatch.setattr(session, 'vla_navigate', lambda instruction: calls.append(instruction) or [])
-    monkeypatch.setattr(session, '_fetch_map', lambda: pytest.fail('Automatic map requested'))
+    monkeypatch.setattr(session, '_fetch_map', lambda: (None, 'renderer down'))
     result = session.tools.invoke('execute_subtask', {'task_id': 1, 'instruction': 'Local correction'})
     assert not result.isError and calls[0].startswith('Local correction')
     assert session._tasks.tasks[0]['instruction'] == 'Original'
     session.tools.invoke('execute_subtask', {'task_id': 1})
     assert calls[-1].startswith('Original')
     assert not [c for c in result.content if c.type == 'image']
+    assert 'map unavailable' in text(result)
     assert session.tools.invoke('update_memory', args(end=0)).isError
     for name in ('observe_forward', 'observe_panorama', 'observe_node'):
         assert name not in session.tools.definitions
@@ -364,3 +369,63 @@ def test_return_without_valid_recorded_orientation_does_not_move(monkeypatch, ro
     monkeypatch.setattr(session, '_call', lambda *args: pytest.fail('Invalid target dispatched movement'))
     with pytest.raises(ValueError, match='recorded orientation'):
         session.return_node(0)
+
+
+def test_movement_result_map_authorizes_caption_until_next_motion(session, monkeypatch):
+    session._tasks.update_plan([{"id": 1, "instruction": "Enter"}], "Plan")
+
+    def walk(instruction):
+        session._motion_epoch += 1
+        session._last_pose = pose(1)
+        return [json.dumps({"subtask_return": "vla_stop"})]
+
+    monkeypatch.setattr(session, "vla_navigate", walk)
+    result = session.tools.invoke("execute_subtask", {"task_id": 1})
+    assert [c for c in result.content if c.type == "image"], "movement result must carry the map"
+    assert '"memory_context"' in text(result)
+    assert not session.tools.invoke("update_memory", args()).isError
+    session.tools.invoke("execute_subtask", {"task_id": 1})
+    session._motion_epoch += 1  # any later motion revokes the credential
+    assert "Call observe_map" in text(session.tools.invoke("update_memory", args(1, 1)))
+
+
+def test_plan_patch_changes_status_only_and_execution_records_revision(session):
+    plan = [{"id": 1, "instruction": "Enter", "status": "in_progress"},
+            {"id": 2, "instruction": "Turn left", "status": "pending"}]
+    session.tools.invoke("update_plan", {"subtasks": plan, "reason": "Plan"})
+    assert session.tools.invoke("update_plan", {"reason": "both", "subtasks": plan, "patch": []}).isError
+    assert session.tools.invoke("update_plan", {"reason": "x", "patch": [{"id": 9, "status": "completed"}]}).isError
+    revision = session._tasks.revision
+    assert not session.tools.invoke(
+        "update_plan", {"reason": "Entered", "patch": [{"id": 1, "status": "completed"}, {"id": 2, "status": "in_progress"}]}
+    ).isError
+    assert [(t["id"], t["instruction"], t["status"]) for t in session._tasks.tasks] == [
+        (1, "Enter", "completed"), (2, "Turn left", "in_progress")]
+    session.tools.invoke("update_plan", {"reason": "Back", "patch": [{"id": 1, "status": "in_progress"}]})
+    assert [t["status"] for t in session._tasks.tasks] == ["in_progress", "pending"]
+    # Executing another task is a recorded revision, not a silent status change.
+    revision = session._tasks.revision
+    session._tasks.begin(2)
+    assert session._tasks.revision == revision + 1
+    assert [t["status"] for t in session._tasks.tasks] == ["pending", "in_progress"]
+    session._tasks.begin(2)
+    assert session._tasks.revision == revision + 1
+
+
+def test_repeated_stalled_relative_move_is_refused_before_motion(session, monkeypatch):
+    calls = []
+
+    def stuck(name, inputs):
+        calls.append(inputs)
+        session._motion_epoch += 1
+        return {"walked_m": 0.02, "step_count": len(calls)}
+
+    monkeypatch.setattr(session, "_call", stuck)
+    monkeypatch.setattr(session, "_frame_here", lambda: None)
+    move = {"turn_deg": 10.0, "distance_m": 1.0}
+    for _ in range(session.RELATIVE_NO_PROGRESS_LIMIT):
+        assert not session.tools.invoke("navigate_relative", move).isError
+    refused = session.tools.invoke("navigate_relative", move)
+    assert refused.isError and "made no progress" in text(refused)
+    assert len(calls) == session.RELATIVE_NO_PROGRESS_LIMIT
+    assert not session.tools.invoke("navigate_relative", {"turn_deg": 90.0, "distance_m": 1.0}).isError

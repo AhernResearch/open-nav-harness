@@ -171,22 +171,26 @@ def test_image_label_dedup_preserves_status_and_unlabelled_images():
     assert sum(i['type'] == 'image_url' for i in images) == 3
 
 
-async def test_map_and_memory_cannot_be_precomputed_in_one_model_response(tmp_path, monkeypatch):
+async def test_caption_may_precede_but_never_follow_an_unread_map(tmp_path, monkeypatch):
+    names = ["observe_map", "execute_subtask", "update_memory", "update_plan", "terminate_episode"]
     executed, outcome = await run_fake(
         tmp_path,
         monkeypatch,
         [
-            [call("1", "observe_map"), call("2", "update_memory")],
-            [call("3", "observe_map")],
-            [call("4", "update_memory")],
-            [call("5", "terminate_episode")],
+            # A caption after a map in the same response describes a map never read.
+            [call("1", "execute_subtask"), call("2", "update_memory")],
+            [call("3", "observe_map"), call("4", "update_memory")],
+            # Captioning the map from the previous result, then moving on, is one turn.
+            [call("5", "update_memory"), call("6", "update_plan"), call("7", "execute_subtask")],
+            [call("8", "terminate_episode")],
         ],
-        names=["observe_map", "update_memory", "terminate_episode"],
+        names=names,
     )
-    assert executed == ["observe_map", "update_memory", "terminate_episode"]
+    assert executed == ["update_memory", "update_plan", "execute_subtask", "terminate_episode"]
     assert outcome.error is None
     events = [json.loads(line) for line in (tmp_path / "trace/requests.jsonl").read_text().splitlines()]
-    assert any("separate model turns" in str(e) for e in events if e["kind"] == "tool_validation_error")
+    rejected = [e for e in events if e["kind"] == "tool_validation_error"]
+    assert len(rejected) == 2 and all("already read" in str(e) for e in rejected)
 
 
 @pytest.mark.parametrize('name,status', [
