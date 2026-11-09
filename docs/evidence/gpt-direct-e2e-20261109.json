@@ -1,0 +1,263 @@
+{
+  "date": "2026-11-09",
+  "release": "6fd2f09491985e728832693506a2cc04ece4e4b0",
+  "implementation_digest": "2ea2597da3ea84d0f1258ddd1e0f6a20580d30a0e309cc49a9093732072eaa75",
+  "branch": "fix/harness-no-direct-motion",
+  "job_id": "5ab0730cea7d440bbb4d3bbb8bc1f569",
+  "experiment_id": "1d6205984e7b49769a777a77054b700a",
+  "purpose": "train-split development integration; not a benchmark estimate",
+  "planner_profile": {
+    "runtime": "openai_compatible",
+    "api_format": "responses",
+    "replay_reasoning": false,
+    "token_count_mode": "estimate",
+    "image_token_estimate": 4096,
+    "model": "gpt-6.1-sol",
+    "base_url": "http://120.25.203.202:6005/v1",
+    "credential_env": "NAVH_GPT_API_KEY",
+    "context_limit": 131072,
+    "output_tokens": 4096,
+    "max_images": 24,
+    "context_policy": "bounded",
+    "thinking": false,
+    "effort": "low",
+    "temperature": null,
+    "request_timeout_s": 120,
+    "tokenizer_path": null,
+    "token_count_url": null,
+    "max_concurrency": 2
+  },
+  "actor": "LightNav-0",
+  "verification": {
+    "vla": {
+      "id": "4eb1976550c1486380df0e506ba4d160",
+      "ok": true,
+      "implementation_digest": "2ea2597da3ea84d0f1258ddd1e0f6a20580d30a0e309cc49a9093732072eaa75"
+    },
+    "environment": {
+      "id": "eb8d5e2ac00c429081218d4dbf69e017",
+      "ok": true,
+      "implementation_digest": null
+    },
+    "execution": {
+      "id": "ef705ed49f4e4f70991b4ab7fbd97b20",
+      "ok": true,
+      "implementation_digest": "2ea2597da3ea84d0f1258ddd1e0f6a20580d30a0e309cc49a9093732072eaa75"
+    },
+    "navh-api.service": {
+      "owned": true,
+      "active": "active"
+    },
+    "navh-worker.service": {
+      "owned": true,
+      "active": "active"
+    }
+  },
+  "rows": [
+    {
+      "attempt_id": "200fca52189445679bbab0968b438c6c",
+      "episode": 0,
+      "attempt": 1,
+      "status": "completed",
+      "success": 0.0,
+      "ne": 1.0909,
+      "spl": 0.0,
+      "ndtw": 0.9302,
+      "distance_m": 5.7859,
+      "wall_s": 71.5,
+      "tool_calls": 6,
+      "turns": 6,
+      "vla_calls": 46,
+      "input_tokens": 26364,
+      "cached_input_tokens": 5548,
+      "output_tokens": 468,
+      "cost_usd": null,
+      "error": "HTTPStatusError: Client error '400 Bad Request' for url 'http://120.25.203.202:6005/v1/responses'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400",
+      "scene_id": "mp3d/7y3sRwLe3Va/7y3sRwLe3Va.glb",
+      "episode_id": "1",
+      "training_status": "evaluation_only"
+    },
+    {
+      "attempt_id": "be24a9dcb20848dc9fd7ba086a12d61a",
+      "episode": 190,
+      "attempt": 1,
+      "status": "completed",
+      "success": 0.0,
+      "ne": 10.7988,
+      "spl": 0.0,
+      "ndtw": 0.0378,
+      "distance_m": 6.4536,
+      "wall_s": 72.6,
+      "tool_calls": 7,
+      "turns": 7,
+      "vla_calls": 49,
+      "input_tokens": 34310,
+      "cached_input_tokens": 5432,
+      "output_tokens": 457,
+      "cost_usd": null,
+      "error": null,
+      "scene_id": "mp3d/B6ByNegPMKs/B6ByNegPMKs.glb",
+      "episode_id": "191",
+      "training_status": "evaluation_only"
+    }
+  ],
+  "details": [
+    {
+      "episode_index": 0,
+      "attempt_id": "200fca52189445679bbab0968b438c6c",
+      "metrics": {
+        "distance_to_goal": 1.0909,
+        "success": 0.0,
+        "spl": 0.0,
+        "oracle_success": 1.0,
+        "ndtw": 0.9302,
+        "sdtw": 0.0,
+        "path_length": 5.7859,
+        "steps_taken": 44.0,
+        "stop_called": 0.0,
+        "collisions": 0.0,
+        "teleports": 0.0,
+        "teleport_fallbacks": 0.0,
+        "velocity_steps": 44.0
+      },
+      "agent": {
+        "turns": 6,
+        "turn_unit": "environment_feedback_response_v1",
+        "tool_calls": {
+          "observe": 1,
+          "update_plan": 3,
+          "execute_subtask": 2
+        },
+        "env_steps": 44,
+        "called_stop": false,
+        "end_reason": null,
+        "cost_usd": null,
+        "usage": {
+          "input_tokens": 26364,
+          "cached_input_tokens": 5548,
+          "output_tokens": 468
+        },
+        "review": {},
+        "initial_rollout": null,
+        "places_total": 3,
+        "places_named": 0,
+        "clauses_bound": 0,
+        "annotate_node_calls": 0,
+        "update_memory_calls": 0,
+        "read_memory_calls": 0,
+        "navigate_to_node_calls": 0,
+        "terminate_episode_calls": 0,
+        "observe_node_calls": 0
+      },
+      "model_requests": 7,
+      "model_success_responses": 6,
+      "model_latency_s": 42.899,
+      "tool_elapsed_s": {
+        "observe": 0.799,
+        "update_plan": 3.559,
+        "execute_subtask": 23.347
+      },
+      "http_errors": [
+        {
+          "status": 400,
+          "body": {
+            "error": {
+              "message": "Insufficient quota available for instant inference. (request id: 202611090540209909086218268d9d66Oc8VL7k)",
+              "type": "upstream_error",
+              "param": "",
+              "code": null
+            }
+          }
+        }
+      ],
+      "trace": "/home/holo/robots/nav-harness/state/runs/5ab0730cea7d440bbb4d3bbb8bc1f569/200fca52189445679bbab0968b438c6c/episode/work/ep0000/trace/requests.jsonl",
+      "result": "/home/holo/robots/nav-harness/state/runs/5ab0730cea7d440bbb4d3bbb8bc1f569/200fca52189445679bbab0968b438c6c/result.json",
+      "context_max_dropped_blocks": 1
+    },
+    {
+      "episode_index": 190,
+      "attempt_id": "be24a9dcb20848dc9fd7ba086a12d61a",
+      "metrics": {
+        "distance_to_goal": 10.7988,
+        "success": 0.0,
+        "spl": 0.0,
+        "oracle_success": 0.0,
+        "ndtw": 0.0378,
+        "sdtw": 0.0,
+        "path_length": 6.4536,
+        "steps_taken": 48.0,
+        "stop_called": 1.0,
+        "collisions": 0.0,
+        "teleports": 0.0,
+        "teleport_fallbacks": 0.0,
+        "velocity_steps": 47.0
+      },
+      "agent": {
+        "turns": 7,
+        "turn_unit": "environment_feedback_response_v1",
+        "tool_calls": {
+          "observe": 1,
+          "update_plan": 3,
+          "execute_subtask": 2,
+          "terminate_episode": 1
+        },
+        "env_steps": 48,
+        "called_stop": true,
+        "end_reason": "stop_called",
+        "cost_usd": null,
+        "usage": {
+          "input_tokens": 34310,
+          "cached_input_tokens": 5432,
+          "output_tokens": 457
+        },
+        "review": {},
+        "initial_rollout": null,
+        "places_total": 3,
+        "places_named": 0,
+        "clauses_bound": 0,
+        "annotate_node_calls": 0,
+        "update_memory_calls": 0,
+        "read_memory_calls": 0,
+        "navigate_to_node_calls": 0,
+        "terminate_episode_calls": 1,
+        "observe_node_calls": 0
+      },
+      "model_requests": 7,
+      "model_success_responses": 7,
+      "model_latency_s": 45.775,
+      "tool_elapsed_s": {
+        "observe": 1.112,
+        "update_plan": 0.751,
+        "execute_subtask": 23.738,
+        "terminate_episode": 0.351
+      },
+      "http_errors": [],
+      "trace": "/home/holo/robots/nav-harness/state/runs/5ab0730cea7d440bbb4d3bbb8bc1f569/be24a9dcb20848dc9fd7ba086a12d61a/episode/work/ep0190/trace/requests.jsonl",
+      "result": "/home/holo/robots/nav-harness/state/runs/5ab0730cea7d440bbb4d3bbb8bc1f569/be24a9dcb20848dc9fd7ba086a12d61a/result.json",
+      "context_max_dropped_blocks": 1
+    }
+  ],
+  "initial_jobs": [
+    {
+      "job_id": "5620677649f64ca5a54d10420f2ac393",
+      "issue": "Both attempts ended with local estimated-context overflow at 64K; fixed with a 128K client budget."
+    },
+    {
+      "job_id": "5bc133ded6b34337a3f77f37b4fccd37",
+      "issue": "Episode 0 failed with invalid encrypted reasoning from gateway; read-only replay succeeded without reasoning replay. Episode 190 completed but navigation failed."
+    }
+  ],
+  "tests": {
+    "pytest": 202,
+    "playwright_model_selection": 4,
+    "mypy": "pass",
+    "ruff": "pass",
+    "frontend_build": "pass"
+  },
+  "conclusions": [
+    "One complete model/tool/STOP cycle and one run interrupted by upstream instant-inference quota.",
+    "Final SR 0/2, with one infrastructure error; not a clean planner quality comparison.",
+    "Both final attempts wrote plans but made zero observe_map/update_memory/read_memory calls.",
+    "No old attempts were overwritten; no uncertain movement was automatically retried."
+  ]
+}
