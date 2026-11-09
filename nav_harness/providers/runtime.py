@@ -11,6 +11,15 @@ from nav_harness.core.config import PlannerProfile
 from nav_harness.core.context import ContextWindow
 from .compatible import CompatibleClient, ModelProtocolError
 
+# Tools validate with pydantic strict mode, where 2.0 is not an integer. Batch checks must
+# agree, or a call could pass here and fail only after earlier calls in its batch moved.
+StrictValidator = jsonschema.validators.extend(
+    jsonschema.Draft202012Validator,
+    type_checker=jsonschema.Draft202012Validator.TYPE_CHECKER.redefine(
+        "integer", lambda _, value: isinstance(value, int) and not isinstance(value, bool)
+    ),
+)
+
 
 def tool_feedback(result, call_id):
     """Chat tool messages are text-only; image observations follow the batch.
@@ -126,7 +135,7 @@ class ManagedRuntime:
                             arguments = json.loads(fn["arguments"])
                             if name not in definitions:
                                 raise ValueError("Unknown navigation tool: " + name)
-                            jsonschema.validate(arguments, definitions[name])
+                            StrictValidator(definitions[name]).validate(arguments)
                             prepared.append((ident, name, arguments))
                         except (ValueError, jsonschema.ValidationError) as exc:
                             validation_errors.append(name + ": " + getattr(exc, "message", str(exc)))
@@ -203,7 +212,9 @@ class ManagedRuntime:
                                     state = value.get("subtask_state", state)
                             except ValueError:
                                 pass
-                        last = sink.last_step_result or {}
+                        # Only this call's own status can end the episode; the sink keeps
+                        # the last status of any earlier call.
+                        last = sink.parse_step_result(texts) or {}
                         if last.get("episode_over") is True:
                             terminal_reason = last.get("end_reason") or "environment_ended"
                             stopped = terminal_reason == "stop_called"

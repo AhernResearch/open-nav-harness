@@ -124,7 +124,7 @@ class EventSink:
                         self.ablation_error = data.get('ablation_error', self.ablation_error)
                 except (ValueError, TypeError):
                     pass
-            parsed = self._parse_step_result(payload.get("texts") or [])
+            parsed = self.parse_step_result(payload.get("texts") or [])
             if parsed is not None:
                 self.last_step_result = parsed
         elif kind == "assistant_text" and self.api_error is None:
@@ -140,7 +140,7 @@ class EventSink:
         self._fh.flush()  # a live tail -f must see every event as it happens
 
     @staticmethod
-    def _parse_step_result(texts: list[str]) -> dict[str, Any] | None:
+    def parse_step_result(texts: list[str]) -> dict[str, Any] | None:
         """The LAST status block in a result, which is the final state.
 
         Every tool but one emits a single status. `terminate_episode(n)` retraces and

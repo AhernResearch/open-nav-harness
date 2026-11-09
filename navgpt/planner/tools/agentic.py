@@ -167,13 +167,6 @@ class AgenticTasks(SubtaskManager):
 
 
 TOOL_DESCRIPTIONS = {
-    "observe_forward": "Inspect the current forward RGB view at full resolution. Does not move.",
-    "observe_panorama": (
-        "Inspect four simultaneous camera views: ahead, right, behind, left. Does not move. "
-        "Each image has direction, approximate clearance, a relative-bearing ruler and map orientation. "
-        "For navigate_relative, positive degrees turn left. Read the ruler for object bearings; "
-        "the whole image spans a field of view, not a single direction."
-    ),
     "observe_map": (
         "View the observed map, visited node IDs and current pose. Path: blue to red over time; "
         "red arrow: current pose. World orientation is fixed; crop may change. Unknown cells "
@@ -192,5 +185,4 @@ TOOL_DESCRIPTIONS = {
         "Node IDs remain stable. Use observe_map for node geometry and available destinations. "
         "This does not find unvisited goals."
     ),
-    "observe_node": "Retrieve the image recorded at a visited node by its map ID. Does not move.",
 }

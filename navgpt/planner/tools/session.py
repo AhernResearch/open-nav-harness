@@ -36,6 +36,15 @@ read_frame = _sibling("frame_store", "read_frame")
 frame_exists = _sibling("frame_store", "frame_exists")
 
 
+# Environment verbs that can change the pose; CAPTURE_VERBS also record passed frames.
+MOTION_VERBS = frozenset(("step_hightolow", "retrace_to", "retrace_path", "step_discrete", "step_velocity", "teleport"))
+CAPTURE_VERBS = frozenset(("step_hightolow", "retrace_to", "retrace_path", "step_discrete"))
+
+
+class MotionRejected(RuntimeError):
+    """The environment refused a movement before its first step: nothing moved."""
+
+
 class NavigationSession:
     """Episode-local navigation tool state. One instance per episode; no mutable module state."""
 
@@ -308,39 +317,44 @@ class NavigationSession:
 
     def _call(self, function_name: str, inputs: dict[str, Any]) -> dict[str, Any]:
         motion = function_name.rsplit("__", 1)[-1]
-        capture = (self._ABLATION or self.VLA_BACKEND == "lightnav" or self._SUBTASK) and motion in (
-            "step_hightolow",
-            "retrace_to",
-            "retrace_path",
-            "step_discrete",
-        )
+        moving = motion in MOTION_VERBS
+        capture = (self._ABLATION or self.VLA_BACKEND == "lightnav" or self._SUBTASK) and motion in CAPTURE_VERBS
         if capture:
             inputs = dict(inputs, capture_history=True)
-        if self._AGENTIC and motion in ("step_hightolow", "retrace_to", "retrace_path",
-                                        "step_discrete", "step_velocity", "teleport"):
+        if self._AGENTIC and moving:
             inputs = dict(inputs, capture_path=True)
-        if motion in ("step_hightolow", "retrace_to", "retrace_path", "step_discrete", "step_velocity", "teleport"):
-            self._motion_epoch += 1
-            self._memory_map_read = None
         if self._cancelled is not None and self._cancelled.is_set():
             raise RuntimeError("Execution cancelled before environment call")
-        resp = requests.post(
-            "{}/call/{}".format(self.SERVER_URL, function_name), json={"inputs": inputs}, timeout=300
-        )
+        # The environment reports every `error` output and 4xx before its first step, so
+        # those are clean rejections. A lost reply or a 5xx may follow motion: uncertain.
+        try:
+            resp = requests.post(
+                "{}/call/{}".format(self.SERVER_URL, function_name), json={"inputs": inputs}, timeout=300
+            )
+        except Exception:
+            if moving:
+                self._motion_dispatched()
+            raise
         if resp.status_code >= 400:
             detail = ""
             try:
                 detail = str((resp.json() or {}).get("error") or "")
             except ValueError:
                 detail = resp.text[:200]
-            raise RuntimeError(detail or "{} {}".format(resp.status_code, resp.reason))
+            detail = detail or "{} {}".format(resp.status_code, resp.reason)
+            if moving and resp.status_code < 500:
+                raise MotionRejected(detail)
+            if moving:
+                self._motion_dispatched()
+            raise RuntimeError(detail)
         output = resp.json()["outputs"]
         if output.get("error") and self._AGENTIC:
-            raise RuntimeError(str(output["error"]))
+            raise (MotionRejected if moving else RuntimeError)(str(output["error"]))
+        if moving and not output.get("error"):
+            self._motion_dispatched()
         if (
             self._SUBTASK
-            and motion
-            in ("step_hightolow", "retrace_to", "retrace_path", "step_discrete", "step_velocity", "teleport")
+            and moving
             and (not output.get("error"))
             and (not (motion == "step_discrete" and inputs.get("action") == 0))
         ):
@@ -354,6 +368,11 @@ class NavigationSession:
                 self._last_pose = output["pose"]
                 self._tasks.memory.record(output["pose"])
         return output
+
+    def _motion_dispatched(self):
+        """The robot may have moved: older map reads no longer authorize memory writes."""
+        self._motion_epoch += 1
+        self._memory_map_read = None
 
     def _policy_views(self, views):
         names = ("policy_front",) if self.VLA_BACKEND == "lightnav" else ("front", "right", "back", "left")
@@ -1840,7 +1859,7 @@ class NavigationSession:
                             self._tasks._event("execution_memory", **self._tasks.memory.status())
                             result = self._compact_motion_result(result)
                             result.append(json.dumps({"execution": self._tasks.memory.status()}))
-                    except ValueError as exc:
+                    except (ValueError, MotionRejected) as exc:
                         if begun:
                             if self._motion_epoch != before_motion:
                                 self._tasks.memory.uncertain(str(exc))
@@ -2110,7 +2129,12 @@ class NavigationSession:
         """
         if not reason.strip():
             raise ValueError("Explain why the episode should end")
+        already_over = self._episode_over
+        stopped = self.arrive('here')
+        if already_over or self._end_reason != "stop_called":
+            return stopped  # STOP was not executed, so there is no completion to declare.
+        # Declare only after the environment confirmed STOP.
         self._tasks.finish(status)
         self._tasks._event('completion_reason', reason=reason)
-        return [*self.arrive('here'), json.dumps({"declared_status": status, "reason": reason,
-                                                 "node_id": self._tasks.memory.current_node_id})]
+        return [*stopped, json.dumps({"declared_status": status, "reason": reason,
+                                      "node_id": self._tasks.memory.current_node_id})]

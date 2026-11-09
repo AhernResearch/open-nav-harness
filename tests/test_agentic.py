@@ -312,3 +312,71 @@ def test_no_relative_ablation_freezes_surface_and_matches_briefing():
             'planner': {'runtime': 'codex', 'tools': [n for n in selected if n != 'update_memory']},
             'harness': {'mode': 'agentic'},
         }, {}).run_config()
+
+
+class _Reply:
+    def __init__(self, status, body):
+        self.status_code, self._body, self.reason, self.text = status, body, "reason", json.dumps(body)
+
+    def json(self):
+        return self._body
+
+
+@pytest.mark.parametrize("reply,error,moved", [
+    (_Reply(400, {"error": "too far from the travelled path"}), "MotionRejected", False),
+    (_Reply(200, {"outputs": {"error": "episode already done"}}), "MotionRejected", False),
+    (_Reply(500, {"error": "worker crashed"}), "RuntimeError", True),
+    (ConnectionError("reply lost"), "ConnectionError", True),
+    (_Reply(200, {"outputs": {"pose": {"position": [0, 0, 0]}}}), None, True),
+])
+def test_only_unknown_motion_outcomes_invalidate_map_reads(monkeypatch, reply, error, moved):
+    from navgpt.planner.tools import session as module
+
+    s = NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic"})
+    s._memory_map_read = {"motion_epoch": 0}
+
+    def post(*args, **kwargs):
+        if isinstance(reply, Exception):
+            raise reply
+        return reply
+
+    monkeypatch.setattr(module.requests, "post", post)
+    try:
+        s._call("env__retrace_path", {})
+        raised = None
+    except Exception as exc:  # noqa: BLE001
+        raised = type(exc).__name__
+    assert raised == error
+    assert (s._motion_epoch == 1) is moved
+    assert (s._memory_map_read is None) is moved
+
+
+def test_rejected_motion_is_repairable_and_leaves_no_memory_edge(monkeypatch):
+    from navgpt.planner.tools.session import MotionRejected
+
+    s = NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic"})
+
+    def rejected(*args):
+        raise MotionRejected("too far from the travelled path")
+
+    s._last_pose = {"position": [0, 0, 0]}
+    monkeypatch.setattr(s, "_call", rejected)
+    result = s.tools.invoke("navigate_relative", {"turn_deg": 0.0, "distance_m": 1.0})
+    assert result.isError
+    assert json.loads(result.content[0].text)["error"] == "precondition_failed"
+    assert s._tasks.memory.active is None and s._tasks.memory.edges == []
+
+
+@pytest.mark.parametrize("ending", ["stop_called", "max_steps", "already_over"])
+def test_completion_is_declared_only_after_confirmed_stop(monkeypatch, ending):
+    s = NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic"})
+    s._episode_over = ending == "already_over"
+
+    def arrive(where):
+        if ending != "already_over":
+            s._episode_over, s._end_reason = True, ending
+        return [json.dumps({"episode_over": True, "end_reason": ending})]
+
+    monkeypatch.setattr(s, "arrive", arrive)
+    s.finish_agentic_episode("complete", "the bed is in front")
+    assert (s._tasks.completion_claim == "complete") is (ending == "stop_called")

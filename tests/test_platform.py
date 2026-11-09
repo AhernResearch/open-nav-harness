@@ -18,7 +18,7 @@ from nav_harness.core.config import (
     ServiceSpec,
     ServiceTemplate,
 )
-from nav_harness.core.context import ContextOverflow, ContextWindow
+from nav_harness.core.context import ContextOverflow, ContextWindow, ImageBudget
 from nav_harness.platform.api import create_app
 from nav_harness.platform.database import Database
 from nav_harness.platform.results import read_jsonl
@@ -232,6 +232,64 @@ async def test_context_prunes_atomic_blocks_preserves_current_state(tmp_path):
     assert not any(m.get("content") == "old" for m in messages)
     assert [m["content"] for m in messages[-2:]] == ["new", "new result"]
     assert '"current": "b"' in messages[2]["content"]
+
+
+def _image_turn(name, images):
+    return [{"role": "assistant", "content": name},
+            {"role": "user", "content": [{"type": "image_url", "image_url": {"url": name}}] * images}]
+
+
+def _urls(messages):
+    return [item["image_url"]["url"] for m in messages if isinstance(m.get("content"), list)
+            for item in m["content"] if item.get("type") == "image_url"]
+
+
+async def test_image_budget_omits_oldest_images_to_low_water_and_keeps_turns(tmp_path):
+    w = ContextWindow("system", "task", "bounded", 100000, 128, max_images=4)
+    w.append(_image_turn("old", 3))
+    w.append(_image_turn("new", 2))
+
+    async def counter(*_):
+        return 1000
+
+    journal = Journal(tmp_path)
+    messages = await w.build(counter, [], journal)
+    # Over budget: omit down to half the budget, never into the newest turn.
+    assert _urls(messages) == ["new", "new"]
+    assert any(m.get("content") == "old" for m in messages)
+    w.append(_image_turn("newest", 1))
+    messages = await w.build(counter, [], journal)
+    # Within budget again: nothing new is omitted and omitted images never reappear,
+    # so the previous request remains a prefix of this one.
+    assert _urls(messages) == ["new", "new", "newest"]
+
+
+async def test_prune_leaves_headroom_so_next_turn_keeps_the_prefix(tmp_path):
+    w = ContextWindow("system", "task", "bounded", 1384, 128)  # input budget 1000
+    for i in range(7):
+        w.append([{"role": "assistant", "content": f"turn {i}"}, {"role": "tool", "content": "x"}], {"s": i})
+
+    async def counter(messages, tools):
+        return 150 * sum(m["role"] == "assistant" for m in messages)
+
+    journal = Journal(tmp_path)
+    first = await w.build(counter, [], journal)
+    assert 150 * sum(m["role"] == "assistant" for m in first) <= 750
+    w.append([{"role": "assistant", "content": "turn 7"}, {"role": "tool", "content": "x"}], {"s": 7})
+    second = await w.build(counter, [], journal)
+    history = [m for m in first if m["role"] in ("assistant", "tool")]
+    assert [m for m in second if m["role"] in ("assistant", "tool")][: len(history)] == history
+
+
+async def test_newest_turn_over_image_budget_is_a_distinct_failure(tmp_path):
+    w = ContextWindow("system", "task", "bounded", 100000, 128, max_images=2)
+    w.append(_image_turn("huge", 3))
+
+    async def counter(*_):
+        return 1000
+
+    with pytest.raises(ImageBudget):
+        await w.build(counter, [], Journal(tmp_path))
 
 
 async def test_context_overflow_without_safe_summary(tmp_path):

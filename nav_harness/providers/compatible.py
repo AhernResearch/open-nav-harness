@@ -98,7 +98,7 @@ class CompatibleClient:
             payload = {'model': p.model, 'messages': messages, 'tools': tools,
                        'add_generation_prompt': True,
                        'chat_template_kwargs': {'enable_thinking': p.thinking}}
-            url = p.token_count_url or p.base_url.removesuffix('/v1') + '/tokenize'
+            url = p.token_count_url or p.base_url.rstrip('/').removesuffix('/v1') + '/tokenize'
         # vLLM's tokenize endpoint applies the actual processor/chat template,
         # including image placeholders. An unavailable counter fails closed.
         r = await self._post_inference(

@@ -212,7 +212,7 @@ one current persisted state, while preserving original tool responses in the tra
 SDK-managed conversation compaction is external; do not claim identical prompt replacement
 there. The most recent caption is bounded background for the VLA, not a new instruction.
 
-`read_memory(node_id, other_node_id=None, include_images=False, offset=0)` selects incident
+`read_memory(node_id, other_node_id=None, images="none", views=None, offset=0)` selects incident
 history, or only the specified directed pair. It returns five executions newest-first,
 explicit pagination and system facts plus model captions. Optional images are capped at
 four sampled chronological frames across the page; references/counts disclose omissions.

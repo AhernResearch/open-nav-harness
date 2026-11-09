@@ -11,11 +11,11 @@ from navgpt.planner.contracts import EpisodeContext
 from navgpt.planner.runner import EventSink
 
 
-def call(ident, name):
-    return {"id": ident, "type": "function", "function": {"name": name, "arguments": "{}"}}
+def call(ident, name, arguments="{}"):
+    return {"id": ident, "type": "function", "function": {"name": name, "arguments": arguments}}
 
 
-async def run_fake(tmp_path, monkeypatch, responses, names=None, results=None):
+async def run_fake(tmp_path, monkeypatch, responses, names=None, results=None, schemas=None, sink_state=None):
     names = names or ["observe_panorama", "terminate_episode"]
     executed = []
 
@@ -50,7 +50,9 @@ async def run_fake(tmp_path, monkeypatch, responses, names=None, results=None):
                 SimpleNamespace(
                     name=name,
                     description=name,
-                    inputSchema={"type": "object", "properties": {}, "additionalProperties": False},
+                    inputSchema=(schemas or {}).get(
+                        name, {"type": "object", "properties": {}, "additionalProperties": False}
+                    ),
                 )
                 for name in names
             ]
@@ -86,6 +88,7 @@ async def run_fake(tmp_path, monkeypatch, responses, names=None, results=None):
         20,
     )
     sink = EventSink(tmp_path / "events.jsonl")
+    sink.last_step_result = sink_state
     outcome = await ManagedRuntime(PlannerProfile(model="test")).run(ctx, sink)
     sink.close()
     return executed, outcome
@@ -237,11 +240,11 @@ def test_return_telemetry_keeps_last_status_and_budget_failure_is_scored():
     from navgpt.planner.runner import is_scored
     from nav_harness.platform.results import aggregate, metrics
     retrace = {'step_count': 499, 'truncated': True, 'terminated': False, 'arrived': False}
-    parsed = EventSink._parse_step_result([json.dumps(retrace)])
+    parsed = EventSink.parse_step_result([json.dumps(retrace)])
     assert parsed['steps_taken_total'] == 499 and parsed['episode_over'] is True
     assert parsed['end_reason'] == 'step_budget_exhausted'
     stop = {'steps_taken_total': 500, 'episode_over': True, 'end_reason': 'stop_called'}
-    assert EventSink._parse_step_result([json.dumps(retrace), json.dumps(stop)]) == stop
+    assert EventSink.parse_step_result([json.dumps(retrace), json.dumps(stop)]) == stop
     result = {'agent': {'env_steps': 499, 'end_reason': parsed['end_reason'], 'called_stop': False},
               'metrics': {'success': 0, 'stop_called': 0, 'distance_to_goal': 2}, 'error': None}
     assert is_scored(result)
@@ -250,3 +253,30 @@ def test_return_telemetry_keeps_last_status_and_budget_failure_is_scored():
     summary = aggregate([row])
     assert summary['routes_completed'] == 1 and summary['sr'] == 0
     assert summary['execution_errors'] == 0
+
+
+async def test_batch_validation_is_as_strict_as_the_tools(tmp_path, monkeypatch):
+    # pydantic strict rejects 2.0 for an integer; accepting it here would let the first
+    # call move before the second fails inside its tool.
+    schema = {"type": "object", "properties": {"task_id": {"type": "integer"}}, "required": ["task_id"]}
+    executed, outcome = await run_fake(
+        tmp_path, monkeypatch,
+        [[call("1", "observe_panorama"), call("2", "execute_subtask", '{"task_id": 2.0}')],
+         [call("3", "terminate_episode")]],
+        names=["observe_panorama", "execute_subtask", "terminate_episode"],
+        schemas={"execute_subtask": schema},
+    )
+    assert executed == ["terminate_episode"]
+    assert outcome.error is None
+
+
+async def test_only_the_current_call_can_end_the_episode(tmp_path, monkeypatch):
+    stale = {"steps_taken_total": 3, "episode_over": True, "end_reason": "stop_called"}
+    executed, outcome = await run_fake(
+        tmp_path, monkeypatch,
+        [[call("1", "observe_panorama")], [call("2", "terminate_episode")]],
+        results={"observe_panorama": {"note": "no status"}},
+        sink_state=stale,
+    )
+    assert executed == ["observe_panorama", "terminate_episode"]
+    assert outcome.turns == 2
