@@ -1,0 +1,787 @@
+{
+  "experiment": {
+    "experiment_id": "acd4879d208148d48e4408cf64d6984e",
+    "episode_index": 190,
+    "episode_id": 191,
+    "rollout_count": 8,
+    "jobs": [
+      {
+        "rollout": 1,
+        "job_id": "1f27d0874c3a442a8bd9a453c97e44e2"
+      },
+      {
+        "rollout": 2,
+        "job_id": "3ad7a477f2ca4468b62bcb1c60846e2a"
+      },
+      {
+        "rollout": 3,
+        "job_id": "1e03521ea1b949bd9eecb853c941a3ec"
+      },
+      {
+        "rollout": 4,
+        "job_id": "5bfc09fd03ac45e597ae48ee0e9b2e17"
+      },
+      {
+        "rollout": 5,
+        "job_id": "dbe517fd3f4a468daff33488bec0175a"
+      },
+      {
+        "rollout": 6,
+        "job_id": "dbb738ca0e8b47c4bfba638439cfc473"
+      },
+      {
+        "rollout": 7,
+        "job_id": "ddb54b74a72b4c44b5ad46f649ab65e6"
+      },
+      {
+        "rollout": 8,
+        "job_id": "2589e17d76d8481e9eb93e3db65e2694"
+      }
+    ],
+    "previous_job_id": "9a8271897b2c4114ae1b4d18f5ea3065",
+    "output": "/home/holo/robots/nav-harness/state/probes/qwen27b-190-eight-20261109-135231",
+    "same_config_as_previous": true,
+    "planner_temperature": 0.0,
+    "interpretation": "Repeated execution under the existing deployed configuration, not best-of-eight sampling; each job resets episode and starts a fresh planner and actor session."
+  },
+  "completed": 8,
+  "successes": 0,
+  "success_rate": 0.0,
+  "errors": 0,
+  "same_start_pose": true,
+  "rows": [
+    {
+      "rollout": 1,
+      "job_id": "1f27d0874c3a442a8bd9a453c97e44e2",
+      "attempt_id": "31421cc2c3ec41feaf397ac5e6fc8614",
+      "episode": 190,
+      "attempt": 1,
+      "status": "completed",
+      "success": 0.0,
+      "ne": 11.2195,
+      "spl": 0.0,
+      "ndtw": 0.0428,
+      "distance_m": 6.5418,
+      "wall_s": 117.1,
+      "tool_calls": 13,
+      "turns": 13,
+      "vla_calls": 47,
+      "input_tokens": 101461,
+      "cached_input_tokens": 0,
+      "output_tokens": 1683,
+      "cost_usd": null,
+      "error": null,
+      "scene_id": "mp3d/B6ByNegPMKs/B6ByNegPMKs.glb",
+      "episode_id": "191",
+      "training_status": "evaluation_only",
+      "metrics": {
+        "distance_to_goal": 11.2195,
+        "success": 0.0,
+        "spl": 0.0,
+        "oracle_success": 0.0,
+        "ndtw": 0.0428,
+        "sdtw": 0.0,
+        "path_length": 6.5418,
+        "steps_taken": 46.0,
+        "stop_called": 1.0,
+        "collisions": 0.0,
+        "teleports": 0.0,
+        "teleport_fallbacks": 0.0,
+        "velocity_steps": 45.0
+      },
+      "calls": {
+        "observe": 2,
+        "update_plan": 3,
+        "execute_subtask": 2,
+        "observe_map": 2,
+        "update_memory": 3,
+        "terminate_episode": 1
+      },
+      "successful_memory_writes": 2,
+      "memory": [
+        {
+          "caption": "Walked 4.5m down the hallway from node 0 to node 1. Passed multiple doorways/openings on the left side. Currently at a junction with hallways to left, right, and ahead.",
+          "start_node_id": 0,
+          "end_node_id": 1,
+          "accepted": true
+        },
+        {
+          "caption": "Turned left from node 1 into a new hallway and walked 2m to node 2. Successfully entered the hallway as instructed.",
+          "start_node_id": 1,
+          "end_node_id": 2,
+          "accepted": false
+        },
+        {
+          "caption": "Turned left from node 1 into a new hallway and walked 2m to node 2. Successfully entered the hallway as instructed.",
+          "start_node_id": 1,
+          "end_node_id": 2,
+          "accepted": true
+        }
+      ],
+      "model_latency_s": 56.006,
+      "tool_elapsed_s": {
+        "observe": 1.192,
+        "update_plan": 1.021,
+        "execute_subtask": 23.917,
+        "observe_map": 28.527,
+        "update_memory": 1.012,
+        "terminate_episode": 0.474
+      },
+      "model_requests": 13,
+      "endpoint_position": [
+        25.281230926513672,
+        0.08020400255918503,
+        12.9176607131958
+      ],
+      "context_dropped_blocks": 1,
+      "trace": "/home/holo/robots/nav-harness/state/runs/1f27d0874c3a442a8bd9a453c97e44e2/31421cc2c3ec41feaf397ac5e6fc8614/episode/work/ep0190/trace/requests.jsonl"
+    },
+    {
+      "rollout": 2,
+      "job_id": "3ad7a477f2ca4468b62bcb1c60846e2a",
+      "attempt_id": "902ad5fcdaaa408cb6a6e510c1612e8e",
+      "episode": 190,
+      "attempt": 1,
+      "status": "completed",
+      "success": 0.0,
+      "ne": 11.2195,
+      "spl": 0.0,
+      "ndtw": 0.0428,
+      "distance_m": 6.5418,
+      "wall_s": 105.4,
+      "tool_calls": 12,
+      "turns": 12,
+      "vla_calls": 47,
+      "input_tokens": 89121,
+      "cached_input_tokens": 0,
+      "output_tokens": 1151,
+      "cost_usd": null,
+      "error": null,
+      "scene_id": "mp3d/B6ByNegPMKs/B6ByNegPMKs.glb",
+      "episode_id": "191",
+      "training_status": "evaluation_only",
+      "metrics": {
+        "distance_to_goal": 11.2195,
+        "success": 0.0,
+        "spl": 0.0,
+        "oracle_success": 0.0,
+        "ndtw": 0.0428,
+        "sdtw": 0.0,
+        "path_length": 6.5418,
+        "steps_taken": 46.0,
+        "stop_called": 1.0,
+        "collisions": 0.0,
+        "teleports": 0.0,
+        "teleport_fallbacks": 0.0,
+        "velocity_steps": 45.0
+      },
+      "calls": {
+        "observe": 1,
+        "update_plan": 3,
+        "execute_subtask": 2,
+        "observe_map": 2,
+        "update_memory": 3,
+        "terminate_episode": 1
+      },
+      "successful_memory_writes": 2,
+      "memory": [
+        {
+          "caption": "Walked 4.5m down the hallway from node 0 to node 1. Passed multiple doorways on the right side. Now at an intersection with a hallway opening to the left.",
+          "start_node_id": 0,
+          "end_node_id": 1,
+          "accepted": true
+        },
+        {
+          "caption": "Turned left from node 1 into the hallway and walked 2m to node 2. Successfully entered the new hallway as instructed.",
+          "start_node_id": 1,
+          "end_node_id": 2,
+          "accepted": false
+        },
+        {
+          "caption": "Turned left from node 1 into the hallway and walked 2m to node 2. Successfully entered the new hallway as instructed.",
+          "start_node_id": 1,
+          "end_node_id": 2,
+          "accepted": true
+        }
+      ],
+      "model_latency_s": 43.33,
+      "tool_elapsed_s": {
+        "observe": 0.613,
+        "update_plan": 0.878,
+        "execute_subtask": 23.751,
+        "observe_map": 30.614,
+        "update_memory": 1.147,
+        "terminate_episode": 0.369
+      },
+      "model_requests": 12,
+      "endpoint_position": [
+        25.281230926513672,
+        0.08020400255918503,
+        12.9176607131958
+      ],
+      "context_dropped_blocks": 0,
+      "trace": "/home/holo/robots/nav-harness/state/runs/3ad7a477f2ca4468b62bcb1c60846e2a/902ad5fcdaaa408cb6a6e510c1612e8e/episode/work/ep0190/trace/requests.jsonl"
+    },
+    {
+      "rollout": 3,
+      "job_id": "1e03521ea1b949bd9eecb853c941a3ec",
+      "attempt_id": "5d43be2530f848f5a49a98af0538b23a",
+      "episode": 190,
+      "attempt": 1,
+      "status": "completed",
+      "success": 0.0,
+      "ne": 11.2956,
+      "spl": 0.0,
+      "ndtw": 0.0471,
+      "distance_m": 6.5139,
+      "wall_s": 95.2,
+      "tool_calls": 13,
+      "turns": 13,
+      "vla_calls": 47,
+      "input_tokens": 100567,
+      "cached_input_tokens": 0,
+      "output_tokens": 1514,
+      "cost_usd": null,
+      "error": null,
+      "scene_id": "mp3d/B6ByNegPMKs/B6ByNegPMKs.glb",
+      "episode_id": "191",
+      "training_status": "evaluation_only",
+      "metrics": {
+        "distance_to_goal": 11.2956,
+        "success": 0.0,
+        "spl": 0.0,
+        "oracle_success": 0.0,
+        "ndtw": 0.0471,
+        "sdtw": 0.0,
+        "path_length": 6.5139,
+        "steps_taken": 46.0,
+        "stop_called": 1.0,
+        "collisions": 0.0,
+        "teleports": 0.0,
+        "teleport_fallbacks": 0.0,
+        "velocity_steps": 45.0
+      },
+      "calls": {
+        "observe": 2,
+        "update_plan": 3,
+        "execute_subtask": 2,
+        "observe_map": 2,
+        "update_memory": 3,
+        "terminate_episode": 1
+      },
+      "successful_memory_writes": 2,
+      "memory": [
+        {
+          "caption": "Walked down the hallway from node 0 to node 1, passing multiple doorways on the right side. Reached a junction where there's a hallway to the left.",
+          "start_node_id": 0,
+          "end_node_id": 1,
+          "accepted": true
+        },
+        {
+          "caption": "Turned left from the junction at node 1 and stepped into the hallway, moving forward about 2.3 meters to node 2. Now positioned inside the left hallway as instructed.",
+          "start_node_id": 1,
+          "end_node_id": 2,
+          "accepted": false
+        },
+        {
+          "caption": "Turned left from the junction at node 1 and stepped into the hallway, moving forward about 2.3 meters to node 2. Now positioned inside the left hallway as instructed.",
+          "start_node_id": 1,
+          "end_node_id": 2,
+          "accepted": true
+        }
+      ],
+      "model_latency_s": 51.653,
+      "tool_elapsed_s": {
+        "observe": 1.279,
+        "update_plan": 0.878,
+        "execute_subtask": 24.561,
+        "observe_map": 10.477,
+        "update_memory": 0.994,
+        "terminate_episode": 0.443
+      },
+      "model_requests": 13,
+      "endpoint_position": [
+        25.19656753540039,
+        0.08020400255918503,
+        12.956929206848145
+      ],
+      "context_dropped_blocks": 0,
+      "trace": "/home/holo/robots/nav-harness/state/runs/1e03521ea1b949bd9eecb853c941a3ec/5d43be2530f848f5a49a98af0538b23a/episode/work/ep0190/trace/requests.jsonl"
+    },
+    {
+      "rollout": 4,
+      "job_id": "5bfc09fd03ac45e597ae48ee0e9b2e17",
+      "attempt_id": "4c85723f4d0643828f9634af10bc28a6",
+      "episode": 190,
+      "attempt": 1,
+      "status": "completed",
+      "success": 0.0,
+      "ne": 10.7788,
+      "spl": 0.0,
+      "ndtw": 0.0471,
+      "distance_m": 6.0844,
+      "wall_s": 130.4,
+      "tool_calls": 16,
+      "turns": 16,
+      "vla_calls": 47,
+      "input_tokens": 135933,
+      "cached_input_tokens": 0,
+      "output_tokens": 2491,
+      "cost_usd": null,
+      "error": null,
+      "scene_id": "mp3d/B6ByNegPMKs/B6ByNegPMKs.glb",
+      "episode_id": "191",
+      "training_status": "evaluation_only",
+      "metrics": {
+        "distance_to_goal": 10.7788,
+        "success": 0.0,
+        "spl": 0.0,
+        "oracle_success": 0.0,
+        "ndtw": 0.0471,
+        "sdtw": 0.0,
+        "path_length": 6.0844,
+        "steps_taken": 45.0,
+        "stop_called": 1.0,
+        "collisions": 0.0,
+        "teleports": 0.0,
+        "teleport_fallbacks": 0.0,
+        "velocity_steps": 44.0
+      },
+      "calls": {
+        "observe": 3,
+        "update_plan": 3,
+        "execute_subtask": 3,
+        "observe_map": 3,
+        "update_memory": 3,
+        "terminate_episode": 1
+      },
+      "successful_memory_writes": 2,
+      "memory": [
+        {
+          "caption": "Walked 4.5m down the hallway from node 0 to node 1. Passed multiple doorways on the left side. Now at a junction with hallways to left, right, and ahead.",
+          "start_node_id": 0,
+          "end_node_id": 1,
+          "accepted": true
+        },
+        {
+          "caption": "Turned left from node 2 and stepped 1.12m into the left hallway, arriving at node 3. Completed the turn and step into the hallway as instructed.",
+          "start_node_id": 2,
+          "end_node_id": 3,
+          "accepted": false
+        },
+        {
+          "caption": "Turned left from node 2 and stepped 1.12m into the left hallway, arriving at node 3. Completed the turn and step into the hallway as instructed.",
+          "start_node_id": 2,
+          "end_node_id": 3,
+          "accepted": true
+        }
+      ],
+      "model_latency_s": 83.7,
+      "tool_elapsed_s": {
+        "observe": 1.803,
+        "update_plan": 0.858,
+        "execute_subtask": 24.223,
+        "observe_map": 11.679,
+        "update_memory": 0.991,
+        "terminate_episode": 0.402
+      },
+      "model_requests": 16,
+      "endpoint_position": [
+        25.786808013916016,
+        0.08020400255918503,
+        12.873518943786621
+      ],
+      "context_dropped_blocks": 4,
+      "trace": "/home/holo/robots/nav-harness/state/runs/5bfc09fd03ac45e597ae48ee0e9b2e17/4c85723f4d0643828f9634af10bc28a6/episode/work/ep0190/trace/requests.jsonl"
+    },
+    {
+      "rollout": 5,
+      "job_id": "dbe517fd3f4a468daff33488bec0175a",
+      "attempt_id": "d5270f139e114dfc86b45241caab919d",
+      "episode": 190,
+      "attempt": 1,
+      "status": "completed",
+      "success": 0.0,
+      "ne": 11.2195,
+      "spl": 0.0,
+      "ndtw": 0.0428,
+      "distance_m": 6.5418,
+      "wall_s": 80.3,
+      "tool_calls": 12,
+      "turns": 12,
+      "vla_calls": 47,
+      "input_tokens": 89886,
+      "cached_input_tokens": 0,
+      "output_tokens": 1171,
+      "cost_usd": null,
+      "error": null,
+      "scene_id": "mp3d/B6ByNegPMKs/B6ByNegPMKs.glb",
+      "episode_id": "191",
+      "training_status": "evaluation_only",
+      "metrics": {
+        "distance_to_goal": 11.2195,
+        "success": 0.0,
+        "spl": 0.0,
+        "oracle_success": 0.0,
+        "ndtw": 0.0428,
+        "sdtw": 0.0,
+        "path_length": 6.5418,
+        "steps_taken": 46.0,
+        "stop_called": 1.0,
+        "collisions": 0.0,
+        "teleports": 0.0,
+        "teleport_fallbacks": 0.0,
+        "velocity_steps": 45.0
+      },
+      "calls": {
+        "observe": 1,
+        "update_plan": 3,
+        "execute_subtask": 2,
+        "observe_map": 2,
+        "update_memory": 3,
+        "terminate_episode": 1
+      },
+      "successful_memory_writes": 2,
+      "memory": [
+        {
+          "caption": "Walked 4.5m down the hallway from node 0 to node 1. Passed multiple doorways on the right side. Reached a junction where a hallway opens to the left.",
+          "start_node_id": 0,
+          "end_node_id": 1,
+          "accepted": true
+        },
+        {
+          "caption": "Turned left from node 1 into the new hallway and walked 2m to node 2. Successfully entered the hallway as instructed.",
+          "start_node_id": 1,
+          "end_node_id": 2,
+          "accepted": false
+        },
+        {
+          "caption": "Turned left from node 1 into the new hallway and walked 2m to node 2. Successfully entered the hallway as instructed.",
+          "start_node_id": 1,
+          "end_node_id": 2,
+          "accepted": true
+        }
+      ],
+      "model_latency_s": 42.908,
+      "tool_elapsed_s": {
+        "observe": 0.612,
+        "update_plan": 0.757,
+        "execute_subtask": 22.856,
+        "observe_map": 7.799,
+        "update_memory": 0.855,
+        "terminate_episode": 0.382
+      },
+      "model_requests": 12,
+      "endpoint_position": [
+        25.281230926513672,
+        0.08020400255918503,
+        12.9176607131958
+      ],
+      "context_dropped_blocks": 0,
+      "trace": "/home/holo/robots/nav-harness/state/runs/dbe517fd3f4a468daff33488bec0175a/d5270f139e114dfc86b45241caab919d/episode/work/ep0190/trace/requests.jsonl"
+    },
+    {
+      "rollout": 6,
+      "job_id": "dbb738ca0e8b47c4bfba638439cfc473",
+      "attempt_id": "81c2c221c2e54495bbc230652909e3f9",
+      "episode": 190,
+      "attempt": 1,
+      "status": "completed",
+      "success": 0.0,
+      "ne": 11.0575,
+      "spl": 0.0,
+      "ndtw": 0.0509,
+      "distance_m": 6.3211,
+      "wall_s": 53.2,
+      "tool_calls": 8,
+      "turns": 8,
+      "vla_calls": 46,
+      "input_tokens": 45182,
+      "cached_input_tokens": 0,
+      "output_tokens": 791,
+      "cost_usd": null,
+      "error": null,
+      "scene_id": "mp3d/B6ByNegPMKs/B6ByNegPMKs.glb",
+      "episode_id": "191",
+      "training_status": "evaluation_only",
+      "metrics": {
+        "distance_to_goal": 11.0575,
+        "success": 0.0,
+        "spl": 0.0,
+        "oracle_success": 0.0,
+        "ndtw": 0.0509,
+        "sdtw": 0.0,
+        "path_length": 6.3211,
+        "steps_taken": 45.0,
+        "stop_called": 1.0,
+        "collisions": 0.0,
+        "teleports": 0.0,
+        "teleport_fallbacks": 0.0,
+        "velocity_steps": 44.0
+      },
+      "calls": {
+        "observe": 2,
+        "update_plan": 3,
+        "execute_subtask": 2,
+        "terminate_episode": 1
+      },
+      "successful_memory_writes": 0,
+      "memory": [],
+      "model_latency_s": 25.452,
+      "tool_elapsed_s": {
+        "observe": 1.192,
+        "update_plan": 0.945,
+        "execute_subtask": 22.783,
+        "terminate_episode": 0.288
+      },
+      "model_requests": 8,
+      "endpoint_position": [
+        25.448678970336914,
+        0.08020400255918503,
+        12.919958114624023
+      ],
+      "context_dropped_blocks": 0,
+      "trace": "/home/holo/robots/nav-harness/state/runs/dbb738ca0e8b47c4bfba638439cfc473/81c2c221c2e54495bbc230652909e3f9/episode/work/ep0190/trace/requests.jsonl"
+    },
+    {
+      "rollout": 7,
+      "job_id": "ddb54b74a72b4c44b5ad46f649ab65e6",
+      "attempt_id": "9d3fb0b0ac1d4a84917168780da38a3e",
+      "episode": 190,
+      "attempt": 1,
+      "status": "completed",
+      "success": 0.0,
+      "ne": 11.0575,
+      "spl": 0.0,
+      "ndtw": 0.0509,
+      "distance_m": 6.3211,
+      "wall_s": 68.5,
+      "tool_calls": 10,
+      "turns": 10,
+      "vla_calls": 46,
+      "input_tokens": 64382,
+      "cached_input_tokens": 0,
+      "output_tokens": 1253,
+      "cost_usd": null,
+      "error": null,
+      "scene_id": "mp3d/B6ByNegPMKs/B6ByNegPMKs.glb",
+      "episode_id": "191",
+      "training_status": "evaluation_only",
+      "metrics": {
+        "distance_to_goal": 11.0575,
+        "success": 0.0,
+        "spl": 0.0,
+        "oracle_success": 0.0,
+        "ndtw": 0.0509,
+        "sdtw": 0.0,
+        "path_length": 6.3211,
+        "steps_taken": 45.0,
+        "stop_called": 1.0,
+        "collisions": 0.0,
+        "teleports": 0.0,
+        "teleport_fallbacks": 0.0,
+        "velocity_steps": 44.0
+      },
+      "calls": {
+        "observe": 2,
+        "update_plan": 3,
+        "execute_subtask": 2,
+        "observe_map": 1,
+        "update_memory": 1,
+        "terminate_episode": 1
+      },
+      "successful_memory_writes": 1,
+      "memory": [
+        {
+          "caption": "Walked 4.5m down the hallway from node 0 to node 1. Passed multiple doorways on the left side (wooden doors). Now at a junction where a hallway branches to the left.",
+          "start_node_id": 0,
+          "end_node_id": 1,
+          "accepted": true
+        }
+      ],
+      "model_latency_s": 36.088,
+      "tool_elapsed_s": {
+        "observe": 1.15,
+        "update_plan": 0.831,
+        "execute_subtask": 22.759,
+        "observe_map": 3.788,
+        "update_memory": 0.251,
+        "terminate_episode": 0.411
+      },
+      "model_requests": 10,
+      "endpoint_position": [
+        25.448678970336914,
+        0.08020400255918503,
+        12.919958114624023
+      ],
+      "context_dropped_blocks": 0,
+      "trace": "/home/holo/robots/nav-harness/state/runs/ddb54b74a72b4c44b5ad46f649ab65e6/9d3fb0b0ac1d4a84917168780da38a3e/episode/work/ep0190/trace/requests.jsonl"
+    },
+    {
+      "rollout": 8,
+      "job_id": "2589e17d76d8481e9eb93e3db65e2694",
+      "attempt_id": "4cb4215e8ab84e4cba05222cccc7f3f9",
+      "episode": 190,
+      "attempt": 1,
+      "status": "completed",
+      "success": 0.0,
+      "ne": 11.2195,
+      "spl": 0.0,
+      "ndtw": 0.0428,
+      "distance_m": 6.5418,
+      "wall_s": 57.5,
+      "tool_calls": 8,
+      "turns": 8,
+      "vla_calls": 47,
+      "input_tokens": 47555,
+      "cached_input_tokens": 0,
+      "output_tokens": 922,
+      "cost_usd": null,
+      "error": null,
+      "scene_id": "mp3d/B6ByNegPMKs/B6ByNegPMKs.glb",
+      "episode_id": "191",
+      "training_status": "evaluation_only",
+      "metrics": {
+        "distance_to_goal": 11.2195,
+        "success": 0.0,
+        "spl": 0.0,
+        "oracle_success": 0.0,
+        "ndtw": 0.0428,
+        "sdtw": 0.0,
+        "path_length": 6.5418,
+        "steps_taken": 46.0,
+        "stop_called": 1.0,
+        "collisions": 0.0,
+        "teleports": 0.0,
+        "teleport_fallbacks": 0.0,
+        "velocity_steps": 45.0
+      },
+      "calls": {
+        "observe": 1,
+        "update_plan": 3,
+        "execute_subtask": 2,
+        "observe_map": 1,
+        "terminate_episode": 1
+      },
+      "successful_memory_writes": 0,
+      "memory": [],
+      "model_latency_s": 26.559,
+      "tool_elapsed_s": {
+        "observe": 0.585,
+        "update_plan": 0.835,
+        "execute_subtask": 22.688,
+        "observe_map": 3.848,
+        "terminate_episode": 0.308
+      },
+      "model_requests": 8,
+      "endpoint_position": [
+        25.281230926513672,
+        0.08020400255918503,
+        12.9176607131958
+      ],
+      "context_dropped_blocks": 0,
+      "trace": "/home/holo/robots/nav-harness/state/runs/2589e17d76d8481e9eb93e3db65e2694/4cb4215e8ab84e4cba05222cccc7f3f9/episode/work/ep0190/trace/requests.jsonl"
+    }
+  ],
+  "aggregate": {
+    "ne_mean_m": 11.133424999999999,
+    "ne_min_m": 10.7788,
+    "ne_max_m": 11.2956,
+    "wall_mean_s": 88.45,
+    "wall_total_s": 707.6,
+    "memory_rollouts": 6,
+    "successful_memory_writes": 11,
+    "read_memory_calls": 0,
+    "navigate_to_node_calls": 0,
+    "endpoint_cluster_diameter_m": 0.5961049357808964,
+    "explicit_stop_count": 8,
+    "oracle_success_count": 0
+  },
+  "planner_profile": {
+    "runtime": "openai_compatible",
+    "api_format": "chat_completions",
+    "replay_reasoning": true,
+    "token_count_mode": "remote",
+    "image_token_estimate": 4096,
+    "model": "navh-qwen27b-nvfp4",
+    "base_url": "http://127.0.0.1:18103/v1",
+    "credential_env": null,
+    "context_limit": 16384,
+    "output_tokens": 2048,
+    "max_images": 32,
+    "context_policy": "bounded",
+    "thinking": false,
+    "effort": null,
+    "temperature": 0.0,
+    "request_timeout_s": 120,
+    "tokenizer_path": null,
+    "token_count_url": null,
+    "max_concurrency": 12
+  },
+  "implementation_digest": "2ea2597da3ea84d0f1258ddd1e0f6a20580d30a0e309cc49a9093732072eaa75",
+  "config": {
+    "dataset": {
+      "name": "r2r",
+      "split": "train"
+    },
+    "harness": {
+      "mode": "agentic",
+      "execution_url": "http://127.0.0.1:19697"
+    },
+    "vla": {
+      "backend": "lightnav",
+      "url": "http://127.0.0.1:18386"
+    },
+    "environment": {
+      "max_steps": 500,
+      "url": "http://127.0.0.1:19457"
+    },
+    "planner": {
+      "max_turns": 100,
+      "episode_timeout_s": 1200,
+      "tools": [
+        "observe",
+        "observe_map",
+        "navigate_to_node",
+        "terminate_episode",
+        "update_plan",
+        "execute_subtask",
+        "update_memory",
+        "read_memory"
+      ],
+      "runtime": "openai_compatible",
+      "model": "navh-qwen27b-nvfp4",
+      "max_budget_usd": null,
+      "profile": {
+        "runtime": "openai_compatible",
+        "api_format": "chat_completions",
+        "replay_reasoning": true,
+        "token_count_mode": "remote",
+        "image_token_estimate": 4096,
+        "model": "navh-qwen27b-nvfp4",
+        "base_url": "http://127.0.0.1:18103/v1",
+        "credential_env": null,
+        "context_limit": 16384,
+        "output_tokens": 2048,
+        "max_images": 32,
+        "context_policy": "bounded",
+        "thinking": false,
+        "effort": null,
+        "temperature": 0.0,
+        "request_timeout_s": 120,
+        "tokenizer_path": null,
+        "token_count_url": null,
+        "max_concurrency": 12
+      }
+    },
+    "output": {
+      "save_frames": true
+    }
+  },
+  "interpretation": [
+    "Eight new independent episode sessions under the same deployed Qwen3.6-27B NVFP4 profile (temperature 0), LightNav and harness; previous single-run result excluded.",
+    "All eight reset to the same pose and completed with explicit STOP, with zero episode errors; success rate 0/8.",
+    "Six rollouts wrote memory successfully, but all still failed; no read_memory or navigate_to_node calls. Persisted memory can still be present in context, so absence of read_memory does not prove it was never seen.",
+    "This measures repetition on one train-development route, not general benchmark success or best-of-eight stochastic sampling."
+  ]
+}
