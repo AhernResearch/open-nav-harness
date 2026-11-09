@@ -36,7 +36,8 @@ def test_responses_roundtrip_preserves_reasoning_tools_and_images():
     assert TOOLS[0]['function'].get('strict') is None
 
 
-async def test_responses_wire_uses_native_fields_and_normalizes_usage(tmp_path):
+@pytest.mark.parametrize('replay_reasoning', [True, False])
+async def test_responses_wire_uses_native_fields_and_normalizes_usage(tmp_path, replay_reasoning):
     captured = []
 
     def handler(request):
@@ -48,7 +49,7 @@ async def test_responses_wire_uses_native_fields_and_normalizes_usage(tmp_path):
 
     journal = Journal(tmp_path / 'trace')
     client = CompatibleClient(PlannerProfile(model='test', api_format='responses', effort='low',
-                                             temperature=None), journal)
+                                             temperature=None, replay_reasoning=replay_reasoning), journal)
     await client.http.aclose()
     client.http = httpx.AsyncClient(transport=httpx.MockTransport(handler))
     try:
@@ -61,10 +62,20 @@ async def test_responses_wire_uses_native_fields_and_normalizes_usage(tmp_path):
     assert captured[0][0] == '/v1/responses/input_tokens'
     wire = captured[1][1]
     assert wire['reasoning'] == {'effort': 'low'}
-    assert wire['store'] is False and wire['include'] == ['reasoning.encrypted_content']
+    assert wire['store'] is False
+    assert wire.get('include') == (['reasoning.encrypted_content'] if replay_reasoning else None)
     assert not {'messages', 'chat_template_kwargs', 'max_tokens', 'temperature'} & wire.keys()
     events = [json.loads(l) for l in journal.path.read_text().splitlines()]
     assert next(e for e in events if e['kind'] == 'model_response')['response']['output'] == OUTPUT
+
+
+def test_gateway_can_omit_reasoning_without_dropping_calls_or_mutating_trace():
+    message = normalize_response({'status': 'completed', 'output': OUTPUT})['choices'][0]['message']
+    payload = request_input([message, {'role': 'tool', 'tool_call_id': 'call_1', 'content': 'observed'}],
+                            TOOLS, replay_reasoning=False)
+    assert [item['type'] for item in payload['input']] == ['function_call', 'function_call_output']
+    assert payload['input'][0]['call_id'] == payload['input'][1]['call_id'] == 'call_1'
+    assert message['provider_items'] == OUTPUT
 
 
 async def test_explicit_estimate_omits_image_bytes_and_never_calls_server(tmp_path):

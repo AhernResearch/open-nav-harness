@@ -3,13 +3,14 @@
 import copy
 
 
-def request_input(messages, tools):
-    items = []
+def request_input(messages, tools, *, replay_reasoning=True):
+    items: list[dict] = []
     for message in messages:
         role = message['role']
         if role == 'assistant' and message.get('provider_items') is not None:
             # Stateless replay retains reasoning (including encrypted content) and call IDs.
-            items.extend(copy.deepcopy(message['provider_items']))
+            items.extend(copy.deepcopy(item) for item in message['provider_items']
+                         if replay_reasoning or item.get('type') != 'reasoning')
             continue
         if role == 'tool':
             items.append({'type': 'function_call_output', 'call_id': message['tool_call_id'],

@@ -91,6 +91,15 @@ Actual usage still comes from the generation response. Remote counting failures
 never silently fall back to estimation. Use `temperature: null` for models that
 do not accept temperature and `effort` for Responses reasoning effort.
 
+Responses defaults to `replay_reasoning: true`. If a gateway rejects returned
+encrypted reasoning, explicitly set it to `false`: omit reasoning items from
+subsequent inputs and do not request encrypted content. Tool calls, results,
+images and the raw trace remain intact; reasoning effort is unchanged. This is
+a gateway compatibility option, never an automatic retry of a navigation action.
+Size estimated-context budgets for a complete motion feedback block: the local
+gateway profile uses 131072 because 12 returned images plus text exceeded its
+initial 65536 budget before the Planner could review or stop.
+
 New model families implementing this protocol need a profile, not a new navigation
 loop. A different wire protocol belongs in `nav_harness/providers/`. New actors
 implement the actor service contract; they do not change Planner orchestration.

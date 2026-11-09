@@ -12,6 +12,7 @@ class StrictModel(BaseModel):
 class PlannerProfile(StrictModel):
     runtime: Literal["openai_compatible", "codex", "claude"] = "openai_compatible"
     api_format: Literal["chat_completions", "responses"] = "chat_completions"
+    replay_reasoning: bool = True
     token_count_mode: Literal["remote", "estimate"] = "remote"
     image_token_estimate: int = Field(default=4096, ge=256, le=32768)
     model: str = Field(min_length=1)

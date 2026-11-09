@@ -598,6 +598,11 @@ export interface components {
              */
             api_format: "chat_completions" | "responses";
             /**
+             * Replay Reasoning
+             * @default true
+             */
+            replay_reasoning: boolean;
+            /**
              * Token Count Mode
              * @default remote
              * @enum {string}

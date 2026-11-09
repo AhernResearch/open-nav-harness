@@ -51,6 +51,7 @@ export function ServicesPage({
               base_url: serviceUrl,
               runtime,
               api_format: "chat_completions",
+              replay_reasoning: true,
               token_count_mode: "remote",
               image_token_estimate: 4096,
               context_limit: contextLimit,

@@ -92,7 +92,7 @@ class CompatibleClient:
                                   text_bytes=size, images=images, image_budget=p.image_token_estimate)
             return estimated
         if p.api_format == 'responses':
-            payload = {'model': p.model, **request_input(messages, tools)}
+            payload = {'model': p.model, **request_input(messages, tools, replay_reasoning=p.replay_reasoning)}
             url = p.token_count_url or p.base_url.rstrip('/') + '/responses/input_tokens'
         else:
             payload = {'model': p.model, 'messages': messages, 'tools': tools,
@@ -133,10 +133,11 @@ class CompatibleClient:
     async def generate(self, messages: list, tools: list, journal):
         p = self.profile
         if p.api_format == 'responses':
-            payload = {'model': p.model, **request_input(messages, tools),
+            payload = {'model': p.model, **request_input(messages, tools, replay_reasoning=p.replay_reasoning),
                        'tool_choice': 'auto', 'parallel_tool_calls': False,
-                       'max_output_tokens': p.output_tokens, 'store': False,
-                       'include': ['reasoning.encrypted_content']}
+                       'max_output_tokens': p.output_tokens, 'store': False}
+            if p.replay_reasoning:
+                payload['include'] = ['reasoning.encrypted_content']
             if p.effort:
                 payload['reasoning'] = {'effort': p.effort}
             if p.temperature is not None:
