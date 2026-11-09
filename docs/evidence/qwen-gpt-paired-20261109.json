@@ -1,0 +1,471 @@
+{
+  "date": "2026-11-09",
+  "purpose": "Two-route development comparison, not a benchmark estimate",
+  "same_harness_version": true,
+  "same_actor_environment_tools_prompt": true,
+  "implementation_digest": "2ea2597da3ea84d0f1258ddd1e0f6a20580d30a0e309cc49a9093732072eaa75",
+  "profile_difference": {
+    "qwen": {
+      "runtime": "openai_compatible",
+      "api_format": "chat_completions",
+      "replay_reasoning": true,
+      "token_count_mode": "remote",
+      "image_token_estimate": 4096,
+      "model": "navh-qwen27b-nvfp4",
+      "base_url": "http://127.0.0.1:18103/v1",
+      "credential_env": null,
+      "context_limit": 16384,
+      "output_tokens": 2048,
+      "max_images": 32,
+      "context_policy": "bounded",
+      "thinking": false,
+      "effort": null,
+      "temperature": 0.0,
+      "request_timeout_s": 120,
+      "tokenizer_path": null,
+      "token_count_url": null,
+      "max_concurrency": 12
+    },
+    "gpt": {
+      "runtime": "openai_compatible",
+      "api_format": "responses",
+      "replay_reasoning": false,
+      "token_count_mode": "estimate",
+      "image_token_estimate": 4096,
+      "model": "gpt-6.1-sol",
+      "base_url": "http://120.25.203.202:6005/v1",
+      "credential_env": "NAVH_GPT_API_KEY",
+      "context_limit": 131072,
+      "output_tokens": 4096,
+      "max_images": 24,
+      "context_policy": "bounded",
+      "thinking": false,
+      "effort": "low",
+      "temperature": null,
+      "request_timeout_s": 120,
+      "tokenizer_path": null,
+      "token_count_url": null,
+      "max_concurrency": 2
+    }
+  },
+  "runs": {
+    "qwen": {
+      "job_id": "9a8271897b2c4114ae1b4d18f5ea3065",
+      "rows": [
+        {
+          "attempt_id": "39f57b8abc44439e8d50b049ded0062c",
+          "episode": 0,
+          "attempt": 1,
+          "status": "completed",
+          "success": 1.0,
+          "ne": 0.542,
+          "spl": 1.0,
+          "ndtw": 0.2963,
+          "distance_m": 6.5931,
+          "wall_s": 54.6,
+          "tool_calls": 8,
+          "turns": 8,
+          "vla_calls": 47,
+          "input_tokens": 47230,
+          "cached_input_tokens": 0,
+          "output_tokens": 772,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/7y3sRwLe3Va/7y3sRwLe3Va.glb",
+          "episode_id": "1",
+          "training_status": "evaluation_only"
+        },
+        {
+          "attempt_id": "efdbac3a034f4d0fb95cd19d5aa6fd36",
+          "episode": 190,
+          "attempt": 1,
+          "status": "completed",
+          "success": 0.0,
+          "ne": 11.0575,
+          "spl": 0.0,
+          "ndtw": 0.0509,
+          "distance_m": 6.3211,
+          "wall_s": 55.2,
+          "tool_calls": 8,
+          "turns": 8,
+          "vla_calls": 46,
+          "input_tokens": 45169,
+          "cached_input_tokens": 0,
+          "output_tokens": 789,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/B6ByNegPMKs/B6ByNegPMKs.glb",
+          "episode_id": "191",
+          "training_status": "evaluation_only"
+        }
+      ],
+      "details": [
+        {
+          "episode": 0,
+          "attempt_id": "39f57b8abc44439e8d50b049ded0062c",
+          "tool_calls": {
+            "observe": 1,
+            "update_plan": 3,
+            "execute_subtask": 2,
+            "observe_map": 1,
+            "terminate_episode": 1
+          },
+          "model_requests": 8,
+          "model_success_responses": 8,
+          "model_latency_total_s": 25.206,
+          "tool_elapsed_s": {
+            "observe": 0.716,
+            "update_plan": 0.82,
+            "execute_subtask": 23.462,
+            "observe_map": 0.961,
+            "terminate_episode": 0.332
+          },
+          "context_max_dropped_blocks": 0,
+          "http_errors": [],
+          "plan_updates": [
+            {
+              "subtasks": [
+                {
+                  "id": 1,
+                  "instruction": "Move forward along the right side of the kitchen island, keeping the island on my right, towards the dining area visible ahead.",
+                  "status": "pending"
+                },
+                {
+                  "id": 2,
+                  "instruction": "Stop by the right side doorway that shows a dining table and mirror.",
+                  "status": "pending"
+                }
+              ],
+              "reason": "Initial plan to navigate around the right side of the center kitchen island to reach the dining area doorway with the dining table and mirror."
+            },
+            {
+              "subtasks": [
+                {
+                  "id": 1,
+                  "instruction": "Move forward along the right side of the kitchen island, keeping the island on my right, towards the dining area visible ahead.",
+                  "status": "completed"
+                },
+                {
+                  "id": 2,
+                  "instruction": "Stop by the right side doorway that shows a dining table and mirror.",
+                  "status": "in_progress"
+                }
+              ],
+              "reason": "First task completed - I've moved around the right side of the center unit. Now I need to position myself by the right side doorway with the dining table and mirror."
+            },
+            {
+              "subtasks": [
+                {
+                  "id": 1,
+                  "instruction": "Move forward along the right side of the kitchen island, keeping the island on my right, towards the dining area visible ahead.",
+                  "status": "completed"
+                },
+                {
+                  "id": 2,
+                  "instruction": "Stop by the right side doorway that shows a dining table and mirror.",
+                  "status": "completed"
+                }
+              ],
+              "reason": "Successfully navigated around the right side of the center unit and stopped by the right side doorway with the dining table and mirror visible."
+            }
+          ],
+          "trace": "/home/holo/robots/nav-harness/state/runs/9a8271897b2c4114ae1b4d18f5ea3065/39f57b8abc44439e8d50b049ded0062c/episode/work/ep0000/trace/requests.jsonl",
+          "last_node_position": [
+            -11.974461555480957,
+            0.1518409252166748,
+            3.8111774921417236
+          ]
+        },
+        {
+          "episode": 190,
+          "attempt_id": "efdbac3a034f4d0fb95cd19d5aa6fd36",
+          "tool_calls": {
+            "observe": 2,
+            "update_plan": 3,
+            "execute_subtask": 2,
+            "terminate_episode": 1
+          },
+          "model_requests": 8,
+          "model_success_responses": 8,
+          "model_latency_total_s": 26.28,
+          "tool_elapsed_s": {
+            "observe": 1.628,
+            "update_plan": 0.816,
+            "execute_subtask": 22.947,
+            "terminate_episode": 0.389
+          },
+          "context_max_dropped_blocks": 0,
+          "http_errors": [],
+          "plan_updates": [
+            {
+              "subtasks": [
+                {
+                  "id": 1,
+                  "instruction": "Walk straight down the hallway, passing three doorways on the right side.",
+                  "status": "pending"
+                },
+                {
+                  "id": 2,
+                  "instruction": "After passing the third doorway, turn left into the next hallway and step into it, then stop.",
+                  "status": "pending"
+                }
+              ],
+              "reason": "Initial plan based on the original instruction. The hallway ahead has doorways on the right side that need to be counted and passed before turning left."
+            },
+            {
+              "subtasks": [
+                {
+                  "id": 1,
+                  "instruction": "Walk straight down the hallway, passing three doorways on the right side.",
+                  "status": "completed"
+                },
+                {
+                  "id": 2,
+                  "instruction": "After passing the third doorway, turn left into the next hallway and step into it, then stop.",
+                  "status": "in_progress"
+                }
+              ],
+              "reason": "Task 1 is complete - I've walked down the hallway and passed the three doorways. Now I need to turn left into the next hallway."
+            },
+            {
+              "subtasks": [
+                {
+                  "id": 1,
+                  "instruction": "Walk straight down the hallway, passing three doorways on the right side.",
+                  "status": "completed"
+                },
+                {
+                  "id": 2,
+                  "instruction": "After passing the third doorway, turn left into the next hallway and step into it, then stop.",
+                  "status": "completed"
+                }
+              ],
+              "reason": "Both tasks are complete. I've walked down the hallway past three doorways, turned left into the next hallway, and stepped into it as instructed."
+            }
+          ],
+          "trace": "/home/holo/robots/nav-harness/state/runs/9a8271897b2c4114ae1b4d18f5ea3065/efdbac3a034f4d0fb95cd19d5aa6fd36/episode/work/ep0190/trace/requests.jsonl",
+          "last_node_position": [
+            25.448678970336914,
+            0.08020400255918503,
+            12.919958114624023
+          ]
+        }
+      ]
+    },
+    "gpt": {
+      "job_id": "5ab0730cea7d440bbb4d3bbb8bc1f569",
+      "rows": [
+        {
+          "attempt_id": "200fca52189445679bbab0968b438c6c",
+          "episode": 0,
+          "attempt": 1,
+          "status": "completed",
+          "success": 0.0,
+          "ne": 1.0909,
+          "spl": 0.0,
+          "ndtw": 0.9302,
+          "distance_m": 5.7859,
+          "wall_s": 71.5,
+          "tool_calls": 6,
+          "turns": 6,
+          "vla_calls": 46,
+          "input_tokens": 26364,
+          "cached_input_tokens": 5548,
+          "output_tokens": 468,
+          "cost_usd": null,
+          "error": "HTTPStatusError: Client error '400 Bad Request' for url 'http://120.25.203.202:6005/v1/responses'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400",
+          "scene_id": "mp3d/7y3sRwLe3Va/7y3sRwLe3Va.glb",
+          "episode_id": "1",
+          "training_status": "evaluation_only"
+        },
+        {
+          "attempt_id": "be24a9dcb20848dc9fd7ba086a12d61a",
+          "episode": 190,
+          "attempt": 1,
+          "status": "completed",
+          "success": 0.0,
+          "ne": 10.7988,
+          "spl": 0.0,
+          "ndtw": 0.0378,
+          "distance_m": 6.4536,
+          "wall_s": 72.6,
+          "tool_calls": 7,
+          "turns": 7,
+          "vla_calls": 49,
+          "input_tokens": 34310,
+          "cached_input_tokens": 5432,
+          "output_tokens": 457,
+          "cost_usd": null,
+          "error": null,
+          "scene_id": "mp3d/B6ByNegPMKs/B6ByNegPMKs.glb",
+          "episode_id": "191",
+          "training_status": "evaluation_only"
+        }
+      ],
+      "details": [
+        {
+          "episode": 0,
+          "attempt_id": "200fca52189445679bbab0968b438c6c",
+          "tool_calls": {
+            "observe": 1,
+            "update_plan": 3,
+            "execute_subtask": 2
+          },
+          "model_requests": 7,
+          "model_success_responses": 6,
+          "model_latency_total_s": 42.899,
+          "tool_elapsed_s": {
+            "observe": 0.799,
+            "update_plan": 3.559,
+            "execute_subtask": 23.347
+          },
+          "context_max_dropped_blocks": 1,
+          "http_errors": [
+            {
+              "error": {
+                "message": "Insufficient quota available for instant inference. (request id: 202611090540209909086218268d9d66Oc8VL7k)",
+                "type": "upstream_error",
+                "param": "",
+                "code": null
+              }
+            }
+          ],
+          "plan_updates": [
+            {
+              "reason": "The center island is ahead/right; the right-hand aisle runs beside the ovens toward the far opening.",
+              "subtasks": [
+                {
+                  "id": 1,
+                  "instruction": "Turn right and go around the right side of the center kitchen island, along the aisle between the island and the ovens/refrigerator, to its far end.",
+                  "status": "in_progress"
+                },
+                {
+                  "id": 2,
+                  "instruction": "Continue to the right-side doorway containing the dining table and mirror, and stop beside the doorway.",
+                  "status": "pending"
+                }
+              ]
+            },
+            {
+              "reason": "Passed the refrigerator and rounded the island; the dining-room opening is now immediately on the right.",
+              "subtasks": [
+                {
+                  "id": 1,
+                  "instruction": "Turn right and go around the right side of the center kitchen island, along the aisle between the island and the ovens/refrigerator, to its far end.",
+                  "status": "completed"
+                },
+                {
+                  "id": 2,
+                  "instruction": "Turn right to face the adjacent dining-room doorway with the dining table and mirror beyond it. Stop beside the doorway without proceeding into the room.",
+                  "status": "in_progress"
+                }
+              ]
+            },
+            {
+              "reason": "Stopped beside the dining-room opening; the table is directly beyond it and the tall mirror is visible on the right wall. The island was passed on its right side.",
+              "subtasks": [
+                {
+                  "id": 1,
+                  "instruction": "Turn right and go around the right side of the center kitchen island, along the aisle between the island and the ovens/refrigerator, to its far end.",
+                  "status": "completed"
+                },
+                {
+                  "id": 2,
+                  "instruction": "Turn right to face the adjacent dining-room doorway with the dining table and mirror beyond it. Stop beside the doorway without proceeding into the room.",
+                  "status": "completed"
+                }
+              ]
+            }
+          ],
+          "trace": "/home/holo/robots/nav-harness/state/runs/5ab0730cea7d440bbb4d3bbb8bc1f569/200fca52189445679bbab0968b438c6c/episode/work/ep0000/trace/requests.jsonl",
+          "last_node_position": [
+            -13.315934181213379,
+            0.1518409252166748,
+            4.695990085601807
+          ]
+        },
+        {
+          "episode": 190,
+          "attempt_id": "be24a9dcb20848dc9fd7ba086a12d61a",
+          "tool_calls": {
+            "observe": 1,
+            "update_plan": 3,
+            "execute_subtask": 2,
+            "terminate_episode": 1
+          },
+          "model_requests": 7,
+          "model_success_responses": 7,
+          "model_latency_total_s": 45.775,
+          "tool_elapsed_s": {
+            "observe": 1.112,
+            "update_plan": 0.751,
+            "execute_subtask": 23.738,
+            "terminate_episode": 0.351
+          },
+          "context_max_dropped_blocks": 1,
+          "http_errors": [],
+          "plan_updates": [
+            {
+              "reason": "Follow the hall forward past the required three doorways, then enter the hallway on the left and stop.",
+              "subtasks": [
+                {
+                  "id": 1,
+                  "instruction": "Walk straight down the hall ahead, passing the three doorways, and stop at the left turn beyond them.",
+                  "status": "in_progress"
+                },
+                {
+                  "id": 2,
+                  "instruction": "Turn left into the hallway beyond the three doorways, step into it, and stop.",
+                  "status": "pending"
+                }
+              ]
+            },
+            {
+              "reason": "Traversal passed the three doorway positions and reached the junction; the left view shows the open entrance to the continuing hallway.",
+              "subtasks": [
+                {
+                  "id": 1,
+                  "instruction": "Walk straight down the hall ahead, passing the three doorways, and stop at the left turn beyond them.",
+                  "status": "completed"
+                },
+                {
+                  "id": 2,
+                  "instruction": "Turn left through the open wooden doorway into the visible hallway. Step fully into that hallway and stop.",
+                  "status": "in_progress"
+                }
+              ]
+            },
+            {
+              "reason": "The left turn is complete and the robot has crossed the open doorway into the hallway, with the junction behind it.",
+              "subtasks": [
+                {
+                  "id": 1,
+                  "instruction": "Walk straight down the hall ahead, passing the three doorways, and stop at the left turn beyond them.",
+                  "status": "completed"
+                },
+                {
+                  "id": 2,
+                  "instruction": "Turn left through the open wooden doorway into the visible hallway. Step fully into that hallway and stop.",
+                  "status": "completed"
+                }
+              ]
+            }
+          ],
+          "trace": "/home/holo/robots/nav-harness/state/runs/5ab0730cea7d440bbb4d3bbb8bc1f569/be24a9dcb20848dc9fd7ba086a12d61a/episode/work/ep0190/trace/requests.jsonl",
+          "last_node_position": [
+            25.835891723632812,
+            0.08020400255918503,
+            12.795961380004883
+          ]
+        }
+      ]
+    }
+  },
+  "episode_190_endpoint_separation_m": 0.40658198006207785,
+  "interpretation": [
+    "Qwen succeeds on episode 0; GPT reached the success radius but its STOP turn was interrupted by gateway quota, so this does not isolate planner ability.",
+    "Both models terminate incorrectly on episode 190, with final nodes about 0.41 m apart; both lack adequate acceptance checks in this run.",
+    "Qwen called observe_map once on episode 0, but neither model wrote or read memory in either episode.",
+    "Profiles differ in transport, context budget/counting, output budget and sampling; this compares current deployed configurations, not a controlled model-only ablation."
+  ]
+}
