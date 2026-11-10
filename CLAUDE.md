@@ -70,7 +70,7 @@ not model-name branches. New actors implement the actor service contract without
 orchestration. Harness modes: `agentic` (model-owned plan/memory workflow), `subtask` (the earlier
 strict review workflow, kept for comparisons) and `global` (full-route delegation).
 
-The current agentic tool contract is `docs/TOOL_CONTRACT_V6.md`, a delta on `docs/TOOL_CONTRACT_V5.md` (v3 holds earlier validation). It supersedes the v2
+The current agentic tool contract is `docs/TOOL_CONTRACT_V7.md`, a delta on `docs/TOOL_CONTRACT_V6.md` and `docs/TOOL_CONTRACT_V5.md` (v3 holds earlier validation). It supersedes the v2
 "Topology memory" section of `docs/ARCHITECTURE.md`, which remains the reference for ownership,
 durable execution and context/causality semantics. `docs/OPERATIONS.md` covers deployment,
 failure handling and backup. `docs/LIGHTNAV.md` covers the LightNav backend.

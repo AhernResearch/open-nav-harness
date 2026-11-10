@@ -423,3 +423,66 @@ def test_stall_return_policy_is_validated_and_frozen_into_the_session():
         config("nearest")
     session = NavigationSession(env=mcp_env_for(config("any"), None))
     assert session._stall.policy == "any"
+
+
+def stop_session(monkeypatch):
+    s = NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic"})
+    s._tasks.tasks = [{"id": 1, "instruction": "Walk down the hall", "status": "completed"},
+                      {"id": 2, "instruction": "Stop at the stairs", "status": "completed"}]
+    s._tasks.memory.nodes = {0: {}, 1: {}, 2: {}}
+    s._tasks.memory.current_node_id = 2
+    stops = []
+
+    def arrive(where):
+        stops.append(where)
+        s._episode_over, s._end_reason = True, "stop_called"
+        return [json.dumps({"episode_over": True, "end_reason": "stop_called"})]
+
+    monkeypatch.setattr(s, "arrive", arrive)
+    return s, stops
+
+
+def evidence(last_node=2):
+    return [{"task_id": 1, "node_id": 1, "seen": "end of the hall"},
+            {"task_id": 2, "node_id": last_node, "seen": "stairs ahead"}]
+
+
+@pytest.mark.parametrize("bad", [None, evidence()[:1], evidence(last_node=1),
+                                 evidence() + [{"task_id": 9, "node_id": 2, "seen": "x"}],
+                                 [dict(evidence()[0], node_id=7), evidence()[1]],
+                                 [evidence()[0], dict(evidence()[1], seen=" ")]])
+def test_complete_stop_without_task_evidence_is_refused_before_moving(monkeypatch, bad):
+    s, stops = stop_session(monkeypatch)
+    result = s.tools.invoke("terminate_episode", {"status": "complete", "reason": "done",
+                                                  **({"evidence": bad} if bad is not None else {})})
+    assert result.isError and json.loads(result.content[0].text)["error"] == "precondition_failed"
+    assert stops == [] and s._tasks.completion_claim is None
+
+
+def test_complete_stop_with_evidence_is_declared(monkeypatch):
+    s, stops = stop_session(monkeypatch)
+    result = s.tools.invoke("terminate_episode", {"status": "complete", "reason": "done", "evidence": evidence()})
+    assert not result.isError and stops == ["here"] and s._tasks.completion_claim == "complete"
+    assert "evidence_gate_bypassed" not in "".join(c.text for c in result.content if c.type == "text")
+
+
+def test_abort_needs_no_evidence(monkeypatch):
+    s, stops = stop_session(monkeypatch)
+    assert not s.tools.invoke("terminate_episode", {"status": "abort", "reason": "lost"}).isError
+    assert stops == ["here"]
+
+
+def test_evidence_gate_lets_the_third_deficient_stop_through_and_records_it(monkeypatch):
+    s, stops = stop_session(monkeypatch)
+    call = {"status": "complete", "reason": "done"}
+    assert s.tools.invoke("terminate_episode", call).isError
+    assert s.tools.invoke("terminate_episode", call).isError
+    result = s.tools.invoke("terminate_episode", call)
+    assert not result.isError and stops == ["here"]
+    assert '"evidence_gate_bypassed": true' in "".join(c.text for c in result.content if c.type == "text")
+
+
+def test_terminate_schema_offers_optional_structured_evidence():
+    s = NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic"})
+    schema = s.tools.definitions["terminate_episode"].inputSchema
+    assert set(schema["required"]) == {"status", "reason"} and "evidence" in schema["properties"]

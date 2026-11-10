@@ -30,6 +30,14 @@ class PlanPatch(TypedDict):
     status: Literal["pending", "in_progress", "completed"]
 
 
+class StopEvidence(TypedDict):
+    __pydantic_config__ = ConfigDict(extra="forbid")
+
+    task_id: int
+    node_id: int
+    seen: str
+
+
 class AgenticTasks(SubtaskManager):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -47,7 +55,7 @@ class AgenticTasks(SubtaskManager):
             "active_id": self.active_id,
             "completion_claim": self.completion_claim,
             "workflow": "model_owned",
-            "tool_contract": "topology_memory_v6",
+            "tool_contract": "topology_memory_v7",
             "memory_context": self.memory.context(self.active_id),
             "latest_memory": next((self.memory.brief(e) for e in reversed(self.memory.edges) if e["caption"]), None),
         }
@@ -280,3 +288,46 @@ class StallGuard:
 
     def released(self):
         self.allowed, self.zero, self.short = None, 0, 0
+
+
+class StopEvidenceGate:
+    """Requires per-task evidence before a ``complete`` STOP.
+
+    The check is structural only: every plan task has an entry, every entry names a visited
+    node and what was seen there, and the last task was satisfied at the current node. It
+    cannot judge whether the evidence is true. After MAX_REJECTIONS refusals in an episode the
+    next complete STOP passes and is reported as bypassed, so a model that cannot satisfy the
+    format is never trapped. ``abort`` is always allowed.
+    """
+
+    MAX_REJECTIONS = 2
+
+    def __init__(self):
+        self.rejections = 0
+
+    def problems(self, evidence, tasks, memory):
+        entries = evidence or []
+        ids = [t["id"] for t in tasks]
+        covered = {e["task_id"] for e in entries}
+        found = [f"no evidence for task {i}" for i in ids if i not in covered]
+        found += [f"task {i} is not in the plan" for i in sorted(covered - set(ids))]
+        found += [f"node {e['node_id']} was never visited" for e in entries if e["node_id"] not in memory.nodes]
+        found += [f"task {e['task_id']}: describe what you saw" for e in entries if not e["seen"].strip()]
+        last = [e for e in entries if ids and e["task_id"] == ids[-1]]
+        if last and all(e["node_id"] != memory.current_node_id for e in last):
+            found.append(f"the last task must be satisfied here, at node {memory.current_node_id}")
+        return found
+
+    def check(self, status, evidence, tasks, memory):
+        """Raise ValueError to refuse STOP; return True when a deficient STOP is let through."""
+        if status != "complete":
+            return False
+        found = self.problems(evidence, tasks, memory)
+        if not found:
+            return False
+        if self.rejections >= self.MAX_REJECTIONS:
+            return True
+        self.rejections += 1
+        raise ValueError("STOP refused, nothing moved: " + "; ".join(found) + ". Give evidence for each plan "
+                         "task (task_id, node_id where it was satisfied, what you saw), keep navigating to "
+                         "check missing parts, or terminate with status=abort.")

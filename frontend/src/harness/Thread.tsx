@@ -23,7 +23,7 @@ function describe(item: Item): { icon: string; label: string } {
     case "read_memory":
       return { icon: "book", label: a.other_node_id == null ? `回忆地点 ${a.node_id}` : `回忆 ${a.node_id} → ${a.other_node_id}` };
     case "terminate_episode":
-      return { icon: "flag", label: a.status === "abort" ? "放弃任务" : "宣布到达" };
+      return { icon: "flag", label: a.status === "abort" ? "放弃任务" : `宣布到达${a.evidence?.length ? ` · ${a.evidence.length} 条证据` : ""}` };
     default:
       return { icon: "tool", label: item.name };
   }

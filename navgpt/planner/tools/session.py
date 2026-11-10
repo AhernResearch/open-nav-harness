@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, Literal
 import requests
 from .registry import Image, TextContent, ToolRegistry, ToolResult
-from .agentic import PlanItem, PlanPatch
+from .agentic import PlanItem, PlanPatch, StopEvidence
 from navgpt.vla.profiles import input_profile
 
 
@@ -136,6 +136,7 @@ class NavigationSession:
             else None
         )
         self._stall = _sibling("agentic", "StallGuard")(self.env.get("NAVGPT_STALL_RETURN", "previous"))
+        self._stop_gate = _sibling("agentic", "StopEvidenceGate")()
         # Planner-chosen walking cap for the current agentic delegation; None outside one.
         self._distance_cap = None
         self._vla_calls = 0
@@ -2198,17 +2199,25 @@ class NavigationSession:
         result["termination_reason"] = "returned" if result.get("arrived") else "stopped_short"
         return [json.dumps(result), *self._pano_content(pano)]
 
-    def finish_agentic_episode(self, status: Literal["complete", "abort"], reason: str) -> list:
+    def finish_agentic_episode(self, status: Literal["complete", "abort"], reason: str,
+                               evidence: list[StopEvidence] | None = None) -> list:
         """Permanently STOP at the current pose. Declare complete or abort and briefly explain why.
+
+        status=complete requires evidence: one entry per plan task with the visited node_id where
+        it was satisfied and what you saw there; the last task's node is the current node.
+        Restating the instruction is not evidence. abort needs none.
         """
         if not reason.strip():
             raise ValueError("Explain why the episode should end")
+        bypassed = self._stop_gate.check(status, evidence, self._tasks.tasks, self._tasks.memory)
         already_over = self._episode_over
         stopped = self.arrive('here')
         if already_over or self._end_reason != "stop_called":
             return stopped  # STOP was not executed, so there is no completion to declare.
         # Declare only after the environment confirmed STOP.
         self._tasks.finish(status)
-        self._tasks._event('completion_reason', reason=reason)
+        self._tasks._event('completion_reason', reason=reason, evidence=evidence or [],
+                           evidence_gate_bypassed=bypassed, evidence_rejections=self._stop_gate.rejections)
         return [*stopped, json.dumps({"declared_status": status, "reason": reason,
-                                      "node_id": self._tasks.memory.current_node_id})]
+                                      "node_id": self._tasks.memory.current_node_id,
+                                      **({"evidence_gate_bypassed": True} if bypassed else {})})]

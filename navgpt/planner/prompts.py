@@ -515,6 +515,10 @@ directed travel between nodes. Use update_plan with patch for status changes and
 subtasks only to rewrite the plan; memory writing is optional.
 The latest persisted state supersedes older snapshots, but its assessments may be wrong.
 
+Declare complete only when you can point to evidence for every plan task: the visited node where
+it was satisfied and what you saw there, with the last task satisfied where you stand. Restating
+the instruction is not evidence. If a part lacks evidence, keep navigating or return to check it.
+
 Before tool calls, write at most one short sentence; do not narrate the views. Continue until terminate_episode permanently
 stops the episode: complete when the original route is finished, abort when giving up.
 Budget: {budget} low-level actions. No user can answer questions during navigation.
