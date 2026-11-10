@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, type Row } from "./api";
+import { Logo } from "./Logo";
 import { QueuePage } from "./pages/QueuePage";
 import { ServicesPage } from "./pages/ServicesPage";
 import { ExperimentsPage } from "./pages/ExperimentsPage";
@@ -71,7 +72,8 @@ export function Workbench() {
     <div className="layout">
       <aside>
         <a className="logo" onClick={() => setPage("queue")}>
-          <span className="brand small">N↗</span>Nav Harness
+          <Logo size={30} />
+          open nav harness
         </a>
         <p className="eyebrow">WORKSPACE / A100</p>
         <a className="view-switch" href="/harness">
@@ -140,7 +142,7 @@ export function Workbench() {
           />
         )}
         {page === "compare" && <ComparePage {...props} />}
-        <footer>Nav Harness · 每次决策都有可回溯的证据</footer>
+        <footer>Open Nav Harness · 每次决策都有可回溯的证据</footer>
       </main>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, type Row } from "../api";
 import { Composer, usePendingJob } from "./Composer";
+import { Logo } from "../Logo";
 import { Icon } from "./icons";
 import { MapView } from "./MapPanel";
 import { PlanCard, Thread } from "./Thread";
@@ -78,7 +79,8 @@ export function HarnessPage() {
     <div className="hx">
       <div className="hx-side" role="navigation" aria-label="会话">
         <div className="hx-brand">
-          <span className="logo-dot">N</span>Nav Harness
+          <Logo />
+          open nav harness
         </div>
         <button className="new-run" onClick={() => open(null)}>
           <Icon name="plus" /> 新的运行

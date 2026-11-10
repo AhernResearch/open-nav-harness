@@ -1,4 +1,4 @@
-# Nav Harness
+# Open Nav Harness
 
 A navigation experiment platform derived from NavGPT-3. Holo owns the web console,
 Planner sessions and durable queue; A100 owns model serving and Habitat execution.

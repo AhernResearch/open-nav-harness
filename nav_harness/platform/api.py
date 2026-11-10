@@ -55,7 +55,7 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
                 await task
             db.engine.dispose()
 
-    app = FastAPI(title="Nav Harness", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="Open Nav Harness", version="0.1.0", lifespan=lifespan)
     app.state.db = db
     app.state.services = manager
 

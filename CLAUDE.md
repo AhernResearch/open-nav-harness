@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Nav Harness is an independent NavGPT-3 derivative: a navigation experiment platform. The Holo
+Open Nav Harness is an independent NavGPT-3 derivative: a navigation experiment platform. The Holo
 workstation runs the web console, API, durable queue and Planner sessions. The A100 hosts model
 serving, Habitat and actor (VLA) workers. `AGENTS.md` contains the contributor rules. Don't edit
 or manage processes owned by neighboring repos, and keep `provenance.json` and the inherited
