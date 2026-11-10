@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 import httpx
 from sqlalchemy import text
-from nav_harness.core.config import PlatformSettings
+from open_nav_harness.core.config import PlatformSettings
 
 
 class ServiceManager:
@@ -62,7 +62,7 @@ class ServiceManager:
         template = self.settings.service_templates.get(spec.template)
         if not template:
             raise ValueError("Unknown administrator-defined service template")
-        return spec, template, "navh-" + sid
+        return spec, template, "onh-" + sid
 
     def set_status(self, sid, status, **details):
         with self.db.transaction() as c:
@@ -87,7 +87,7 @@ class ServiceManager:
             ],
         )
         state = dict(line.split("=", 1) for line in raw.splitlines() if "=" in line)
-        if state.get("LoadState") != "not-found" and "NAV_HARNESS_OWNER=" + sid not in shlex.split(
+        if state.get("LoadState") != "not-found" and "OPEN_NAV_HARNESS_OWNER=" + sid not in shlex.split(
             state.get("Environment", "")
         ):
             raise ValueError("Remote unit ownership could not be verified")
@@ -195,7 +195,7 @@ class ServiceManager:
                     env = {
                         **template.environment,
                         "CUDA_VISIBLE_DEVICES": ",".join(map(str, spec.gpu_ids)),
-                        "NAV_HARNESS_OWNER": sid,
+                        "OPEN_NAV_HARNESS_OWNER": sid,
                     }
                     argv += ["--setenv=" + k + "=" + v for k, v in env.items()]
                     argv += ["--", *template.argv]

@@ -59,7 +59,7 @@ class BackendFactory:
                     )
 
                 def _infer_batch(self, requests):
-                    cancelled = [getattr(r.session, "_navh_cancelled", False) for r in requests]
+                    cancelled = [getattr(r.session, "_onh_cancelled", False) for r in requests]
                     active = [r for r, skip in zip(requests, cancelled) if not skip]
                     results = iter(super()._infer_batch(active) if active else [])
                     return [
@@ -131,7 +131,7 @@ class BackendFactory:
 
     def cancel(self, actor):
         if self.backend == "lightnav":
-            actor.inference.agent._navh_cancelled = True
+            actor.inference.agent._onh_cancelled = True
 
     async def close(self):
         if self.backend == "lightnav":

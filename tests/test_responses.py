@@ -4,10 +4,10 @@ from unittest.mock import AsyncMock
 import httpx
 import pytest
 
-from nav_harness.core.artifacts import Journal
-from nav_harness.core.config import PlannerProfile
-from nav_harness.providers.compatible import CompatibleClient, ModelProtocolError
-from nav_harness.providers.responses import request_input, normalize_response
+from open_nav_harness.core.artifacts import Journal
+from open_nav_harness.core.config import PlannerProfile
+from open_nav_harness.providers.compatible import CompatibleClient, ModelProtocolError
+from open_nav_harness.providers.responses import request_input, normalize_response
 
 
 TOOLS = [{'type': 'function', 'function': {'name': 'observe', 'description': 'Look',

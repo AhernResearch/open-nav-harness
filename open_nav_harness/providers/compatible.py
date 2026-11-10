@@ -5,8 +5,8 @@ import json
 import os
 import time
 import httpx
-from nav_harness.core.config import PlannerProfile
-from nav_harness.core.context import CounterLimit
+from open_nav_harness.core.config import PlannerProfile
+from open_nav_harness.core.context import CounterLimit
 from .responses import request_input, normalize_response
 
 

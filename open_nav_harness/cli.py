@@ -4,12 +4,12 @@ import argparse
 import asyncio
 import json
 from pathlib import Path
-from nav_harness.core.config import PlatformSettings
-from nav_harness.core.artifacts import atomic_json
+from open_nav_harness.core.config import PlatformSettings
+from open_nav_harness.core.artifacts import atomic_json
 
 
 def main():
-    p = argparse.ArgumentParser(prog="nav-harness")
+    p = argparse.ArgumentParser(prog="open-nav-harness")
     p.add_argument("--state", type=Path, default=Path("state"))
     p.add_argument("--settings", type=Path)
     sub = p.add_subparsers(dest="command", required=True)
@@ -27,8 +27,8 @@ def main():
         PlatformSettings.model_validate_json(a.settings.read_text()) if a.settings else PlatformSettings()
     )
     if a.command == "worker":
-        from nav_harness.platform.database import Database
-        from nav_harness.platform.worker import Worker
+        from open_nav_harness.platform.database import Database
+        from open_nav_harness.platform.worker import Worker
 
         db = Database(root)
         db.migrate()
@@ -41,7 +41,7 @@ def main():
             source.backup(target)
         print("Metadata backup written; preserve runs/ and private deployment settings separately.")
     else:
-        from nav_harness.platform.api import create_app
+        from open_nav_harness.platform.api import create_app
 
         app = create_app(root, settings)
         if a.command == "openapi":

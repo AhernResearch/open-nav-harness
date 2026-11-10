@@ -10,8 +10,8 @@ def implementation_digest() -> str:
     digest = sha256()
     paths = set((root / "navgpt").rglob("*.py"))
     for package in ("core", "providers"):
-        paths.update((root / "nav_harness" / package).rglob("*.py"))
-    paths.add(root / "nav_harness/platform/episode.py")
+        paths.update((root / "open_nav_harness" / package).rglob("*.py"))
+    paths.add(root / "open_nav_harness/platform/episode.py")
     for path in sorted(paths):
         digest.update(path.relative_to(root).as_posix().encode())
         digest.update(path.read_bytes())

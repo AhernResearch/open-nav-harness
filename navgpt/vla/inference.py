@@ -14,7 +14,7 @@ from typing import Any
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
-from nav_harness.core.version import implementation_digest
+from open_nav_harness.core.version import implementation_digest
 
 
 class OpenSession(BaseModel):

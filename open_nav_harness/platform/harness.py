@@ -12,7 +12,7 @@ import cmath
 import json
 import struct
 from pathlib import Path
-from nav_harness.providers.responses import response_message
+from open_nav_harness.providers.responses import response_message
 
 MOTION = {"execute_subtask", "navigate_relative", "navigate_to_node"}
 ITEM_TYPES = {"update_plan": "plan", "update_memory": "memory_write", "read_memory": "memory_read",

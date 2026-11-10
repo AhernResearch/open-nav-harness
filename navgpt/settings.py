@@ -280,7 +280,7 @@ class Settings:
         cfg.planner_runtime = runtime
         cfg.planner_profile = planner.get("profile", {})
         if runtime == "openai_compatible":
-            from nav_harness.core.config import PlannerProfile
+            from open_nav_harness.core.config import PlannerProfile
             cfg.planner_profile = PlannerProfile.model_validate(cfg.planner_profile).model_dump()
         cfg.model = str(planner.get("model") or (DEFAULT_CODEX_MODEL if runtime == "codex"
                                                  else DEFAULT_MODEL))

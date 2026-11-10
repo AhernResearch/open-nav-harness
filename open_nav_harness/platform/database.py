@@ -6,7 +6,7 @@ import uuid
 from contextlib import contextmanager
 from pathlib import Path
 from sqlalchemy import create_engine, event, text
-from nav_harness.core.config import ExperimentSpec, ServiceSpec
+from open_nav_harness.core.config import ExperimentSpec, ServiceSpec
 
 
 def ident():
@@ -163,7 +163,7 @@ class Database:
         frozen = spec.model_dump()
         frozen["config"] = cfg
         frozen["execution_pool"] = pool
-        from nav_harness.core.version import implementation_digest
+        from open_nav_harness.core.version import implementation_digest
 
         frozen["implementation_digest"] = implementation_digest()
         frozen["deployment_templates"] = deployments or {}

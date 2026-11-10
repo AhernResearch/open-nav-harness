@@ -12,7 +12,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse, Res
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from sqlalchemy import text
-from nav_harness.core.config import ExperimentSpec, PlatformSettings, ServiceSpec
+from open_nav_harness.core.config import ExperimentSpec, PlatformSettings, ServiceSpec
 from .database import Database, ident
 from .services import ServiceManager
 from .catalog import Catalog

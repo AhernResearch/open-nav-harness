@@ -7,16 +7,16 @@ from unittest.mock import AsyncMock
 import httpx
 import pytest
 
-from nav_harness.core.artifacts import Journal
-from nav_harness.core.config import PlannerProfile
-from nav_harness.core.context import CounterLimit
-from nav_harness.providers.compatible import CompatibleClient, ModelProtocolError
+from open_nav_harness.core.artifacts import Journal
+from open_nav_harness.core.config import PlannerProfile
+from open_nav_harness.core.context import CounterLimit
+from open_nav_harness.providers.compatible import CompatibleClient, ModelProtocolError
 
 
 @pytest.fixture
 def retry_sleep(monkeypatch):
     sleep = AsyncMock()
-    monkeypatch.setattr("nav_harness.providers.compatible.asyncio.sleep", sleep)
+    monkeypatch.setattr("open_nav_harness.providers.compatible.asyncio.sleep", sleep)
     return sleep
 
 

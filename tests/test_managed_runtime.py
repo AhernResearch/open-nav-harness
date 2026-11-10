@@ -4,9 +4,9 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock
 import pytest
 from navgpt.planner.tools.registry import ToolResult as CallToolResult, TextContent, ImageContent
-from nav_harness.core.config import PlannerProfile
-from nav_harness.providers import runtime as module
-from nav_harness.providers.runtime import ManagedRuntime, tool_feedback
+from open_nav_harness.core.config import PlannerProfile
+from open_nav_harness.providers import runtime as module
+from open_nav_harness.providers.runtime import ManagedRuntime, tool_feedback
 from navgpt.planner.contracts import EpisodeContext
 from navgpt.planner.runner import EventSink
 
@@ -242,7 +242,7 @@ async def test_planner_turn_exhaustion_remains_distinct(tmp_path, monkeypatch):
 
 def test_return_telemetry_keeps_last_status_and_budget_failure_is_scored():
     from navgpt.planner.runner import is_scored
-    from nav_harness.platform.results import aggregate, metrics
+    from open_nav_harness.platform.results import aggregate, metrics
     retrace = {'step_count': 499, 'truncated': True, 'terminated': False, 'arrived': False}
     parsed = EventSink.parse_step_result([json.dumps(retrace)])
     assert parsed['steps_taken_total'] == 499 and parsed['episode_over'] is True

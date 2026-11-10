@@ -9,7 +9,7 @@ from __future__ import annotations
 import uuid
 import httpx
 
-from nav_harness.core.version import implementation_digest
+from open_nav_harness.core.version import implementation_digest
 
 
 class RemoteActor:

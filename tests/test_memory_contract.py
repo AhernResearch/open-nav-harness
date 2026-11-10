@@ -13,8 +13,8 @@ from navgpt.planner.tools.mcp_tools import build_mcp
 from navgpt.planner.tools.transport import RemoteTools
 from navgpt.vla.worker import ActorWorker
 from navgpt.settings import AGENTIC_TOOLS_WITH_RECALL
-from nav_harness.core.artifacts import Journal
-from nav_harness.core.context import ContextWindow
+from open_nav_harness.core.artifacts import Journal
+from open_nav_harness.core.context import ContextWindow
 
 
 def pose(x=0, y=0):

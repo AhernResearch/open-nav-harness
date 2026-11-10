@@ -10,8 +10,8 @@ import time
 from pathlib import Path
 from typing import IO
 from sqlalchemy import text
-from nav_harness.core.artifacts import atomic_json
-from nav_harness.core.config import PlatformSettings
+from open_nav_harness.core.artifacts import atomic_json
+from open_nav_harness.core.config import PlatformSettings
 from .database import Database
 
 
@@ -29,7 +29,7 @@ def process_matches(attempt):
     try:
         cmd = Path(f"/proc/{pid}/cmdline").read_bytes().split(b"\0")
         return (
-            b"nav_harness.platform.episode" in cmd
+            b"open_nav_harness.platform.episode" in cmd
             and str(Path(attempt["output"]) / "input.json").encode() in cmd
         )
     except OSError:
@@ -85,7 +85,7 @@ class Worker:
                 )
 
     async def launch(self, a):
-        from nav_harness.core.version import implementation_digest
+        from open_nav_harness.core.version import implementation_digest
 
         if a["spec"]["implementation_digest"] != implementation_digest():
             raise ValueError("Implementation changed since experiment freeze; create a new experiment")
@@ -96,7 +96,7 @@ class Worker:
             proc = await asyncio.create_subprocess_exec(
                 sys.executable,
                 "-m",
-                "nav_harness.platform.episode",
+                "open_nav_harness.platform.episode",
                 str(root / "input.json"),
                 stdout=log,
                 stderr=log,

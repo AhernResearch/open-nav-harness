@@ -10,21 +10,21 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 
-from nav_harness.core.artifacts import ArtifactStore, Journal
-from nav_harness.core.config import (
+from open_nav_harness.core.artifacts import ArtifactStore, Journal
+from open_nav_harness.core.config import (
     ExperimentSpec,
     PlannerProfile,
     PlatformSettings,
     ServiceSpec,
     ServiceTemplate,
 )
-from nav_harness.core.context import ContextOverflow, ContextWindow, ImageBudget
-from nav_harness.platform.api import create_app
-from nav_harness.platform.database import Database
-from nav_harness.platform.results import read_jsonl
-from nav_harness.platform.services import ServiceManager
-from nav_harness.platform.worker import Worker
-from nav_harness.providers.compatible import CompatibleClient
+from open_nav_harness.core.context import ContextOverflow, ContextWindow, ImageBudget
+from open_nav_harness.platform.api import create_app
+from open_nav_harness.platform.database import Database
+from open_nav_harness.platform.results import read_jsonl
+from open_nav_harness.platform.services import ServiceManager
+from open_nav_harness.platform.worker import Worker
+from open_nav_harness.providers.compatible import CompatibleClient
 
 
 @pytest.fixture
@@ -40,12 +40,12 @@ async def test_external_planner_health_uses_credential_env(db, monkeypatch):
         name='gpt', kind='planner', url='https://gateway.test/v1',
         planner=PlannerProfile(model='gpt', api_format='responses',
                                base_url='https://gateway.test/v1',
-                               credential_env='NAVH_TEST_KEY'),
+                               credential_env='ONH_TEST_KEY'),
     ))
     services = ServiceManager(db, PlatformSettings())
-    monkeypatch.delenv('NAVH_TEST_KEY', raising=False)
+    monkeypatch.delenv('ONH_TEST_KEY', raising=False)
     assert (await services.health(sid))['ok'] is False
-    monkeypatch.setenv('NAVH_TEST_KEY', 'test-secret')
+    monkeypatch.setenv('ONH_TEST_KEY', 'test-secret')
     get = AsyncMock(return_value=httpx.Response(200, json={'data': [{'id': 'gpt'}]},
         request=httpx.Request('GET', 'https://gateway.test/v1/models')))
     monkeypatch.setattr(httpx.AsyncClient, 'get', get)
@@ -396,7 +396,7 @@ def test_lost_motion_response_blocks_even_if_metrics_written(db):
 
 
 def test_motion_recovery_requires_acknowledged_result():
-    from nav_harness.core.recovery import resource_state
+    from open_nav_harness.core.recovery import resource_state
 
     events = [{"kind": "tool_dispatch", "call_id": "a", "name": "execute_subtask"}]
     assert resource_state(events, wire=True) == "unknown"
@@ -448,7 +448,7 @@ def test_reconciliation_finishes_pending_cancellation(db):
 
 
 def test_comparison_counts_completed_errors_without_metrics_as_failures():
-    from nav_harness.platform.results import aggregate
+    from open_nav_harness.platform.results import aggregate
 
     rows = [
         {"episode": 0, "status": "completed", "success": 1, "error": None},
@@ -476,8 +476,8 @@ def test_reconciliation_preserves_committed_timeout_as_completed(db):
                 )
     jid = db.enqueue(eid)
     a = db.claim()
-    from nav_harness.platform.worker import Worker
-    from nav_harness.core.config import PlatformSettings
+    from open_nav_harness.platform.worker import Worker
+    from open_nav_harness.core.config import PlatformSettings
 
     Worker(db, PlatformSettings()).complete(
         a, {"error": "episode_timeout", "task_success": 0, "resource_state": "unknown"}

@@ -7,7 +7,7 @@
   "service_templates": {
     "qwen27b": {
       "host": "a100",
-      "working_directory": "/srv/nav-harness",
+      "working_directory": "/srv/open-nav-harness",
       "argv": [
         "/srv/venvs/vllm/bin/vllm",
         "serve",
@@ -17,7 +17,7 @@
         "--port",
         "18101",
         "--served-model-name",
-        "navh-qwen27b",
+        "onh-qwen27b",
         "--max-model-len",
         "16384",
         "--max-num-seqs",
@@ -42,13 +42,13 @@
     },
     "owned-lightnav": {
       "host": "a100",
-      "working_directory": "/srv/nav-harness/releases/RELEASE",
+      "working_directory": "/srv/open-nav-harness/releases/RELEASE",
       "argv": [
         "/srv/venvs/lightnav/bin/python",
         "-m",
         "navgpt.vla.worker",
         "--config",
-        "/srv/nav-harness/deployment/actor-lightnav.json"
+        "/srv/open-nav-harness/deployment/actor-lightnav.json"
       ],
       "environment": {
         "HF_HUB_OFFLINE": "1",
@@ -58,13 +58,13 @@
     },
     "owned-navgpt": {
       "host": "a100",
-      "working_directory": "/srv/nav-harness/releases/RELEASE",
+      "working_directory": "/srv/open-nav-harness/releases/RELEASE",
       "argv": [
         "/srv/venvs/navgpt/bin/python",
         "-m",
         "navgpt.vla.worker",
         "--config",
-        "/srv/nav-harness/deployment/actor-navgpt.json"
+        "/srv/open-nav-harness/deployment/actor-navgpt.json"
       ],
       "environment": {
         "HF_HUB_OFFLINE": "1",

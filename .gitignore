@@ -13,7 +13,7 @@ node_modules/
 frontend/dist/
 .env
 configs/paths.yaml
-nav_harness/web/
+open_nav_harness/web/
 dist/
 build/
 frontend/test-results/

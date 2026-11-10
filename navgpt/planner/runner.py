@@ -523,7 +523,7 @@ def preflight(cfg: RunConfig) -> dict[str, Any]:
 
     # 3. model actually authorized (cheap call)
     if cfg.planner_runtime == "openai_compatible":
-        from nav_harness.core.config import PlannerProfile
+        from open_nav_harness.core.config import PlannerProfile
         profile = PlannerProfile.model_validate(cfg.planner_profile)
         import httpx
         headers = {}
@@ -784,7 +784,7 @@ def _check_history_cameras(backend, health):
 
 
 def _check_execution(cfg, inference_info):
-    from nav_harness.core.version import implementation_digest
+    from open_nav_harness.core.version import implementation_digest
     info = inference_info
     if cfg.execution_url.rstrip("/") != cfg.vla_url.rstrip("/"):
         if not info.get("shared_inference") or info.get("protocol_version") != 2:

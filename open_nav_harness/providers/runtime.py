@@ -6,9 +6,9 @@ import jsonschema
 from navgpt.planner.contracts import SessionOutcome
 from navgpt.planner.runner import expected_tools_from_env
 from navgpt.planner.tools.transport import open_tools
-from nav_harness.core.artifacts import Journal
-from nav_harness.core.config import PlannerProfile
-from nav_harness.core.context import ContextWindow
+from open_nav_harness.core.artifacts import Journal
+from open_nav_harness.core.config import PlannerProfile
+from open_nav_harness.core.context import ContextWindow
 from .compatible import CompatibleClient, ModelProtocolError
 
 # Tools whose result carries a map and grants the memory-write credential.

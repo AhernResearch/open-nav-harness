@@ -1,0 +1,14 @@
+[Unit]
+Description=Open Nav Harness durable scheduler
+After=network-online.target
+
+[Service]
+WorkingDirectory=/srv/open-nav-harness
+ExecStart=/srv/open-nav-harness/.venv/bin/open-nav-harness --state /srv/open-nav-harness/state --settings /srv/open-nav-harness/state/platform.json worker
+KillMode=process
+Restart=on-failure
+RestartSec=5
+UMask=0077
+
+[Install]
+WantedBy=default.target

@@ -29,10 +29,10 @@ own existing environments; do not install the control-plane dependencies into Ha
 uv sync --locked --extra dev
 npm --prefix frontend ci
 npm --prefix frontend run build
-uv run nav-harness init
-uv run nav-harness --settings deployment/platform.example.json serve
+uv run open-nav-harness init
+uv run open-nav-harness --settings deployment/platform.example.json serve
 # A separate terminal/process:
-uv run nav-harness --settings deployment/platform.example.json worker
+uv run open-nav-harness --settings deployment/platform.example.json worker
 ```
 
 For Codex/Claude planners, additionally install `uv sync --locked --extra dev --extra sdk`
@@ -78,7 +78,7 @@ and encrypted reasoning items across turns and uses `/responses/input_tokens`
 for counting. An optional `token_count_url` overrides the counting endpoint.
 
 See `deployment/planner-responses.example.json` for an external GPT service profile.
-Set `NAVH_GPT_API_KEY` in both API and worker process environments using a private
+Set `ONH_GPT_API_KEY` in both API and worker process environments using a private
 environment file outside the repository/releases; snapshots contain only the
 variable name. Register the profile with `POST /api/services` after deploying this
 code. The existing model picker uses registered Planner profiles unchanged.
@@ -101,7 +101,7 @@ gateway profile uses 131072 because 12 returned images plus text exceeded its
 initial 65536 budget before the Planner could review or stop.
 
 New model families implementing this protocol need a profile, not a new navigation
-loop. A different wire protocol belongs in `nav_harness/providers/`. New actors
+loop. A different wire protocol belongs in `open_nav_harness/providers/`. New actors
 implement the actor service contract; they do not change Planner orchestration.
 
 The two initial A100 profiles are Qwen3.6-27B and Qwen3.6-35B-A3B NVFP4. Their owned
@@ -115,7 +115,7 @@ Validate a deployment before navigation:
 
 ```bash
 uv run python -m deployment.probe_planner \
-  --url http://127.0.0.1:18101/v1 --model navh-qwen27b \
+  --url http://127.0.0.1:18101/v1 --model onh-qwen27b \
   --output state/probes/new-profile
 ```
 
@@ -148,12 +148,12 @@ No training-ready SFT dataset is claimed by this platform.
 
 ```bash
 uv run pytest -q
-uv run ruff check nav_harness
+uv run ruff check open_nav_harness
 uv run ruff check --select F821,F823 navgpt
-uv run mypy nav_harness
+uv run mypy open_nav_harness
 npm --prefix frontend run build
-# Or omit NAVH_CHROME after installing Playwright's Chromium:
-NAVH_CHROME=/opt/google/chrome/chrome npm --prefix frontend test
+# Or omit ONH_CHROME after installing Playwright's Chromium:
+ONH_CHROME=/opt/google/chrome/chrome npm --prefix frontend test
 ```
 
 API schemas generate the frontend request types. The UI uses ordinary components,

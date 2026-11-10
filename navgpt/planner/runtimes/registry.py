@@ -11,8 +11,8 @@ def create_runtime(cfg):
 
         return ClaudePlannerRuntime()
     if cfg.planner_runtime == "openai_compatible":
-        from nav_harness.core.config import PlannerProfile
-        from nav_harness.providers.runtime import ManagedRuntime
+        from open_nav_harness.core.config import PlannerProfile
+        from open_nav_harness.providers.runtime import ManagedRuntime
 
         return ManagedRuntime(PlannerProfile.model_validate(cfg.planner_profile))
     raise ValueError("Unknown runtime: " + cfg.planner_runtime)

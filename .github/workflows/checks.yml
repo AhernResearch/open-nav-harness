@@ -16,11 +16,11 @@ jobs:
       - run: pip install uv==0.9.27
       - run: uv sync --locked --extra dev
       - run: uv run pytest -q
-      - run: uv run ruff check nav_harness
+      - run: uv run ruff check open_nav_harness
       - run: uv run ruff check --select F821,F823 navgpt
-      - run: uv run mypy nav_harness
+      - run: uv run mypy open_nav_harness
       - run: npm --prefix frontend ci
-      - run: uv run nav-harness --state /tmp/navh-schema openapi > frontend/openapi.json
+      - run: uv run open-nav-harness --state /tmp/onh-schema openapi > frontend/openapi.json
       - run: npm --prefix frontend run build
       - run: npx playwright install --with-deps chromium
         working-directory: frontend

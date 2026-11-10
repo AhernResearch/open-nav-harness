@@ -3,7 +3,7 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "nav-harness"
+name = "open-nav-harness"
 version = "0.1.0"
 description = "NavGPT-3 simulator harness with Planner, Environment, and NavGPT3 VLA"
 readme = "README.md"
@@ -25,15 +25,15 @@ dependencies = [
 # requirements-vla.txt.
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["navgpt*", "nav_harness*"]
+include = ["navgpt*", "open_nav_harness*"]
 
 [tool.setuptools.package-data]
-"nav_harness" = ["web/**/*"]
-"nav_harness.platform" = ["migrations/*.py", "migrations/versions/*.py"]
+"open_nav_harness" = ["web/**/*"]
+"open_nav_harness.platform" = ["migrations/*.py", "migrations/versions/*.py"]
 "navgpt.vla" = ["LICENSE"]
 
 [project.scripts]
-nav-harness = "nav_harness.cli:main"
+open-nav-harness = "open_nav_harness.cli:main"
 navgpt = "navgpt.cli:main"
 
 [project.optional-dependencies]

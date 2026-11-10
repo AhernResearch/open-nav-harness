@@ -35,7 +35,7 @@ class ActorWorker:
         self.failed = False
         self.cancelled = threading.Event()
         self.seen = set()
-        from nav_harness.core.version import implementation_digest
+        from open_nav_harness.core.version import implementation_digest
 
         self.implementation_digest = implementation_digest()
 

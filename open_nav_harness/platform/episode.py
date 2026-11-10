@@ -7,7 +7,7 @@ import signal
 import sys
 import traceback
 from pathlib import Path
-from nav_harness.core.artifacts import atomic_json
+from open_nav_harness.core.artifacts import atomic_json
 from .worker import start_ticks
 
 
@@ -48,7 +48,7 @@ async def execute(path):
     task_events = read_jsonl(
         root / "episode" / "live" / f"ep{data['episode']:04d}" / "subtasks" / "events.jsonl"
     )
-    from nav_harness.core.recovery import resource_state
+    from open_nav_harness.core.recovery import resource_state
 
     trace_path = root / "episode" / "work" / f"ep{data['episode']:04d}" / "trace" / "requests.jsonl"
     wire = trace_path.exists()

@@ -20,15 +20,15 @@ npm --prefix frontend ci
 # Required checks (mirrors .github/workflows/checks.yml)
 uv run pytest -q
 uv run pytest tests/test_memory_contract.py::test_name -q   # single test
-uv run ruff check nav_harness
+uv run ruff check open_nav_harness
 uv run ruff check --select F821,F823 navgpt                  # navgpt only gets undefined-name checks
-uv run mypy nav_harness
+uv run mypy open_nav_harness
 npm --prefix frontend run build         # = openapi-typescript types + tsc --noEmit + vite build
-NAVH_CHROME=/opt/google/chrome/chrome npm --prefix frontend test   # Playwright; omit env if Chromium installed
+ONH_CHROME=/opt/google/chrome/chrome npm --prefix frontend test   # Playwright; omit env if Chromium installed
 ```
 
 When an API schema changes, regenerate the frontend types first:
-`uv run nav-harness --state /tmp/navh-schema openapi > frontend/openapi.json` (the build then
+`uv run open-nav-harness --state /tmp/onh-schema openapi > frontend/openapi.json` (the build then
 regenerates `src/api-schema.ts`). Playwright starts its own server on port 18878 from
 `.venv/bin/python`. Use it for any changed user workflow.
 
@@ -36,10 +36,10 @@ Running the platform (management flags go **before** the subcommand; API and wor
 the same `--state`, and only one worker may own a state folder):
 
 ```bash
-uv run nav-harness init
-uv run nav-harness --settings deployment/platform.example.json serve    # http://127.0.0.1:8878
-uv run nav-harness --settings deployment/platform.example.json worker   # separate process
-uv run nav-harness --state DIR backup --output FILE
+uv run open-nav-harness init
+uv run open-nav-harness --settings deployment/platform.example.json serve    # http://127.0.0.1:8878
+uv run open-nav-harness --settings deployment/platform.example.json worker   # separate process
+uv run open-nav-harness --state DIR backup --output FILE
 uv run python -m deployment.probe_planner --url URL/v1 --model ID --output state/probes/NAME
 ```
 
@@ -54,7 +54,7 @@ deployment and a train/dev manifest.
 
 There are two packages in one distribution:
 
-- `nav_harness/`: the control plane.
+- `open_nav_harness/`: the control plane.
   - `platform/` holds the FastAPI API, the SQLite (WAL) queue with leases, the worker/scheduler, service lifecycle, per-episode subprocess execution and results/exports. Schema changes go through Alembic `migrations/`. Add a new migration and never edit an applied one.
   - `core/` holds config contracts, content-addressed artifacts, the context budget (`context.py`) and recovery evidence.
   - `providers/` holds the OpenAI-compatible `CompatibleClient` and `ManagedRuntime` (the explicit model/tool loop). A new wire protocol is added here.
@@ -82,5 +82,5 @@ failure handling and backup. `docs/LIGHTNAV.md` covers the LightNav backend.
 - Malformed tool arguments reject the whole unexecuted batch with repair feedback, which is not an execution failure. Duplicate call IDs, truncated responses and missing explicit STOP are recorded failures.
 - Experiments freeze config, launch templates and source fingerprints. Changing navigation, provider, context or executor code invalidates queued experiments, so pause jobs before deploying. Completed attempts are never overwritten, and recovery creates a new attempt.
 - `completed` is an execution status, not navigation success. Missing cost is `null`. Collection requires the `train` split, and exports stay `pending_review` or `evaluation_only` because training admission happens downstream.
-- Service control requires generated ownership tokens (`NAV_HARNESS_OWNER`). Browser input never becomes executable argv, because argv comes only from trusted config files. Credentials are env-var references, never experiment fields.
+- Service control requires generated ownership tokens (`OPEN_NAV_HARNESS_OWNER`). Browser input never becomes executable argv, because argv comes only from trusted config files. Credentials are env-var references, never experiment fields.
 - `state/` is local runtime data (DB, runs, deployment config) and is git-ignored.

@@ -7,9 +7,9 @@ import io
 import json
 from pathlib import Path
 from PIL import Image
-from nav_harness.core.artifacts import Journal, atomic_json
-from nav_harness.core.config import PlannerProfile
-from nav_harness.providers.compatible import CompatibleClient
+from open_nav_harness.core.artifacts import Journal, atomic_json
+from open_nav_harness.core.config import PlannerProfile
+from open_nav_harness.providers.compatible import CompatibleClient
 
 
 async def probe(url, model, directory, image_count=2, image_size=256):

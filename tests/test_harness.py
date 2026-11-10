@@ -8,10 +8,10 @@ from unittest.mock import AsyncMock
 
 import pytest
 from fastapi.testclient import TestClient
-from nav_harness.core.config import ExperimentSpec, PlannerProfile, ServiceSpec
+from open_nav_harness.core.config import ExperimentSpec, PlannerProfile, ServiceSpec
 
-from nav_harness.platform.api import create_app
-from nav_harness.platform.harness import Feed, JsonlTail, fit_map
+from open_nav_harness.platform.api import create_app
+from open_nav_harness.platform.harness import Feed, JsonlTail, fit_map
 
 EP = 7
 
@@ -307,7 +307,7 @@ def test_stream_replays_and_ends_with_cache_rules(tmp_path):
 
 
 def test_view_routes_serve_the_console(tmp_path):
-    web = Path(__file__).resolve().parents[1] / "nav_harness" / "web" / "index.html"
+    web = Path(__file__).resolve().parents[1] / "open_nav_harness" / "web" / "index.html"
     if not web.is_file():
         pytest.skip("frontend is not built")
     with TestClient(create_app(tmp_path)) as c:

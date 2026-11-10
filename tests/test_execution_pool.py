@@ -5,8 +5,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 from sqlalchemy import text
-from nav_harness.core.config import ExperimentSpec, ServiceSpec, PlannerProfile
-from nav_harness.platform.database import Database
+from open_nav_harness.core.config import ExperimentSpec, ServiceSpec, PlannerProfile
+from open_nav_harness.platform.database import Database
 
 
 @pytest.fixture
@@ -135,8 +135,8 @@ def test_cancel_does_not_mark_unknown_motion_terminal(pool):
 async def test_reconciliation_closes_only_failed_actor_session_and_waits_for_gpu(pool, monkeypatch):
     import httpx
     from pathlib import Path
-    from nav_harness.core.config import PlatformSettings
-    from nav_harness.platform.services import ServiceManager
+    from open_nav_harness.core.config import PlatformSettings
+    from open_nav_harness.platform.services import ServiceManager
     db, jid, spec = pool
     failed, healthy = db.claim(), db.claim()
     db.block(failed['id'], 'lost response')
@@ -159,7 +159,7 @@ async def test_reconciliation_closes_only_failed_actor_session_and_waits_for_gpu
         assert request.url.path.startswith('/sessions/'+ident)
         return httpx.Response(409 if request.url.path.endswith('/close') and not drained else 200, json={})
     client_type = httpx.AsyncClient
-    monkeypatch.setattr('nav_harness.platform.services.httpx.AsyncClient',
+    monkeypatch.setattr('open_nav_harness.platform.services.httpx.AsyncClient',
         lambda **kwargs: client_type(transport=httpx.MockTransport(handle), **kwargs))
     manager = ServiceManager(db, PlatformSettings())
     with pytest.raises(ValueError, match='still running'):

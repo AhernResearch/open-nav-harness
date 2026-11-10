@@ -11,8 +11,8 @@ from pydantic import ValidationError
 
 from navgpt.planner.tools.registry import Image, ToolRegistry
 from navgpt.planner.tools.mcp_tools import build_mcp
-from nav_harness.core.artifacts import Journal
-from nav_harness.core.context import ContextWindow
+from open_nav_harness.core.artifacts import Journal
+from open_nav_harness.core.context import ContextWindow
 
 
 async def test_mcp_preserves_registry_schema_and_multimodal_results():

@@ -115,7 +115,7 @@ def test_owned_lightnav_reuses_controller_without_connecting_websocket():
 
 
 def test_nonmotion_rpc_failure_still_retains_the_actor_lease():
-    from nav_harness.core.recovery import resource_state
+    from open_nav_harness.core.recovery import resource_state
 
     # No movement was dispatched, but the remote process still owns a session.
     for info in (

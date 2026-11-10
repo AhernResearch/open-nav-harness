@@ -1,6 +1,6 @@
 import json
 import pytest
-from nav_harness.core.recovery import resource_state
+from open_nav_harness.core.recovery import resource_state
 
 
 @pytest.mark.parametrize('wire', [True, False])

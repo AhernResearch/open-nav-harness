@@ -13,7 +13,7 @@ forward. `deployment/direct_lan_socket.py` binds SSH to the requested LAN interf
 has no VPN fallback. Do not configure an A100 reverse proxy to the workstation VPN.
 The current local deployment configuration is under `state/deployment/`, excluded
 from version control. Remote code and extracted train annotations live under the new
-`/data/nav_storage/nav-harness/` tree. Existing model weights and scene assets are shared
+`/data/nav_storage/open-nav-harness/` tree. Existing model weights and scene assets are shared
 read-only. The owned LightNav worker loads its inference engine in-process. The legacy
 bridge remains available with its own WebSocket session on the existing policy server;
 neither deployment takes ownership of that neighboring server.
@@ -155,10 +155,10 @@ This small smoke is not a success-rate estimate.
 
 1. Pause all jobs and allow active episodes to finish; confirm no running attempts.
 2. Stop the API and scheduler, preserving remote service ownership.
-3. Run `uv run nav-harness --state STATE backup --output BACKUP/platform.sqlite3`.
+3. Run `uv run open-nav-harness --state STATE backup --output BACKUP/platform.sqlite3`.
 4. Copy `runs/` and private deployment settings to the same backup.
    The database backup alone is not a replay backup. Keep private settings files mode 0600.
-5. Restore into a new state directory, run `nav-harness --state RESTORED init` to apply
+5. Restore into a new state directory, run `open-nav-harness --state RESTORED init` to apply
    migrations, check `/health`, then start the API and worker with that same state path.
 
 The backup uses SQLite's online backup API; never copy a live database while omitting
@@ -236,7 +236,7 @@ PyTorch 2.10.0.
 | 1, 5 | Protected existing services | Unchanged |
 
 The planner service is `eaa85c5c908141f6b57e16a231cdc511`, template
-`qwen27b-nvfp4-pool`, served model `navh-qwen27b-nvfp4`, and API
+`qwen27b-nvfp4-pool`, served model `onh-qwen27b-nvfp4`, and API
 `http://127.0.0.1:18103/v1` through the owned LAN SSH tunnel. It is registered in
 the async workbench on port 18889. Use its service ID for new experiments; frozen
 experiments retain their original planner references. The former GPU-3 BF16
@@ -247,7 +247,7 @@ The original NVIDIA checkpoint was downloaded directly on A100 from
 `nv-community/Qwen3.6-27B-NVFP4` on ModelScope and verified against per-file SHA256
 values. It is stored at `/data/nav_storage/models/NVIDIA-Qwen3.6-27B-NVFP4`.
 The serving environment is independently installed at
-`/data/nav_storage/nav-harness/venvs/planner-vllm025`; no shared environment was
+`/data/nav_storage/open-nav-harness/venvs/planner-vllm025`; no shared environment was
 upgraded. vLLM 0.25.0 supports this checkpoint's `modelopt_mixed` loader on SM80;
 the old 0.19.1 loader rejects that combination. A100 uses Marlin weight-only
 FP4/FP8 kernels, not native FP4 tensor-core computation. The checkpoint is unmodified.
@@ -284,7 +284,7 @@ Evidence: [deployment snapshot](evidence/nvfp4-planner-deployment-20261108.json)
 [installed dependencies](evidence/nvfp4-planner-environment-20261108.txt).
 Administrative scripts, dependency wheels and installation reports are retained
 under `state/deployment/nvfp4` locally and
-`/data/nav_storage/nav-harness/deployment/nvfp4-20261108` on A100.
+`/data/nav_storage/open-nav-harness/deployment/nvfp4-20261108` on A100.
 
 ## Terminal lifecycle and cropped-history baseline, 2026-11-09
 

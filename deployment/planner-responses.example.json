@@ -9,7 +9,7 @@
     "api_format": "responses",
     "model": "gpt-6.1-sol",
     "base_url": "https://api.openai.com/v1",
-    "credential_env": "NAVH_GPT_API_KEY",
+    "credential_env": "ONH_GPT_API_KEY",
     "token_count_mode": "remote",
     "context_limit": 65536,
     "output_tokens": 4096,

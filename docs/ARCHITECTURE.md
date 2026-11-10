@@ -6,10 +6,10 @@
 |---|---|---|
 | `frontend/src/pages` | Forms, status and evidence presentation | Navigation or scheduling decisions |
 | `frontend/src/harness` | Live, read-only run view (`/harness`): chat thread, plan, memory, map; may pause/cancel a job | Queue or experiment rules |
-| `nav_harness/platform/harness.py` | Incremental projection of one attempt's trace into item events | Any write to run files; evaluation data |
-| `nav_harness/platform` | Auth, immutable experiments, queue, leases, service lifecycle, exports | Model-specific prompting logic |
-| `nav_harness/core` | Validated contracts, artifacts, context budget, recovery evidence | GPU model loading |
-| `nav_harness/providers` | Wire protocol and managed model/tool loop | Environment state or navigation tools |
+| `open_nav_harness/platform/harness.py` | Incremental projection of one attempt's trace into item events | Any write to run files; evaluation data |
+| `open_nav_harness/platform` | Auth, immutable experiments, queue, leases, service lifecycle, exports | Model-specific prompting logic |
+| `open_nav_harness/core` | Validated contracts, artifacts, context budget, recovery evidence | GPU model loading |
+| `open_nav_harness/providers` | Wire protocol and managed model/tool loop | Environment state or navigation tools |
 | `navgpt/planner/tools/session.py` | Episode-local tool state and shared navigation capability | Global mutable episode state |
 | `navgpt/planner/tools/subtasks.py` | Plan/review lifecycle and causal actor frame selection | Hidden goal or success labels |
 | `navgpt/environment` | Simulator execution, observations and evaluator metrics | Planner/provider selection |
@@ -92,7 +92,7 @@ its trace contains an unacknowledged/errored movement request.
 Managed service operations fence scheduler claims in the same database transaction.
 An owned service is claimable only after readiness. Startup reservations include other
 starting services; insufficient memory never evicts existing processes. Remote units
-carry a generated `NAV_HARNESS_OWNER` token and use systemd process-group cleanup.
+carry a generated `OPEN_NAV_HARNESS_OWNER` token and use systemd process-group cleanup.
 Only trusted configuration files contain executable argv; the browser cannot submit
 shell commands. Register each physical stateful endpoint once; aliases are unsupported.
 

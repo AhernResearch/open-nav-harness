@@ -151,7 +151,7 @@ async def test_http_protocol_and_capacity():
 
 def test_runner_checks_separate_bindings_and_never_globally_resets_shared_actor(monkeypatch):
     from navgpt.planner.runner import _check_execution, _reset_vla, PreflightError
-    from nav_harness.core.version import implementation_digest
+    from open_nav_harness.core.version import implementation_digest
     cfg = SimpleNamespace(execution_url='http://worker:8000', vla_url='http://inference:8000', env_url='http://env:8000')
     inference = {'shared_inference': True, 'protocol_version': 2, 'implementation_digest': implementation_digest()}
     worker = {'implementation_digest': implementation_digest(), 'environment_url': cfg.env_url,
