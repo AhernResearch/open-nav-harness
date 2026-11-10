@@ -371,6 +371,8 @@ def test_rejected_motion_is_repairable_and_leaves_no_memory_edge(monkeypatch):
 def test_completion_is_declared_only_after_confirmed_stop(monkeypatch, ending):
     s = NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic"})
     s._episode_over = ending == "already_over"
+    s._tasks.memory.nodes = {0: {}, 1: {}}
+    s._tasks.memory.current_node_id = 1
 
     def arrive(where):
         if ending != "already_over":
@@ -378,7 +380,8 @@ def test_completion_is_declared_only_after_confirmed_stop(monkeypatch, ending):
         return [json.dumps({"episode_over": True, "end_reason": ending})]
 
     monkeypatch.setattr(s, "arrive", arrive)
-    s.finish_agentic_episode("complete", "the bed is in front")
+    s.finish_agentic_episode("complete", "the bed is in front",
+                             [{"element": "the bed", "node_id": 1, "seen": "a bed in front"}])
     assert (s._tasks.completion_claim == "complete") is (ending == "stop_called")
 
 
@@ -442,16 +445,16 @@ def stop_session(monkeypatch):
     return s, stops
 
 
-def evidence(last_node=2):
-    return [{"task_id": 1, "node_id": 1, "seen": "end of the hall"},
-            {"task_id": 2, "node_id": last_node, "seen": "stairs ahead"}]
+def evidence(node_id=2):
+    return [{"element": "hallway with two doors", "node_id": 1, "seen": "the hallway opened ahead"},
+            {"element": "stairs", "node_id": node_id, "seen": "a staircase in front of me"}]
 
 
-@pytest.mark.parametrize("bad", [None, evidence()[:1], evidence(last_node=1),
-                                 evidence() + [{"task_id": 9, "node_id": 2, "seen": "x"}],
-                                 [dict(evidence()[0], node_id=7), evidence()[1]],
-                                 [evidence()[0], dict(evidence()[1], seen=" ")]])
-def test_complete_stop_without_task_evidence_is_refused_before_moving(monkeypatch, bad):
+@pytest.mark.parametrize("bad", [None, [], evidence(node_id=1),
+                                 [dict(evidence()[0], element=" ")],
+                                 [dict(evidence()[0], seen=" "), evidence()[1]],
+                                 [dict(evidence()[0], node_id=7), evidence()[1]]])
+def test_complete_stop_without_route_evidence_is_refused_before_moving(monkeypatch, bad):
     s, stops = stop_session(monkeypatch)
     result = s.tools.invoke("terminate_episode", {"status": "complete", "reason": "done",
                                                   **({"evidence": bad} if bad is not None else {})})
@@ -459,11 +462,20 @@ def test_complete_stop_without_task_evidence_is_refused_before_moving(monkeypatc
     assert stops == [] and s._tasks.completion_claim is None
 
 
-def test_complete_stop_with_evidence_is_declared(monkeypatch):
+def test_complete_stop_with_route_evidence_is_declared(monkeypatch):
     s, stops = stop_session(monkeypatch)
     result = s.tools.invoke("terminate_episode", {"status": "complete", "reason": "done", "evidence": evidence()})
     assert not result.isError and stops == ["here"] and s._tasks.completion_claim == "complete"
     assert "evidence_gate_bypassed" not in "".join(c.text for c in result.content if c.type == "text")
+
+
+def test_evidence_need_not_follow_the_plan(monkeypatch):
+    s, stops = stop_session(monkeypatch)
+    s._tasks.tasks = [{"id": 1, "instruction": "Walk down the hall", "status": "in_progress"}]
+    here = [{"element": "stairs", "node_id": 2, "seen": "a staircase in front of me"}]
+    assert not s.tools.invoke("terminate_episode", {"status": "complete", "reason": "done",
+                                                    "evidence": here}).isError
+    assert stops == ["here"]
 
 
 def test_abort_needs_no_evidence(monkeypatch):

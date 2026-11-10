@@ -5,12 +5,17 @@ v7 is a delta on [v6](TOOL_CONTRACT_V6.md). The tool set is unchanged.
 ## Evidence for a complete STOP
 
 `terminate_episode(status, reason, evidence?)` takes an optional `evidence` list, and
-`status=complete` requires it. Each entry is `{task_id, node_id, seen}`:
+`status=complete` requires it. Each entry is `{element, node_id, seen}`, naming one route
+element of the instruction and where it was met:
 
-- every plan task has at least one entry, and no entry names a task outside the plan;
+- at least one entry is present;
+- every `element` and `seen` is non-empty;
 - every `node_id` is a visited topology node;
-- every `seen` is non-empty;
-- the last plan task is satisfied at the current node, where STOP executes.
+- one entry is at the current node, so the stopping place itself is named and described.
+
+Evidence is deliberately not tied to plan tasks. The first release required one entry per plan
+task, and the model responded by omitting whole tasks from the plan instead of evidencing them,
+so the gate refused STOPs on routes it had actually walked.
 
 `StopEvidenceGate` (in `navgpt/planner/tools/agentic.py`) checks these rules before STOP is sent.
 A refusal is a repairable `precondition_failed`, and nothing moves. `status=abort` needs no
@@ -23,6 +28,9 @@ After two refusals in one episode, the next complete STOP passes. Its result car
 
 The 2026-11-10 val_unseen run (50 routes, v6) motivated the gate. 13 of 23 failures were
 `complete` STOPs at routes the agent never came near, and their reasons restated the instruction.
+The per-task form was measured on the 16 routes v6 stopped wrongly: 2 succeeded, 6 were gate
+refusals, all of them missing plan tasks. Plan granularity is the model's choice, so it is not a
+valid evidence key.
 
 ## Validation
 

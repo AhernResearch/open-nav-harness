@@ -515,9 +515,11 @@ directed travel between nodes. Use update_plan with patch for status changes and
 subtasks only to rewrite the plan; memory writing is optional.
 The latest persisted state supersedes older snapshots, but its assessments may be wrong.
 
-Declare complete only when you can point to evidence for every plan task: the visited node where
-it was satisfied and what you saw there, with the last task satisfied where you stand. Restating
-the instruction is not evidence. If a part lacks evidence, keep navigating or return to check it.
+Declare complete only when you can name the route elements from the instruction that you saw,
+the visited node where each happened and what you saw there, including the place where you are
+stopping now. Plan task status is not evidence and the evidence need not follow the plan.
+Restating the instruction is not evidence. If a part lacks evidence, keep navigating, return to
+check it, or terminate with status=abort; a STOP that is refused has not moved the robot.
 
 Before tool calls, write at most one short sentence; do not narrate the views. Continue until terminate_episode permanently
 stops the episode: complete when the original route is finished, abort when giving up.

@@ -2203,13 +2203,13 @@ class NavigationSession:
                                evidence: list[StopEvidence] | None = None) -> list:
         """Permanently STOP at the current pose. Declare complete or abort and briefly explain why.
 
-        status=complete requires evidence: one entry per plan task with the visited node_id where
-        it was satisfied and what you saw there; the last task's node is the current node.
+        status=complete requires evidence: entries naming a route element from the instruction, the
+        visited node where it was satisfied and what was seen there, one of them at the current node.
         Restating the instruction is not evidence. abort needs none.
         """
         if not reason.strip():
             raise ValueError("Explain why the episode should end")
-        bypassed = self._stop_gate.check(status, evidence, self._tasks.tasks, self._tasks.memory)
+        bypassed = self._stop_gate.check(status, evidence, self._tasks.memory)
         already_over = self._episode_over
         stopped = self.arrive('here')
         if already_over or self._end_reason != "stop_called":

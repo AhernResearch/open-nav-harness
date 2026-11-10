@@ -33,7 +33,7 @@ class PlanPatch(TypedDict):
 class StopEvidence(TypedDict):
     __pydantic_config__ = ConfigDict(extra="forbid")
 
-    task_id: int
+    element: str
     node_id: int
     seen: str
 
@@ -291,13 +291,14 @@ class StallGuard:
 
 
 class StopEvidenceGate:
-    """Requires per-task evidence before a ``complete`` STOP.
+    """Requires route evidence before a ``complete`` STOP.
 
-    The check is structural only: every plan task has an entry, every entry names a visited
-    node and what was seen there, and the last task was satisfied at the current node. It
-    cannot judge whether the evidence is true. After MAX_REJECTIONS refusals in an episode the
-    next complete STOP passes and is reported as bypassed, so a model that cannot satisfy the
-    format is never trapped. ``abort`` is always allowed.
+    Each entry names a route element from the instruction, the visited node where it was satisfied
+    and what was seen there. One entry must be at the current node, so the stop location itself is
+    claimed and named. Nothing is checked against the plan: plan granularity is the model's choice
+    and tying evidence to it produced omissions. The check is structural only and never uses goals
+    or reference paths. After MAX_REJECTIONS refusals the next complete STOP passes and is reported
+    as bypassed. ``abort`` is always allowed.
     """
 
     MAX_REJECTIONS = 2
@@ -305,29 +306,26 @@ class StopEvidenceGate:
     def __init__(self):
         self.rejections = 0
 
-    def problems(self, evidence, tasks, memory):
+    def problems(self, evidence, memory):
         entries = evidence or []
-        ids = [t["id"] for t in tasks]
-        covered = {e["task_id"] for e in entries}
-        found = [f"no evidence for task {i}" for i in ids if i not in covered]
-        found += [f"task {i} is not in the plan" for i in sorted(covered - set(ids))]
+        found = ["give at least one route element and where you saw it"] if not entries else []
+        found += [f"describe the {e['element'] or 'unnamed'} element you saw" for e in entries if not e["element"].strip()]
+        found += [f"describe what you saw for {e['element'] or 'an element'}" for e in entries if not e["seen"].strip()]
         found += [f"node {e['node_id']} was never visited" for e in entries if e["node_id"] not in memory.nodes]
-        found += [f"task {e['task_id']}: describe what you saw" for e in entries if not e["seen"].strip()]
-        last = [e for e in entries if ids and e["task_id"] == ids[-1]]
-        if last and all(e["node_id"] != memory.current_node_id for e in last):
-            found.append(f"the last task must be satisfied here, at node {memory.current_node_id}")
+        if entries and all(e["node_id"] != memory.current_node_id for e in entries):
+            found.append(f"say what you see here, at node {memory.current_node_id}, where you are stopping")
         return found
 
-    def check(self, status, evidence, tasks, memory):
+    def check(self, status, evidence, memory):
         """Raise ValueError to refuse STOP; return True when a deficient STOP is let through."""
         if status != "complete":
             return False
-        found = self.problems(evidence, tasks, memory)
+        found = self.problems(evidence, memory)
         if not found:
             return False
         if self.rejections >= self.MAX_REJECTIONS:
             return True
         self.rejections += 1
-        raise ValueError("STOP refused, nothing moved: " + "; ".join(found) + ". Give evidence for each plan "
-                         "task (task_id, node_id where it was satisfied, what you saw), keep navigating to "
-                         "check missing parts, or terminate with status=abort.")
+        raise ValueError("STOP refused, nothing moved: " + "; ".join(found) + ". Name each route element from "
+                         "the instruction you satisfied, the visited node where it happened and what you saw "
+                         "there, including the place where you are stopping now; or terminate with status=abort.")
