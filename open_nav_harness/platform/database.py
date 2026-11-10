@@ -9,6 +9,15 @@ from sqlalchemy import create_engine, event, text
 from open_nav_harness.core.config import ExperimentSpec, ServiceSpec
 
 
+def pick_slot(slots, replicas, free):
+    """Free planner slot index; with replicas (slot i -> replica i % n), prefer the least occupied one."""
+    open_slots = [i for i in range(slots) if free[i]]
+    if not open_slots or not replicas:
+        return open_slots[0] if open_slots else None
+    busy = [sum(1 for i in range(slots) if not free[i] and i % replicas == r) for r in range(replicas)]
+    return min(open_slots, key=lambda i: (busy[i % replicas], i))
+
+
 def ident():
     return uuid.uuid4().hex
 
@@ -331,11 +340,19 @@ class Database:
                     if key == "planner_service":
                         frozen, current = frozen["planner"], current["planner"]
                     slots = min(frozen.get("max_concurrency", 1), current.get("max_concurrency", 1))
-                    slot = next((f"{sid}:{i}" for i in range(slots) if free(f"{sid}:{i}")), None)
-                    if slot is None or not ready(sid) or not free(sid):
+                    replicas = (
+                        spec["services"][key].get("metadata", {}).get("replica_urls") or []
+                        if key == "planner_service" and "profile" in spec["config"].get("planner", {})
+                        else []
+                    )
+                    index = pick_slot(slots, len(replicas), [free(f"{sid}:{i}") for i in range(slots)])
+                    if index is None or not ready(sid) or not free(sid):
                         admitted = False
                         break
-                    resources.append(slot)
+                    resources.append(f"{sid}:{index}")
+                    if replicas:
+                        # The slot pins the whole episode to one replica so its prefix cache is reused.
+                        spec["config"]["planner"]["profile"]["base_url"] = replicas[index % len(replicas)]
                 if not admitted:
                     continue
                 if binding:
@@ -380,7 +397,10 @@ class Database:
                     text("UPDATE jobs SET status='running',error=NULL,updated=:t WHERE id=:j"),
                     {"t": now, "j": jid},
                 )
-                self.emit(c, "attempt_started", aid, {"job_id": jid, "episode": episode, "ordinal": ordinal})
+                self.emit(c, "attempt_started", aid, {
+                    "job_id": jid, "episode": episode, "ordinal": ordinal,
+                    "planner_url": spec["config"].get("planner", {}).get("profile", {}).get("base_url"),
+                })
                 return {
                     "id": aid,
                     "job_id": jid,

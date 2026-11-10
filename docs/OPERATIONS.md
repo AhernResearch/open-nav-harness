@@ -286,6 +286,25 @@ Administrative scripts, dependency wheels and installation reports are retained
 under `state/deployment/nvfp4` locally and
 `/data/nav_storage/open-nav-harness/deployment/nvfp4-20261108` on A100.
 
+## Independent planner replicas, 2026-11-10
+
+The data-parallel deployment above has no session affinity: identical requests were
+distributed across engines, so one episode's growing prompt rarely reused a prefix
+cache. It is replaced by three independent single-GPU vLLM servers running one owned
+unit, `deployment/vllm_replicas.py`. The platform sets `CUDA_VISIBLE_DEVICES` from the
+service's GPU list; replica *i* gets the *i*-th GPU and the *i*-th `--ports` entry. If
+any replica exits, the launcher stops the others and the unit fails, so a partial
+pool is never reported ready.
+
+The planner service lists its endpoints in `metadata.replica_urls`, with the first as
+its URL. Health requires every replica to answer. Planner slot *i* maps to replica
+*i* mod *n*; `claim()` picks a free slot on the least occupied replica and rewrites
+the attempt's `config.planner.profile.base_url`, so an episode stays on one replica
+for its whole lifetime. The chosen URL is frozen in the attempt's `input.json` and
+the `attempt_started` event; the experiment itself is unchanged. These changes are
+outside the implementation digest, so actor and environment services keep running
+across this release.
+
 ## Terminal lifecycle and cropped-history baseline, 2026-11-09
 
 The Planner loop now exits when a movement tool reports that the environment has

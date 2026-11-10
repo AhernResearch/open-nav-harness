@@ -48,9 +48,12 @@ class ServiceManager:
                 if not key:
                     return {'ok': False, 'error': 'Missing credential environment variable: ' + spec.planner.credential_env}
                 headers['Authorization'] = 'Bearer ' + key
+            # A replicated planner is available only when every replica answers.
+            urls = (spec.metadata.get("replica_urls") if spec.kind == "planner" else None) or [spec.url]
             async with httpx.AsyncClient(timeout=5, trust_env=False) as client:
-                r = await client.get(spec.url.rstrip("/") + suffix, headers=headers)
-                r.raise_for_status()
+                for url in urls:
+                    r = await client.get(url.rstrip("/") + suffix, headers=headers)
+                    r.raise_for_status()
             return {"ok": True, "details": r.json()}
         except Exception as e:
             return {"ok": False, "error": str(e)}
