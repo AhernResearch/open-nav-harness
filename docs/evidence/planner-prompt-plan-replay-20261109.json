@@ -1,0 +1,1496 @@
+{
+  "created": 1794172798.4774027,
+  "implementation_digest": "aaf7fb2b8c75211475689d527978a7730672ef28a35005a661a03c73f00382db",
+  "profile": {
+    "runtime": "openai_compatible",
+    "model": "navh-qwen27b-nvfp4",
+    "base_url": "http://127.0.0.1:18103/v1",
+    "context_limit": 16384,
+    "output_tokens": 2048,
+    "max_images": 32,
+    "context_policy": "bounded",
+    "thinking": false,
+    "effort": null,
+    "temperature": 0.0,
+    "request_timeout_s": 120,
+    "tokenizer_path": null,
+    "token_count_url": null,
+    "max_concurrency": 12
+  },
+  "scope": "Only system prompt and tool descriptions vary. Identical original instruction, four initial images, observe call/result and initial task-state text across arms. No tool calls are executed.",
+  "arms": [
+    "deployed_baseline",
+    "principles_verbose",
+    "principles_compact"
+  ],
+  "repetitions": 3,
+  "cases": [
+    {
+      "episode": 456,
+      "source_trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/cdadf47253414093acc3c01d3faa3ee1/75dffad2580147919908b2e23a2b40b3/episode/work/ep0456/trace/requests.jsonl",
+      "instruction": "Walk out of the bathroom and through the television room into the hallway. In the hall go to the stairs and go up the stairs, stopping on the fourth from the top stair. ",
+      "image_hashes": [
+        "45045f7a75fab4f2c27dc0b6db79f9b957f6ded7e2d40b7d636b346f56f2af61",
+        "3184e4e4709e0fb559f393188815f757d2293a4c71ff77db1a9de12d1f019b5b",
+        "878f8fbd485b780297605b7ae54733fd8fe0854eb40c43d9bd957001fc174274",
+        "98ed959b171b71d0c774438926be794cd313feeaf1c8fac282a04583b8458afd"
+      ],
+      "shared_observation_messages_sha256": "b0274cf83e6fa91010868d54f37c6aee71acbb939556735a8e57e00ae30c7f8f",
+      "historical_plan": {
+        "reason": "Initial plan based on observations. I'm in a bathroom and need to exit through the doorway to my left, then navigate through the television room to the hallway, find stairs, and go up to the fourth from the top stair.",
+        "subtasks": [
+          {
+            "id": 1,
+            "instruction": "Exit the bathroom through the doorway to the left",
+            "status": "pending"
+          },
+          {
+            "id": 2,
+            "instruction": "Walk through the television room toward the hallway",
+            "status": "pending"
+          },
+          {
+            "id": 3,
+            "instruction": "Enter the hallway and find the stairs",
+            "status": "pending"
+          },
+          {
+            "id": 4,
+            "instruction": "Go up the stairs and stop on the fourth from the top stair",
+            "status": "pending"
+          }
+        ]
+      }
+    },
+    {
+      "episode": 7006,
+      "source_trace": "/home/holo/robots/nav-harness-async/state/async-integration/runs/cdadf47253414093acc3c01d3faa3ee1/47f928a9d47f4bf3bb7de234f5c2cb1f/episode/work/ep7006/trace/requests.jsonl",
+      "instruction": "Walk up stairs. Make a left on the stair landing. Make a left through the open door on the left. Wait at the foot of the bed. ",
+      "image_hashes": [
+        "9be0b1bb2d81d794b40e4f76a4df59928800382f6112c6eead323dfd28d575dc",
+        "25c7fd58ba0f94449402d9d3b749ac30d8e66707ba60e88f66cc5a6ff196a34e",
+        "333b611c896d6d78a3f34d1e90202f6ab793dd13fd7cb3ceb3ab8719daf2d005",
+        "9b913e08cc3ccf34a029c6fb493f5353487597756a477fb74aba70ecd0e7d813"
+      ],
+      "shared_observation_messages_sha256": "cb44b62f34b29df8366c236d851d650a8a82e320ea136d918f6e4c39364a94f0",
+      "historical_plan": {
+        "reason": "Initial plan based on observations: I'm at the bottom of stairs that go up to my right. I need to walk up, turn left on landing, find open door on left, and wait at foot of bed.",
+        "subtasks": [
+          {
+            "id": 1,
+            "instruction": "Walk up the stairs",
+            "status": "pending"
+          },
+          {
+            "id": 2,
+            "instruction": "Make a left on the stair landing",
+            "status": "pending"
+          },
+          {
+            "id": 3,
+            "instruction": "Make a left through the open door on the left",
+            "status": "pending"
+          },
+          {
+            "id": 4,
+            "instruction": "Wait at the foot of the bed",
+            "status": "pending"
+          }
+        ]
+      }
+    }
+  ],
+  "results": [
+    {
+      "episode": 456,
+      "arm": "deployed_baseline",
+      "repeat": 1,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep456-deployed_baseline-r1/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I'm in a bathroom. I can see:\n- Front: bathroom vanity with mirror, toilet, and window\n- Right: wall with artwork and toilet paper holder\n- Back: glass shower enclosure\n- Left: bathroom doorway leading out to what appears to be a television room/living area\n\nLet me create a plan and start navigating.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-800035c104d53cbe",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"reason\": \"Initial plan based on observations. I'm in a bathroom and need to exit through the doorway to my left, then navigate through the television room to the hallway, find stairs, and go up to the fourth from the top stair.\", \"subtasks\": [{\"id\": 1, \"instruction\": \"Exit the bathroom through the doorway to the left\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"Walk through the television room toward the hallway\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"Enter the hallway and find the stairs\", \"status\": \"pending\"}, {\"id\": 4, \"instruction\": \"Go up the stairs and stop on the fourth from the top stair\", \"status\": \"pending\"}]}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 3994,
+        "total_tokens": 4255,
+        "completion_tokens": 261,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "reason": "Initial plan based on observations. I'm in a bathroom and need to exit through the doorway to my left, then navigate through the television room to the hallway, find stairs, and go up to the fourth from the top stair.",
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Exit the bathroom through the doorway to the left",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "Walk through the television room toward the hallway",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "Enter the hallway and find the stairs",
+              "status": "pending"
+            },
+            {
+              "id": 4,
+              "instruction": "Go up the stairs and stop on the fourth from the top stair",
+              "status": "pending"
+            }
+          ]
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 4.576
+    },
+    {
+      "episode": 456,
+      "arm": "deployed_baseline",
+      "repeat": 2,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep456-deployed_baseline-r2/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I'm in a bathroom. I can see:\n- Front: bathroom vanity with mirror, toilet, and window\n- Right: wall with artwork and toilet paper holder\n- Back: glass shower enclosure\n- Left: bathroom doorway leading out to what appears to be a television room/living area\n\nLet me create a plan and start navigating.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-9207cdba6917ad3f",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"reason\": \"Initial plan based on observations. I'm in a bathroom and need to exit through the doorway to my left, then navigate through the television room to the hallway, find stairs, and go up to the fourth from the top stair.\", \"subtasks\": [{\"id\": 1, \"instruction\": \"Exit the bathroom through the doorway to the left\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"Walk through the television room toward the hallway\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"Enter the hallway and find the stairs\", \"status\": \"pending\"}, {\"id\": 4, \"instruction\": \"Go up the stairs and stop on the fourth from the top stair\", \"status\": \"pending\"}]}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 3994,
+        "total_tokens": 4255,
+        "completion_tokens": 261,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "reason": "Initial plan based on observations. I'm in a bathroom and need to exit through the doorway to my left, then navigate through the television room to the hallway, find stairs, and go up to the fourth from the top stair.",
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Exit the bathroom through the doorway to the left",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "Walk through the television room toward the hallway",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "Enter the hallway and find the stairs",
+              "status": "pending"
+            },
+            {
+              "id": 4,
+              "instruction": "Go up the stairs and stop on the fourth from the top stair",
+              "status": "pending"
+            }
+          ]
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 4.79
+    },
+    {
+      "episode": 456,
+      "arm": "deployed_baseline",
+      "repeat": 3,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep456-deployed_baseline-r3/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I'm in a bathroom. I can see:\n- Front: bathroom vanity with mirror, toilet, and window\n- Right: wall with artwork and toilet paper holder\n- Back: glass shower stall\n- Left: bathroom doorway leading out to what appears to be a television room/living area\n\nLet me create a plan and start navigating.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-b7bfa0cfd8c8f769",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"reason\": \"Initial plan based on observations. I'm in a bathroom and need to exit through the doorway to my left, then navigate through the television room to find the hallway and stairs.\", \"subtasks\": [{\"id\": 1, \"instruction\": \"Exit the bathroom through the doorway to the left\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"Walk through the television room toward the hallway\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"Find the stairs in the hallway and go up\", \"status\": \"pending\"}, {\"id\": 4, \"instruction\": \"Stop on the fourth stair from the top\", \"status\": \"pending\"}]}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 3994,
+        "total_tokens": 4241,
+        "completion_tokens": 247,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "reason": "Initial plan based on observations. I'm in a bathroom and need to exit through the doorway to my left, then navigate through the television room to find the hallway and stairs.",
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Exit the bathroom through the doorway to the left",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "Walk through the television room toward the hallway",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "Find the stairs in the hallway and go up",
+              "status": "pending"
+            },
+            {
+              "id": 4,
+              "instruction": "Stop on the fourth stair from the top",
+              "status": "pending"
+            }
+          ]
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 4.702
+    },
+    {
+      "episode": 456,
+      "arm": "principles_verbose",
+      "repeat": 1,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep456-principles_verbose-r1/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I'm in a bathroom. I can see:\n- Front: bathroom vanity with mirror, toilet, and window\n- Right: wall with artwork and toilet paper holder\n- Back: glass shower enclosure\n- Left: an open doorway leading out to what appears to be a television room/living area\n\nLet me create a plan and start navigating.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-bf1dbd8e18cc3a09",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"reason\": \"Initial plan based on observations. I'm in a bathroom and need to exit through the doorway to my left, then navigate through the television room to the hallway, find stairs, and go up to the fourth from the top stair.\", \"subtasks\": [{\"id\": 1, \"instruction\": \"Turn left and walk out of the bathroom through the open doorway into the television room.\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"Walk through the television room and into the hallway.\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"In the hallway, go to the stairs and go up the stairs, stopping on the fourth from the top stair.\", \"status\": \"pending\"}]}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 4259,
+        "total_tokens": 4514,
+        "completion_tokens": 255,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "reason": "Initial plan based on observations. I'm in a bathroom and need to exit through the doorway to my left, then navigate through the television room to the hallway, find stairs, and go up to the fourth from the top stair.",
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Turn left and walk out of the bathroom through the open doorway into the television room.",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "Walk through the television room and into the hallway.",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "In the hallway, go to the stairs and go up the stairs, stopping on the fourth from the top stair.",
+              "status": "pending"
+            }
+          ]
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 7.297
+    },
+    {
+      "episode": 456,
+      "arm": "principles_verbose",
+      "repeat": 2,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep456-principles_verbose-r2/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I'm in a bathroom. I can see:\n- Front: bathroom vanity with mirror, toilet, and window\n- Right: wall with artwork and toilet paper holder\n- Back: glass shower enclosure\n- Left: an open doorway leading out to what appears to be a television room/living area\n\nLet me create a plan and start navigating.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-b5621cc71573ccc3",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"reason\": \"Initial plan based on observations. I'm in a bathroom and need to exit through the doorway to my left, then navigate through the television room to the hallway, find stairs, and go up to the fourth from the top stair.\", \"subtasks\": [{\"id\": 1, \"instruction\": \"Turn left and walk out of the bathroom through the open doorway into the television room.\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"Walk through the television room and into the hallway.\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"In the hallway, go to the stairs.\", \"status\": \"pending\"}, {\"id\": 4, \"instruction\": \"Go up the stairs, stopping on the fourth from the top stair.\", \"status\": \"pending\"}]}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 4259,
+        "total_tokens": 4530,
+        "completion_tokens": 271,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "reason": "Initial plan based on observations. I'm in a bathroom and need to exit through the doorway to my left, then navigate through the television room to the hallway, find stairs, and go up to the fourth from the top stair.",
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Turn left and walk out of the bathroom through the open doorway into the television room.",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "Walk through the television room and into the hallway.",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "In the hallway, go to the stairs.",
+              "status": "pending"
+            },
+            {
+              "id": 4,
+              "instruction": "Go up the stairs, stopping on the fourth from the top stair.",
+              "status": "pending"
+            }
+          ]
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 6.541
+    },
+    {
+      "episode": 456,
+      "arm": "principles_verbose",
+      "repeat": 3,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep456-principles_verbose-r3/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I'm in a bathroom. I can see:\n- Front: bathroom vanity with mirror, toilet, and window\n- Right: wall with artwork and toilet paper holder\n- Back: glass shower enclosure\n- Left: an open doorway leading out to what appears to be a television room/living area\n\nLet me create a plan and start navigating.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-8e8f39632d3bd301",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"reason\": \"Initial plan based on observations. I'm in a bathroom and need to exit through the doorway to my left, go through the television room, reach the hallway, find stairs, and go up to the fourth from the top stair.\", \"subtasks\": [{\"id\": 1, \"instruction\": \"Turn left and walk out of the bathroom through the open doorway into the television room.\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"Walk through the television room and into the hallway beyond it.\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"In the hallway, go to the stairs and go up the stairs, stopping on the fourth from the top stair.\", \"status\": \"pending\"}]}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 4259,
+        "total_tokens": 4516,
+        "completion_tokens": 257,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "reason": "Initial plan based on observations. I'm in a bathroom and need to exit through the doorway to my left, go through the television room, reach the hallway, find stairs, and go up to the fourth from the top stair.",
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Turn left and walk out of the bathroom through the open doorway into the television room.",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "Walk through the television room and into the hallway beyond it.",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "In the hallway, go to the stairs and go up the stairs, stopping on the fourth from the top stair.",
+              "status": "pending"
+            }
+          ]
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 4.491
+    },
+    {
+      "episode": 456,
+      "arm": "principles_compact",
+      "repeat": 1,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep456-principles_compact-r1/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I'm in a bathroom. I can see the exit doorway to my left leading into what appears to be a television room. Let me create a plan and start navigating.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-a84c9de6ce6a838e",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"subtasks\": [{\"id\": 1, \"instruction\": \"Turn left and walk out of the bathroom through the doorway into the television room\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"Walk through the television room and into the hallway\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"In the hallway, go to the stairs\", \"status\": \"pending\"}, {\"id\": 4, \"instruction\": \"Go up the stairs, stopping on the fourth from the top stair\", \"status\": \"pending\"}], \"reason\": \"Initial plan based on original instruction: exit bathroom, traverse television room, reach hallway, find stairs, and climb to fourth from top stair.\"}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 3200,
+        "total_tokens": 3415,
+        "completion_tokens": 215,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Turn left and walk out of the bathroom through the doorway into the television room",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "Walk through the television room and into the hallway",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "In the hallway, go to the stairs",
+              "status": "pending"
+            },
+            {
+              "id": 4,
+              "instruction": "Go up the stairs, stopping on the fourth from the top stair",
+              "status": "pending"
+            }
+          ],
+          "reason": "Initial plan based on original instruction: exit bathroom, traverse television room, reach hallway, find stairs, and climb to fourth from top stair."
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 4.811
+    },
+    {
+      "episode": 456,
+      "arm": "principles_compact",
+      "repeat": 2,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep456-principles_compact-r2/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I'm in a bathroom. I can see the exit doorway to my left leading into what appears to be a television room. Let me create a plan and start navigating.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-b36e0351c41e718b",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"subtasks\": [{\"id\": 1, \"instruction\": \"Turn left and walk out of the bathroom through the doorway into the television room\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"Walk through the television room and into the hallway\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"In the hallway, go to the stairs\", \"status\": \"pending\"}, {\"id\": 4, \"instruction\": \"Go up the stairs, stopping on the fourth from the top stair\", \"status\": \"pending\"}], \"reason\": \"Initial plan based on original instruction: exit bathroom, traverse television room, reach hallway, find stairs, and climb to fourth from top stair.\"}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 3200,
+        "total_tokens": 3415,
+        "completion_tokens": 215,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Turn left and walk out of the bathroom through the doorway into the television room",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "Walk through the television room and into the hallway",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "In the hallway, go to the stairs",
+              "status": "pending"
+            },
+            {
+              "id": 4,
+              "instruction": "Go up the stairs, stopping on the fourth from the top stair",
+              "status": "pending"
+            }
+          ],
+          "reason": "Initial plan based on original instruction: exit bathroom, traverse television room, reach hallway, find stairs, and climb to fourth from top stair."
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 4.819
+    },
+    {
+      "episode": 456,
+      "arm": "principles_compact",
+      "repeat": 3,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep456-principles_compact-r3/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I'm in a bathroom. I can see the exit doorway to my left leading into what appears to be a television room. Let me create a plan and start navigating.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-8754bdaaf0d2a148",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"subtasks\": [{\"id\": 1, \"instruction\": \"Turn left and walk out of the bathroom through the doorway into the television room\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"Walk through the television room and into the hallway\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"In the hallway, go to the stairs\", \"status\": \"pending\"}, {\"id\": 4, \"instruction\": \"Go up the stairs, stopping on the fourth from the top stair\", \"status\": \"pending\"}], \"reason\": \"Initial plan based on original instruction: exit bathroom, traverse television room, reach hallway, find stairs, and climb to fourth from top stair.\"}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 3200,
+        "total_tokens": 3415,
+        "completion_tokens": 215,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Turn left and walk out of the bathroom through the doorway into the television room",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "Walk through the television room and into the hallway",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "In the hallway, go to the stairs",
+              "status": "pending"
+            },
+            {
+              "id": 4,
+              "instruction": "Go up the stairs, stopping on the fourth from the top stair",
+              "status": "pending"
+            }
+          ],
+          "reason": "Initial plan based on original instruction: exit bathroom, traverse television room, reach hallway, find stairs, and climb to fourth from top stair."
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 3.863
+    },
+    {
+      "episode": 7006,
+      "arm": "deployed_baseline",
+      "repeat": 1,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep7006-deployed_baseline-r1/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I can see stairs going up to my right. Let me create a plan and start executing.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-9fb80c835592e9ca",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"reason\": \"Initial plan based on observations: I'm at the bottom of stairs that go up to my right. I need to walk up, turn left on landing, find open door on left, and wait at foot of bed.\", \"subtasks\": [{\"id\": 1, \"instruction\": \"Walk up the stairs\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"Make a left on the stair landing\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"Make a left through the open door on the left\", \"status\": \"pending\"}, {\"id\": 4, \"instruction\": \"Wait at the foot of the bed\", \"status\": \"pending\"}]}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 3974,
+        "total_tokens": 4173,
+        "completion_tokens": 199,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "reason": "Initial plan based on observations: I'm at the bottom of stairs that go up to my right. I need to walk up, turn left on landing, find open door on left, and wait at foot of bed.",
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Walk up the stairs",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "Make a left on the stair landing",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "Make a left through the open door on the left",
+              "status": "pending"
+            },
+            {
+              "id": 4,
+              "instruction": "Wait at the foot of the bed",
+              "status": "pending"
+            }
+          ]
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 3.513
+    },
+    {
+      "episode": 7006,
+      "arm": "deployed_baseline",
+      "repeat": 2,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep7006-deployed_baseline-r2/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I can see stairs going up to my right. Let me create a plan and start executing.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-99840d0abdc84559",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"reason\": \"Initial plan based on observations: I'm at the bottom of stairs that go up to my right. I need to walk up, turn left on landing, find open door on left, and wait at foot of bed.\", \"subtasks\": [{\"id\": 1, \"instruction\": \"Walk up the stairs\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"Make a left on the stair landing\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"Make a left through the open door on the left\", \"status\": \"pending\"}, {\"id\": 4, \"instruction\": \"Wait at the foot of the bed\", \"status\": \"pending\"}]}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 3974,
+        "total_tokens": 4173,
+        "completion_tokens": 199,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "reason": "Initial plan based on observations: I'm at the bottom of stairs that go up to my right. I need to walk up, turn left on landing, find open door on left, and wait at foot of bed.",
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Walk up the stairs",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "Make a left on the stair landing",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "Make a left through the open door on the left",
+              "status": "pending"
+            },
+            {
+              "id": 4,
+              "instruction": "Wait at the foot of the bed",
+              "status": "pending"
+            }
+          ]
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 4.026
+    },
+    {
+      "episode": 7006,
+      "arm": "deployed_baseline",
+      "repeat": 3,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep7006-deployed_baseline-r3/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I can see stairs going up to my right. Let me create a plan and start executing.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-958db34906d7d40d",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"reason\": \"Initial plan based on observations: I'm at the bottom of stairs that go up to my right. I need to walk up, turn left on landing, find open door on left, and wait at foot of bed.\", \"subtasks\": [{\"id\": 1, \"instruction\": \"Walk up the stairs\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"Make a left on the stair landing\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"Make a left through the open door on the left\", \"status\": \"pending\"}, {\"id\": 4, \"instruction\": \"Wait at the foot of the bed\", \"status\": \"pending\"}]}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 3974,
+        "total_tokens": 4173,
+        "completion_tokens": 199,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "reason": "Initial plan based on observations: I'm at the bottom of stairs that go up to my right. I need to walk up, turn left on landing, find open door on left, and wait at foot of bed.",
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Walk up the stairs",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "Make a left on the stair landing",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "Make a left through the open door on the left",
+              "status": "pending"
+            },
+            {
+              "id": 4,
+              "instruction": "Wait at the foot of the bed",
+              "status": "pending"
+            }
+          ]
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 3.498
+    },
+    {
+      "episode": 7006,
+      "arm": "principles_verbose",
+      "repeat": 1,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep7006-principles_verbose-r1/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I can see stairs going up to my right. Let me create a plan for this navigation task.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-9530c65442885293",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"reason\": \"Initial plan based on observations: I'm at the bottom of stairs that go up to my right. The route requires going up stairs, turning left on the landing, then left through an open door, and waiting at the foot of a bed.\", \"subtasks\": [{\"id\": 1, \"instruction\": \"Walk up the stairs to the landing\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"Make a left on the stair landing\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"Make a left through the open door on the left\", \"status\": \"pending\"}, {\"id\": 4, \"instruction\": \"Wait at the foot of the bed\", \"status\": \"pending\"}]}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 4239,
+        "total_tokens": 4447,
+        "completion_tokens": 208,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "reason": "Initial plan based on observations: I'm at the bottom of stairs that go up to my right. The route requires going up stairs, turning left on the landing, then left through an open door, and waiting at the foot of a bed.",
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Walk up the stairs to the landing",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "Make a left on the stair landing",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "Make a left through the open door on the left",
+              "status": "pending"
+            },
+            {
+              "id": 4,
+              "instruction": "Wait at the foot of the bed",
+              "status": "pending"
+            }
+          ]
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 4.961
+    },
+    {
+      "episode": 7006,
+      "arm": "principles_verbose",
+      "repeat": 2,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep7006-principles_verbose-r2/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I can see stairs going up to my right. Let me create a plan for this navigation task.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-b45225e31807aa0e",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"reason\": \"Initial plan based on observations: I'm at the bottom of stairs that go up to my right. The route requires going up stairs, turning left on the landing, then left through an open door, and waiting at the foot of a bed.\", \"subtasks\": [{\"id\": 1, \"instruction\": \"Walk up the stairs to the landing\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"Make a left on the stair landing\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"Make a left through the open door on the left\", \"status\": \"pending\"}, {\"id\": 4, \"instruction\": \"Wait at the foot of the bed\", \"status\": \"pending\"}]}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 4239,
+        "total_tokens": 4447,
+        "completion_tokens": 208,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "reason": "Initial plan based on observations: I'm at the bottom of stairs that go up to my right. The route requires going up stairs, turning left on the landing, then left through an open door, and waiting at the foot of a bed.",
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Walk up the stairs to the landing",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "Make a left on the stair landing",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "Make a left through the open door on the left",
+              "status": "pending"
+            },
+            {
+              "id": 4,
+              "instruction": "Wait at the foot of the bed",
+              "status": "pending"
+            }
+          ]
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 5.148
+    },
+    {
+      "episode": 7006,
+      "arm": "principles_verbose",
+      "repeat": 3,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep7006-principles_verbose-r3/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I can see stairs going up to my right. Let me create a plan for this navigation task.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-af5b77de5c50e740",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"reason\": \"Initial plan based on observations: I'm at the bottom of stairs that go up to my right. The route requires going up stairs, turning left on the landing, then left through an open door, and waiting at the foot of a bed.\", \"subtasks\": [{\"id\": 1, \"instruction\": \"Walk up the stairs to the landing\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"Make a left on the stair landing\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"Make a left through the open door on the left\", \"status\": \"pending\"}, {\"id\": 4, \"instruction\": \"Wait at the foot of the bed\", \"status\": \"pending\"}]}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 4239,
+        "total_tokens": 4447,
+        "completion_tokens": 208,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "reason": "Initial plan based on observations: I'm at the bottom of stairs that go up to my right. The route requires going up stairs, turning left on the landing, then left through an open door, and waiting at the foot of a bed.",
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Walk up the stairs to the landing",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "Make a left on the stair landing",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "Make a left through the open door on the left",
+              "status": "pending"
+            },
+            {
+              "id": 4,
+              "instruction": "Wait at the foot of the bed",
+              "status": "pending"
+            }
+          ]
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 3.653
+    },
+    {
+      "episode": 7006,
+      "arm": "principles_compact",
+      "repeat": 1,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep7006-principles_compact-r1/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I can see stairs going up to my right. Let me create a plan based on the original instruction.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-9f184c1c2cc21768",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"subtasks\": [{\"id\": 1, \"instruction\": \"Walk up the stairs to the landing.\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"At the stair landing, make a left turn.\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"Make a left through the open door on the left.\", \"status\": \"pending\"}, {\"id\": 4, \"instruction\": \"Wait at the foot of the bed.\", \"status\": \"pending\"}], \"reason\": \"Breaking down the original instruction into sequential steps: first climb stairs, then navigate the landing, find the open door, and finally locate the bed.\"}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 3180,
+        "total_tokens": 3371,
+        "completion_tokens": 191,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Walk up the stairs to the landing.",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "At the stair landing, make a left turn.",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "Make a left through the open door on the left.",
+              "status": "pending"
+            },
+            {
+              "id": 4,
+              "instruction": "Wait at the foot of the bed.",
+              "status": "pending"
+            }
+          ],
+          "reason": "Breaking down the original instruction into sequential steps: first climb stairs, then navigate the landing, find the open door, and finally locate the bed."
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 4.476
+    },
+    {
+      "episode": 7006,
+      "arm": "principles_compact",
+      "repeat": 2,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep7006-principles_compact-r2/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I can see stairs going up to my right. Let me create a plan based on the original instruction.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-ac3c508f7c6f9e2c",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"subtasks\": [{\"id\": 1, \"instruction\": \"Walk up the stairs to the landing.\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"At the stair landing, make a left turn.\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"Make a left through the open door on the left.\", \"status\": \"pending\"}, {\"id\": 4, \"instruction\": \"Wait at the foot of the bed.\", \"status\": \"pending\"}], \"reason\": \"Breaking down the original instruction into sequential steps: first climb stairs, then navigate the landing, find the open door, and finally locate the bed.\"}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 3180,
+        "total_tokens": 3371,
+        "completion_tokens": 191,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Walk up the stairs to the landing.",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "At the stair landing, make a left turn.",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "Make a left through the open door on the left.",
+              "status": "pending"
+            },
+            {
+              "id": 4,
+              "instruction": "Wait at the foot of the bed.",
+              "status": "pending"
+            }
+          ],
+          "reason": "Breaking down the original instruction into sequential steps: first climb stairs, then navigate the landing, find the open door, and finally locate the bed."
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 4.405
+    },
+    {
+      "episode": 7006,
+      "arm": "principles_compact",
+      "repeat": 3,
+      "trace": "/home/holo/robots/nav-harness-async/state/deployment/prompt-plan-replay-20261109/ep7006-principles_compact-r3/requests.jsonl",
+      "message": {
+        "role": "assistant",
+        "content": "I can see stairs going up to my right. Let me create a plan based on the original instruction.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-92e88bf8a11c4b7a",
+            "type": "function",
+            "function": {
+              "name": "update_plan",
+              "arguments": "{\"subtasks\": [{\"id\": 1, \"instruction\": \"Walk up the stairs to the landing.\", \"status\": \"pending\"}, {\"id\": 2, \"instruction\": \"At the stair landing, make a left turn.\", \"status\": \"pending\"}, {\"id\": 3, \"instruction\": \"Make a left through the open door on the left.\", \"status\": \"pending\"}, {\"id\": 4, \"instruction\": \"Wait at the foot of the bed.\", \"status\": \"pending\"}], \"reason\": \"Breaking down the original instruction into sequential steps: first climb stairs, then navigate the landing, find the open door, and finally locate the bed.\"}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "usage": {
+        "prompt_tokens": 3180,
+        "total_tokens": 3371,
+        "completion_tokens": 191,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "tool_calls",
+      "plans": [
+        {
+          "subtasks": [
+            {
+              "id": 1,
+              "instruction": "Walk up the stairs to the landing.",
+              "status": "pending"
+            },
+            {
+              "id": 2,
+              "instruction": "At the stair landing, make a left turn.",
+              "status": "pending"
+            },
+            {
+              "id": 3,
+              "instruction": "Make a left through the open door on the left.",
+              "status": "pending"
+            },
+            {
+              "id": 4,
+              "instruction": "Wait at the foot of the bed.",
+              "status": "pending"
+            }
+          ],
+          "reason": "Breaking down the original instruction into sequential steps: first climb stairs, then navigate the landing, find the open door, and finally locate the bed."
+        }
+      ],
+      "requested_tools": [
+        "update_plan"
+      ],
+      "wall_s": 3.362
+    }
+  ],
+  "limitations": [
+    "Greedy decoding across shared data-parallel replicas can still vary.",
+    "Initial plan only, not executed navigation or success rate.",
+    "Observation labels and initial state reminder are held at recorded baseline wording to isolate prompt/tool-description effects.",
+    "Latency is load/cache sensitive and is not a performance benchmark."
+  ],
+  "finished": 1794172829.449197,
+  "summary": [
+    {
+      "episode": 456,
+      "arm": "deployed_baseline",
+      "n": 3,
+      "task_counts": [
+        4,
+        4,
+        4
+      ],
+      "distinct_instruction_lists": 2,
+      "instructions_by_repeat": [
+        [
+          "Exit the bathroom through the doorway to the left",
+          "Walk through the television room toward the hallway",
+          "Enter the hallway and find the stairs",
+          "Go up the stairs and stop on the fourth from the top stair"
+        ],
+        [
+          "Exit the bathroom through the doorway to the left",
+          "Walk through the television room toward the hallway",
+          "Enter the hallway and find the stairs",
+          "Go up the stairs and stop on the fourth from the top stair"
+        ],
+        [
+          "Exit the bathroom through the doorway to the left",
+          "Walk through the television room toward the hallway",
+          "Find the stairs in the hallway and go up",
+          "Stop on the fourth stair from the top"
+        ]
+      ],
+      "prompt_tokens": [
+        3994,
+        3994,
+        3994
+      ],
+      "completion_tokens": [
+        261,
+        261,
+        247
+      ]
+    },
+    {
+      "episode": 456,
+      "arm": "principles_verbose",
+      "n": 3,
+      "task_counts": [
+        3,
+        4,
+        3
+      ],
+      "distinct_instruction_lists": 3,
+      "instructions_by_repeat": [
+        [
+          "Turn left and walk out of the bathroom through the open doorway into the television room.",
+          "Walk through the television room and into the hallway.",
+          "In the hallway, go to the stairs and go up the stairs, stopping on the fourth from the top stair."
+        ],
+        [
+          "Turn left and walk out of the bathroom through the open doorway into the television room.",
+          "Walk through the television room and into the hallway.",
+          "In the hallway, go to the stairs.",
+          "Go up the stairs, stopping on the fourth from the top stair."
+        ],
+        [
+          "Turn left and walk out of the bathroom through the open doorway into the television room.",
+          "Walk through the television room and into the hallway beyond it.",
+          "In the hallway, go to the stairs and go up the stairs, stopping on the fourth from the top stair."
+        ]
+      ],
+      "prompt_tokens": [
+        4259,
+        4259,
+        4259
+      ],
+      "completion_tokens": [
+        255,
+        271,
+        257
+      ]
+    },
+    {
+      "episode": 456,
+      "arm": "principles_compact",
+      "n": 3,
+      "task_counts": [
+        4,
+        4,
+        4
+      ],
+      "distinct_instruction_lists": 1,
+      "instructions_by_repeat": [
+        [
+          "Turn left and walk out of the bathroom through the doorway into the television room",
+          "Walk through the television room and into the hallway",
+          "In the hallway, go to the stairs",
+          "Go up the stairs, stopping on the fourth from the top stair"
+        ],
+        [
+          "Turn left and walk out of the bathroom through the doorway into the television room",
+          "Walk through the television room and into the hallway",
+          "In the hallway, go to the stairs",
+          "Go up the stairs, stopping on the fourth from the top stair"
+        ],
+        [
+          "Turn left and walk out of the bathroom through the doorway into the television room",
+          "Walk through the television room and into the hallway",
+          "In the hallway, go to the stairs",
+          "Go up the stairs, stopping on the fourth from the top stair"
+        ]
+      ],
+      "prompt_tokens": [
+        3200,
+        3200,
+        3200
+      ],
+      "completion_tokens": [
+        215,
+        215,
+        215
+      ]
+    },
+    {
+      "episode": 7006,
+      "arm": "deployed_baseline",
+      "n": 3,
+      "task_counts": [
+        4,
+        4,
+        4
+      ],
+      "distinct_instruction_lists": 1,
+      "instructions_by_repeat": [
+        [
+          "Walk up the stairs",
+          "Make a left on the stair landing",
+          "Make a left through the open door on the left",
+          "Wait at the foot of the bed"
+        ],
+        [
+          "Walk up the stairs",
+          "Make a left on the stair landing",
+          "Make a left through the open door on the left",
+          "Wait at the foot of the bed"
+        ],
+        [
+          "Walk up the stairs",
+          "Make a left on the stair landing",
+          "Make a left through the open door on the left",
+          "Wait at the foot of the bed"
+        ]
+      ],
+      "prompt_tokens": [
+        3974,
+        3974,
+        3974
+      ],
+      "completion_tokens": [
+        199,
+        199,
+        199
+      ]
+    },
+    {
+      "episode": 7006,
+      "arm": "principles_verbose",
+      "n": 3,
+      "task_counts": [
+        4,
+        4,
+        4
+      ],
+      "distinct_instruction_lists": 1,
+      "instructions_by_repeat": [
+        [
+          "Walk up the stairs to the landing",
+          "Make a left on the stair landing",
+          "Make a left through the open door on the left",
+          "Wait at the foot of the bed"
+        ],
+        [
+          "Walk up the stairs to the landing",
+          "Make a left on the stair landing",
+          "Make a left through the open door on the left",
+          "Wait at the foot of the bed"
+        ],
+        [
+          "Walk up the stairs to the landing",
+          "Make a left on the stair landing",
+          "Make a left through the open door on the left",
+          "Wait at the foot of the bed"
+        ]
+      ],
+      "prompt_tokens": [
+        4239,
+        4239,
+        4239
+      ],
+      "completion_tokens": [
+        208,
+        208,
+        208
+      ]
+    },
+    {
+      "episode": 7006,
+      "arm": "principles_compact",
+      "n": 3,
+      "task_counts": [
+        4,
+        4,
+        4
+      ],
+      "distinct_instruction_lists": 1,
+      "instructions_by_repeat": [
+        [
+          "Walk up the stairs to the landing.",
+          "At the stair landing, make a left turn.",
+          "Make a left through the open door on the left.",
+          "Wait at the foot of the bed."
+        ],
+        [
+          "Walk up the stairs to the landing.",
+          "At the stair landing, make a left turn.",
+          "Make a left through the open door on the left.",
+          "Wait at the foot of the bed."
+        ],
+        [
+          "Walk up the stairs to the landing.",
+          "At the stair landing, make a left turn.",
+          "Make a left through the open door on the left.",
+          "Wait at the foot of the bed."
+        ]
+      ],
+      "prompt_tokens": [
+        3180,
+        3180,
+        3180
+      ],
+      "completion_tokens": [
+        191,
+        191,
+        191
+      ]
+    }
+  ],
+  "validation": {
+    "responses": 18,
+    "valid_update_plan_calls": 18,
+    "executed_tools": 0,
+    "simulator_resets": 0,
+    "identical_tool_schemas": true,
+    "identical_observation_messages": true
+  },
+  "observations": [
+    "Compact plans use clearer local destinations but retain four tasks for both cases.",
+    "Episode 7006 still contains an isolated landing turn and a wait-only final task in every arm.",
+    "All episode 456 plans preserve fourth-from-top stair requirement.",
+    "Compact instruction lists were identical in three repetitions per case; this is observed repeatability, not a deterministic guarantee."
+  ]
+}

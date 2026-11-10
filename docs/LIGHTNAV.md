@@ -38,6 +38,18 @@ historical evidence, while full records remain available through `read_memory` a
 the audit trace. Current plan/memory state is injected once without repeated prose
 guidance. These are text/context changes, not measured navigation gains.
 
+The subsequent [end-to-end development check](evidence/prompt-compact-e2e-20261109.json)
+ran episodes 456 and 7006 with the compact prompts and completion cropping, once
+each on the same execution lanes. Both succeeded, as in the preceding baseline.
+NE changed from 1.7874/0.2670 m to 0.8932/0.3922 m; mean episode time fell from
+191.55 to 143.45 seconds and total Planner input tokens from 469,993 to 264,843.
+However, episode 456 made seven zero-motion retries versus two previously, and
+neither episode wrote memory (previously five/four calls). Prompt compression,
+context presentation, generated plans and tool usage changed together; two runs
+do not establish a general performance gain. Initial image hashes match the
+baseline. The deployed source digest is
+`aaf7fb2b8c75211475689d527978a7730672ef28a35005a661a03c73f00382db`.
+
 An opt-in development ablation sets `harness.actor_history_policy` to
 `completed_subtask` (default: `episode`; agentic LightNav only). When `update_plan`
 marks the last executed task completed, the harness records the current frame as
