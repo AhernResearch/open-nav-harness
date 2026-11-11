@@ -1,0 +1,130 @@
+{
+  "owner": "65378b320c104249957981040694d954",
+  "local": "/home/holo/robots/open-nav-harness-tools/state/habitat-gs/tasks/65378b320c104249957981040694d954",
+  "local_release": "/home/holo/robots/open-nav-harness-tools/state/habitat-gs/tasks/65378b320c104249957981040694d954/release",
+  "remote": "/data/nav_storage/open-nav-harness-tools/harness-gs/65378b320c104249957981040694d954",
+  "scene": "/home/holo/robots/open-nav-harness-tools/state/habitat-gs/scenes/m-floor-open-tasks-v2",
+  "instruction": "Find a meeting room (洽谈室) on this floor. Go through its doorway and stop inside the room. Confirm the room using visible signage or furnishings.",
+  "instruction_zh": "找到洽谈室，穿过门口进入房间，在室内停下。",
+  "episode_index": 1,
+  "episode_id": "m-floor-enter-meeting-room-001",
+  "implementation_digest": "05ebb7bb9fcec1380a80a2202fb611e6339bcf0f871dc54771301b53f15b5bdd",
+  "source_sha256": "aecaa6dd5a9af4080b51e4c4b11ba243a3689344d1efe567a7a1c3a0b18ce41a",
+  "navigation_receipt_sha256": "76913737540fc8e13b6adc905a5711c8931deb28f65cb3dbd8f420b0affe2f5a",
+  "tools": [
+    "observe",
+    "observe_map",
+    "navigate_to_node",
+    "terminate_episode",
+    "update_plan",
+    "execute_subtask",
+    "update_memory"
+  ],
+  "old_attempt": "04a0f21720134681a254b94c5ea149d6",
+  "purpose": "development",
+  "direct_movement_allowed": false,
+  "visited_node_return_allowed": true,
+  "scene_manifest": "/data/nav_storage/open-nav-harness-tools/harness-gs/b5d4fac66e324310a39e4cf4e791281d/scene/scene.json",
+  "parent_source_release": "/data/nav_storage/open-nav-harness-tools/harness-gs/b5d4fac66e324310a39e4cf4e791281d",
+  "delegation_policy": "Planner owns exploration, sign reading and room classification. VLA executes a movement to a currently visible landmark with an explicit stopping location.",
+  "vla_steps_per_call": 20,
+  "changes": [
+    "Planner briefing",
+    "update_plan and execute_subtask descriptions",
+    "short per-call action budget"
+  ],
+  "task_changed": false,
+  "attempt_id": "bc35015f55bd404abc2f6a22cdb23e1f",
+  "job_id": "2309d225165546d8844b322f716f392d",
+  "live_url": "http://192.168.66.221:8879/harness?attempt=bc35015f55bd404abc2f6a22cdb23e1f",
+  "status_at_review": "running",
+  "old_attempt_status": "interrupted",
+  "old_first_delegations": [
+    {
+      "instruction": "Move forward down the hallway and look for meeting room (洽谈室) signage on doors or walls",
+      "max_distance_m": 15,
+      "task_id": 1
+    },
+    {
+      "instruction": "Turn right and continue moving forward down the hallway, looking for meeting room (洽谈室) doors and signage",
+      "max_distance_m": 15,
+      "task_id": 1
+    },
+    {
+      "instruction": "Turn left and move into the office area, looking for meeting room (洽谈室) doors and signage",
+      "max_distance_m": 10,
+      "task_id": 1
+    }
+  ],
+  "new_first_delegations": [
+    {
+      "task_id": 1,
+      "instruction": "Walk down the hallway ahead, passing the yellow caution sign on the right. Stop at the first doorway/opening on the left side of the hallway.",
+      "max_distance_m": 8
+    },
+    {
+      "instruction": "Turn left and approach the doorway opening on the left. Stop just outside the doorway to look inside.",
+      "max_distance_m": 2,
+      "task_id": 2
+    },
+    {
+      "instruction": "Turn left to face the doorway directly and look inside the room. Stop just outside the doorway.",
+      "max_distance_m": 1,
+      "task_id": 2
+    }
+  ],
+  "new_first_execution_returns": [
+    {
+      "steps_the_vla_took": 20,
+      "step_budget_for_this_call": 20,
+      "distance_travelled_m": 3.01,
+      "net_displacement_m": 2.99,
+      "blocked_events": 0,
+      "steps_taken_total": 20,
+      "steps_remaining_approx": 580,
+      "episode_over": false,
+      "subtask_return": "action_budget",
+      "turn_travelled_deg": 23.47,
+      "max_distance_m": 8.0
+    },
+    {
+      "steps_the_vla_took": 14,
+      "step_budget_for_this_call": 20,
+      "distance_travelled_m": 2.14,
+      "net_displacement_m": 2.14,
+      "blocked_events": 0,
+      "steps_taken_total": 34,
+      "steps_remaining_approx": 566,
+      "episode_over": false,
+      "subtask_return": "distance_budget",
+      "turn_travelled_deg": 0.71,
+      "max_distance_m": 2.0
+    }
+  ],
+  "review": {
+    "method": "inspection of actual dispatched instructions and execution feedback",
+    "local_visible_landmarks_and_stop_locations_in_first_three_calls": true,
+    "global_search_delegated_in_first_three_calls": false,
+    "remaining_issue": "The first requested distance cap is still 8m, larger than the near-door guidance; the 20-action runtime cap returned after 3.01m.",
+    "full_navigation_success_established": false,
+    "task_unchanged": true,
+    "automatic_movement_retries": 0
+  },
+  "config_sha256": "f62c3ea8a56bc1f01ffd063353d6fcf0f8618328b3174b372ec066202cbf0f70",
+  "browser": {
+    "url": "http://192.168.66.221:8879/harness?attempt=bc35015f55bd404abc2f6a22cdb23e1f",
+    "instructionVisible": true,
+    "observeDispatched": true,
+    "errors": []
+  },
+  "validation": {
+    "pytest": "251 passed; 4 subtests passed",
+    "ruff_open_nav_harness": "passed",
+    "mypy_open_nav_harness": "passed",
+    "ruff_navgpt_F821_F823": "passed",
+    "frontend_build": "passed",
+    "actual_lan_playwright": "passed"
+  },
+  "formal_benchmark": false,
+  "training_admitted": false
+}

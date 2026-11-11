@@ -757,7 +757,7 @@ class R2RCEEnv:
     def set_split(self, split):
         """Load official R2R or role/language-filtered RxR data atomically."""
         with self._lock:
-            loaded = load_episode_set(
+            loaded = self._load_episode_set(
                 data_root=self.data_root, split=split, dataset=self.dataset,
                 episodes_file=self.episodes_file, gt_file=self.gt_file,
                 gt_split=self.gt_split, languages=self.languages, roles=self.roles,
@@ -776,6 +776,9 @@ class R2RCEEnv:
             if self._gt_coverage < len(self._episodes):
                 log.warning("Incomplete dense GT: benchmark evaluation will refuse this dataset")
             return dict(loaded)
+
+    def _load_episode_set(self, **options):
+        return load_episode_set(**options)
 
     @property
     def episode_count(self):
@@ -798,6 +801,12 @@ class R2RCEEnv:
         # scene_id is "mp3d/<scan>/<scan>.glb", joined against the scene root
         return os.path.join(self.scene_root, str(ep["scene_id"]))
 
+    def _navmesh_file(self, scene_path):
+        return os.path.splitext(scene_path)[0] + ".navmesh"
+
+    def _configure_simulator(self, sim_cfg):
+        """Backend-specific configuration before constructing the shared rig."""
+
     def _open_scene(self, scene_path):
         """Load navmesh (+ Simulator unless blind). Idempotent per scene."""
         import habitat_sim
@@ -806,7 +815,7 @@ class R2RCEEnv:
             return
 
         self._close_scene()
-        navmesh = os.path.splitext(scene_path)[0] + ".navmesh"
+        navmesh = self._navmesh_file(scene_path)
 
         if self.blind:
             if not os.path.isfile(navmesh):
@@ -824,6 +833,7 @@ class R2RCEEnv:
         sim_cfg.scene_id = scene_path
         sim_cfg.gpu_device_id = int(os.environ.get("NAVGPT_GPU_DEVICE_ID", "0"))
         sim_cfg.allow_sliding = bool(cfg["allow_sliding"])
+        self._configure_simulator(sim_cfg)
 
         # ── the agent's own forward camera (fixed: the `planner_basic` baseline
         # must stay comparable) ──

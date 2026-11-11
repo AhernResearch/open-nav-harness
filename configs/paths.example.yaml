@@ -17,9 +17,3 @@ checkpoints:
 
 # Optional: Codex CLI used by the Codex runtime, when newer than the SDK's bundled one.
 # codex_bin: /path/to/codex
-
-# Optional: the Python that `navgpt launch` uses for each service (defaults shown,
-# relative to the repository root).
-# python:
-#   environment: .envs/habitat/bin/python
-#   vla: .envs/vla/bin/python

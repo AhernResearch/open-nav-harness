@@ -1,12 +1,11 @@
 """Experiment settings: one YAML file drives the Environment, the VLA and the Planner.
 
 An experiment file is self-contained: up to six sections (dataset, environment,
-vla, planner, harness, output), the ``gpus`` used by ``navgpt launch``, and an
-optional ``name``. Omitting ``planner`` runs the VLA alone.
+vla, planner, harness, output) and an optional ``name``. Omitting ``planner`` runs the VLA alone.
 
 Machine-specific paths live in ``configs/paths.yaml`` (copied from
 ``configs/paths.example.yaml``): dataset roots, scene assets, curated episode
-files, checkpoint directories and the service interpreters. Experiments refer to
+files and checkpoint directories. Experiments refer to
 those entries by key.
 
 Every key is validated, so a misspelled setting fails instead of being ignored.
@@ -22,6 +21,11 @@ import math
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from .planner.tool_profiles import (
+    AGENTIC_TOOLS, AGENTIC_TOOLS_WITH_DIRECT_MOVEMENT, AGENTIC_TOOLS_WITH_RECALL,
+    ALL_TOOLS, CAPABILITIES, EXPECTED_TOOLS, SUBTASK_TOOLS,
+)
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EXPERIMENTS_DIR = REPO_ROOT / "configs" / "experiments"
@@ -30,14 +34,14 @@ KEYS = {
     "dataset": {"name", "split", "episodes", "episodes_file", "ground_truth_split",
                 "ground_truth_file", "languages", "roles"},
     "environment": {"url", "max_steps", "forward_view_px", "panorama_view_px",
-                    "turn_angle_deg", "step_size_m", "allow_sliding"},
+                    "turn_angle_deg", "step_size_m", "allow_sliding", "backend", "scene_manifest"},
     "vla": {"url", "checkpoint", "visual_token_budget", "frame_cache",
             "gpu_memory_fraction", "seed", "backend", "policy_url", "control_dt_s",
             "max_linear_mps", "max_angular_dps"},
     "planner": {"runtime", "model", "effort", "service_tier", "tools", "max_turns",
                 "episode_timeout_s", "max_budget_usd", "profile"},
     "harness": {"interface", "review_every", "route_finding", "vla_steps_per_call",
-                "mode", "execution_url", "allow_context_reset", "actor_history_policy", "stall_return", "subtask_max_distance_m", "subtask_max_turn_deg", "subtask_max_actions"},
+                "mode", "execution_url", "allow_context_reset", "actor_history_policy", "stall_return", "subtask_max_distance_m", "subtask_max_turn_deg", "subtask_max_actions", "vla_instruction_style"},
     "output": {"dir", "save_frames"},
 }
 DOCS = "docs/USAGE.md#experiment-configs"
@@ -45,8 +49,6 @@ TOP_LEVEL = set(KEYS) | {"name", "gpus"}
 EFFORTS = {"claude": ("low", "medium", "high", "xhigh", "max"),
            "codex": ("none", "minimal", "low", "medium", "high", "xhigh")}
 PATH_GROUPS = {"data", "episodes", "checkpoints", "codex_bin", "python"}
-# Service interpreters used by `navgpt launch` unless paths.yaml sets `python`.
-INTERPRETERS = {"environment": ".envs/habitat/bin/python", "vla": ".envs/vla/bin/python"}
 
 
 class SettingsError(ValueError):
@@ -125,27 +127,14 @@ def load(config: str | Path, paths: str | Path | None = None) -> "Settings":
     return Settings(source=source, data=data, paths=load_paths(paths))
 
 
-# The eight-tool NavGPT-3 harness: the default when planner.tools is omitted.
-ALL_TOOLS = ["observe_forward", "observe_panorama", "observe_map", "navigate_by_instruction",
-             "navigate_relative", "navigate_to_node", "annotate_node", "terminate_episode"]
-SUBTASK_TOOLS = [tool for tool in ALL_TOOLS if tool != 'navigate_by_instruction'] + [
-    'update_plan', 'execute_subtask', 'review_subtask']
-AGENTIC_TOOLS = [t for t in SUBTASK_TOOLS if t not in ('annotate_node', 'review_subtask', 'observe_forward', 'observe_panorama')] + [
-    'observe', 'update_memory']
-# read_memory stays implemented for ablations; the default surface omits it (rarely used).
-AGENTIC_TOOLS_WITH_RECALL = AGENTIC_TOOLS + ['read_memory']
-
-
 def tool_set(tools) -> tuple[str, str]:
     """Map a configured tool list to the internal (condition, capability_bundle)
     that registers exactly those tools and briefs the Planner on them."""
-    from .planner.runner import EXPECTED_TOOLS
-    from .planner.tools.ablation import CAPABILITIES
 
     known: dict = {frozenset(v): (k, "full") for k, v in EXPECTED_TOOLS.items()}
     # Agentic movement ablation: preserve task/memory semantics and remove only
     # direct metric movement. The explicit tool list is frozen in the experiment.
-    for agentic in (AGENTIC_TOOLS, AGENTIC_TOOLS_WITH_RECALL):
+    for agentic in (AGENTIC_TOOLS_WITH_DIRECT_MOVEMENT, AGENTIC_TOOLS_WITH_DIRECT_MOVEMENT + ['read_memory']):
         known[frozenset(agentic)] = known[frozenset(agentic) - {"navigate_relative"}] = ("planner_agentic", "full")
     for bundle, names in CAPABILITIES.items():
         known.setdefault(frozenset(names), ("planner_vla_memory", bundle))
@@ -191,26 +180,6 @@ class Settings:
     def has_planner(self) -> bool:
         return bool(self.data.get("planner"))
 
-    @property
-    def gpus(self) -> list[int]:
-        """One shard per entry; each hosts an Environment and a VLA service."""
-        return list(self.data.get("gpus") or [0])
-
-    def interpreter(self, service: str) -> str:
-        """The Python that runs `navgpt.environment` or `navgpt.vla`."""
-        table = self.paths.get("python") or {}
-        if not isinstance(table, dict):
-            raise SettingsError("python in configs/paths.yaml must map environment and vla "
-                                "to interpreters")
-        python = Path(table.get(service) or INTERPRETERS[service])
-        if not python.is_absolute():
-            python = REPO_ROOT / python
-        if not python.is_file():
-            raise SettingsError(
-                "no Python for the {} service at {}: install it as in the README, or set "
-                "python.{} in configs/paths.yaml".format(service, python, service))
-        return str(python)
-
     def lookup(self, group: str, key: str, what: str) -> str:
         """Resolve a paths.yaml entry by key; values containing a slash are paths."""
         if "/" in str(key):
@@ -233,6 +202,7 @@ class Settings:
                                     self.section("output"))
         cfg = RunConfig(
             dataset=str(ds.get("name", "r2r")),
+            environment_backend=str(env.get("backend", "habitat")),
             split=str(ds.get("split", "val_unseen")),
             episodes=str(ds.get("episodes", "all")),
             env_url=str(env.get("url", RunConfig.env_url)),
@@ -265,6 +235,11 @@ class Settings:
             _url(cfg.execution_url)
         if cfg.harness_mode not in ('global', 'subtask', 'agentic'):
             raise SettingsError('harness.mode must be global, subtask or agentic')
+        cfg.vla_instruction_style = harness.get('vla_instruction_style', 'natural')
+        if cfg.vla_instruction_style not in ('natural', 'r2r'):
+            raise SettingsError('harness.vla_instruction_style must be natural or r2r')
+        if cfg.vla_instruction_style == 'r2r' and cfg.harness_mode != 'agentic':
+            raise SettingsError('r2r instruction style requires agentic mode')
         if not self.has_planner:
             if cfg.harness_mode in ('subtask', 'agentic'):
                 raise SettingsError('Subtask mode requires a Planner to manage local goals')
@@ -345,26 +320,48 @@ class Settings:
 
     # ── services ──
 
+    def _environment_config(self, env: dict, *, default_max_steps: int) -> dict:
+        """Simulator config shared by every environment backend."""
+        config = {"max_steps": int(env.get("max_steps", default_max_steps))}
+        for key, target in (("forward_view_px", "rgb_size"), ("panorama_view_px", "pano_size"),
+                            ("turn_angle_deg", "turn_angle_deg"),
+                            ("step_size_m", "step_size_m"), ("allow_sliding", "allow_sliding")):
+            if key in env:
+                config[target] = env[key]
+        vla = self.section("vla")
+        if vla.get("backend") == "lightnav":
+            config["policy_camera"] = {"width": 480, "height": 270, "height_m": 0.88, "hfov": 120.0}
+            config["velocity_control"] = {key: vla.get(key, default) for key, default in
+                (("control_dt_s", 0.1), ("max_linear_mps", 2.5), ("max_angular_dps", 300.0))}
+        return config
+
     def environment_options(self) -> dict:
         ds, env = self.section("dataset"), self.section("environment")
         name = str(ds.get("name", "r2r"))
+        backend = env.get("backend", "habitat")
+        if backend not in ("habitat", "habitat_gs"):
+            raise SettingsError("environment.backend must be habitat or habitat_gs")
+        if backend == "habitat_gs":
+            if name != "scan" or ds.get("split") != "development" or not env.get("scene_manifest"):
+                raise SettingsError("Habitat-GS requires dataset.name=scan, split=development and scene_manifest")
+            if set(ds) - {"name", "split", "episodes"}:
+                raise SettingsError("Scan assets and episodes must come from the frozen scene manifest")
+            host, port = _url(str(env.get("url", "http://127.0.0.1:19270")))
+            config = self._environment_config(env, default_max_steps=100)
+            return {"backend": backend, "scene_manifest": str(env["scene_manifest"]),
+                    "dataset": name, "split": "development", "data_root": None, "scene_root": None,
+                    "episodes_file": None, "gt_split": None, "gt_file": None,
+                    "languages": None, "roles": None, "host": host, "port": port, "config": config,
+                    "interface": str(self.section("harness").get("interface", "standard"))}
+        if env.get("scene_manifest"):
+            raise SettingsError("scene_manifest requires environment.backend=habitat_gs")
         if name not in ("r2r", "rxr"):
             raise SettingsError("dataset.name must be r2r or rxr")
         host, port = _url(str(env.get("url", "http://127.0.0.1:9200")))
         episodes_file = ds.get("episodes_file")
         if episodes_file:
             episodes_file = self.lookup("episodes", episodes_file, "episode file")
-        config = {"max_steps": int(env.get("max_steps", 500))}
-        for key, target in (("forward_view_px", "rgb_size"), ("panorama_view_px", "pano_size"),
-                            ("turn_angle_deg", "turn_angle_deg"),
-                            ("step_size_m", "step_size_m"), ("allow_sliding", "allow_sliding")):
-            if key in env:
-                config[target] = env[key]
-        if self.section('vla').get('backend') == 'lightnav':
-            vla = self.section('vla')
-            config['policy_camera'] = {'width': 480, 'height': 270, 'height_m': 0.88, 'hfov': 120.0}
-            config['velocity_control'] = {key: vla.get(key, default) for key, default in
-                (('control_dt_s', 0.1), ('max_linear_mps', 2.5), ('max_angular_dps', 300.0))}
+        config = self._environment_config(env, default_max_steps=500)
         listify = lambda v: ",".join(v) if isinstance(v, (list, tuple)) else v
         return {
             "dataset": name,

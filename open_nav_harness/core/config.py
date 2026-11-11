@@ -98,6 +98,9 @@ class ExperimentSpec(StrictModel):
 
     @model_validator(mode="after")
     def execution(self):
+        if (self.config.get("dataset", {}).get("name") == "scan"
+                and self.purpose != "development"):
+            raise ValueError("Scan integration currently supports development attempts only")
         if bool(self.environment_service) == bool(self.execution_pool):
             raise ValueError("Choose one environment_service or an execution_pool")
         if self.execution_pool:

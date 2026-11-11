@@ -60,11 +60,15 @@ class ToolRegistry:
             name=name, description=description or "", inputSchema=args.model_json_schema()
         )
 
+    def validate(self, name, arguments):
+        """Strictly validate one call without executing it."""
+        if name not in self.functions:
+            raise ValueError("Unknown navigation tool: " + str(name))
+        return self.arguments[name].model_validate(arguments, strict=True)
+
     def invoke(self, name, arguments) -> ToolResult:
         """Execute once; the caller owns the journal and uncertain-effect handling."""
-        if name not in self.functions:
-            raise ValueError("Unknown navigation tool: " + name)
-        args = self.arguments[name].model_validate(arguments, strict=True).model_dump()
+        args = self.validate(name, arguments).model_dump()
         values = self.functions[name](**args)
         if isinstance(values, ToolResult):
             return values

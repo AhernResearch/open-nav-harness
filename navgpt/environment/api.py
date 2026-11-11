@@ -316,7 +316,8 @@ VERBS = {
 
 
 def serve(*, dataset, split, data_root, scene_root, episodes_file, gt_split, gt_file,
-          languages, roles, host, port, config, blind=False, verbose=False):
+          languages, roles, host, port, config, blind=False, verbose=False,
+          backend="habitat", scene_manifest=None):
     """Load the episode set and serve it until interrupted. Arguments come from
     ``Settings.environment_options()``; see ``navgpt/environment/__main__.py``."""
     global ENV
@@ -324,17 +325,21 @@ def serve(*, dataset, split, data_root, scene_root, episodes_file, gt_split, gt_
         level=logging.DEBUG if verbose else logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
-    ENV = R2RCEEnv(
-        dataset=dataset, languages=languages, roles=roles,
-        data_root=data_root,
-        scene_root=scene_root,
-        split=split,
-        episodes_file=episodes_file,
-        gt_file=gt_file,
-        gt_split=gt_split,
-        blind=blind,
-        config=config,
-    )
+    if backend == "habitat_gs":
+        from .scan import ScanEnv
+
+        if dataset != "scan" or split != "development":
+            raise ValueError("Habitat-GS scan backend requires the development dataset")
+        ENV = ScanEnv(scene_manifest, config=config, blind=blind)
+    elif backend == "habitat":
+        ENV = R2RCEEnv(
+            dataset=dataset, languages=languages, roles=roles,
+            data_root=data_root, scene_root=scene_root, split=split,
+            episodes_file=episodes_file, gt_file=gt_file, gt_split=gt_split,
+            blind=blind, config=config,
+        )
+    else:
+        raise ValueError("Unknown environment backend: " + str(backend))
     httpd = ThreadingHTTPServer((host, port), Handler)
     httpd.daemon_threads = True
     log.info("serving r2rce on %s:%d — dataset=%s split=%s episodes=%d blind=%s",

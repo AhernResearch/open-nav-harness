@@ -10,7 +10,7 @@ from navgpt.planner.tools.agentic import AgenticTasks
 from navgpt.planner.tools.session import NavigationSession
 from navgpt.planner.runner import expected_tools
 from navgpt.planner.prompts import build_briefing_for
-from navgpt.settings import Settings, SettingsError
+from navgpt.settings import Settings, SettingsError, AGENTIC_TOOLS_WITH_DIRECT_MOVEMENT
 
 
 def tasks():
@@ -86,6 +86,65 @@ def test_agentic_tools_and_prompt_match_without_altering_strict_contract(tmp_pat
     assert config.condition == "planner_agentic" and config.vla_map_enabled()
     with pytest.raises(SettingsError):
         Settings(Path("test.json"), {"harness": {"mode": "agentic"}}, {}).run_config()
+
+
+def test_agentic_default_rejects_direct_movement_and_keeps_vla_and_node_return(monkeypatch):
+    from navgpt.planner.runner import mcp_env_for
+    from unittest.mock import Mock
+
+    config = Settings(Path('test.json'), {
+        'planner': {'runtime': 'codex'}, 'harness': {'mode': 'agentic'},
+    }, {}).run_config()
+    direct = NavigationSession(env={'NAVGPT_CONDITION': 'planner_agentic'})
+    configured = NavigationSession(env=mcp_env_for(config, live_dir=None))
+    assert set(direct.tools.definitions) == set(config.tools) == set(configured.tools.definitions)
+    assert len(config.tools) == 7
+    assert {'execute_subtask', 'navigate_to_node'} <= set(config.tools)
+    dispatch = Mock(side_effect=AssertionError('Forbidden tool reached the environment'))
+    monkeypatch.setattr(configured, '_call', dispatch)
+    for name, args in [('navigate_relative', {'turn_deg': 0., 'distance_m': 1.}),
+                       ('navigate_primitive', {'actions': [1]})]:
+        with pytest.raises(ValueError, match='Unknown navigation tool'):
+            configured.tools.invoke(name, args)
+    dispatch.assert_not_called()
+
+
+def test_r2r_route_profile_requires_endpoint_before_dispatch_and_reuses_execution(monkeypatch):
+    from navgpt.planner.runner import mcp_env_for
+    from pydantic import ValidationError
+    from unittest.mock import Mock
+
+    cfg = Settings(Path('test.json'), {
+        'planner': {'runtime': 'codex'}, 'vla': {'backend': 'lightnav'},
+        'harness': {'mode': 'agentic', 'vla_instruction_style': 'r2r'},
+    }, {}).run_config()
+    session = NavigationSession(env=mcp_env_for(cfg, None))
+    tool = session.tools.definitions['execute_subtask']
+    assert tool.inputSchema['required'] == ['task_id', 'max_distance_m', 'instruction', 'stop_at']
+    execute = Mock(return_value=['existing execution'])
+    monkeypatch.setattr(session, 'execute_agentic_task', execute)
+    args = {'task_id': 1, 'max_distance_m': 8.,
+            'instruction': 'Follow the corridor past the shelves and turn left through the open door.'}
+    with pytest.raises(ValidationError):
+        session.tools.invoke('execute_subtask', args)
+    execute.assert_not_called()
+    session.execute_r2r_task(**args, stop_at='inside the room beside the table')
+    execute.assert_called_once_with(1, 8.,
+        'Follow the corridor past the shelves and turn left through the open door. Stop inside the room beside the table.')
+    assert session._tool_state()['vla_instruction_contract']['style'] == 'r2r'
+    assert 'navigate_to_node' in session.tools.definitions
+    assert 'navigate_relative' not in session.tools.definitions
+    execute.reset_mock()
+    with pytest.raises(ValueError, match='concrete final stopping location'):
+        session.execute_r2r_task(**args, stop_at='  ')
+    execute.assert_not_called()
+
+
+@pytest.mark.parametrize('mode,style', [('agentic', 'unknown'), ('global', 'r2r')])
+def test_invalid_route_instruction_profiles_fail_configuration(mode, style):
+    with pytest.raises(SettingsError):
+        Settings(Path('test.json'), {'planner': {'runtime': 'codex'},
+            'harness': {'mode': mode, 'vla_instruction_style': style}}, {}).run_config()
 
 
 @pytest.mark.parametrize("reason,stopped", [("vla_stop", True), ("turn_budget", False)])
@@ -198,7 +257,8 @@ def test_agentic_rollout_uses_global_protection_not_old_segment_caps(monkeypatch
 
 
 def test_protocol_feedback_does_not_swallow_failure_after_motion_dispatch(monkeypatch):
-    s = NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic"})
+    s = NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic",
+                              "NAVGPT_TOOLS": json.dumps(AGENTIC_TOOLS_WITH_DIRECT_MOVEMENT)})
 
     def bad_reply(*args):
         s._motion_epoch += 1
@@ -305,7 +365,10 @@ def test_no_relative_ablation_freezes_surface_and_matches_briefing():
     prompt = build_briefing_for(config.condition, 'Find the stairs', 500, tools=config.tools)
     assert 'navigate_relative' not in prompt
     assert 'execute_subtask for forward progress and local repairs' in prompt
-    assert 'navigate_relative' in NavigationSession(env={'NAVGPT_CONDITION': 'planner_agentic'}).tools.functions
+    assert 'navigate_relative' not in NavigationSession(env={'NAVGPT_CONDITION': 'planner_agentic'}).tools.functions
+    legacy = NavigationSession(env={'NAVGPT_CONDITION': 'planner_agentic',
+                                    'NAVGPT_TOOLS': json.dumps(AGENTIC_TOOLS_WITH_DIRECT_MOVEMENT)})
+    assert 'navigate_relative' in legacy.tools.functions  # Explicit historical ablation only.
     # Other accidental omissions are still configuration errors, not silent ablations.
     with pytest.raises(SettingsError):
         Settings(Path('test.json'), {
@@ -354,7 +417,8 @@ def test_only_unknown_motion_outcomes_invalidate_map_reads(monkeypatch, reply, e
 def test_rejected_motion_is_repairable_and_leaves_no_memory_edge(monkeypatch):
     from navgpt.planner.tools.session import MotionRejected
 
-    s = NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic"})
+    s = NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic",
+                              "NAVGPT_TOOLS": json.dumps(AGENTIC_TOOLS_WITH_DIRECT_MOVEMENT)})
 
     def rejected(*args):
         raise MotionRejected("too far from the travelled path")

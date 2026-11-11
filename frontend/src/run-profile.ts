@@ -1,6 +1,6 @@
 import type { Row } from "./api";
 
-/** The interactive agentic profile delegates forward movement to the actor. */
+/** Exploration and local repairs use the actor; visited-node retracing remains available. */
 export function agenticPlanner(config: Row = {}): Row {
   return {
     ...config,

@@ -106,6 +106,19 @@ def _lines(content: str) -> tuple[list[str], dict | None]:
     return lines, state
 
 
+def _image_views(blocks: list[dict]) -> list[dict]:
+    """Keep each recorded camera caption paired with its own image artifact."""
+    out, caption = [], ""
+    for block in blocks:
+        if block.get("type") == "text":
+            caption = block.get("text", "")
+        url = (block.get("image_url") or {}).get("url")
+        if isinstance(url, dict) and url.get("artifact"):
+            out.append({"artifact": url["artifact"], "caption": caption})
+            caption = ""
+    return out
+
+
 class Feed:
     """Incremental projection of one attempt. Rebuilds state from the start of each file and
     suppresses everything at or before ``cursor`` (``"<journal_offset>.<events_offset>"``)."""
@@ -179,8 +192,8 @@ class Feed:
             lines, state = _lines(r["feedback"].get("content") or "")
             item = {"id": call, "status": "failed" if r.get("is_error") else "completed",
                     "result": lines, "state": state,
-                    "images": [i["image_url"]["url"]["artifact"] for i in r.get("images") or []
-                               if isinstance((i.get("image_url") or {}).get("url"), dict)]}
+                    "image_views": _image_views(r.get("images") or [])}
+            item["images"] = [view["artifact"] for view in item["image_views"]]
             if r["name"] == "observe_map" and not r.get("is_error") and lines and item["images"]:
                 head = json.loads(lines[0])
                 item["map"] = {"artifact": item["images"][0], "places_px": head.get("places_px") or {},

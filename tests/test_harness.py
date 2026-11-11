@@ -150,6 +150,25 @@ def test_responses_trace_shows_model_text_and_tool_execution(tmp_path):
     assert any(e['type'] == 'item.completed' and e['item']['id'] == 'call_map' for e in events)
 
 
+def test_observation_keeps_captions_with_the_returned_camera_artifacts(tmp_path):
+    a = Attempt(tmp_path)
+    a.call("look", "observe", {"views": ["front", "right", "back", "left"]})
+    # A missing camera must not shift the labels of the cameras that did render.
+    a.journal("tool_result", call_id="look", name="observe", is_error=False,
+        feedback={"content": '{"missing_views": ["right"]}'}, images=[
+            {"type": "text", "text": "Tool look: ahead — clearance 8 m"},
+            {"type": "image_url", "image_url": {"url": {"artifact": "front-image"}}},
+            {"type": "text", "text": "Tool look: behind — clearance 1 m"},
+            {"type": "image_url", "image_url": {"url": {"artifact": "back-image"}}},
+        ])
+    item = Feed(tmp_path, EP).poll()[-1]["item"]
+    assert item["images"] == ["front-image", "back-image"]
+    assert item["image_views"] == [
+        {"artifact": "front-image", "caption": "Tool look: ahead — clearance 8 m"},
+        {"artifact": "back-image", "caption": "Tool look: behind — clearance 1 m"},
+    ]
+
+
 def test_tail_waits_for_complete_lines_and_detects_truncation(tmp_path):
     path = tmp_path / "x.jsonl"
     tail = JsonlTail(path)

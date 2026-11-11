@@ -3,14 +3,9 @@ review interval. No provider or simulator dependencies."""
 import threading
 import time
 
+from ..tool_profiles import CAPABILITIES
+
 INTERFACES = ('reference', 'text_labels', 'small_digits', 'heading_up_map', 'absolute_bearings')
-CAPABILITIES = {
-    'core': ('navigate_by_instruction', 'observe_forward', 'observe_panorama', 'terminate_episode'),
-    'spatial_memory': ('navigate_by_instruction', 'observe_forward', 'observe_panorama', 'terminate_episode',
-                       'observe_map', 'navigate_to_node', 'annotate_node'),
-    'full': ('navigate_by_instruction', 'observe_forward', 'observe_panorama', 'terminate_episode',
-             'observe_map', 'navigate_to_node', 'annotate_node', 'navigate_relative'),
-}
 
 
 def validate(interface, capabilities, review_every):

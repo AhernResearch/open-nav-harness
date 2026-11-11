@@ -41,6 +41,7 @@ sdk = ["claude-agent-sdk==0.2.179", "mcp==1.30.0", "openai-codex==0.147.0"]
 dev = ["pytest==9.2.0", "pytest-asyncio==1.4.1.post1", "ruff==0.17.4", "mypy==2.4.1", "mcp==1.30.0"]
 
 [tool.pytest.ini_options]
+testpaths = ["tests"]
 asyncio_default_fixture_loop_scope = "function"
 asyncio_mode = "auto"
 

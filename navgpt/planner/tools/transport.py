@@ -75,7 +75,12 @@ class RemoteTools:
             temporary.replace(path)
         await self.request("POST", "/sessions/" + self.session_id + "/ack", {"cursor": reply["cursor"]})
 
+    def _validate_name(self, name):
+        if name not in self.definitions:
+            raise ValueError("Unknown navigation tool: " + str(name))
+
     async def invoke(self, name, arguments):
+        self._validate_name(name)
         try:
             if self.failed:
                 raise RuntimeError("Remote tool outcome uncertain; do not continue this episode")
@@ -94,6 +99,7 @@ class RemoteTools:
             raise
 
     async def call_tool(self, name, arguments):
+        self._validate_name(name)
         try:
             return await self.invoke(name, arguments)
         except BaseException:

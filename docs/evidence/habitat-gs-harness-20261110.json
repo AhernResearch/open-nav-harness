@@ -1,0 +1,117 @@
+{
+  "schema": "open_nav_scan_harness_validation_v1",
+  "date": "2026-11-10",
+  "purpose": "development",
+  "formal_benchmark": false,
+  "training_admitted": false,
+  "loop_passed": true,
+  "task_passed": false,
+  "task_review": {
+    "method": "assistant visual inspection of recorded frames and pose trace",
+    "found_counter": true,
+    "final_stop_outside": true,
+    "no_entry_constraint_satisfied": false,
+    "detail": "The actor moved into the reception area to inspect the counter, then the Planner retraced to node 1 in the corridor and called STOP. This violates the instruction not to enter, despite the final stopping location being outside."
+  },
+  "instruction": "Walk forward along the corridor. Find the open entrance on your left with a light-colored reception counter. Stop in the corridor just outside that entrance; do not enter.",
+  "start_position": [
+    0.005824999883770943,
+    -1.0047825574874878,
+    0.0030249999836087227
+  ],
+  "start_rotation_xyzw": [
+    0,
+    0,
+    0,
+    1
+  ],
+  "job_id": "419a59ed072e4810afa8a42164e95a2f",
+  "attempt_id": "d4fb0f5a7ed044ba90e90c2c8b3ac122",
+  "owner": "193bd7385dce4ab895e12f221b84a452",
+  "implementation_digest": "0b25ce8b0e5915e27999477032448b74386682d98565a187fd7ee8b24f897282",
+  "planner": "onh-qwen27b-nvfp4",
+  "actor": "LightNav-0",
+  "backend": "habitat_gs",
+  "wall_s": 92.2,
+  "turns": 9,
+  "tool_calls": {
+    "observe": 2,
+    "update_plan": 2,
+    "execute_subtask": 2,
+    "observe_map": 1,
+    "navigate_to_node": 1,
+    "terminate_episode": 1
+  },
+  "metrics": {
+    "evaluation_available": false,
+    "purpose": "development",
+    "success": null,
+    "spl": null,
+    "ndtw": null,
+    "distance_to_goal": null,
+    "steps_taken": 58,
+    "stop_called": true,
+    "collisions": 2
+  },
+  "task_success": null,
+  "resource_state": "idle",
+  "inference_sessions_after": 0,
+  "model_request_audit": {
+    "\"goals\"": 0,
+    "\"reference_path\"": 0,
+    "\"distance_to_goal\"": 0,
+    "\"ndtw\"": 0,
+    "\"spl\"": 0
+  },
+  "commissioning_attempt": {
+    "attempt_id": "c5032b1a5ee24cf9ad91e5e215db51e5",
+    "valid_visual_test": false,
+    "reason": "128px panoramas were obscured by standard direction labels",
+    "planner_turns": 30,
+    "stop_called": false,
+    "retained": true
+  },
+  "artifacts": {
+    "attempt_output": "/home/holo/robots/open-nav-harness-tools/state/habitat-gs/harness/193bd7385dce4ab895e12f221b84a452/runs/419a59ed072e4810afa8a42164e95a2f/d4fb0f5a7ed044ba90e90c2c8b3ac122",
+    "requests_sha256": "f69e1ff8e9fdad8c3a2e8617882c8a9485d38e316983dbcadd816a4e74b6cb96",
+    "result_sha256": "17866bf26ccb6870ee5ab99f254dc11c7d6abf049765f8ab31abe6588415efa6",
+    "source_provenance_sha256": "e77699f26c6a17f4732e66eb6dd23312a48887248f4a09b5d9ddf12c2a5df5f6",
+    "model_source_receipt_sha256": "3cd1dfae11d6b9174c27abe102bf5947562652e20775950643be9d0f4116a1b1",
+    "images": {
+      "start": {
+        "path": "docs/evidence/habitat-gs-harness-start-20261110.png",
+        "sha256": "70800aba5ed487bfc808cc6bd76396a4c329a2f87f584bf591430a5cd38106f0"
+      },
+      "counter": {
+        "path": "docs/evidence/habitat-gs-harness-counter-20261110.png",
+        "sha256": "5bbdd1d6d1062197e1a0516e57a493896d7da4f3e994705b583333ad4ff813f2"
+      },
+      "stop": {
+        "path": "docs/evidence/habitat-gs-harness-stop-20261110.png",
+        "sha256": "43eea3aa03f06aba4f8a828168d1115635d9e788b11eb6714e58f8ce62bed99d"
+      }
+    }
+  },
+  "validation": {
+    "pytest": "247 passed; 4 subtests passed",
+    "ruff_open_nav_harness": "passed",
+    "mypy_open_nav_harness": "passed",
+    "ruff_navgpt_F821_F823": "passed",
+    "frontend_build": "passed",
+    "playwright": "14 passed; scan workflow rechecked after final build",
+    "actual_browser_submission": "passed",
+    "actual_browser_replay": {
+      "url": "http://127.0.0.1:8879/harness?attempt=d4fb0f5a7ed044ba90e90c2c8b3ac122",
+      "stopped": true,
+      "images": 1,
+      "loadedImages": 1,
+      "errors": []
+    }
+  },
+  "limitations": [
+    "single development task",
+    "Gaussian depth and navigation geometry require review",
+    "2 collision events",
+    "benchmark metrics unavailable"
+  ]
+}

@@ -163,6 +163,9 @@ class Database:
         cfg["output"] = {"save_frames": True}
         _validate(cfg, Path("experiment"))
         run = Settings(Path("experiment"), cfg, {}).run_config()
+        if "planner_service" in services:
+            # Freeze the resolved surface even when an API caller omitted tools.
+            cfg["planner"]["tools"] = list(run.tools)
         from navgpt.planner.config import needs_vla, VLA_ONLY
 
         if (needs_vla(run.condition) or run.condition == VLA_ONLY) and not spec.vla_service:

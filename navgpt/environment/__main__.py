@@ -2,8 +2,8 @@
 
     python -m navgpt.environment --config configs/experiments/vln/navgpt3_astra_r2r.yaml
 
-Run it with the Habitat environment's Python (habitat-sim 0.1.7). The experiment
-config selects the dataset, episode set and rendering settings; ``--port`` and
+Run it with the selected Habitat or Habitat-GS environment's Python. The experiment
+config selects the backend, dataset, episode set and rendering settings; ``--port`` and
 ``--gpu`` place one service of several for sharded runs.
 """
 
@@ -33,7 +33,7 @@ def _ensure_runtime_libraries():
 def main(argv=None):
     parser = argparse.ArgumentParser(
         prog="python -m navgpt.environment",
-        description="NavGPT Environment service for R2R-CE / RxR-CE (habitat-sim 0.1.7)")
+        description="Navigation Environment service for R2R-CE, RxR-CE or Habitat-GS scan development")
     parser.add_argument("--config", required=True, help="experiment YAML file")
     parser.add_argument("--paths", help="machine paths file (default: configs/paths.yaml)")
     parser.add_argument("--port", type=int, help="override the port in environment.url")

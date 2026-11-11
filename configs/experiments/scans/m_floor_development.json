@@ -1,0 +1,17 @@
+{
+  "name": "m_floor_habitat_gs_development",
+  "dataset": {"name": "scan", "split": "development", "episodes": "0"},
+  "environment": {
+    "backend": "habitat_gs",
+    "scene_manifest": "state/habitat-gs/scenes/m-floor-lod3-v1/scene.json",
+    "url": "http://127.0.0.1:19270",
+    "max_steps": 100,
+    "forward_view_px": 256,
+    "panorama_view_px": 512,
+    "turn_angle_deg": 15,
+    "step_size_m": 0.25,
+    "allow_sliding": true
+  },
+  "harness": {"interface": "standard"},
+  "output": {"dir": "outputs/habitat-gs-development", "save_frames": true}
+}

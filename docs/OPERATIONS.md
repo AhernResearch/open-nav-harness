@@ -73,83 +73,10 @@ establish a navigation success-rate improvement. Keep the original hard-50 job p
 deploy a matching planner/worker release and create a new development experiment for
 closed-loop evaluation rather than resuming an experiment frozen against old source.
 
-### Agentic execution/reset ablation, November 9
-
-`execute_subtask` now accepts `task_id`, optional `instruction`, and optional
-`reset_context`. Model-selected action, distance and cumulative-turn caps have been
-removed, including the hidden 80-action/3-m/180-degree agentic segment defaults.
-Policy STOP, three consecutive blocked moves, the episode action budget and episode
-timeout still end execution. An operator may set `harness.vla_steps_per_call`; the
-paired experiment explicitly sets it to zero (disabled). The older strict subtask
-condition retains its original configured segment limits.
-
-`harness.allow_context_reset=false` removes the reset argument from both the actual
-validated tool schema and its briefing. It does not force a reset every call or remove
-visual history. Automatic anchoring on task changes and bounded frame selection are
-identical in both variants. The `begin` event records `reset_requested` and
-`reset_reason` (initial/task_change/explicit/continue).
-
-The new release includes the common November 8 reliability/context fixes. Both reset
-variants use that same release; comparison against the older eight-route run is
-descriptive, not an isolated estimate of removing caps. LightNav exposes no seeded
-reset, so a single paired run is preliminary. Historical reset use is confounded by
-task difficulty. See [historical calls](evidence/reset-context-history-20261109.json)
-and [exact tool schemas](evidence/execute-subtask-schema-ablation-20261109.json).
-
-The paired four-route run is complete: with manual reset exposed SR=0/4, without
-it SR=1/4. Both groups had two errored attempts. Five explicit resets occurred only
-on route 4132 (three same-task, two task switches); route 7006 improved without reset
-but had used no explicit reset in the other group either. The run does not establish
-that manual reset helps or hurts. Removing caps allowed a single 436-action/268-second
-rollout that travelled 41.86 m with only 0.58 m net displacement. Three attempts across
-the groups exhausted the global action budget and then repeated terminal calls until
-900 seconds: the existing runtime recognizes only `stop_called`, while the tool's
-already-over path retains `step_budget_exhausted`. One other attempt exhausted its
-2048-token output allowance. These faults are recorded, not fixed in this experiment.
-Do not interpret total wall time as navigation latency alone or automatically resume
-the historical hard-50 job. See [per-attempt metrics and tool timing](evidence/reset-context-ablation-results-20261109.json)
-and [deployment, matched configuration and findings](evidence/reset-context-ablation-20261109.json).
-
-
-
-### LightNav official input migration, November 9
-
-The subsequent migration supersedes the bounded-history LightNav ablation above.
-The owned actor snapshots upstream `3015508b70fb6e30bbd66701e94c9b916dcb8df8` into
-its immutable release and uses continuous native episode history. It advertises
-`history_mode=episode`, `context_replace=false`, and
-`input_contract=lightnav_official_episode_v1`; preflight rejects an older replacement
-server. LightNav tools no longer expose manual reset regardless of the older
-`allow_context_reset` flag. NavGPT VLA's bounded profile remains available.
-
-Only the chosen task instruction is sent, without a topology caption or summary.
-Task-manager `begin`/anchor events still describe logical plan segments; they do not
-reset LightNav. `policy_context.frame_ids` describes the available episode buffer,
-not the smaller set selected by the native SlowFast sampler. The actor owns that
-selection. Frame IDs retain causal order, including retraces; an endpoint inferred
-again with revised text is not appended twice.
-
-The fixed-frame GPU probe checked eight points through a 500-frame episode against
-the official Habitat policy: native processor samples, raw tokens, waypoints and
-velocity commands matched. The same-endpoint instruction change, 101 numerical
-controller cases and malformed-action zero-STOP fallback also matched. A separate
-live test sent eight simultaneous sessions with different history lengths; the
-largest actual batch was seven and all outputs matched the serial official reference.
-The first concurrent probe used an incorrectly retained reference-engine cache; its
-failed evidence is preserved separately, and the corrected probe resets the official
-single-session reference at episode changes. This was a validation-script error.
-
-See [migration provenance](evidence/lightnav-official-migration-20261109.json),
-[fixed-frame parity](evidence/lightnav-official-parity-20261109.json), and
-[live batching](evidence/lightnav-official-live-batch-20261109.json). These are
-implementation checks, not benchmark results or proof of a success-rate improvement.
-The historical hard-50 job remains paused; new source requires a new experiment.
-The subsequent two-route integration smoke succeeded on both routes (train indices
-0 and 7648, NE 0.58 m and 2.57 m). The latter used one retrace and five VLA
-delegations. Both traces preserved continuous episode history and plain actor
-instructions; neither had a runtime error. See [smoke results and replay links](evidence/lightnav-official-smoke-20261109.json).
-This small smoke is not a success-rate estimate.
-
+Current execution limits, reset schemas and STOP rules are documented in the
+[tool contract](TOOL_CONTRACT.md). LightNav's native episode history and the opt-in
+completion-boundary policy are documented in [LightNav](LIGHTNAV.md). Historical
+ablation and migration results remain under [evidence](evidence/).
 
 ## Backup and restore
 
@@ -205,21 +132,6 @@ An incomplete RPC session is a fence even if its TCP connection disappears. Stop
 owned actor/environment, reconcile the blocked attempt, restart, then use a new attempt.
 Remote `artifact_dir/<session_id>/calls.jsonl` preserves receipts if a response was lost;
 this directory belongs in evidence backups alongside local `state/runs`.
-
-## Development acceptance, 2026-11-07
-
-[Recorded results](evidence/lightweight-harness-20261107.json) contain the two owned-worker
-pilots, all eight runs of the two-route train-split matrix, per-route tool/inference/token
-counts, replay checks and final direct/MCP GPU probes. The formal 50-route benchmark was
-not started. Matrix source `9fdb040` precedes the final schema/trace optimization; final
-worker source `6a32b07` was checked with explicit one-action integration probes.
-
-Both 27B pairings and the 35B/LightNav pairing succeeded on 2/2 routes. The 35B/native
-pairing succeeded on 0/2: its timed-out route never delegated to the VLA and used 46
-short-motion calls. These are development observations, not a model ranking. All traces
-remain evaluation-only. LightNav's owned and legacy runtime profiles produced identical
-outputs on two of three replay frames, but differed on the third; do not claim bitwise
-equivalence or attribute all end-to-end timing differences to transport.
 
 ## A100 planner pool, 2026-11-08
 
@@ -305,36 +217,11 @@ the `attempt_started` event; the experiment itself is unchanged. These changes a
 outside the implementation digest, so actor and environment services keep running
 across this release.
 
-## Terminal lifecycle and cropped-history baseline, 2026-11-09
+## Episode termination
 
-The Planner loop now exits when a movement tool reports that the environment has
-ended, including step-budget exhaustion. Exhaustion remains a scored navigation
-failure without an implicit STOP or an infrastructure error. A VLA STOP that only
-hands control back to the Planner does not end the episode. Return-tool terminal
-flags are normalized into the same lifecycle state. The isolated terminal probe
-now executes one tool instead of continuing to issue STOP calls; regression tests
-also cover remaining calls in a generated tool batch. Validation: 150 tests plus
-4 subtests, required static checks and frontend build passed.
-
-Only the `completed_subtask` history policy was retained for the requested
-development rerun. The full-history job was cancelled and excluded. Source digest:
-`297ccc1234ef1739a2c4e5b57497212a2c83e9c6e8287cc737ff9afa3d488c78`.
-
-| Train episode | Success | NE (m) | Wall time (s) | execute_subtask calls | VLA predictions | History crops |
-| --- | --- | --- | --- | --- | --- | --- |
-| 456 | 1 | 1.7874 | 218.8 | 7 | 91 | 3 |
-| 7006 | 1 | 0.2670 | 164.3 | 4 | 66 | 3 |
-
-Each crop retained one boundary frame; repeated calls within the same unfinished
-subtask retained their history. Both episodes ended through an explicit Planner
-STOP, so step-budget termination was verified by the isolated probe and tests,
-not triggered by these rollouts. Neither episode returned to a node. Episode 456
-still made two final zero-motion calls: benchmark success does not demonstrate
-precise compliance with the requested stair position.
-
-These are two single-rollout development checks, not a success-rate estimate.
-Compared with the previous crop run, both pose restoration and lifecycle handling
-changed, and concurrent load decreased during cancellation. Neither outcome nor
-latency changes can be attributed to one fix. Detailed traces, metrics, crop
-boundaries and limitations are in the
+The Planner loop exits when movement reports that the environment ended,
+including step-budget exhaustion. Exhaustion remains a scored navigation failure
+without an implicit STOP or an infrastructure error. Actor STOP only hands control
+back to the Planner. Remaining calls in a generated batch are not dispatched after
+termination. Historical development checks remain in the
 [baseline evidence](evidence/terminal-lifecycle-crop-baseline-20261109.json).

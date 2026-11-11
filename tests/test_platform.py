@@ -104,6 +104,23 @@ def test_serialized_claim_and_completed_episodes_never_rerun(db):
     assert db.rows("SELECT status FROM jobs WHERE id=:id", id=jid)[0]["status"] == "completed"
 
 
+def test_api_omitted_tools_freezes_vla_movement_and_node_return(db):
+    original, env = experiment(db)
+    source = json.loads(db.rows('SELECT spec FROM experiments WHERE id=:id', id=original)[0]['spec'])
+    body = {'name': 'agentic API defaults', 'environment_service': env,
+            'vla_service': source['vla_service'], 'planner_service': source['planner_service'],
+            'episodes': [0], 'config': {'harness': {'mode': 'agentic'}}}
+    with TestClient(create_app(db.root)) as client:
+        response = client.post('/api/experiments', json=body)
+        assert response.status_code == 201
+        frozen = next(e['spec'] for e in client.get('/api/experiments').json() if e['id'] == response.json()['id'])
+    tools = frozen['config']['planner']['tools']
+    assert len(tools) == 7
+    assert {'execute_subtask', 'navigate_to_node'} <= set(tools)
+    assert not {'navigate_relative', 'navigate_primitive'} & set(tools)
+    assert db.rows('SELECT * FROM jobs') == []
+
+
 def test_distinct_jobs_cannot_share_environment(db):
     eid, _ = experiment(db)
     db.enqueue(eid)

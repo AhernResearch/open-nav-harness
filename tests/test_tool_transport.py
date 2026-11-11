@@ -44,10 +44,12 @@ async def test_mcp_preserves_registry_schema_and_multimodal_results():
 def test_local_tool_transport_does_not_import_mcp():
     code = """
 import sys, asyncio
+from navgpt.planner.tool_profiles import EXPECTED_TOOLS
 from navgpt.planner.tools.transport import open_tools
 async def check():
-    async with open_tools({'NAVGPT_CONDITION': 'planner_subtask'}) as tools:
-        assert len(await tools.list_tools()) == 10
+    for condition, expected in EXPECTED_TOOLS.items():
+        async with open_tools({'NAVGPT_CONDITION': condition}) as tools:
+            assert {t.name for t in await tools.list_tools()} == set(expected), condition
 asyncio.run(check())
 assert not any(m == 'mcp' or m.startswith('mcp.') for m in sys.modules)
 """

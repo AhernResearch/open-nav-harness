@@ -29,6 +29,7 @@ from navgpt.vla.profiles import input_profile
 from .config import has_places, RunConfig, needs_vla
 from .prompts import build_briefing_for, first_prompt_for
 from .turns import PlannerTurnCounter, TURN_UNIT
+from .tool_profiles import expected_tools
 
 MCP_TOOLS_MODULE = "navgpt.planner.tools.mcp_tools"
 MCP_TOOLS_PATH = Path(__file__).resolve().parent / "tools" / "mcp_tools.py"
@@ -342,39 +343,6 @@ def parse_episodes(spec: str) -> list[int]:
 # ── preflight ──
 
 
-# Per-condition tool surface, mirroring the registration gate in
-# tools/mcp_tools.py. Kept here so preflight can fail once, loudly, instead of
-# letting a mis-registered surface produce a plausible-looking run.
-# The preflight contract: exactly these tools per profile (docs/USAGE.md).
-# The frozen basic profile stops through primitive action 0; other profiles
-# expose terminate_episode. The rest follow the capability flags in mcp_tools.py.
-EXPECTED_TOOLS = {
-    "planner_agentic": ["execute_subtask", "navigate_relative", "navigate_to_node",
-                        "observe", "observe_map",
-                        "terminate_episode", "update_memory", "update_plan"],
-    "planner_subtask": ["annotate_node", "execute_subtask", "navigate_relative",
-                        "navigate_to_node", "observe_forward", "observe_map",
-                        "observe_panorama", "review_subtask", "terminate_episode", "update_plan"],
-    "planner_basic": ["navigate_primitive", "observe_forward"],
-    "planner_motion": ["navigate_primitive", "navigate_relative", "observe_forward",
-                       "observe_map", "observe_panorama", "terminate_episode"],
-    "planner_memory": ["annotate_node", "navigate_primitive", "navigate_relative",
-                       "navigate_to_node", "observe_forward", "observe_map", "observe_node",
-                       "observe_panorama", "terminate_episode"],
-    # the final harness: eight tools
-    "planner_vla_memory": ["annotate_node", "navigate_by_instruction", "navigate_relative",
-                           "navigate_to_node", "observe_forward", "observe_map",
-                           "observe_panorama", "terminate_episode"],
-}
-
-
-def expected_tools(condition, bundle='full'):
-    if condition == 'planner_vla_memory':
-        from .tools.ablation import CAPABILITIES
-        return list(CAPABILITIES[bundle])
-    return EXPECTED_TOOLS.get(condition)
-
-
 def expected_tools_from_env(env):
     """Use the frozen explicit surface across provider and transport boundaries."""
     if "NAVGPT_TOOLS" in env:
@@ -454,7 +422,14 @@ def preflight(cfg: RunConfig) -> dict[str, Any]:
         "episode_count", "gt_covered", "episode_sources", "gt_sources", "caliber")}
     # nDTW needs dense ground truth for every episode; a gap would silently score
     # as missing values, so refuse the run instead.
-    if (not health.get("blind") and health.get("gt_covered") is not None
+    scan_development = (
+        cfg.dataset == "scan" and cfg.split == "development" and cfg.environment_backend == "habitat_gs"
+        and health.get("backend") == "habitat_gs" and health.get("purpose") == "development"
+        and health.get("evaluation_available") is False
+    )
+    if cfg.dataset == "scan" and not scan_development:
+        raise PreflightError("Scan runs require matching Habitat-GS development configuration and health")
+    if (not scan_development and not health.get("blind") and health.get("gt_covered") is not None
             and health["gt_covered"] < health["episode_count"]):
         raise PreflightError("dense ground truth covers {} of {} episodes; check "
                              "dataset.gt_split / gt_file".format(health["gt_covered"],
@@ -831,6 +806,7 @@ def mcp_env_for(cfg: RunConfig, live_dir: Path | None,
         "NAVGPT_TOOLS": json.dumps(cfg.tools or expected_tools(cfg.condition, cfg.capability_bundle)),
         "NAVGPT_VLA_URL": cfg.vla_url,
         "NAVGPT_VLA_BACKEND": cfg.vla_backend,
+        "NAVGPT_VLA_INSTRUCTION_STYLE": cfg.vla_instruction_style,
         "NAVGPT_SUBTASK_MAX_DISTANCE": str(cfg.subtask_max_distance_m),
         "NAVGPT_SUBTASK_MAX_TURN": str(cfg.subtask_max_turn_deg),
         "NAVGPT_SUBTASK_MAX_ACTIONS": str(cfg.subtask_max_actions),
@@ -1069,7 +1045,8 @@ async def run_episode(adapter, cfg: RunConfig, index: int, run_dir: Path) -> dic
                             and (cfg.harness_mode == 'agentic' or
                                  (task_state['tasks'] and all(t['status']=='accepted' for t in task_state['tasks'])))
                             and not outcome.error and not sink.api_error)
-        task_fields = {'subtasks': task_state, 'task_success': float(task_success)}
+        task_fields = {'subtasks': task_state, 'task_success': (
+            None if metrics.get('evaluation_available') is False else float(task_success))}
     place_stats = {}
     if has_places(cfg.condition):
         # Named vs merely created is the usage question: a tool that registers

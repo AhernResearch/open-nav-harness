@@ -1,6 +1,15 @@
 import type { Row } from "../api";
 
 export type Pose = { position: number[]; heading_rad?: number };
+export type CameraImage = { src: string; caption: string };
+/** Tool-result images paired with their recorded camera captions. */
+export function toolImages(item: Item, attempt: string, fallback: string): CameraImage[] {
+  return (item.images ?? []).map((artifact, index) => ({
+    src: `/api/attempts/${attempt}/artifact/${artifact}`,
+    caption: item.image_views?.[index]?.caption
+      ?? (item.name === "observe" ? item.arguments.views?.[index] : undefined) ?? fallback,
+  }));
+}
 export type MapInfo = {
   artifact: string;
   size: [number, number] | null;
@@ -17,6 +26,7 @@ export type Item = {
   result?: string[];
   state?: Row | null;
   images?: string[];
+  image_views?: { artifact: string; caption: string }[];
   map?: MapInfo;
   poses: Pose[];
   frames: Record<string, string>[];
@@ -91,6 +101,19 @@ export class Trace {
 
   latestMotion(upto: number) {
     return this.find(upto, (i) => i.type === "motion");
+  }
+
+  /** Observe results and motion cameras share one timeline; maps are not cameras. */
+  camera(upto: number, attempt: string): CameraImage[] {
+    for (let i = upto; i >= 0; i--) {
+      const item = this.itemAt(i);
+      if (item?.name === "observe" && item.images?.length) return toolImages(item, attempt, "相机画面");
+      const frame = item?.type === "motion" && item.frames.at(-1);
+      if (frame) return Object.entries(frame).filter(([, path]) => path).map(([name, path]) => ({
+        src: `/api/attempts/${attempt}/files/${path}`, caption: name,
+      }));
+    }
+    return [];
   }
 
   itemAt(index: number): Item | undefined {

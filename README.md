@@ -4,11 +4,25 @@ A navigation experiment platform derived from NavGPT-3. Holo owns the web consol
 Planner sessions and durable queue; A100 owns model serving and Habitat execution.
 The navigation tools have one implementation shared by all Planner runtimes.
 
+`open-nav-harness` is the entry point for service management, durable execution
+and replay. The component `navgpt` CLI provides `run`, `preflight`, `check-data`
+and `check-checkpoint` against separately managed services. Use execution pools
+for parallel runs and Workbench imports for historical result folders; the old
+`navgpt launch`, `merge` and `view` commands have been removed.
+
+The [current tool contract](docs/TOOL_CONTRACT.md) is the single reference for
+agentic navigation. Tool inventories live in `navgpt/planner/tool_profiles.py`.
+Historical study matrices and the separate paired-evaluation runner have been
+removed; frozen attempts, provenance and evidence remain intact.
+
 ## What is implemented
 
 - OpenAI-compatible multimodal Planners with an explicit model/tool loop, alongside
   the inherited Codex and Claude SDK runtimes.
 - LightNav-0 and official NavGPT VLA through the existing actor contracts.
+- [Habitat-GS scan development](docs/HABITAT_GS.md), with immutable GS/mesh assets,
+  navmesh generation and the shared navigation tools. M-floor has a GPU tool probe;
+  geometry and Gaussian depth remain subject to review.
 - First-observation planning, bounded subtask execution, evidence-based review,
   replanning, explicit STOP, and per-subtask VLA history replacement.
 - Validated service registration, trusted remote launch templates, GPU admission,

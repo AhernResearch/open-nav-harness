@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "./icons";
-import type { Entry, Item, Trace } from "./trace";
+import { toolImages, type Entry, type Item, type Trace } from "./trace";
+import { CameraGallery } from "./CameraGallery";
 
 /** What a row says in plain words; raw arguments stay behind the expander. */
 function describe(item: Item): { icon: string; label: string } {
@@ -13,7 +14,7 @@ function describe(item: Item): { icon: string; label: string } {
     case "update_plan":
       return { icon: "list", label: a.patch ? `更新计划 · 调整 ${a.patch.length} 项状态` : `更新计划 · ${a.subtasks?.length ?? 0} 项` };
     case "execute_subtask":
-      return { icon: "route", label: `${a.instruction || `执行任务 ${a.task_id}`}${a.max_distance_m ? ` · ≤${a.max_distance_m} 米` : ""}` };
+      return { icon: "route", label: `${a.instruction || `执行任务 ${a.task_id}`}${a.stop_at ? ` · Stop: ${a.stop_at}` : ""}${a.max_distance_m ? ` · ≤${a.max_distance_m} 米` : ""}` };
     case "navigate_relative":
       return { icon: "route", label: `转向 ${a.turn_deg ?? 0}°，前进 ${a.distance_m ?? 0} 米` };
     case "navigate_to_node":
@@ -129,11 +130,7 @@ function Row({ entry, trace, attempt, state, onSelect }: { entry: Entry; trace: 
             <div key={i}>{line}</div>
           ))}
           {!!item.images?.length && (
-            <div className="thumbs">
-              {item.images.map((d) => (
-                <img key={d} alt="工具返回的图像" src={`/api/attempts/${attempt}/artifact/${d}`} />
-              ))}
-            </div>
+            <CameraGallery className="thumbs" images={toolImages(item, attempt, "工具返回的图像")} />
           )}
         </div>
       )}

@@ -1,0 +1,62 @@
+{
+  "owner": "b5d4fac66e324310a39e4cf4e791281d",
+  "local": "/home/holo/robots/open-nav-harness-tools/state/habitat-gs/tasks/b5d4fac66e324310a39e4cf4e791281d",
+  "local_release": "/home/holo/robots/open-nav-harness-tools/state/habitat-gs/tasks/b5d4fac66e324310a39e4cf4e791281d/release",
+  "remote": "/data/nav_storage/open-nav-harness-tools/harness-gs/b5d4fac66e324310a39e4cf4e791281d",
+  "scene": "/home/holo/robots/open-nav-harness-tools/state/habitat-gs/scenes/m-floor-open-tasks-v2",
+  "instruction": "Find a meeting room (洽谈室) on this floor. Go through its doorway and stop inside the room. Confirm the room using visible signage or furnishings.",
+  "instruction_zh": "找到洽谈室，穿过门口进入房间，在室内停下。",
+  "episode_index": 1,
+  "episode_id": "m-floor-enter-meeting-room-001",
+  "implementation_digest": "446fe07063964df3bd50bee9adc2421de505c4dfcde8e92ccf2f111dac8d36a0",
+  "source_sha256": "67cb708d9a1e72ed05ab9bc31e1710d11fd7f15a5ed654f481ef9a886071e6e2",
+  "navigation_receipt_sha256": "76913737540fc8e13b6adc905a5711c8931deb28f65cb3dbd8f420b0affe2f5a",
+  "tools": [
+    "observe",
+    "observe_map",
+    "navigate_to_node",
+    "terminate_episode",
+    "update_plan",
+    "execute_subtask",
+    "update_memory"
+  ],
+  "old_attempt": "1539bd95a64c4abb84cd559ff23a7cba",
+  "purpose": "development",
+  "direct_movement_allowed": false,
+  "visited_node_return_allowed": true,
+  "job_id": "832f5df49a6c49e4ba7404c2cd527639",
+  "attempt_id": "04a0f21720134681a254b94c5ea149d6",
+  "live_url": "http://192.168.66.221:8879/harness?attempt=04a0f21720134681a254b94c5ea149d6",
+  "status_at_publication": "running",
+  "model_tool_surfaces_checked": 3,
+  "actual_model_tools": [
+    "observe",
+    "terminate_episode",
+    "observe_map",
+    "navigate_to_node",
+    "update_plan",
+    "execute_subtask",
+    "update_memory"
+  ],
+  "old_attempt_status": "interrupted",
+  "old_attempt_preserved": true,
+  "new_automatic_movement_retries": 0,
+  "browser": {
+    "url": "http://192.168.66.221:8879/harness?attempt=04a0f21720134681a254b94c5ea149d6",
+    "instructionVisible": true,
+    "observeDispatched": true,
+    "errors": []
+  },
+  "config_sha256": "96887d414b9313b15d0bd9ef3f0486e48f7d2715925b1745d7da9880c6b3e21e",
+  "checks": {
+    "pytest": "251 passed; 4 subtests passed",
+    "targeted_tests_after_tool_order_change": "79 passed",
+    "ruff_open_nav_harness": "passed",
+    "mypy_open_nav_harness": "passed",
+    "ruff_navgpt_F821_F823": "passed",
+    "frontend_build": "passed",
+    "playwright": "15 passed"
+  },
+  "formal_benchmark": false,
+  "training_admitted": false
+}

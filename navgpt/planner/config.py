@@ -41,6 +41,7 @@ INTERFACES = ("standard", "reference", "text_labels", "small_digits",
 class RunConfig:
     # ── what to run ──
     dataset: str = "r2r"
+    environment_backend: str = "habitat"
     dataset_info: dict = field(default_factory=dict)
     split: str = "val_unseen"
     episodes: str = "all"
@@ -54,6 +55,7 @@ class RunConfig:
     env_url: str = "http://127.0.0.1:9200"
     vla_url: str = "http://127.0.0.1:8000"
     vla_backend: str = 'navgpt'
+    vla_instruction_style: str = 'natural'
     harness_mode: str = 'global'
     execution_url: str = ''
     allow_context_reset: bool = True

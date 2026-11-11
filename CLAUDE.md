@@ -43,9 +43,8 @@ uv run open-nav-harness --state DIR backup --output FILE
 uv run python -m deployment.probe_planner --url URL/v1 --model ID --output state/probes/NAME
 ```
 
-The inherited `navgpt` CLI (`run`, `launch`, `preflight`, `merge`, `view`, `check-data`,
-`check-checkpoint`) and its YAML experiments under `configs/experiments/` are documented in
-`docs/USAGE.md`. Machine paths live in `configs/paths.yaml`, copied from `paths.example.yaml`.
+The component `navgpt` CLI (`run`, `preflight`, `check-data`, `check-checkpoint`) and its
+YAML/JSON examples under `configs/experiments/` are documented in `docs/USAGE.md`. Machine paths live in `configs/paths.yaml`, copied from `paths.example.yaml`.
 
 Unit and UI tests must never start the formal benchmark. GPU integration uses a separate
 deployment and a train/dev manifest.
@@ -70,9 +69,9 @@ not model-name branches. New actors implement the actor service contract without
 orchestration. Harness modes: `agentic` (model-owned plan/memory workflow), `subtask` (the earlier
 strict review workflow, kept for comparisons) and `global` (full-route delegation).
 
-The current agentic tool contract is `docs/TOOL_CONTRACT_V7.md`, a delta on `docs/TOOL_CONTRACT_V6.md` and `docs/TOOL_CONTRACT_V5.md` (v3 holds earlier validation). It supersedes the v2
-"Topology memory" section of `docs/ARCHITECTURE.md`, which remains the reference for ownership,
-durable execution and context/causality semantics. `docs/OPERATIONS.md` covers deployment,
+The current agentic tool contract is `docs/TOOL_CONTRACT.md`. Tool inventories live in
+`navgpt/planner/tool_profiles.py`, shared by settings, preflight and session registration.
+`docs/ARCHITECTURE.md` describes ownership, durable execution and context/causality semantics. `docs/OPERATIONS.md` covers deployment,
 failure handling and backup. `docs/LIGHTNAV.md` covers the LightNav backend.
 
 ## Invariants (violations are bugs)

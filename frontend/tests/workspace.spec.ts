@@ -179,3 +179,36 @@ test('reduced motion and an empty composer render without errors', async ({page}
  await expect(page.getByRole('heading',{name:'任务队列',exact:true})).toBeVisible();
  expect(errors).toEqual([]);
 });
+
+test('scan composer binds the development scene and Habitat-GS configuration', async ({page}) => {
+ const services=[
+  {id:'p',available:true,spec:{kind:'planner',name:'planner',planner:{model:'test'}}},
+  {id:'e',available:true,spec:{kind:'environment',name:'M-floor',url:'http://127.0.0.1:19270',metadata:{dataset:'scan',split:'development',scene_id:'m_floor',backend:'habitat_gs',scene_manifest:'/scene/scene.json',environment_config:{max_steps:200}}}},
+  {id:'v',available:true,spec:{kind:'vla',name:'LightNav',url:'http://127.0.0.1:18397',metadata:{shared_inference:true}}},
+  {id:'x',available:true,spec:{kind:'execution',name:'execution',metadata:{environment_url:'http://127.0.0.1:19270',inference_url:'http://127.0.0.1:18397'}}},
+ ];
+ await page.route('**/api/catalog',r=>r.fulfill({json:[{name:'scan_development',dataset:'scan',split:'development',scenes:[{scene:'m_floor',count:1},{scene:'other',count:1}]}]}));
+ await page.route('**/api/catalog/scan_development/episodes?**',r=>r.fulfill({json:[{index:0,episode_id:'reception-001',scene:'m_floor',instruction:'Stop outside the reception entrance.'}]}));
+ await page.route('**/api/harness/services',r=>r.fulfill({json:services}));
+ let frozen:any;
+ await page.route('**/api/experiments',async r=>{
+  if(r.request().method()==='POST'){frozen=r.request().postDataJSON();await r.fulfill({json:{id:'scan-exp'}});}
+  else await r.fulfill({json:[]});
+ });
+ await page.route('**/api/jobs',r=>r.fulfill({json:r.request().method()==='POST'?{id:'scan-job'}:[]}));
+ await page.route('**/api/harness/jobs/scan-job',r=>r.fulfill({json:{status:'queued',attempts:[]}}));
+ await page.goto('/harness');
+ await page.getByRole('button',{name:'Stop outside the reception entrance.',exact:true}).click();
+ await expect(page.getByRole('button',{name:'开始运行'})).toBeEnabled();
+ await page.getByLabel('场景',{exact:true}).selectOption('other');
+ await expect(page.getByRole('button',{name:'开始运行'})).toBeDisabled();
+ await page.getByLabel('场景',{exact:true}).selectOption('m_floor');
+ await page.getByRole('button',{name:'Stop outside the reception entrance.',exact:true}).click();
+ await page.getByRole('button',{name:'开始运行'}).click();
+ await expect.poll(()=>frozen?.config.environment.backend).toBe('habitat_gs');
+ expect(frozen.config.environment.scene_manifest).toBe('/scene/scene.json');
+ expect(frozen.config.environment.max_steps).toBe(200);
+ expect(frozen.config.dataset).toEqual({name:'scan',split:'development'});
+ expect(frozen.execution_pool).toEqual([{environment_service:'e',execution_service:'x'}]);
+ expect(frozen.purpose).toBe('development');
+});

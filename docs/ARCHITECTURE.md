@@ -149,16 +149,12 @@ images, and stop independently of plan checkboxes. Initial observation/decomposi
 and evidence-based handoff review are prompting guidance. `subtask` preserves the
 previous strict workflow for comparisons; `global` preserves full-route delegation.
 
-### Topology memory contract v2
+### Topology memory
 
-Agentic mode exposes eleven tools, including `update_plan`, `update_memory` and
-`read_memory`. Legacy profiles retain their old interfaces. New experiments must freeze
-new configuration/source fingerprints; old traces are not reinterpreted as v2. The
-pre-change implementation and annotation audit are preserved at commit `b281792`.
-
-`update_plan(subtasks, reason)` replaces the ordered plan. Each task has a unique positive
-`id`, `instruction`, `completion_criterion`, and `status` (`pending`, `in_progress`,
-`completed`), with at most one in progress. Only plan updates mark completion.
+The [current tool contract](TOOL_CONTRACT.md) defines the seven default agentic
+tools, plan schema, execution caps, map receipts and STOP evidence. Explicit
+historical inventories remain supported. All profiles use the same session and
+memory implementation; completed traces retain their recorded contract.
 
 One `TopologyMemory` owns the graph in `live/subtasks/topology.json`, independent of the
 legacy dense geometric graph. Nodes contain stable IDs, actual 3D positions and frame
@@ -186,11 +182,11 @@ same endpoints. Beginning a new execution closes the prior write window. Caption
 1–800 characters; storage has no old 4000-character global cap. Full previous captions
 and map-read evidence remain in the event journal. No parallel node-caption store exists.
 
-Only an explicit successful `observe_map` grants write access. The receipt records image
+A successful `observe_map` or movement-returned map grants write access. The receipt records image
 SHA-256, shown IDs, frame, motion epoch and pending execution. Both endpoints must be
-shown and match the pending edge. Every motion or VLA call invalidates it; automatic
-handoff maps, `read_memory` and failed map reads do not grant access. The managed loop
-rejects batches containing both map read and memory write before executing any tool.
+shown and match the pending edge. Every later motion or VLA call invalidates it;
+`read_memory` and failed map reads do not grant access. The managed loop rejects
+a batch where a memory write follows a map-producing call before the model sees its result.
 MCP enforces completed tool-read-before-write but cannot independently certify SDK
 model-request boundaries.
 
@@ -216,7 +212,6 @@ there. The most recent caption is bounded background for the VLA, not a new inst
 history, or only the specified directed pair. It returns five executions newest-first,
 explicit pagination and system facts plus model captions. Optional images are capped at
 four sampled chronological frames across the page; references/counts disclose omissions.
-`observe_node` remains a lightweight single-place-image lookup using the same memory IDs.
 The memory read does not move, write, or grant map-read permission.
 
 Malformed tool arguments reject the whole unexecuted batch and return repair feedback.

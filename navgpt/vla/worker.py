@@ -154,7 +154,7 @@ class ActorWorker:
                 raise ValueError("Invalid or repeated request ID; refusing duplicate execution")
             name, arguments = data["name"], data["arguments"]
             # Validate before recording a dispatch that might have side effects.
-            self.session.tools.arguments[name].model_validate(arguments, strict=True)
+            self.session.tools.validate(name, arguments)
             self.seen.add(ident)
             receipt = folder / "calls.jsonl"
 

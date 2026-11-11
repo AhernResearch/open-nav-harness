@@ -178,7 +178,7 @@ async def test_real_mcp_stdio_to_rpc_closes_remote_ownership(tmp_path, unused_tc
             async with stdio_client(params) as (read, write):
                 async with ClientSession(read, write) as client:
                     await client.initialize()
-                    assert len((await client.list_tools()).tools) == 8  # default: no read_memory
+                    assert len((await client.list_tools()).tools) == 7  # VLA + node return; no direct movement.
                     assert (await http.get(url + "/info")).json()["session_id"] is None
                     result = await client.call_tool("observe", {"views": ["front"]})
                     assert result.content[0].text == "real MCP/RPC transport"
@@ -233,4 +233,31 @@ async def test_no_relative_tool_is_absent_on_both_rpc_sides(tmp_path):
     await tools.start()
     assert set(tools.definitions) == set(worker.session.tools.definitions) == set(selected)
     assert 'navigate_relative' not in worker.session.tools.functions
+    await tools.close()
+
+
+async def test_rpc_omitted_tools_cannot_restore_direct_movement(tmp_path):
+    actor = Mock()
+    actor.info.return_value = {'backend': 'lightnav'}
+    worker = ActorWorker(actor, 'lightnav', tmp_path / 'remote', 'http://fixed-environment')
+    tools = RemoteTools({'NAVGPT_CONDITION': 'planner_agentic',
+                         'NAVGPT_VLA_BACKEND': 'lightnav', 'NAVGPT_EXECUTION_URL': 'http://worker',
+                         'NAVGPT_LIVE_DIR': str(tmp_path / 'local')})
+    tools.request = AsyncMock(side_effect=worker.handle)
+    await tools.start()
+    assert len(tools.definitions) == 7
+    assert {'execute_subtask', 'navigate_to_node'} <= set(worker.session.tools.definitions)
+    assert 'navigate_relative' not in tools.definitions
+    before = tools.request.await_count
+    with pytest.raises(ValueError, match='Unknown navigation tool'):
+        await tools.call_tool('navigate_relative', {'turn_deg': 0., 'distance_m': 1.})
+    assert tools.request.await_count == before  # Refused before any RPC or cancellation.
+    with pytest.raises(ValueError, match='Unknown navigation tool'):
+        worker.handle('POST', f'/sessions/{tools.session_id}/call', {
+            'request_id': 'forbidden', 'name': 'navigate_relative',
+            'arguments': {'turn_deg': 0., 'distance_m': 1.},
+        })
+    assert not (worker.directory / worker.session_id / 'calls.jsonl').exists()
+    assert not worker.failed
+    assert not tools.failed
     await tools.close()

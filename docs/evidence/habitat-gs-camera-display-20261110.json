@@ -1,0 +1,62 @@
+{
+  "date": "2026-11-10",
+  "scope": "camera replay display",
+  "model_execution_changed": false,
+  "movement_commands_submitted": 0,
+  "completed_attempts_modified": false,
+  "root_causes": [
+    "The retained 128px commissioning images were covered by baked-in direction labels. The later 512px run contains four distinct camera artifacts.",
+    "The camera panel selected only motion history, so selecting an observe event showed no image or an older motion camera."
+  ],
+  "fixes": [
+    "Camera panel follows the latest recorded observe result or motion frame on the selected timeline.",
+    "Camera captions stay paired with returned artifacts even when another view is missing.",
+    "Click to inspect full recorded image without cropping, with a low resolution warning for old images.",
+    "Session timestamps distinguish the retained commissioning record from the later validation."
+  ],
+  "browser": {
+    "url": "http://192.168.66.221:8879/harness?attempt=d4fb0f5a7ed044ba90e90c2c8b3ac122",
+    "views": [
+      {
+        "src": "/api/attempts/d4fb0f5a7ed044ba90e90c2c8b3ac122/artifact/6ac0553dcebb83f12f9922539d4b27eb66b98bb87327ab6cc7caf5b25acaf8f0",
+        "alt": "\u524d\u65b9\u89c6\u89d2",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "src": "/api/attempts/d4fb0f5a7ed044ba90e90c2c8b3ac122/artifact/f7d629f1587668c6a0c4fea080cfef790fb76a79ca2a341803e337c8deb5d963",
+        "alt": "\u53f3\u65b9\u89c6\u89d2",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "src": "/api/attempts/d4fb0f5a7ed044ba90e90c2c8b3ac122/artifact/aec364e08cf754b26204c4ca827c20e5138286969a8c562cd623d3c20909f506",
+        "alt": "\u540e\u65b9\u89c6\u89d2",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "src": "/api/attempts/d4fb0f5a7ed044ba90e90c2c8b3ac122/artifact/2bf5cca037abf9d4408d9bd465773741300d47c217dd632463919c956d734dcc",
+        "alt": "\u5de6\u65b9\u89c6\u89d2",
+        "width": 512,
+        "height": 512
+      }
+    ],
+    "oldLowResolutionWarning": true,
+    "errors": []
+  },
+  "source_release": "/home/holo/robots/open-nav-harness-tools/state/habitat-gs/camera-fix/d765542a845d465489f585b5e6e6a317/release",
+  "screenshot": "docs/evidence/habitat-gs-camera-display-20261110.png",
+  "screenshot_sha256": "6d80bc3001afe9e772282ca3f241ed74e664b2f843b1beff4038dfd050dc03e1",
+  "checks": {
+    "pytest": "248 passed; 4 subtests passed",
+    "ruff": "passed",
+    "mypy": "passed",
+    "navgpt_F821_F823": "passed",
+    "frontend_build": "passed",
+    "playwright": "15 passed",
+    "lan_browser_check": "passed",
+    "completed_evidence_hashes": "unchanged",
+    "model_implementation_digest": "unchanged"
+  }
+}

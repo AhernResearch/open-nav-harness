@@ -12,7 +12,9 @@ from navgpt.planner.tools.memory import TopologyMemory
 from navgpt.planner.tools.mcp_tools import build_mcp
 from navgpt.planner.tools.transport import RemoteTools
 from navgpt.vla.worker import ActorWorker
-from navgpt.settings import AGENTIC_TOOLS_WITH_RECALL
+from navgpt.settings import AGENTIC_TOOLS_WITH_DIRECT_MOVEMENT
+
+LEGACY_RECALL_TOOLS = AGENTIC_TOOLS_WITH_DIRECT_MOVEMENT + ["read_memory"]
 from open_nav_harness.core.artifacts import Journal
 from open_nav_harness.core.context import ContextWindow
 
@@ -44,9 +46,9 @@ def configure(s, monkeypatch):
 
 @pytest.fixture
 def session(tmp_path, monkeypatch):
-    # read_memory is opt-in; these contract tests select the recall surface.
+    # Historical movement and recall remain explicit in these lifecycle ablations.
     return configure(NavigationSession(env={"NAVGPT_CONDITION": "planner_agentic",
-                                           "NAVGPT_TOOLS": json.dumps(AGENTIC_TOOLS_WITH_RECALL),
+                                           "NAVGPT_TOOLS": json.dumps(LEGACY_RECALL_TOOLS),
                                            "NAVGPT_LIVE_DIR": str(tmp_path / "live")}), monkeypatch)
 
 
@@ -249,7 +251,7 @@ async def test_mcp_rpc_gate_and_history_do_not_fence_recoverable_rejections(tmp_
     worker = ActorWorker(SimpleNamespace(info=lambda: {"backend": "lightnav"}, close=lambda: None, reset=lambda _: None), "lightnav",
                          tmp_path / "remote", "http://fixed-env")
     remote = RemoteTools({"NAVGPT_CONDITION": "planner_agentic", "NAVGPT_VLA_BACKEND": "lightnav",
-                          "NAVGPT_TOOLS": json.dumps(AGENTIC_TOOLS_WITH_RECALL),
+                          "NAVGPT_TOOLS": json.dumps(LEGACY_RECALL_TOOLS),
                           "NAVGPT_EXECUTION_URL": "http://worker", "NAVGPT_LIVE_DIR": str(tmp_path / "local")})
     from unittest.mock import AsyncMock
     remote.request = AsyncMock(side_effect=worker.handle)

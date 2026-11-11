@@ -6,6 +6,7 @@ import { Icon } from "./icons";
 import { MapView } from "./MapPanel";
 import { PlanCard, Thread } from "./Thread";
 import { useTrace } from "./useTrace";
+import { CameraGallery } from "./CameraGallery";
 
 const statusText: Record<string, string> = {
   running: "运行中",
@@ -68,7 +69,7 @@ export function HarnessPage() {
   const last = trace.entries.length - 1;
   const upto = cursor ?? last;
   const s = trace.status;
-  const frame = trace.latestMotion(upto)?.frames.at(-1);
+  const camera = attempt ? trace.camera(upto, attempt) : [];
   const running = s?.status === "running";
   const control = async (action: string) => {
     if (action === "cancel" && !confirm("停止会终止正在执行的 episode，中断后需要在 Workbench 中核验并释放资源。确定停止？")) return;
@@ -93,6 +94,7 @@ export function HarnessPage() {
                 <span className="title">{a.meta?.instruction ?? a.name}</span>
                 <span className="sub">
                   {String(a.meta?.scene_id ?? "").split("/").at(-1)?.replace(".glb", "") || `ep ${a.episode}`} · {statusText[a.status] ?? a.status}
+                  {a.created && <> · {new Date(a.created * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</>}
                 </span>
               </span>
             </button>
@@ -176,12 +178,10 @@ export function HarnessPage() {
             <h3>
               <Icon name="eye" /> 机器人视角
             </h3>
-            {frame ? (
-              <div className="camera">
-                {Object.entries(frame).map(([name, path]) => path && <img key={name} alt={`${name} 视角`} src={`/api/attempts/${attempt}/files/${path}`} />)}
-              </div>
+            {camera.length ? (
+              <CameraGallery images={camera} />
             ) : (
-              <div className="map-empty">开始运动后显示</div>
+              <div className="map-empty">观察或运动后显示</div>
             )}
           </section>
         </aside>

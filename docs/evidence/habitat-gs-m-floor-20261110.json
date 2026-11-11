@@ -1,0 +1,368 @@
+{
+  "status": "passed",
+  "purpose": "development",
+  "formal_benchmark": false,
+  "model_inference_exercised": false,
+  "actor_inference_exercised": false,
+  "gpu": {
+    "host": "a100",
+    "device": 2,
+    "model": "NVIDIA A100-SXM4-80GB"
+  },
+  "deployment": {
+    "owner": "3066ae942703477c859921c1a94c55c4",
+    "purpose": "development",
+    "lock": {
+      "repository": "https://github.com/zju3dv/habitat-gs",
+      "commit": "cb01b2fdf850ce3cab28ad00461a68ac7719f23f",
+      "imath_commit": "d690a3fcff4e877ead5ae56c7e964595ade8a35e",
+      "patches": [
+        "deployment/patches/habitat-gs-cuda-architectures.patch",
+        "deployment/patches/habitat-gs-cuda13-properties.patch",
+        "deployment/patches/habitat-gs-cuda13-surface.patch"
+      ],
+      "runtime": "independent virtual environment; Python 3.11",
+      "build": {
+        "HABITAT_WITH_CUDA": "ON",
+        "HABITAT_WITH_BULLET": "OFF",
+        "HABITAT_BUILD_GUI_VIEWERS": "OFF",
+        "cmake.build-type": "Release",
+        "CMAKE_CUDA_ARCHITECTURES": "80"
+      },
+      "purpose": "development",
+      "formal_benchmark": false
+    },
+    "inputs": {
+      "upstream-source.tgz": "ba3bbd83c58a5dfe484cf3eeaa231256a01e7466891e10f3d2855c12fa84ff17",
+      "source-resources.tgz": "8728b500c871a1076e0996a0c25a4d9474b634666d04869d2d47d032c9a1720b",
+      "imath-source.tgz": "8ed696b08ba45a715312507c3c8ff114ab472291e486fbbf76a0e467b123c603",
+      "build-inputs.tgz": "9272d615b452b93a6cfdccc184299dc75d57c075debf4ef848b15887f30c8471",
+      "glm-headers.tgz": "6a802c2f0b3bc54b4025454df68480f9b0afad03873a66e298e4ec7f907a725a",
+      "extra-wheels.tgz": "50f246d072286f3b52e6922663034a4b7bf882dc26e049da9181919dacd20f26",
+      "harness-probe-v2.tgz": "e3d767eed0b97cbc6259936fd540726060a97dd03cd06ef71ad835833c1b4350"
+    },
+    "patches": {
+      "habitat-gs-cuda-architectures.patch": "7e1a03c2b9e8b7b1dfc0c930a1f21809897d18d3c708f8d30093915f87a23857",
+      "habitat-gs-cuda13-properties.patch": "a3729079db561453935a60df4f158fec4bce364ee51f00b64e4b4d94842c1de2",
+      "habitat-gs-cuda13-surface.patch": "8ef4b36fd397105dae6db8bd0ab798b6a95f007ece54315177f301fabccd89f1"
+    }
+  },
+  "runtime": {
+    "habitat_version": "0.3.3",
+    "cuda_enabled": true,
+    "bindings_sha256": "03f2ae21f82c45abb0d667a41ac5cf486ba5f8feb34be8e53d00f89c8c3b9030",
+    "scene_manifest_sha256": "c8a3865ec4def0b0ffa594c5887af0094ac61a491855ab65de52bc0f1242e6ee"
+  },
+  "python_sources": {
+    "__init__.py": "9cde6f2f4e8694ecc45f30af4b1e0c6d0a0152cca9ff7e68f866d3659ca5e77e",
+    "__main__.py": "d5f31049dab995a2c9ab32ad07f31b5313fc8dde25095e7edd7f1bdf60a8ce29",
+    "cli.py": "cb4bd41a8a1daf902355c88655733bc831cd92cf535953ac87f825d646af44bf",
+    "environment/__init__.py": "9dd0ca12ade3e785e1b326a1c4effabb72c502a8c4d88940c4e57fff6223310b",
+    "environment/__main__.py": "8538af573f67bd5ae8c30dcdad4bd0c055a9223af9ad18241e81634a784d3241",
+    "environment/api.py": "227e74cfe0accb926f8cbd43d5b70e124797af62d8a2bbb9ab4825ff81c086cb",
+    "environment/datasets.py": "8d003ce2dabd1b722ab96f45854ff76e63b0408720f07cbad99b3120d3bd85b3",
+    "environment/geometry.py": "1c4f900fd3baf15b68e1e83f0a1ed2aa956986cac7a5766fee713a5d07dfa4fc",
+    "environment/presentation.py": "9b13e733f96d131e9952e6ae4b064ba5a5f36a54db21557c45f1bf92f5f1fca7",
+    "environment/r2r.py": "379a8dd32d83ab2a763f3d2cadec913a7170cd0c8d4a957178b1639e1790c051",
+    "environment/scan.py": "4fc7c53721e4dd99932080c57ac02adedc35412904a2ce6f658a190c6cdf9015",
+    "environment/scan_assets.py": "bb2c7edeed325efdb2cd8de592ae720459c65ac9c07c203eef15d969bbcc8399",
+    "environment/scan_probe.py": "09e074389923739fbe4eaa3df30800d6d7ff632180ee87ea42000de82c8fe7ec",
+    "launch.py": "f4fb85e279b471c9bf38150ee5b9585b84655574193bf3b85bb8d0499a025b93",
+    "planner/__init__.py": "115f946b32d92b2250b1a54950634d6d4be9c480ba6b81b729bffa4ba3ec2c63",
+    "planner/config.py": "a7c06770d41266a3681bec14354a56f81fd4b7c3a9c1d7f7e8645ac557ac85d0",
+    "planner/contracts.py": "2de37ce99267edee52100c7f238f36912d41ce153e738105cb95d2241fa20f43",
+    "planner/flowview.py": "45dc2dd01e14edbe68df63a7b950cc1b9d1317abd61d5e7f4dd22ecaf1891142",
+    "planner/merge.py": "47dfb849b679a674e1b85378238970dd78c52af5da02fcd19cc2ee19457c40c5",
+    "planner/prompts.py": "e9c5b56ba76e8a18bd0c776eda77f4d8c598b7062a8eff411065deb2096807cb",
+    "planner/runner.py": "c5b5bb7e133d456aa4bb894920437404bcfcff049452cfbff4677b27a0bdb95f",
+    "planner/runtimes/__init__.py": "3a6931ddad12a378f4a60f29985c70f93ca5975bc6fc661566e48a7454ecd41c",
+    "planner/runtimes/claude.py": "7ba47337a08bb63136b41822fd75ca15bf633ae0ac8404899054225fdd288931",
+    "planner/runtimes/codex.py": "65917bb4b73604cde9dfaf6825e27d1ddc8bfe5d2fd3d659773461fe7e9e0e0a",
+    "planner/runtimes/registry.py": "7e7c807cc803800ec73394a09d384b462cb6e1cc5d6de4d96b2bf9faf0c28f50",
+    "planner/tools/__init__.py": "c592e519e70c761154f29219146424ded1595b411f9b573b4d2b46e034863261",
+    "planner/tools/ablation.py": "0cbf27da797074a015f0ec384f7e90993bc323d9589978f74f2d88c2f1c674a4",
+    "planner/tools/agentic.py": "fb43c8883cfc7824f5ef70442f2e58f26211751f7178eb41f38a9e326f2d465f",
+    "planner/tools/frame_store.py": "5fc69a48248906bfef1346ccb80e28f4e6d2437e4cc887d4652549d73160973c",
+    "planner/tools/mcp_tools.py": "ab1eece69be82fbea93a30b3b2d4af2a90f228d3009c0361f260e43652b821d1",
+    "planner/tools/memory.py": "a73d9bb0dfc0cfcb844115cbada62610a62e3545445ba91ab7a27642926be6de",
+    "planner/tools/registry.py": "e851a44be2c834d602b833d80e3ae59a056087fa847b54a79a02d16c9bee4fbe",
+    "planner/tools/session.py": "c520633436cd7c7d04c18e51a9cace45c2a8ac6305357e7051c422312107af8b",
+    "planner/tools/subtasks.py": "3d07e158e2b900d92b51adf44755201590ca86e23422332c88cfe0f12a6891f3",
+    "planner/tools/transport.py": "fe28c72fc9463eeec97b4f6bb9a7b5dadf99448b38b6714978e52be70c7906dd",
+    "planner/tools/vla_client.py": "725c6e5f40e46938fa83331311640c759c3a0a19d40a3501f22fdd309981d335",
+    "planner/turns.py": "6db3eb70515442093efcd6e63f9b85da72adeb787d2a6c1047c73bd7db3d20df",
+    "planner/viewer.py": "db6a3bb76aa4e3e284aea1b6e480d89c1309f6f28b23c76281983a7e40e2fa0d",
+    "planner/vla_only.py": "8f189714ec97adebe5426ebe813c6730d214e6ac967d3c36c5846ad2cee82bae",
+    "settings.py": "7a1099b9548d953c6d71341f76211172a2aeca60f1daa8a0d38f2240a10687db",
+    "vla/__init__.py": "b7f0c471f0a40a5efa5d1988014e8cc33fe806f86166c139e8754172f18a71bf",
+    "vla/__main__.py": "0d4062fa248cfdec95296edd0e29740f52be99e7277fc988c0e57c9f8b7799eb",
+    "vla/agent.py": "ea4441441a6f559df2e7a8c5573f059458cdc0325090ac4ebbab1915c88708f0",
+    "vla/api.py": "81412a9321642df3ada20cc4045f66ffb22a0384b1456c355474c2445c452a87",
+    "vla/checkpoint.py": "c993bd3259ece7bf5eb635b996a2bd164fc260b7aa9d0145fe07cc2bcd65a6bf",
+    "vla/context.py": "59379d1f4a7f8ce01411a75a57e53b4c4036ee64159630062295cedee57bf984",
+    "vla/images.py": "a0c62ad644f2b61dfc10d3f9f26adea144a25cab002daa719738d43141f1a9f6",
+    "vla/inference.py": "5b6ecaca09a15c94be770a9df19af6ca05c19ffcc39324125d992be09f70f9c0",
+    "vla/lightnav.py": "6f3ef5d732f3606b23184efe966a9554fdc60a00f272a1b0f3a585c73d0e4c9f",
+    "vla/navigation.py": "94ac4599d55b80ed007f3e51d9937239f4f7b7c94e4039d5a8fec1a9a7f934a1",
+    "vla/owned.py": "694e0fcdb3690b90abb66864e535da2d45453bb329cedbb051d5d37b54247eca",
+    "vla/profiles.py": "0668e2f2ed6330be2183caca6195c86b2d8f5b4dc923af8c15c1711830eb7933",
+    "vla/remote.py": "316deeee8b48566901b96302c59929791a88fba8a6c29c6743ae3f6e27207562",
+    "vla/runtime/__init__.py": "005df028edcb8b7b389adc466c8e8b027e9e1306d2d71cfdd78e7c01305d10c6",
+    "vla/runtime/embodiments.py": "276696512303f628aeba6845ff9474ab35eca3b58f3f762faf79b6173fe17e27",
+    "vla/runtime/inference.py": "094abe8220eadaca4e8afaf32d91cc68f5b1677fc0b4b20a6affc22483c3691e",
+    "vla/runtime/models/__init__.py": "db9f7ad943503d2a4db037c3b689893ab7880544c6b091b91d6b809aeaee0a1d",
+    "vla/runtime/models/configuration_navgpt3.py": "8a9a5209a1455fe7677795f63b9a715fe9cc51842b11b560e8afc6af98c24971",
+    "vla/runtime/models/image_processing_navgpt3.py": "548f5d5eb7d14668d1a7adc267d16a7e449c7df670c269da0ca54cd0bcba5b76",
+    "vla/runtime/models/modeling_navgpt3.py": "b3f5e9d3c5797f4299ab5298ec4b2339fbeb143deacea5742bee0eb991b69ef4",
+    "vla/runtime/models/processing_navgpt3.py": "e4ac0a67c2c26d6dbdfae1922d718c582b92e207a02670a0859a36046a214f69",
+    "vla/shared.py": "a3191c3aa3f5d846d2070ef8734d4b1751ef7f257dafcb00ba865253eb0ef77e",
+    "vla/worker.py": "40f1f37c000c2b7c1889379be175f8a16520843b40b13d1f65fe1697289e74d8"
+  },
+  "navigation": {
+    "schema": "open_nav_scan_navigation_v1",
+    "source_manifest_sha256": "c8a3865ec4def0b0ffa594c5887af0094ac61a491855ab65de52bc0f1242e6ee",
+    "owner": "686cc8fa4261488086421d538e47cf88",
+    "purpose": "development",
+    "geometry_review": "required",
+    "settings": {
+      "cellSize": 0.05,
+      "cellHeight": 0.025,
+      "agentHeight": 1.5,
+      "agentRadius": 0.18,
+      "agentMaxClimb": 0.2,
+      "agentMaxSlope": 45.0,
+      "regionMinSize": 20.0,
+      "regionMergeSize": 20.0,
+      "edgeMaxLen": 12.0,
+      "edgeMaxError": 1.2999999,
+      "vertsPerPoly": 6.0,
+      "detailSampleDist": 6.0,
+      "detailSampleMaxError": 1.0,
+      "filterLowHangingObstacles": true,
+      "filterLedgeSpans": true,
+      "filterWalkableLowHeightSpans": true
+    },
+    "habitat_version": "0.3.3",
+    "navigable_area_m2": 150.64422607421875,
+    "scan_positions_sampled": 566,
+    "supported_start_candidates": 448,
+    "horizontal_snap_p90_m": 0.6681446070971281,
+    "assets": {
+      "navmesh": {
+        "path": "scene.navmesh",
+        "sha256": "fce46f5392f326b41bce569b3bd9af4e28bc1643344ebae80757d81ede3756f9"
+      },
+      "episodes": {
+        "path": "episodes.json",
+        "sha256": "9bbafd2b5a0a88ffca4bb1ca986f45d01c014276a03807cb3cedf2eacc3ce307"
+      }
+    }
+  },
+  "render": {
+    "rgb_std": 39.6403177624895,
+    "depth_valid_fraction": 1.0,
+    "depth_median_m": 1.093994140625
+  },
+  "observation_pose_unchanged": true,
+  "tools": [
+    {
+      "tool": "observe_forward",
+      "is_error": false,
+      "images": 1,
+      "agent_state": {
+        "position": [
+          0.005824999883770943,
+          -1.0047825574874878,
+          0.0030249999836087227
+        ],
+        "rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "heading_rad": -0.0,
+        "step_index": 0,
+        "done": false
+      }
+    },
+    {
+      "tool": "observe_panorama",
+      "is_error": false,
+      "images": 4,
+      "agent_state": {
+        "position": [
+          0.005824999883770943,
+          -1.0047825574874878,
+          0.0030249999836087227
+        ],
+        "rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "heading_rad": -0.0,
+        "step_index": 0,
+        "done": false
+      }
+    },
+    {
+      "tool": "observe_map",
+      "is_error": false,
+      "images": 1,
+      "agent_state": {
+        "position": [
+          0.005824999883770943,
+          -1.0047825574874878,
+          0.0030249999836087227
+        ],
+        "rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "heading_rad": -0.0,
+        "step_index": 0,
+        "done": false
+      }
+    },
+    {
+      "tool": "annotate_node",
+      "is_error": false,
+      "images": 0,
+      "agent_state": {
+        "position": [
+          0.005824999883770943,
+          -1.0047825574874878,
+          0.0030249999836087227
+        ],
+        "rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "heading_rad": -0.0,
+        "step_index": 0,
+        "done": false
+      }
+    },
+    {
+      "tool": "navigate_primitive",
+      "is_error": false,
+      "images": 0,
+      "agent_state": {
+        "position": [
+          -0.05887977033853531,
+          -1.0359785556793213,
+          -0.23845645785331726
+        ],
+        "rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "heading_rad": -0.0,
+        "step_index": 3,
+        "done": false
+      }
+    },
+    {
+      "tool": "navigate_relative",
+      "is_error": false,
+      "images": 4,
+      "agent_state": {
+        "position": [
+          -0.05887977033853531,
+          -1.0736076831817627,
+          -1.2384564876556396
+        ],
+        "rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "heading_rad": -0.0,
+        "step_index": 7,
+        "done": false
+      }
+    },
+    {
+      "tool": "navigate_to_node",
+      "is_error": false,
+      "images": 5,
+      "agent_state": {
+        "position": [
+          0.005824999883770943,
+          -1.0047825574874878,
+          0.0030249999836087227
+        ],
+        "rotation_wxyz": [
+          0.02603299915790558,
+          0.0,
+          -0.9996610879898071,
+          0.0
+        ],
+        "heading_rad": -3.0895207726826603,
+        "step_index": 12,
+        "done": false
+      }
+    },
+    {
+      "tool": "terminate_episode",
+      "is_error": false,
+      "images": 0,
+      "agent_state": {
+        "position": [
+          0.005824999883770943,
+          -1.0047825574874878,
+          0.0030249999836087227
+        ],
+        "rotation_wxyz": [
+          0.02603299915790558,
+          0.0,
+          -0.9996610879898071,
+          0.0
+        ],
+        "heading_rad": -3.0895207726826603,
+        "step_index": 13,
+        "done": true
+      }
+    }
+  ],
+  "evaluation": {
+    "evaluation_available": false,
+    "purpose": "development",
+    "success": null,
+    "spl": null,
+    "ndtw": null,
+    "distance_to_goal": null,
+    "steps_taken": 13,
+    "stop_called": true,
+    "collisions": 0
+  },
+  "artifacts": {
+    "probe": "outputs/habitat-gs/probe-001",
+    "forward_sha256": "5c07a5bc6233faf863b040275647371e3150190230a9a135d8791f60b0b25d63",
+    "tools_sha256": "7bb45bce7a6abcce8e90f71ed3e74183e4089efc12d85359c516a5b24aa38ec8",
+    "result_sha256": "f366d6082469f692ee15faafb1dd5b6579a4f1df949648ee7f223ceb8f02a3d6"
+  },
+  "validation": {
+    "pytest": "247 passed; 4 subtests passed",
+    "ruff_open_nav_harness": "passed",
+    "mypy_open_nav_harness": "passed",
+    "ruff_navgpt_F821_F823": "passed",
+    "frontend_build": "passed",
+    "scan_check_data": "passed"
+  },
+  "limitations": [
+    "short deterministic tool probe, without a model or actor",
+    "native Gaussian depth is unvalidated",
+    "navigation geometry requires review",
+    "LOD 3, 256px forward RGB, 128px panorama"
+  ]
+}

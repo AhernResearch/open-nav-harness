@@ -4,7 +4,7 @@ import { Icon } from "./icons";
 import { ModelPicker } from "./ModelPicker";
 import { agenticPlanner } from "../run-profile";
 
-type Pick = { index: number; episode_id: number; scene: string; instruction: string };
+type Pick = { index: number; episode_id: number | string; scene: string; instruction: string };
 
 function bindings(services: Row[], vla: string) {
   const inference = services.find((s) => s.id === vla);
@@ -109,6 +109,9 @@ export function Composer({ onStarted }: { onStarted: (job: string) => void }) {
   }, [dataset, scene, query]);
   const options = (kind: string): [string, string, boolean][] => choices(kind).map((s) => [s.id, s.spec.name + (s.available ? "" : " · 不可用"), !s.available]);
   const environment = pickService("environment");
+  const environmentMetadata = services.find((s) => s.id === environment)?.spec.metadata ?? {};
+  const matchesDataset = !environmentMetadata.dataset || (environmentMetadata.dataset === catalog?.dataset
+    && environmentMetadata.split === catalog?.split && (!environmentMetadata.scene_id || environmentMetadata.scene_id === scene));
   const vla = pickService("vla");
   const planner = pickService("planner");
   const execution = pickService("execution");
@@ -128,7 +131,7 @@ export function Composer({ onStarted }: { onStarted: (job: string) => void }) {
     : e.spec.environment_service === environment))?.spec.config;
   const backend = chosen.backend ?? base?.vla?.backend ?? "lightnav";
   const canStart = !!pick && [environment, vla, planner, ...(shared ? [execution] : [])].every((id) => services.some((s) => s.id === id && s.available))
-    && (!shared || workers.some((s) => s.id === execution)) && !busy;
+    && matchesDataset && (!shared || workers.some((s) => s.id === execution)) && !busy;
 
   const start = async () => {
     if (!canStart || !pick || !catalog || submitting.current) return;
@@ -147,6 +150,10 @@ export function Composer({ onStarted }: { onStarted: (job: string) => void }) {
           };
       config.harness = { ...config.harness, mode: "agentic" };
       config.planner = agenticPlanner(config.planner);
+      if (environmentMetadata.backend === "habitat_gs") {
+        config.environment = { ...config.environment, ...environmentMetadata.environment_config,
+          backend: "habitat_gs", scene_manifest: environmentMetadata.scene_manifest };
+      }
       const { id } = await api<Row>("/experiments", {
         name: `Harness · ${pick.scene} · ${pick.index}`,
         planner_service: planner || null,

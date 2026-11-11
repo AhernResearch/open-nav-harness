@@ -11,7 +11,7 @@ in causal order, including passive retraces. Neither a task switch nor a rolling
 Planner window resets or compresses this timeline. Only an episode reset clears it.
 A new instruction at the same endpoint runs inference without appending a duplicate
 image. The legacy context-replacement endpoint is rejected. Planner tools expose
-`execute_subtask(task_id, instruction="")` for this actor, with no manual reset.
+`execute_subtask(task_id, max_distance_m, instruction="")` for this actor, with no manual reset.
 Only the chosen instruction goes into the native prompt; topology captions and
 Planner summaries are not appended. NavGPT VLA retains its separate bounded profile.
 
@@ -26,6 +26,47 @@ draw on the upstream [Prompt Guide](https://github.com/lightorigins/LightNav-0#%
 They are Planner guidance, not schema restrictions or changes to LightNav's native
 prompt. Existing plans and traces stay frozen. Navigation improvement from this
 wording change has not yet been measured.
+
+The [pinned upstream Prompt Guide](https://github.com/lightorigins/LightNav-0/blob/3015508b70fb6e30bbd66701e94c9b916dcb8df8/README.md#%EF%B8%8F-prompt-guide)
+recommends action, optional robot-relative direction, a disambiguated object phrase
+and an optional stop. Prefer direction plus object or one salient relational anchor;
+ordinals are less reliable and need a counting direction. This is wording guidance,
+not an exclusive grammar for every supported task. The official Habitat policy also
+accepts full R2R/RxR instructions through the VLN trajectory prompt.
+
+For this harness, the Planner now writes concise R2R-style route legs: ordered movement,
+landmarks and spatial relations, then one final stopping location. Related corridor
+travel, turns and doorway crossings can stay together. An authored wording example
+(not a route in the scan) is: “Follow the hallway past the shelves. Turn left through
+the open doorway and stop beside the table inside the room.” The
+[R2R paper](https://arxiv.org/html/1711.07280v3) describes natural-language routes
+typically spanning multiple rooms; it does not establish a universal one-object or
+one-metre instruction limit. No benchmark reference paths or held-out instructions
+are copied into the Planner's examples.
+
+For open room-finding tasks, the Planner selects branches/candidate rooms and judges
+identity. It can delegate a grounded route into a candidate when the user's task
+allows entry, then inspect the returned views. Merely saying “find a meeting room”
+is still insufficient as a route. Splitting every transition into metre-sized nudges
+and repeated stops outside the same door is also discouraged. Resume an unfinished
+leg after a runtime handoff while preserving its destination and endpoint qualifier.
+
+The 20-action local-delegation trial exhausted 60 Planner rounds after 159 environment
+steps without STOP. The next development configuration uses an 80-action per-call
+bound to permit route continuity. This bound is our experimental orchestration choice,
+not an upstream recommendation or a change to LightNav's trained prompt, velocity
+controller, continuous history or decode contract. Wording and handoff cadence change
+together, so a new run cannot isolate their individual effects.
+
+An opt-in harness profile, `harness.vla_instruction_style: r2r`, now requires the
+Planner's `execute_subtask` call to provide `instruction` (the route) and `stop_at`
+(a concrete final location) separately. The adapter records both fields and the
+compiled text, then uses the same navigation execution implementation. LightNav
+receives ordinary English: the route followed by “Stop <stop_at>.” Missing fields
+are refused before dispatch, and an empty endpoint is refused before movement.
+This is our Planner/tool contract, not a requirement in the upstream LightNav prompt
+grammar. It checks structure, not whether a landmark or room classification is true.
+The default `natural` profile and existing frozen attempts retain their schemas.
 
 The Planner prompt and eight active tool descriptions were subsequently condensed
 from 875/566 to 356/323 whitespace-delimited words (using a fixed instruction
@@ -230,8 +271,8 @@ Then run from the holo repository, using its existing Planner environment:
 ```
 
 The VLA-only profile can run directly on A100 with its existing Planner Python;
-that mode needs no Planner login. `navgpt launch` also understands the bridge and
-can create one bridge/session per shard against a shared upstream policy server.
+that mode needs no Planner login. Register the environment and actor through
+Workbench; use an execution pool when multiple lanes share an inference server.
 
 The integration services were left available as transient user units:
 
@@ -257,27 +298,10 @@ invalid output, upstream session isolation, instruction changes, frame-only
 history, no pose/panorama in policy requests, capped-endpoint deduplication,
 external-policy settings and the original NavGPT two-hit stopping behavior.
 
-The real corrective-control diagnostic can be replayed against an isolated
-environment with:
-
-```bash
-.envs/planner/bin/python reproduction/probe_lightnav_repair_resume.py \
-  --output outputs/lightnav-repair-resume-new.json
-```
-
-It caps each delegation at two movements, moves 0.5 m, resumes with a revised
-instruction, verifies causal history and active episode status, then explicitly
-stops. This is a plumbing diagnostic, not a scored route.
-
-Integration evidence is under
-[`reproduction/lightnav_harness_20261106/`](../reproduction/lightnav_harness_20261106/):
-
-- `integration_report.json`: source hashes, identities, native parity and Planner
-  results.
-- `repair_resume_probe.json`: history grows 2 → 4 → 6 observations and the
-  episode ends only on explicit STOP.
-- `planner_smoke.json`, `local_paths.json`, `local_preflight.json`: exact local
-  Planner setup. `planner_smoke.log` records the run.
+Current CPU contract tests cover corrective control and causal history without
+starting model services. Use the explicit parity probe above for GPU checks.
+Historical integration reports remain in [evidence](evidence/); scripts and local
+paths from the retired November 6 checkout are not shipped here.
 
 The A100 native smoke artifacts are in
 `/data/nav_storage/lightnav/runs/navgpt_lightnav_harness_20261106/outputs/lightnav_vla_only_first3`.

@@ -7,33 +7,20 @@ import json
 import math
 import os
 import re
-import sys
 import time
 from pathlib import Path
 from typing import Any, Literal
 import requests
 from .registry import Image, TextContent, ToolRegistry, ToolResult
-from .agentic import PlanItem, PlanPatch, StopEvidence
+from .agentic import (
+    AgenticTasks, PlanItem, PlanPatch, StopEvidence, StallGuard, StopEvidenceGate, TOOL_DESCRIPTIONS,
+)
+from .ablation import ReviewScheduler, validate
+from .frame_store import save_frame, read_frame, frame_exists
+from .subtasks import SubtaskManager
+from .vla_client import NavGPTVLAClient, pose_unchanged
+from ..tool_profiles import CAPABILITIES, expected_tools
 from navgpt.vla.profiles import input_profile
-
-
-def _sibling(module_name, attr):
-    try:
-        mod = __import__("navgpt.planner.tools." + module_name, fromlist=[attr])
-    except ImportError:
-        import importlib.util
-
-        here = os.path.dirname(os.path.abspath(__file__))
-        spec = importlib.util.spec_from_file_location(module_name, os.path.join(here, module_name + ".py"))
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules.setdefault(module_name, mod)
-        spec.loader.exec_module(mod)
-    return getattr(mod, attr)
-
-
-save_frame = _sibling("frame_store", "save_frame")
-read_frame = _sibling("frame_store", "read_frame")
-frame_exists = _sibling("frame_store", "frame_exists")
 
 
 # Environment verbs that can change the pose; CAPTURE_VERBS also record passed frames.
@@ -70,9 +57,16 @@ class NavigationSession:
             raise ValueError("NAVGPT_TOOLS must be a non-empty list of tool names")
         self._AGENTIC = self.CONDITION == "planner_agentic"
         self._SUBTASK = self.CONDITION in ("planner_subtask", "planner_agentic")
+        if self._AGENTIC and self._enabled_tools is None:
+            self._enabled_tools = expected_tools(self.CONDITION)
         self._rollout_limits = None
         self.VLA_URL = self.env.get("NAVGPT_VLA_URL", "http://127.0.0.1:8000")
         self.VLA_BACKEND = self.env.get("NAVGPT_VLA_BACKEND", "navgpt")
+        self._instruction_style = self.env.get("NAVGPT_VLA_INSTRUCTION_STYLE", "natural")
+        if self._instruction_style not in ("natural", "r2r") or (
+            self._instruction_style == "r2r" and not self._AGENTIC
+        ):
+            raise ValueError("r2r instruction style requires an agentic session")
         self._input_profile = input_profile(self.VLA_BACKEND)
         self.VLA_MAX_STEPS = int(self.env.get("NAVGPT_VLA_MAX_STEPS", "200"))
         self.VLA_MAP = self.env.get(
@@ -91,9 +85,8 @@ class NavigationSession:
         self.BUNDLE = self.env.get("NAVGPT_CAPABILITY_BUNDLE", "full")
         self.REVIEW_EVERY = int(self.env.get("NAVGPT_REVIEW_EVERY", "0"))
         self._ABLATION = self.INTERFACE != "standard"
-        self._CAPABILITIES = _sibling("ablation", "CAPABILITIES")
-        _sibling("ablation", "validate")(self.INTERFACE, self.BUNDLE, self.REVIEW_EVERY)
-        self._scheduler = _sibling("ablation", "ReviewScheduler")(self.REVIEW_EVERY)
+        validate(self.INTERFACE, self.BUNDLE, self.REVIEW_EVERY)
+        self._scheduler = ReviewScheduler(self.REVIEW_EVERY)
         self.tools = ToolRegistry()
         self._t0 = time.time()
         self._obs_count = 0
@@ -127,7 +120,7 @@ class NavigationSession:
         self._last_revisit = None
         self._instruction = self.env.get("NAVGPT_INSTRUCTION", "")
         self._tasks = (
-            (_sibling("agentic", "AgenticTasks") if self._AGENTIC else _sibling("subtasks", "SubtaskManager"))(
+            (AgenticTasks if self._AGENTIC else SubtaskManager)(
                 self._instruction,
                 self.env.get("NAVGPT_SUBTASK_DIR")
                 or (self.LIVE_DIR / "subtasks" if self.LIVE_DIR else None),
@@ -135,8 +128,8 @@ class NavigationSession:
             if self._SUBTASK
             else None
         )
-        self._stall = _sibling("agentic", "StallGuard")(self.env.get("NAVGPT_STALL_RETURN", "previous"))
-        self._stop_gate = _sibling("agentic", "StopEvidenceGate")()
+        self._stall = StallGuard(self.env.get("NAVGPT_STALL_RETURN", "previous"))
+        self._stop_gate = StopEvidenceGate()
         # Planner-chosen walking cap for the current agentic delegation; None outside one.
         self._distance_cap = None
         self._vla_calls = 0
@@ -198,6 +191,9 @@ class NavigationSession:
                     "reset_context restarts visual history for this task.\n        ",
                     "",
                 )
+            if self._instruction_style == "r2r":
+                execute = self.execute_r2r_task
+                description = execute.__doc__
             self._register("execute_subtask", description, execute)
             self._register("update_memory", self.update_memory.__doc__, self.update_memory)
             # Optional recall: registered only when an experiment explicitly selects it.
@@ -395,7 +391,7 @@ class NavigationSession:
         if self._actor is not None:
             return self._actor
         if self._vla is None:
-            self._vla = _sibling("vla_client", "NavGPTVLAClient")(self.VLA_URL, backend=self.VLA_BACKEND)
+            self._vla = NavGPTVLAClient(self.VLA_URL, backend=self.VLA_BACKEND)
         return self._vla
 
     def _pano(self) -> dict[str, Any]:
@@ -1144,7 +1140,6 @@ class NavigationSession:
         start_pose = trace[0]["pose"] if trace else None
         travelled = self._scheduler.travelled if self._ABLATION else 0.0
         blocked_count = self._scheduler.blocked_streak if self._ABLATION else 0
-        pose_unchanged = _sibling("vla_client", "pose_unchanged")
         (prev_pose, stuck) = (None, False)
         arrival = False
         executed = 0
@@ -1858,13 +1853,15 @@ class NavigationSession:
             state["map_read_valid"] = bool(read and read["motion_epoch"] == self._motion_epoch
                                             and read["pending_edge_id"] == self._tasks.memory.pending)
             state["steps_remaining"] = max(0, self.STEP_BUDGET - self._steps_taken)
+            if self._instruction_style == "r2r":
+                state["vla_instruction_contract"] = {"style": "r2r"}
         return state
 
     def _register(self, name, description, fn):
         if self._enabled_tools is not None and name not in self._enabled_tools:
             return
         if self._AGENTIC:
-            description = _sibling("agentic", "TOOL_DESCRIPTIONS").get(name, description)
+            description = TOOL_DESCRIPTIONS.get(name, description)
         if self.VLA_BACKEND == "lightnav":
             description = description.replace("NavGPT VLA", "LightNav-0")
         if self._SUBTASK:
@@ -1939,7 +1936,7 @@ class NavigationSession:
 
             self.tools.register(name, description, task_call)
             return
-        if self._ABLATION and name not in self._CAPABILITIES[self.BUNDLE]:
+        if self._ABLATION and name not in CAPABILITIES[self.BUNDLE]:
             return
         if not self._ABLATION:
             self.tools.register(name, description, fn)
@@ -2094,6 +2091,23 @@ class NavigationSession:
                                            instruction: str = "") -> list:
         """Schema adapter for the reset ablation; execution has one implementation."""
         return self.execute_agentic_task(task_id, max_distance_m, instruction)
+
+    def execute_r2r_task(self, task_id: int, max_distance_m: float,
+                         instruction: str, stop_at: str) -> list:
+        """Execute a task with a self-contained route and concrete final stopping location.
+
+        instruction describes the ordered route; stop_at names its final location.
+        max_distance_m limits walked distance before control returns. Returns execution
+        evidence, endpoint views and the map; actor STOP does not end the episode.
+        """
+        if not instruction.strip():
+            raise ValueError("Provide a self-contained route instruction")
+        if not stop_at.strip():
+            raise ValueError("Provide a concrete final stopping location")
+        compiled = instruction.strip().rstrip(". ") + ". Stop " + stop_at.strip().rstrip(". ") + "."
+        self._tasks._event("vla_instruction", style="r2r", instruction=instruction,
+                           stop_at=stop_at, compiled=compiled)
+        return self.execute_agentic_task(task_id, max_distance_m, compiled)
 
     def update_memory(self, start_node_id: int, end_node_id: int, caption: str) -> list:
         """Write a 1-800 character caption for the current traversal.
