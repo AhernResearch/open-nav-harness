@@ -94,6 +94,7 @@ export function Thread({ trace, upto, live, select, attempt }: { trace: Trace; u
 
 function Row({ entry, trace, attempt, state, onSelect }: { entry: Entry; trace: Trace; attempt: string; state: string; onSelect: () => void }) {
   const [open, setOpen] = useState(false);
+  if (entry.kind === "user") return <div className="user-msg"><p>{entry.text}</p></div>;
   if (entry.kind === "turn") {
     if (!entry.text && !entry.reasoning) return null;
     return (

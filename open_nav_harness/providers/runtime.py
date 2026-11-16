@@ -2,6 +2,8 @@
 
 import json
 import traceback
+from contextlib import asynccontextmanager
+
 import jsonschema
 from navgpt.planner.contracts import SessionOutcome
 from navgpt.planner.runner import expected_tools_from_env
@@ -10,6 +12,11 @@ from open_nav_harness.core.artifacts import Journal
 from open_nav_harness.core.config import PlannerProfile
 from open_nav_harness.core.context import ContextWindow
 from .compatible import CompatibleClient, ModelProtocolError
+
+
+@asynccontextmanager
+async def existing_session(session):
+    yield session
 
 # Tools whose result carries a map and grants the memory-write credential.
 MAP_TOOLS = frozenset(("observe_map", "execute_subtask", "navigate_relative", "navigate_to_node"))
@@ -71,9 +78,9 @@ class ManagedRuntime:
             "profile": self.profile.model_dump(exclude={"credential_env"}),
         }
 
-    async def run(self, ctx, sink):
+    async def run(self, ctx, sink, *, window=None, session=None, interactive=False):
         journal = Journal(ctx.workdir / "trace")
-        window = ContextWindow(
+        window = window or ContextWindow(
             ctx.briefing,
             ctx.first_prompt,
             self.profile.context_policy,
@@ -83,16 +90,16 @@ class ManagedRuntime:
         )
         client = CompatibleClient(self.profile, journal=journal)
         usage = {"input_tokens": 0, "cached_input_tokens": 0, "output_tokens": 0}
-        seen_ids = set()
+        seen_ids = {c['id'] for block in window.blocks for m in block for c in (m.get('tool_calls') or [])} if interactive else set()
         error = None
         stopped = False
         terminal_reason = None
         try:
-            async with open_tools(ctx.mcp_env) as session:
+            async with (existing_session(session) if session is not None else open_tools(ctx.mcp_env)) as session:
                 listed = await session.list_tools()
                 definitions = {t.name: t.inputSchema for t in listed}
-                want = expected_tools_from_env(ctx.mcp_env)
-                if set(definitions) != set(want):
+                want = expected_tools_from_env(ctx.mcp_env) if not interactive else definitions
+                if not interactive and set(definitions) != set(want):
                     raise ModelProtocolError("Navigation tool set differs from the configured contract")
                 tools = [
                     {
@@ -112,6 +119,8 @@ class ManagedRuntime:
                     input_visibility="exact_wire_requests",
                 )
                 for _ in range(ctx.max_turns):
+                    if interactive:
+                        sink.receive(window)
                     messages = await window.build(client.count, tools, journal)
                     response = await client.generate(messages, tools, journal)
                     u = response.get("usage") or {}
@@ -124,6 +133,10 @@ class ManagedRuntime:
                     calls = message.get("tool_calls") or []
                     if message.get("content"):
                         sink.emit("assistant_text", {"text": message["content"]})
+                    if not calls and interactive:
+                        window.append([message])
+                        terminal_reason = 'reply_complete'
+                        break
                     if not calls:
                         raise ModelProtocolError("Planner ended without an explicit successful STOP tool")
                     prepared = []
@@ -197,7 +210,10 @@ class ManagedRuntime:
                     for ident, name, arguments in prepared:
                         journal.emit("tool_dispatch", call_id=ident, name=name, arguments=arguments)
                         # A motion call is never retried: a lost response has unknown effects.
-                        result = await session.call_tool(name, arguments)
+                        if interactive and sink.pending():
+                            result = sink.skipped()
+                        else:
+                            result = await session.call_tool(name, arguments)
                         feedback, images, texts = tool_feedback(result, ident)
                         journal.emit(
                             "tool_result",
@@ -209,7 +225,7 @@ class ManagedRuntime:
                         )
                         sink.emit(
                             "tool_result",
-                            {"tool_use_id": ident, "texts": texts, "is_error": bool(result.isError)},
+                            {"tool_use_id": ident, "texts": texts, "images": images, "is_error": bool(result.isError)},
                         )
                         block.append(feedback)
                         observations.extend(images)
@@ -223,7 +239,7 @@ class ManagedRuntime:
                         # Only this call's own status can end the episode; the sink keeps
                         # the last status of any earlier call.
                         last = sink.parse_step_result(texts) or {}
-                        if last.get("episode_over") is True:
+                        if not interactive and last.get("episode_over") is True:
                             terminal_reason = last.get("end_reason") or "environment_ended"
                             stopped = terminal_reason == "stop_called"
                             journal.emit(

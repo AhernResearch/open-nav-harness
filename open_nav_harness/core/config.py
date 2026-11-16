@@ -22,6 +22,7 @@ class PlannerProfile(StrictModel):
     output_tokens: int = Field(default=2048, ge=128)
     max_images: int = Field(default=32, ge=1, le=256)
     context_policy: Literal["full", "bounded"] = "bounded"
+    omit_unique_items: bool = False
     thinking: bool = False
     effort: str | None = None
     temperature: float | None = Field(default=0.0, ge=0, le=2)
@@ -131,6 +132,7 @@ class ServiceTemplate(StrictModel):
 
 
 class PlatformSettings(StrictModel):
+    conversations_config: str | None = None
     host: str = "127.0.0.1"
     port: int = 8878
     max_workers: int = Field(default=4, ge=1, le=16)

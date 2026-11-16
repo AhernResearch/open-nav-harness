@@ -34,6 +34,13 @@ removed; frozen attempts, provenance and evidence remain intact.
 - Content-addressed images and the exact API request/response journal, including
   context selection and tool provenance. SDK-internal model inputs remain opaque.
 
+## Read-only semantic maps
+
+The optional [semantic map tools](docs/SEMANTIC_MAP.md) expose local scene listing,
+candidate search, spatial maps and object images through the shared tool registry
+and MCP transport, including an authenticated LAN Streamable HTTP endpoint.
+Scene packages and model weights remain external.
+
 ## Start the control plane
 
 Python **3.11+**, Node **22+**, Linux and SSH are required. GPU services keep their
@@ -168,6 +175,7 @@ uv run mypy open_nav_harness
 npm --prefix frontend run build
 # Or omit ONH_CHROME after installing Playwright's Chromium:
 ONH_CHROME=/opt/google/chrome/chrome npm --prefix frontend test
+# Set ONH_PYTHON=/absolute/path/to/python when using an external environment.
 ```
 
 API schemas generate the frontend request types. The UI uses ordinary components,
@@ -182,3 +190,43 @@ Navigation and control-plane source are self-contained in this repository. The c
 A100 deployment reuses existing model weights, scene assets and Python environments;
 some of those environments still live beneath the original checkout. Their paths are
 explicit deployment configuration, and those shared assets are not modified.
+
+## Interactive conversations
+
+Open `/harness`; its existing composer accepts free instructions and continues the same conversation. The sidebar contains conversation history and navigation runs. The separate chat page has been removed. Conversations support model selection,
+full multi-turn history, external Streamable HTTP MCP tools, tool images, steering
+and cancellation. The existing experiment runner and the chat share ManagedRuntime.
+The chat client does not import map packages: deep_search runs entirely in the separate
+sementic_map_mcp server. See [MCP client integration](docs/SEMANTIC_MAP.md).
+
+Set `conversations_config` in platform settings to an external JSON file with
+`profiles` (PlannerProfile by alias), `default_model`, `mcp` (alias to `url` and optional
+`credential_env`), and `navigation` (alias to an existing simulator session's NAVGPT env).
+Credentials are injected into the server process; never put actual tokens in the file.
+The model is fixed per conversation. Start a new conversation to change models.
+MCP tool names are prefixed with the connection alias, e.g. map__deep_search.
+No MCP dependency is needed for benchmark-only installations; chat with external MCP
+requires the existing dev or sdk extra (mcp 1.30.0).
+
+Navigation bindings reuse prepared simulator services and their existing tool contracts,
+e.g. NAVGPT_EXECUTION_URL, NAVGPT_SERVER_URL, NAVGPT_CONDITION and NAVGPT_EPISODE_ID.
+The administrator must prepare the scene and starting pose before publishing a binding;
+binding a chat does not reset a shared simulator or launch a benchmark. The web selector
+can attach a binding to an idle chat using POST /api/conversations/{id}/navigation.
+Each conversation retains its live navigation session across user turns. Restarted or
+stopped navigation conversations require explicit reconciliation/rebinding before movement.
+When a navigation result is uncertain, further navigation is blocked; map objects without
+a verified navigation target are not converted into simulator destinations.
+
+The API exposes /api/conversations (create/list), /options, /{id}, /{id}/messages,
+/{id}/navigation, /{id}/stop and /{id}/events (SSE, Last-Event-ID replay). Message request IDs
+are idempotent; full history and tool evidence live under the external platform state root.
+Inference, complete replies and tool events are visible; token streaming is not enabled.
+Context overflow is explicit. Histories are never silently summarized or pruned.
+
+Initial acceptance: all three outer profiles (Sonnet 5, local Qwen3.5-9B, GPT-6 Sol)
+completed greeting followed by an autonomous map__deep_search call against the real map MCP.
+The full outer-Agent map requests took about 12.6 s, 5.6 s and 8.1 s respectively (one case
+each; not a quality or latency ranking). Core tests cover history, request deduplication,
+steering past undispatched actions, cancellation and navigation blocking. A live simulator
+is not currently running on this machine; real simulator motion has not been accepted.

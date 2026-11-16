@@ -38,6 +38,8 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
     db = Database(root)
     db.migrate()
     manager = ServiceManager(db, settings)
+    from .conversations import Conversations, router
+    conversations = Conversations(db, settings.conversations_config)
 
     @asynccontextmanager
     async def lifespan(app):
@@ -53,9 +55,12 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
             task.cancel()
             with suppress(asyncio.CancelledError):
                 await task
+            await conversations.close()
             db.engine.dispose()
 
     app = FastAPI(title="Open Nav Harness", version="0.1.0", lifespan=lifespan)
+    app.include_router(router(conversations))
+    app.state.conversations = conversations
     app.state.db = db
     app.state.services = manager
 
@@ -517,7 +522,7 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
             raise HTTPException(404)
         return FileResponse(index)
 
-    for route in ("/harness", "/workbench"):
+    for route in ("/harness", "/workbench", "/chat"):
         app.get(route, include_in_schema=False)(page)
     if dist.exists():
         app.mount("/", StaticFiles(directory=dist, html=True), name="frontend")

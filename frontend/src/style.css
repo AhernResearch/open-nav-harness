@@ -777,3 +777,6 @@ body:has(.layout) { background: var(--bg); }
 .layout h1, .layout h2, .layout h3, .layout td, .layout th, .layout label, .layout p { color: inherit; }
 .layout .eyebrow, .layout .header-note, .layout footer, .layout label { color: var(--muted); }
 .layout .error, .layout .notice { border-radius: var(--r-md); }
+
+/* The continuing conversation uses the Harness composer and timeline. */
+.conversation-input { width: min(760px, calc(100% - 40px)); margin: 0 auto; padding: 12px 0 22px; flex: none; }

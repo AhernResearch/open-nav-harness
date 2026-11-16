@@ -159,6 +159,17 @@ class CompatibleClient:
             "max_tokens": p.output_tokens,
             "chat_template_kwargs": {"enable_thinking": p.thinking},
         }
+        if not tools:
+            for key in ('tools', 'tool_choice', 'parallel_tool_calls'):
+                payload.pop(key, None)
+        elif p.omit_unique_items:
+            def portable(value):
+                if isinstance(value, dict):
+                    return {k: portable(v) for k, v in value.items() if k != 'uniqueItems'}
+                if isinstance(value, list):
+                    return [portable(v) for v in value]
+                return value
+            payload['tools'] = portable(payload['tools'])
         r = await self._post_inference(
             p.base_url.rstrip("/") + "/chat/completions", payload,
             operation="model", journal=journal,

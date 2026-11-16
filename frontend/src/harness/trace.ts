@@ -5,7 +5,7 @@ export type CameraImage = { src: string; caption: string };
 /** Tool-result images paired with their recorded camera captions. */
 export function toolImages(item: Item, attempt: string, fallback: string): CameraImage[] {
   return (item.images ?? []).map((artifact, index) => ({
-    src: `/api/attempts/${attempt}/artifact/${artifact}`,
+    src: item.media_base ? item.media_base + artifact : `/api/attempts/${attempt}/artifact/${artifact}`,
     caption: item.image_views?.[index]?.caption
       ?? (item.name === "observe" ? item.arguments.views?.[index] : undefined) ?? fallback,
   }));
@@ -26,6 +26,7 @@ export type Item = {
   result?: string[];
   state?: Row | null;
   images?: string[];
+  media_base?: string;
   image_views?: { artifact: string; caption: string }[];
   map?: MapInfo;
   poses: Pose[];
@@ -35,6 +36,7 @@ export type Item = {
   done?: number;
 };
 export type Entry =
+  | { kind: "user"; t: number; text: string }
   | { kind: "turn"; t: number; text: string | null; reasoning: string | null; usage: Row | null; elapsed_s: number }
   | { kind: "item"; id: string; t: number }
   | { kind: "error"; t: number; error: unknown; source: string };
@@ -133,6 +135,9 @@ export class Trace {
     const patch = e.item as Row | undefined;
     const item = patch && this.items.get(patch.id);
     switch (e.type) {
+      case "user.message":
+        this.entries.push({ kind: "user", t: e.t, text: e.text });
+        break;
       case "turn.completed":
         this.entries.push({ kind: "turn", t: e.t, text: e.text, reasoning: e.reasoning, usage: e.usage, elapsed_s: e.elapsed_s });
         break;

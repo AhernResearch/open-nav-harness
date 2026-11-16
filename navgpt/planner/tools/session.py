@@ -188,7 +188,7 @@ class NavigationSession:
             if self.env.get("NAVGPT_ALLOW_CONTEXT_RESET", "1") == "0" or not self._input_profile.manual_reset:
                 execute = self.execute_agentic_task_without_reset
                 description = description.replace(
-                    "reset_context restarts visual history for this task.\n        ",
+                    "reset_context restarts visual history for this task.\n",
                     "",
                 )
             if self._instruction_style == "r2r":

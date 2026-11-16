@@ -18,3 +18,5 @@ neighboring repositories. Preserve inherited licenses and `provenance.json`.
   Use Playwright for changed user workflows.
 - GPU integration uses a separate deployment and training/dev manifest. Never start
   the original formal benchmark as a side effect of a unit/UI test.
+
+- Semantic-map servers and deep_search belong to the neighboring sementic_map_mcp project. Keep only generic MCP client integration here; do not import map packages or implement map search/model loops.

@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { api, type Row } from "../api";
-import { Composer, usePendingJob } from "./Composer";
+import { Composer, ConversationComposer, usePendingJob } from "./Composer";
 import { Logo } from "../Logo";
 import { Icon } from "./icons";
 import { MapView } from "./MapPanel";
 import { PlanCard, Thread } from "./Thread";
+import { useConversation } from "./useConversation";
+import { toolImages } from "./trace";
 import { useTrace } from "./useTrace";
 import { CameraGallery } from "./CameraGallery";
 
 const statusText: Record<string, string> = {
+  idle: "就绪",
   running: "运行中",
   completed: "已结束",
   failed: "失败",
@@ -35,7 +38,10 @@ export function HarnessPage() {
   const [attempt, setAttempt] = useState<string | null>(new URLSearchParams(location.search).get("attempt"));
   const [job, setJob] = useState<string | null>(new URLSearchParams(location.search).get("job"));
   const [cursor, setCursor] = useState<number | null>(null);
-  const trace = useTrace(attempt);
+  const conversation = useConversation();
+  const [datasetMode, setDatasetMode] = useState(false);
+  const navigationTrace = useTrace(attempt);
+  const trace = attempt ? navigationTrace : conversation.trace;
   const refresh = () => api<Row[]>("/harness/attempts").then(setAttempts).catch(() => {});
   useEffect(() => {
     refresh();
@@ -43,10 +49,15 @@ export function HarnessPage() {
     return () => clearInterval(timer);
   }, []);
   const open = (id: string | null) => {
+    conversation.open(null);
+    setDatasetMode(false);
     setAttempt(id);
     setJob(null);
     setCursor(null);
     history.replaceState(null, "", id ? "/harness?attempt=" + encodeURIComponent(id) : "/harness");
+  };
+  const openConversation = (id: string) => {
+    setAttempt(null); setJob(null); setCursor(null); setDatasetMode(false); conversation.open(id);
   };
   const pending = usePendingJob(job, (id) => {
     open(id);
@@ -71,6 +82,10 @@ export function HarnessPage() {
   const s = trace.status;
   const camera = attempt ? trace.camera(upto, attempt) : [];
   const running = s?.status === "running";
+  const recentItems = [...trace.items.values()].reverse();
+  const spatialImage = recentItems.find(i => i.name.endsWith("__view_map") && i.images?.length);
+  const objectImage = recentItems.find(i => !i.name.endsWith("__view_map") && i.images?.length);
+  const panelImages = attempt ? camera : objectImage ? toolImages(objectImage, "", "物体图片") : [];
   const control = async (action: string) => {
     if (action === "cancel" && !confirm("停止会终止正在执行的 episode，中断后需要在 Workbench 中核验并释放资源。确定停止？")) return;
     await api(`/jobs/${s!.job_id}/action`, { action });
@@ -86,7 +101,11 @@ export function HarnessPage() {
         <button className="new-run" onClick={() => open(null)}>
           <Icon name="plus" /> 新的运行
         </button>
+        <button className="ghost-link" onClick={() => { open(null); setDatasetMode(true); }}><Icon name="list" size={14}/> 从数据集运行</button>
         <div className="sessions">
+          {conversation.sessions.map(a => <button key={"conversation-" + a.id} className={"session " + (a.id === conversation.id ? "active" : "")} onClick={() => openConversation(a.id)}>
+            <span className={"dot " + a.status}/><span className="session-text"><span className="title">{a.title || "新的会话"}</span><span className="sub">{a.spec.model} · {statusText[a.status] ?? a.status}</span></span>
+          </button>)}
           {attempts.map((a) => (
             <button key={a.id} className={"session " + (a.id === attempt ? "active" : "")} onClick={() => open(a.id)}>
               <span className={"dot " + a.status} />
@@ -120,7 +139,11 @@ export function HarnessPage() {
               </a>
             </div>
           ) : (
-            <Composer onStarted={enqueue} />
+            (datasetMode || (conversation.ready && !conversation.options.models.length)) ? <Composer onStarted={enqueue} /> : conversation.id ? <>
+              <header className="run-head"><span className={"status-pill " + conversation.status}><i/>{statusText[conversation.status] ?? conversation.status}</span><span className="spacer"/><span className="muted">{conversation.model}</span></header>
+              <Thread trace={trace} upto={last} live={true} select={() => {}} attempt=""/>
+              <ConversationComposer conversation={conversation}/>
+            </> : <ConversationComposer conversation={conversation}/>
           )
         ) : (
           <>
@@ -166,20 +189,20 @@ export function HarnessPage() {
         )}
       </main>
 
-      {attempt && (
+      {(attempt || conversation.id) && (
         <aside className="hx-panel" aria-label="环境">
           <section className="card">
             <h3>
               <Icon name="map" /> 地图
             </h3>
-            <MapView trace={trace} upto={upto} attempt={attempt} />
+            {attempt ? <MapView trace={trace} upto={upto} attempt={attempt} /> : spatialImage ? <CameraGallery images={toolImages(spatialImage, "", "空间图")}/> : <div className="map-empty">查询空间图后显示</div>}
           </section>
           <section className="card">
             <h3>
-              <Icon name="eye" /> 机器人视角
+              <Icon name="eye" /> {attempt ? "机器人视角" : "物体图片"}
             </h3>
-            {camera.length ? (
-              <CameraGallery images={camera} />
+            {panelImages.length ? (
+              <CameraGallery images={panelImages} />
             ) : (
               <div className="map-empty">观察或运动后显示</div>
             )}

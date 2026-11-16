@@ -6,7 +6,7 @@ export function modelLabel(service: Row) {
 }
 
 /** Registered profiles keep endpoint, context budget and model selection together. */
-export function ModelPicker({ services, value, onChange }: { services: Row[]; value: string; onChange: (id: string) => void }) {
+export function ModelPicker({ services, value, onChange, disabled = false }: { services: Row[]; value: string; onChange: (id: string) => void; disabled?: boolean }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -39,7 +39,7 @@ export function ModelPicker({ services, value, onChange }: { services: Row[]; va
     }} onBlur={(event) => {
       if (!event.currentTarget.contains(event.relatedTarget as Node)) setOpen(false);
     }}>
-      <button type="button" ref={trigger} className="pill model-trigger" aria-label="选择模型" aria-haspopup="menu" aria-expanded={open} aria-controls={menu} onClick={() => setOpen(!open)}>
+      <button type="button" disabled={disabled} ref={trigger} className="pill model-trigger" aria-label="选择模型" aria-haspopup="menu" aria-expanded={open} aria-controls={menu} onClick={() => setOpen(!open)}>
         <span>模型</span>
         <span className="model-current">{selected ? modelLabel(selected) : "选择模型"}</span>
         {selected && <i className={"model-dot " + (selected.available ? "online" : "offline")} />}
@@ -47,7 +47,7 @@ export function ModelPicker({ services, value, onChange }: { services: Row[]; va
       </button>
       {open && (
         <div className="model-menu" id={menu} role="menu" aria-label="模型列表">
-          <div className="model-menu-title">选择导航规划模型</div>
+          <div className="model-menu-title">选择模型</div>
           {services.map((service) => (
             <button type="button" key={service.id} role="menuitemradio" aria-checked={value === service.id} disabled={!service.available} onClick={() => {
               onChange(service.id);

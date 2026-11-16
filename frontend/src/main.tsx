@@ -4,6 +4,8 @@ import { HarnessPage } from "./harness/HarnessPage";
 import { installFavicon } from "./Logo";
 import "./style.css";
 
+if (location.pathname === "/chat") history.replaceState(null, "", "/harness" + location.search);
+
 // Two independent views; `/` and legacy `/?attempt=` links land on the Harness.
 if (location.pathname === "/") history.replaceState(null, "", "/harness" + location.search);
 const view = location.pathname.startsWith("/workbench") ? <Workbench /> : <HarnessPage />;
