@@ -12,6 +12,7 @@ from open_nav_harness.core.artifacts import Journal
 from open_nav_harness.core.config import PlannerProfile
 from open_nav_harness.core.context import ContextWindow
 from .compatible import CompatibleClient, ModelProtocolError
+from .validation import StrictValidator
 
 
 @asynccontextmanager
@@ -21,14 +22,6 @@ async def existing_session(session):
 # Tools whose result carries a map and grants the memory-write credential.
 MAP_TOOLS = frozenset(("observe_map", "execute_subtask", "navigate_relative", "navigate_to_node"))
 
-# Tools validate with pydantic strict mode, where 2.0 is not an integer. Batch checks must
-# agree, or a call could pass here and fail only after earlier calls in its batch moved.
-StrictValidator = jsonschema.validators.extend(
-    jsonschema.Draft202012Validator,
-    type_checker=jsonschema.Draft202012Validator.TYPE_CHECKER.redefine(
-        "integer", lambda _, value: isinstance(value, int) and not isinstance(value, bool)
-    ),
-)
 
 
 def tool_feedback(result, call_id):

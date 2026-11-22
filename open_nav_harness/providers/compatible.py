@@ -15,7 +15,7 @@ class ModelProtocolError(RuntimeError):
 
 
 class CompatibleClient:
-    def __init__(self, profile: PlannerProfile, journal=None):
+    def __init__(self, profile: PlannerProfile, journal=None, transport=None):
         self.profile = profile
         self.journal = journal
         headers = {}
@@ -24,7 +24,8 @@ class CompatibleClient:
             if not key:
                 raise ValueError("Missing credential environment variable: " + profile.credential_env)
             headers["Authorization"] = "Bearer " + key
-        self.http = httpx.AsyncClient(timeout=profile.request_timeout_s, headers=headers, trust_env=False)
+        self.http = httpx.AsyncClient(timeout=profile.request_timeout_s, headers=headers, trust_env=False,
+                                      transport=transport)
 
     async def close(self):
         await self.http.aclose()
