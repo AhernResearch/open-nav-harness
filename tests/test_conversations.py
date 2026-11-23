@@ -1,12 +1,17 @@
 import asyncio
+import json
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
+import httpx
 import pytest
 
 from open_nav_harness.platform.database import Database
 from open_nav_harness.platform.conversations import Conversations, CreateConversation, Message
+from test_kernel import FakeSim
+
+TARGET = {"url": "http://sim", "dataset": "r2r_train", "camera": "cam"}
 
 
 @pytest.mark.asyncio
@@ -59,38 +64,87 @@ async def test_dialogue_history_and_idempotency():
 
 
 @pytest.mark.asyncio
-async def test_mcp_and_navigation_composition_and_blocking():
-    from contextlib import asynccontextmanager
-    from types import SimpleNamespace
-    from navgpt.planner.tools.registry import ToolDefinition, ToolResult, TextContent
-    from open_nav_harness.platform.conversations import CombinedTools, DialogueSettings, DialogueSink
+async def test_a_bound_dialogue_carries_the_episode_instruction_in_its_prompt():
+    from open_nav_harness.platform.conversations import DialogueSettings, CreateConversation, prompt_for
 
-    calls = []
+    settings = DialogueSettings(profiles={}, default_model="test", navigation={"sim": TARGET})
+    spec = CreateConversation(navigation="sim", episode="898")
+    bound = prompt_for(settings, spec, {"instruction": "Walk to the sofa and stop."})
+    assert "Walk to the sofa and stop." in bound and "delegate" in bound
+    assert "operator may talk to you" in bound
+    assert prompt_for(settings, spec, None) != bound
 
-    class Tools:
-        async def list_tools(self):
-            return [ToolDefinition(name="move", description="fixture", inputSchema={"type": "object"})]
 
-        async def call_tool(self, name, arguments):
-            calls.append((name, arguments))
-            return ToolResult(content=[TextContent(text="done")])
+@pytest.mark.asyncio
+async def test_a_bound_episode_is_exposed_as_the_kernel_tool_set_and_records_evidence():
+    from open_nav_harness.platform.conversations import CombinedTools, DialogueSettings, CreateConversation
 
-    @asynccontextmanager
-    async def nav(env):
-        yield Tools()
+    sim = FakeSim()
 
     with tempfile.TemporaryDirectory() as tmp:
-        settings = DialogueSettings(profiles={}, default_model="test", navigation={"sim": {}})
-        tools = CombinedTools(settings, CreateConversation(navigation="sim"), Path(tmp))
-        with patch("open_nav_harness.platform.conversations.open_tools", nav):
-            await tools.start()
-            assert [t.name for t in await tools.list_tools()] == ["move"]
-            assert not (await tools.call_tool("move", {})).isError
-            tools.blocked = True
-            assert (await tools.call_tool("move", {})).isError
-            assert len(calls) == 1
-            assert DialogueSink(None, None).skipped().isError
-            await tools.close()
+        settings = DialogueSettings(profiles={}, default_model="test", navigation={"sim": TARGET})
+        spec = CreateConversation(navigation="sim", episode="898")
+        tools = CombinedTools(settings, spec, Path(tmp), transport=httpx.MockTransport(sim))
+        await tools.start()
+        assert tools.session["instruction"] == "Walk to the sofa and stop."
+        names = [tool.name for tool in await tools.list_tools()]
+        assert names == ["observe", "delegate", "return_to", "update_plan", "stop"]
+        result = await tools.call_tool("observe", {"views": ["front"]})
+        assert not result.isError and [c.type for c in result.content] == ["text", "text", "image"]
+        refused = await tools.call_tool("delegate", {"view": "back", "point": [500, 800], "instruction": "go"})
+        assert refused.isError and "Observe the back view" in refused.content[0].text
+        assert sim.steps == []
+        # Every binding writes its own evidence folder and never touches another one.
+        root = next(Path(tmp, "navigation").iterdir())
+        assert {p.name for p in root.iterdir()} >= {"session.json", "spec.json", "trace"}
+        records = [json.loads(line) for line in (root / "trace" / "requests.jsonl").read_text().splitlines()]
+        rendered = [r for r in records if r["kind"] == "map_rendered"]
+        assert rendered and all(len(r["call_id"]) == 32 for r in rendered)
+        await tools.close()
+
+
+@pytest.mark.asyncio
+async def test_a_lost_motion_reply_ends_the_binding_and_blocks_further_motion():
+    from open_nav_harness.platform.conversations import CombinedTools, DialogueSettings, CreateConversation
+
+    sim = FakeSim(lose_step=True)
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = DialogueSettings(profiles={}, default_model="test", navigation={"sim": TARGET})
+        tools = CombinedTools(settings, CreateConversation(navigation="sim", episode="898"), Path(tmp),
+                              transport=httpx.MockTransport(sim))
+        await tools.start()
+        await tools.call_tool("observe", {"views": ["front"]})
+        with pytest.raises(Exception):
+            await tools.call_tool("delegate", {"view": "front", "point": [500, 800], "instruction": "go"})
+        assert tools.blocked and len(sim.steps) == 1
+        assert (await tools.call_tool("observe", {"views": ["front"]})).isError
+        root = next(Path(tmp, "navigation").iterdir())
+        assert (root / "failed_or_uncertain.json").exists()
+
+
+@pytest.mark.asyncio
+async def test_binding_requires_a_known_environment_and_an_episode():
+    from open_nav_harness.platform.conversations import CreateConversation
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        config = root / "config.json"
+        config.write_text(
+            '{"profiles":{"test":{"model":"test","token_count_mode":"estimate","context_policy":"full"}},'
+            '"default_model":"test","navigation":{"sim":{"url":"http://sim","dataset":"r2r_train",'
+            '"camera":"cam"}}}'
+        )
+        db = Database(root / "state")
+        db.migrate()
+        manager = Conversations(db, config)
+        with pytest.raises(ValueError, match="episode"):
+            manager.create(CreateConversation(navigation="sim"))
+        with pytest.raises(ValueError, match="Unknown"):
+            manager.create(CreateConversation(navigation="other", episode="1"))
+        created = manager.create(CreateConversation(navigation="sim", episode="898"))
+        assert created["spec"]["episode"] == "898"
+        await manager.close()
+        db.engine.dispose()
 
 
 @pytest.mark.asyncio
@@ -105,6 +159,7 @@ async def test_new_message_supersedes_undispatched_actions():
         def __init__(self, *args):
             self.connection_errors = {}
             self.blocked = False
+            self.session = None
 
         async def start(self):
             pass
@@ -228,12 +283,21 @@ async def test_namespaced_mcp_coexists_with_navigation():
     calls = []
 
     class Nav:
-        async def list_tools(self):
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def start(self, episode):
+            return {"instruction": "Walk to the sofa."}
+
+        def definitions(self):
             return [ToolDefinition(name="move", description="nav", inputSchema={"type": "object"})]
 
-        async def call_tool(self, name, args):
+        async def call(self, name, args):
             calls.append("nav")
             return ToolResult(content=[TextContent(text="nav")])
+
+        async def close(self):
+            pass
 
     class MCP:
         def __init__(self, *args):
@@ -261,20 +325,16 @@ async def test_namespaced_mcp_coexists_with_navigation():
     async def stream(*args, **kwargs):
         yield (None, None, None)
 
-    @asynccontextmanager
-    async def nav(env):
-        yield Nav()
-
     with tempfile.TemporaryDirectory() as tmp:
         settings = DialogueSettings(
             profiles={},
             default_model="test",
-            navigation={"sim": {}},
+            navigation={"sim": {"url": "http://sim", "dataset": "r2r_train", "camera": "cam"}},
             mcp={"map": dict(url="http://fixture.invalid/mcp")},
         )
-        tools = CombinedTools(settings, CreateConversation(navigation="sim", mcp=["map"]), Path(tmp))
+        tools = CombinedTools(settings, CreateConversation(navigation="sim", episode="1", mcp=["map"]), Path(tmp))
         with (
-            patch("open_nav_harness.platform.conversations.open_tools", nav),
+            patch("open_nav_harness.platform.conversations.KernelNavigation", Nav),
             patch("mcp.ClientSession", MCP),
             patch("mcp.client.streamable_http.streamablehttp_client", stream),
         ):

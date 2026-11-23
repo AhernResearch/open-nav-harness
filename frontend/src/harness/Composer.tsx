@@ -276,6 +276,37 @@ export function usePendingJob(job: string | null, onAttempt: (id: string) => voi
   return pending;
 }
 
+/** An environment alias plus one of its dataset episodes: what a binding opens. */
+function EnvironmentPicker({ conversation: c }: { conversation: Conversation }) {
+  const [catalog, setCatalog] = useState<Row | null>(null);
+  const [scene, setScene] = useState("");
+  const [episodes, setEpisodes] = useState<Row[]>([]);
+  const target = (c.options.navigation as Row[]).find((n) => n.name === c.navigation);
+  useEffect(() => {
+    setCatalog(null); setScene(""); setEpisodes([]);
+    if (!target) return;
+    api<Row[]>("/catalog").then(rows => {
+      const found = rows.find((row) => row.name === target.dataset);
+      setCatalog(found ?? null);
+      setScene(found?.scenes?.[0]?.scene ?? "");
+    }).catch(e => c.setError(String(e)));
+  }, [target?.dataset]);
+  useEffect(() => {
+    if (!catalog || !scene) return;
+    api<Row[]>(`/catalog/${catalog.name}/episodes?scene=${encodeURIComponent(scene)}&limit=200`)
+      .then(setEpisodes).catch(e => c.setError(String(e)));
+  }, [catalog?.name, scene]);
+  const choose = (index: string) => void c.bind(c.navigation, index || null);  // the alias is already bound
+  return <>
+    <Pill label="环境" value={c.navigation} options={[["", "暂不绑定"], ...(c.options.navigation as Row[]).map((n) => [n.name, n.name] as [string, string])]} onChange={value => void c.bind(value, null)}/>
+    {target && !c.episode && catalog && <>
+      <Pill label="场景" value={scene} options={catalog.scenes.map((s: Row) => [s.scene, String(s.scene).split("/").at(-1)?.replace(".glb", "") ?? s.scene] as [string, string])} onChange={setScene}/>
+      <Pill label="episode" value="" options={[["", "选择 episode"], ...episodes.map((e) => [String(e.index), `#${e.index} ${String(e.instruction ?? "").slice(0, 28)}`] as [string, string])]} onChange={choose}/>
+    </>}
+    {target && c.episode && <span className="pill"><Icon name="route" size={13}/>#{c.episode}</span>}
+  </>;
+}
+
 /** The existing input surface also accepts arbitrary conversation instructions. */
 export function ConversationComposer({ conversation: c }: { conversation: Conversation }) {
   const [message, setMessage] = useState("");
@@ -297,7 +328,7 @@ export function ConversationComposer({ conversation: c }: { conversation: Conver
         <ModelPicker disabled={!!c.id} services={services} value={c.model} onChange={c.setModel}/>
         {!c.id && <label className="pill"><input type="checkbox" checked={c.useMcp} onChange={e => c.setUseMcp(e.target.checked)}/>MCP 工具</label>}
         {c.id && c.useMcp && <span className="pill"><Icon name="map" size={13}/>MCP 工具</span>}
-        {c.options.navigation.length > 0 && <Pill label="环境" value={c.navigation} options={[["", "暂不绑定"], ...c.options.navigation.map((n: string) => [n, n] as [string, string])]} onChange={value => {void c.bind(value);}}/>}
+        {c.options.navigation.length > 0 && <EnvironmentPicker conversation={c}/>}
         <span className="spacer"/>
         {c.status === "running" && <button className="pill-button danger" onClick={() => void c.stop()}><Icon name="stop" size={14}/>停止</button>}
         <button className="send" aria-label="发送指令" disabled={!message.trim() || c.busy || !c.model} onClick={() => void send()}><Icon name="send"/></button>

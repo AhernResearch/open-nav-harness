@@ -824,6 +824,8 @@ export interface components {
             mcp?: string[];
             /** Navigation */
             navigation?: string | null;
+            /** Episode */
+            episode?: string | null;
         };
         /** Enqueue */
         Enqueue: {
@@ -910,6 +912,58 @@ export interface components {
             environment: components["schemas"]["EnvironmentSpec"];
             executor?: components["schemas"]["ExecutorSpec"];
             budgets?: components["schemas"]["Budgets"];
+            map?: components["schemas"]["MapSpec"];
+        };
+        /**
+         * MapSpec
+         * @description NavGPT-3's observed_map parameters, with a finer stride and splat cap for the low camera.
+         */
+        MapSpec: {
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * Mpp
+             * @default 0.02
+             */
+            mpp: number;
+            /**
+             * Depth Max M
+             * @default 10
+             */
+            depth_max_m: number;
+            /**
+             * Pixel Stride
+             * @default 2
+             */
+            pixel_stride: number;
+            /**
+             * Below Floor M
+             * @default 0.3
+             */
+            below_floor_m: number;
+            /**
+             * Ceiling M
+             * @default 1.6
+             */
+            ceiling_m: number;
+            /**
+             * Splat Max M
+             * @default 0.16
+             */
+            splat_max_m: number;
+            /**
+             * Margin M
+             * @default 1.5
+             */
+            margin_m: number;
+            /**
+             * Min Span M
+             * @default 6
+             */
+            min_span_m: number;
         };
         /** Message */
         Message: {
@@ -922,6 +976,8 @@ export interface components {
         NavigationBinding: {
             /** Navigation */
             navigation?: string | null;
+            /** Episode */
+            episode?: string | null;
         };
         /** PlannerProfile */
         PlannerProfile: {

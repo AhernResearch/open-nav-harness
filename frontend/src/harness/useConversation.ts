@@ -10,6 +10,7 @@ export function useConversation() {
   const [sessions, setSessions] = useState<Row[]>([]);
   const [model, setModel] = useState("");
   const [navigation, setNavigation] = useState("");
+  const [episode, setEpisode] = useState("");
   const [useMcp, setUseMcp] = useState(true);
   const [events, setEvents] = useState<Row[]>([]);
   const [status, setStatus] = useState("idle");
@@ -29,7 +30,7 @@ export function useConversation() {
     let source: EventSource | undefined;
     api(`/conversations/${id}`).then(row => {
       if (!active) return;
-      setEvents(row.events); setStatus(row.status); setModel(row.spec.model); setNavigation(row.spec.navigation ?? ""); setUseMcp(row.spec.mcp.length > 0);
+      setEvents(row.events); setStatus(row.status); setModel(row.spec.model); setNavigation(row.spec.navigation ?? ""); setEpisode(row.spec.episode ?? ""); setUseMcp(row.spec.mcp.length > 0);
       source = new EventSource(`/api/conversations/${id}/events?after=${row.events.at(-1)?.seq ?? 0}`);
       source.onmessage = message => {
         const event = JSON.parse(message.data);
@@ -44,7 +45,7 @@ export function useConversation() {
   }, [id]);
   const open = (next: string | null) => {
     setId(next);
-    if (!next) { setModel(options.default_model ?? ""); setNavigation(""); setUseMcp(true); }
+    if (!next) { setModel(options.default_model ?? ""); setNavigation(""); setEpisode(""); setUseMcp(true); }
     history.replaceState(null, "", next ? `/harness?conversation=${next}` : "/harness");
   };
   const send = async (content: string) => {
@@ -53,7 +54,7 @@ export function useConversation() {
     try {
       let cid = id;
       if (!cid) {
-        const row = await api("/conversations", { model, mcp: useMcp ? options.mcp : [], navigation: navigation || null });
+        const row = await api("/conversations", { model, mcp: useMcp ? options.mcp : [], navigation: navigation || null, episode: episode || null });
         cid = row.id; open(cid); refresh();
       }
       await api(`/conversations/${cid}/messages`, { request_id: crypto.randomUUID(), content });
@@ -66,9 +67,11 @@ export function useConversation() {
     try { if (id) { const row = await api(`/conversations/${id}/stop`, {}); setStatus(row.status); } }
     catch (e) { setError(String(e)); }
   };
-  const bind = async (value: string) => {
-    if (!id) { setNavigation(value); return; }
-    try { await api(`/conversations/${id}/navigation`, { navigation: value || null }); setNavigation(value); }
+  /** Bind an environment to one dataset episode; the kernel opens a sim-engine session for it. */
+  const bind = async (value: string, chosen: string | null) => {
+    setNavigation(value); setEpisode(chosen ?? "");
+    if (!id) return;
+    try { await api(`/conversations/${id}/navigation`, { navigation: value || null, episode: chosen }); }
     catch (e) { setError(String(e)); }
   };
   const trace = useMemo(() => {
@@ -77,6 +80,7 @@ export function useConversation() {
       const p = event.payload;
       const t = event.seq;
       if (event.kind === "user_text") result.apply([{ type: "user.message", text: p.text, t }]);
+      if (event.kind === "navigation_session") result.apply([{ type: "session.started", instruction: p.instruction, episode_id: p.episode }]);
       if (event.kind === "assistant_text") result.apply([{ type: "turn.completed", text: p.text, t }]);
       if (event.kind === "tool_use") result.apply([{ type: "item.started", t, item: { id: p.id, type: "tool", name: p.name, arguments: p.input, status: "in_progress", media_base: `/api/conversations/${id}/media/` } }]);
       if (event.kind === "tool_result") result.apply([{ type: "item.completed", t, item: { id: p.tool_use_id, status: p.is_error ? "failed" : "completed", result: p.texts, images: (p.images ?? []).filter((part: Row) => part.type === "image_url").map((part: Row) => part.image_url.url.artifact) } }]);
@@ -84,6 +88,6 @@ export function useConversation() {
     }
     result.status = { status }; return result;
   }, [events, status, id]);
-  return { id, options, ready, sessions, model, setModel, navigation, bind, useMcp, setUseMcp, status, error, busy, open, send, stop, trace };
+  return { id, options, ready, sessions, model, setModel, navigation, episode, bind, useMcp, setUseMcp, status, error, setError, busy, open, send, stop, trace };
 }
 export type Conversation = ReturnType<typeof useConversation>;
