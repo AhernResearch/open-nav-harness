@@ -86,6 +86,7 @@ class AgentLoop:
                 ended = False
                 for ident, name, arguments in prepared:
                     self.journal.emit("tool_dispatch", call_id=ident, name=name, arguments=arguments)
+                    state.evidence.call = ident
                     output, is_error = await self._execute(name, state, arguments)
                     feedback = {"role": "tool", "tool_call_id": ident, "content": tool_message(output)}
                     block.append(feedback)

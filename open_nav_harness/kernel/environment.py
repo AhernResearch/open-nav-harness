@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import asyncio
+import io
+import json
 import uuid
 from dataclasses import dataclass
 
 import httpx
+import numpy as np
 
 from .spec import EnvironmentSpec
 
@@ -43,8 +46,8 @@ class SimEngineEnvironment:
         self.event_index = 0
         self.done = False
 
-    async def _call(self, method, path, body=None):
-        response = await self.http.request(method, path, json=body)
+    async def _call(self, method, path, body=None, params=None):
+        response = await self.http.request(method, path, json=body, params=params)
         if response.status_code == 429:
             raise SimulatorBusy(f"{method} {path}: {response.text[:200]}")
         if response.is_error:
@@ -89,7 +92,16 @@ class SimEngineEnvironment:
         response = await self._call("GET", f"/v1/sessions/{self.session_id}/frames/{event_index}")
         return response.content, {"width": int(response.headers["X-Width"]),
                                   "height": int(response.headers["X-Height"]),
-                                  "sha256": response.headers["X-Content-SHA256"]}
+                                  "sha256": response.headers["X-Content-SHA256"],
+                                  "pose": json.loads(response.headers.get("X-Pose") or "null")}
+
+    async def depth(self, observation_id: str, view: str) -> tuple[np.ndarray, dict]:
+        """One observed view's depth in metres with its calibration and world sensor pose."""
+        response = await self._call("GET", f"/v1/sessions/{self.session_id}/observations/"
+                                           f"{observation_id}/{view}", params={"sensor": "depth"})
+        with np.load(io.BytesIO(response.content)) as stored:
+            depth = stored["depth_m"]
+        return depth, json.loads(response.headers["X-Sensor-Metadata"])
 
     async def finish(self, reason: str) -> dict:
         return (await self._call("POST", f"/v1/sessions/{self.session_id}/finish",

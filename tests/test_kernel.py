@@ -4,6 +4,7 @@ import io
 import json
 
 import httpx
+import numpy as np
 import pytest
 from PIL import Image
 
@@ -11,8 +12,12 @@ from open_nav_harness.kernel.episode import PreflightError, preflight, run_episo
 from open_nav_harness.kernel.spec import KernelSpec
 
 PNG = io.BytesIO()
-Image.new("RGB", (8, 6), (90, 90, 90)).save(PNG, format="PNG")
+Image.new("RGB", (32, 24), (90, 90, 90)).save(PNG, format="PNG")
 PNG = PNG.getvalue()
+DEPTH = io.BytesIO()
+np.savez_compressed(DEPTH, depth_m=np.full((24, 32), 2.0, np.float32))
+DEPTH = DEPTH.getvalue()
+PROJECTION = [[0.5, 0, 0, 0], [0, 0.6, 0, 0], [0, 0, -1, -0.02], [0, 0, -1, 0]]
 
 
 class FakeSim:
@@ -35,6 +40,10 @@ class FakeSim:
             return httpx.Response(200, json={"observation_id": f"obs-{self.observations}",
                                              "event_index": self.events, "views": {}})
         if "/observations/" in path:
+            if request.url.params.get("sensor") == "depth":
+                return httpx.Response(200, content=DEPTH, headers={"X-Sensor-Metadata": json.dumps({
+                    "calibration": {"projections": {"depth": PROJECTION}},
+                    "pose": {"position": [0, 0.88, 0], "rotation_xyzw": [0, 0, 0, 1]}})})
             return httpx.Response(200, content=PNG)
         if path.endswith("/step"):
             self.steps.append(body)
@@ -49,8 +58,10 @@ class FakeSim:
             return httpx.Response(200, json={"event_index": self.events, "done": False,
                                              "termination": None, "leg": leg})
         if "/frames/" in path:
+            index = int(path.rsplit("/", 1)[1])
             return httpx.Response(200, content=bytes(8 * 6 * 3), headers={
-                "X-Width": "8", "X-Height": "6", "X-Content-SHA256": "0" * 64})
+                "X-Width": "8", "X-Height": "6", "X-Content-SHA256": "0" * 64,
+                "X-Pose": json.dumps({"position": [0, 0, -0.1 * index], "rotation_xyzw": [0, 0, 0, 1]})})
         if path.endswith("/finish"):
             self.finished = body["reason"]
             return httpx.Response(200, json={})
@@ -126,6 +137,13 @@ async def test_a_delegated_leg_is_recorded_with_frames_and_the_stop_is_scored(tm
     last = planner.requests[-1]["messages"]
     assert sum(isinstance(m["content"], list) for m in last if m["role"] == "user") == 2
     assert "legs_so_far" in last[-2]["content"]
+    # Frames, poses and the observed map are recorded for the delegate call, never sent.
+    journal = [json.loads(line) for line in (root / "trace/requests.jsonl").read_text().splitlines()]
+    evidence = {r["kind"]: r for r in journal if r["kind"] in ("leg_evidence", "map_rendered")}
+    assert evidence["leg_evidence"]["call_id"] == "c3" and len(evidence["leg_evidence"]["poses"]) == 3
+    assert [r["call_id"] for r in journal if r["kind"] == "map_rendered"] == ["c1", "c3"]
+    assert evidence["map_rendered"]["seen_area_m2"] > 0
+    assert "\"position\"" not in sent and "heading_rad" not in sent and "rotation_xyzw" not in sent
 
 
 async def test_tool_calls_written_as_text_are_repaired_then_fail_after_three(tmp_path):

@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 from .environment import VIEWS, Observation, SimEngineEnvironment
+from .evidence import Evidence
 from .executors import Executor, LegRequest
 from .recorder import Recorder
 from .spec import Budgets
@@ -33,6 +34,7 @@ class EpisodeState:
     executor: Executor
     budgets: Budgets
     recorder: Recorder
+    evidence: Evidence
     observation: Observation | None = None
     shown: set[str] = field(default_factory=set)
     plan: list[dict] = field(default_factory=list)
@@ -47,6 +49,7 @@ class EpisodeState:
     async def look(self) -> Observation:
         if self.current() is None:
             self.observation, self.shown = await self.env.observe(), set()
+            await self.evidence.observation(self.observation)
         assert self.observation is not None
         return self.observation
 
@@ -89,6 +92,7 @@ class Motion(Tool):
         state.legs.append({**leg, **record})
         state.recorder.leg({**leg, **record, "start_views": state.recorder.views(state.observation)
                             if state.observation and leg["kind"] != "retrace" else None})
+        await state.evidence.leg(leg)
         if reply["done"]:
             state.end_reason = reply["termination"] or "episode_budget"
             return ToolOutput({"leg": leg, "episode_over": True}, ends_episode=True)

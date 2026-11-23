@@ -13,7 +13,11 @@ test('a kernel run episode replays legs, plan, views and frames, and cancels the
     { type: 'item.completed', item: { id: 'p', status: 'completed', state: { tasks: [{ instruction: 'go to the sofa', status: 'in_progress' }] } } },
     { type: 'item.started', item: { id: 'd', type: 'motion', name: 'delegate', arguments: { view: 'left', point: [500, 800], instruction: 'Walk to the sofa' }, status: 'in_progress' } },
     { type: 'item.completed', item: { id: 'd', status: 'completed', leg, result: ['{"leg": {}}'], image_views: views, images: views.map(v => v.artifact) } },
-    { type: 'item.updated', item: { id: 'd', frames: [{ policy: 'trace/media/' + 'f'.repeat(64) }, { policy: 'trace/media/' + 'e'.repeat(64) }] } },
+    { type: 'item.updated', item: { id: 'd', frames: [{ policy: 'trace/media/' + 'f'.repeat(64) }, { policy: 'trace/media/' + 'e'.repeat(64) }],
+      poses: [{ position: [1, 0, 0], heading_rad: 0 }, { position: [2, 0, 0], heading_rad: 0 }] } },
+    { type: 'item.updated', item: { id: 'd', map: { artifact: 'a'.repeat(64), size: [200, 100], places_px: {}, overlay: 'route', start: [0, 0, 0],
+      transform: { matrix: [50, 0, 10, 0, 50, 50], ppm: 50, residual_px: 0, nodes: 0 } } } },
+    { type: 'session.reference', goal: [3, 0, 0], path: [[0, 0, 0], [3, 0, 0]] },
   ];
   let cancelled = false;
   const base = '**/api/runs/r1/episodes/7';
@@ -29,6 +33,11 @@ test('a kernel run episode replays legs, plan, views and frames, and cancels the
   await expect(page.getByText('已到达 · 2 步')).toBeVisible();
   await expect(page.locator('.plan-dock')).toContainText('go to the sofa');
   await expect(page.locator('.hx-panel img')).toHaveCount(1);
+  // The bare map gets the walked route from the start, the goal and the dataset route.
+  await expect(page.locator('.overlay .trail')).toHaveAttribute('points', '10,50 60,50 110,50');
+  await expect(page.locator('.overlay .start')).toHaveCount(1);
+  await expect(page.locator('.overlay .goal')).toHaveAttribute('transform', 'translate(160 50)');
+  await expect(page.locator('.overlay .reference')).toHaveCount(1);
   await page.getByText('Walk to the sofa · 左侧').click();
   await expect(page.locator('.thumbs figcaption').first()).toHaveText('前方');
   await expect(page.getByRole('button', { name: '完成当前条后暂停' })).toHaveCount(0);

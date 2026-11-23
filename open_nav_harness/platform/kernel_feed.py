@@ -1,9 +1,9 @@
 """Read-only live projection of one kernel episode bundle into item lifecycle events.
 
-The wire journal is the spine: model turns and tool calls in exact order. A motion tool's
-result names its sim-engine leg; the leg's per-step frames are exported when the episode
-ends and arrive as one idempotent update. The end comes from the episode's result file.
-Only public files are read: ``session.json``, the journal, leg frames and the result.
+The wire journal is the spine: model turns and tool calls in exact order. Evidence records
+in the same journal attach each leg's frames and poses, and each observed map, to the tool
+call that produced them. The end comes from the episode's result file; after it, the goal
+and dataset route from the evaluation are published for the map, and never before.
 """
 
 from __future__ import annotations
@@ -35,7 +35,6 @@ class KernelFeed:
         self.journal = JsonlTail(folder / "trace" / "requests.jsonl")
         self.after = int(cursor) if cursor.isdigit() else 0
         self.started = self.ended = False
-        self.legs: dict[int, str] = {}  # sim-engine leg id -> the motion call that ran it
 
     @property
     def cursor(self) -> str:
@@ -58,7 +57,7 @@ class KernelFeed:
                 out += events
         if ending and self._drained() and not self.ended:
             self.ended = True
-            out += self._frames()
+            out += self._reference()
             result = json.loads(ending.read_text())
             out.append({"type": "session.ended", "t": result.get("elapsed_s"),
                         "explicit_stop": result.get("stop") is not None, "status": result.get("status"),
@@ -92,15 +91,21 @@ class KernelFeed:
                 item["state"] = plan_state(payload["plan"])
             if "leg" in payload:
                 item["leg"] = payload["leg"]
-                self.legs[payload["leg"]["leg_id"]] = r["call_id"]
             return [{"type": "item.completed", "t": r["time"], "item": item}]
+        if kind == "leg_evidence":
+            return [{"type": "item.updated", "item": {
+                "id": r["call_id"], "poses": r["poses"],
+                "frames": [{"policy": "trace/media/" + digest} for digest in r["frames"]]}}]
+        if kind == "map_rendered":
+            return [{"type": "item.updated", "item": {"id": r["call_id"], "map": {
+                "artifact": r["artifact"], "size": r["size"], "places_px": {}, "overlay": "route",
+                "start": r["start"],
+                "transform": {"matrix": r["matrix"], "ppm": r["ppm"], "residual_px": 0, "nodes": 0}}}}]
         return []
 
-    def _frames(self) -> list[dict]:
-        out = []
-        for leg_id, call in self.legs.items():
-            path = self.folder / "legs" / f"{leg_id:04d}-frames.json"
-            if path.exists():
-                frames = [{"policy": "trace/media/" + frame["rgb"]} for frame in json.loads(path.read_text())]
-                out.append({"type": "item.updated", "item": {"id": call, "frames": frames}})
-        return out
+    def _reference(self) -> list[dict]:
+        try:
+            reference = json.loads((self.folder / "evaluation.json").read_text()).get("reference")
+        except FileNotFoundError:
+            return []
+        return [{"type": "session.reference", **reference}] if reference else []

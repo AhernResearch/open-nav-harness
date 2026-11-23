@@ -5,6 +5,7 @@ from typing import Literal
 from pydantic import Field, field_validator
 
 from open_nav_harness.core.config import PlannerProfile, StrictModel
+from open_nav_harness.mapping.observed import MapSpec
 
 
 class EnvironmentSpec(StrictModel):
@@ -35,3 +36,4 @@ class KernelSpec(StrictModel):
     environment: EnvironmentSpec
     executor: ExecutorSpec = Field(default_factory=ExecutorSpec)
     budgets: Budgets = Field(default_factory=Budgets)
+    map: MapSpec = Field(default_factory=MapSpec)

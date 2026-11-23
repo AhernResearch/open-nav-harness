@@ -212,6 +212,8 @@ class RunScheduler:
         self.sim_transport, self.planner_transport = sim_transport, planner_transport
         self.lanes: dict[str, set[asyncio.Task]] = {}
         self.slots: dict[tuple, asyncio.Semaphore] = {}
+        # The code this process imported; the disk may change under a running worker.
+        self.loaded = kernel_digest()
 
     def slot(self, key: tuple, size: int) -> asyncio.Semaphore:
         return self.slots.setdefault(key, asyncio.Semaphore(size))
@@ -244,13 +246,17 @@ class RunScheduler:
                 for task in lanes:
                     task.cancel()
                 continue
+            if run["digest"] != self.loaded:
+                if kernel_digest() != run["digest"]:
+                    self.store.fail_queued(run["id"], "kernel source changed since the run was frozen")
+                continue  # frozen against newer code than this worker loaded: wait for a restart
             while len(lanes) < run["lanes"]:
                 lanes.add(asyncio.create_task(self.lane(run)))
 
     async def lane(self, run: dict):
         spec = KernelSpec.model_validate(run["spec"])
         while True:
-            if kernel_digest() != run["digest"]:
+            if kernel_digest() != run["digest"]:  # edited while this lane was running
                 self.store.fail_queued(run["id"], "kernel source changed since the run was frozen")
                 return
             episode = self.store.claim(run["id"])

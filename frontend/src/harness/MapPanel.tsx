@@ -6,7 +6,7 @@ type Box = [number, number, number, number];
 /** Fit the entire observed map and any movement since that map was recorded. */
 export function MapView({ trace, upto, base }: { trace: Trace; upto: number; base: string }) {
   const found = trace.map(upto);
-  if (!found?.item.map?.size) return <div className="map-empty">智能体查看地图后会显示在这里</div>;
+  if (!found?.item.map?.size) return <div className="map-empty">观察后会显示地图</div>;
   return <MapCanvas key={`${base}:${found.item.map.artifact}`} trace={trace} upto={upto} base={base} />;
 }
 
@@ -21,12 +21,18 @@ function MapCanvas({ trace, upto, base }: { trace: Trace; upto: number; base: st
   const m = map.transform?.matrix;
   const project = (p: number[]) => [m![0] * p[0] + m![1] * p[2] + m![2], m![3] * p[0] + m![4] * p[2] + m![5]];
   const current = trace.latestMotion(upto);
-  const trail = m ? trace.motions(index + 1, upto).flatMap((i) => i.poses).map((p) => project(p.position)) : [];
+  // A bare map carries no route, so the whole walk is drawn; a navgpt map already shows it up to `index`.
+  const bare = map.overlay === "route";
+  const walked = m ? trace.motions(bare ? 0 : index + 1, upto).flatMap((i) => i.poses).map((p) => project(p.position)) : [];
+  const start = m && bare && map.start ? project(map.start) : null;
+  const trail = start ? [start, ...walked] : walked;
+  const reference = m && trace.reference ? (trace.reference.path ?? []).map(project) : [];
+  const goal = m && trace.reference?.goal ? project(trace.reference.goal) : null;
   const live = m && current ? current.poses.map((p) => project(p.position)) : [];
   const pose = m ? current?.poses.at(-1) : undefined;
   const places = Object.entries(map.places_px);
   const focus = memoryFocus(trace, upto);
-  const points = [[0, 0], [w, h], ...places.map(([, p]) => p), ...trail, ...live];
+  const points = [[0, 0], [w, h], ...places.map(([, p]) => p), ...trail, ...live, ...reference, ...(goal ? [goal] : [])];
   const xs = points.map((p) => p[0]), ys = points.map((p) => p[1]);
   const fit: Box = [Math.min(...xs) - 32, Math.min(...ys) - 32, Math.max(...xs) - Math.min(...xs) + 64, Math.max(...ys) - Math.min(...ys) + 64];
   const box = viewport ?? fit;
@@ -64,7 +70,10 @@ function MapCanvas({ trace, upto, base }: { trace: Trace; upto: number; base: st
           {focus.edge && at(focus.edge[0]) && at(focus.edge[1]) && (
             <line key={`${focus.edge}-${upto}`} className="memory-edge" x1={at(focus.edge[0])[0]} y1={at(focus.edge[0])[1]} x2={at(focus.edge[1])[0]} y2={at(focus.edge[1])[1]} pathLength={1} />
           )}
+          {reference.length > 1 && <polyline className="reference" points={reference.map((p) => p.join(",")).join(" ")} />}
           {trail.length > 1 && <polyline className="trail" points={trail.map((p) => p.join(",")).join(" ")} />}
+          {start && <circle className="start" cx={start[0]} cy={start[1]} r={9} />}
+          {goal && <g className="goal" transform={`translate(${goal[0]} ${goal[1]})`}><title>终点</title><circle r={14} /><circle r={5} /></g>}
           {live.length > 1 && <polyline key={current!.id} className="live" points={live.map((p) => p.join(",")).join(" ")} pathLength={1} />}
           {places.map(([id, [x, y]]) => focus.nodes.has(id) && <circle key={`${id}-${upto}`} className="node-focus" cx={x} cy={y} r={18} />)}
           {pose && <Heading position={project(pose.position)} heading={pose.heading_rad ?? 0} m={m} />}

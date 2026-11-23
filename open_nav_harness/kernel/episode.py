@@ -8,14 +8,13 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
-import io
 import json
 import time
 from pathlib import Path
 
-from PIL import Image
 
 from .environment import MotionUncertain, SimEngineEnvironment
+from .evidence import Evidence
 from .executors import EXECUTORS
 from .loop import AgentLoop
 from .prompt import FIRST, briefing
@@ -72,7 +71,10 @@ async def run_episode(spec: KernelSpec, episode_id: str, root: Path, max_actions
         recorder.write("spec.json", {"spec": spec.model_dump(exclude={"planner": {"credential_env"}}),
                                      "episode_id": episode_id})
         instruction = opened["instruction"]
-        state = EpisodeState(instruction, env, EXECUTORS[spec.executor.kind], spec.budgets, recorder)
+        evidence = Evidence(env, recorder, spec.map)
+        await evidence.start()
+        state = EpisodeState(instruction, env, EXECUTORS[spec.executor.kind], spec.budgets, recorder,
+                             evidence)
         loop = AgentLoop(spec, recorder.journal, transport=planner_transport)
         system = briefing(instruction, spec.budgets.max_turns, max_actions)
         try:
@@ -83,7 +85,6 @@ async def run_episode(spec: KernelSpec, episode_id: str, root: Path, max_actions
             await env.finish("invalid_output" if error in PLANNER_FAILURES else "cancelled")
         evaluation = await env.metrics()
         recorder.write("evaluation.json", evaluation)
-        await export_frames(env, state.legs, recorder)
         result.update(status="completed", instruction=instruction, error=error,
                       end_reason=state.end_reason, stop=state.stop, turns=loop.turns,
                       malformed_replies=loop.malformed, usage=loop.usage, legs=len(state.legs),
@@ -106,22 +107,6 @@ async def run_episode(spec: KernelSpec, episode_id: str, root: Path, max_actions
     finally:
         await env.close()
     return result
-
-
-async def export_frames(env, legs, recorder) -> None:
-    """Per-step policy-camera RGB of every executed leg, for training export."""
-    for leg in legs:
-        indices = range(leg["start_event_index"] + 1, leg["end_event_index"] + 1)
-        if not indices:
-            continue
-        frames = []
-        for index, (raw, meta) in zip(indices, await asyncio.gather(*map(env.frame, indices))):
-            image = Image.frombytes("RGB", (meta["width"], meta["height"]), raw)
-            stream = io.BytesIO()
-            image.save(stream, format="PNG")
-            frames.append({"event_index": index, "rgb": recorder.image(stream.getvalue()),
-                           "raw_sha256": meta["sha256"]})
-        recorder.write(f"legs/{leg['leg_id']:04d}-frames.json", frames)
 
 
 async def run_batch(spec: KernelSpec, episodes: list[str], output: Path, lanes: int) -> list[dict]:

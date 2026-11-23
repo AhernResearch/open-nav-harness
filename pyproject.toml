@@ -11,13 +11,18 @@ license = "Apache-2.0 AND MIT"
 license-files = ["LICENSE", "NOTICE", "navgpt/vla/LICENSE"]
 requires-python = ">=3.11"
 dependencies = [
-    "fastapi==0.162.0", "uvicorn==0.54.0", "sqlalchemy==2.1.8",
-    "alembic==1.20.1", "httpx==0.28.1", "jsonschema==4.26.0",
+    "fastapi==0.162.0",
+    "uvicorn==0.54.0",
+    "sqlalchemy==2.1.8",
+    "alembic==1.20.1",
+    "httpx==0.28.1",
+    "jsonschema==4.26.0",
     "tomli>=2; python_version < '3.11'",
     "pydantic>=2.14,<3",
     "pillow>=10.0.0",
     "pyyaml>=6.0",
     "requests>=2.28.0",
+    "numpy>=1.26",
 ]
 
 # One source distribution, three runtime environments: these are the Planner's

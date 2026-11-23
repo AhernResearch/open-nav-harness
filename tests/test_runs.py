@@ -110,9 +110,17 @@ async def test_cancel_drops_queued_episodes_and_settles_the_run(store):
 async def test_a_changed_kernel_fails_the_queued_episodes(store, monkeypatch):
     rid = store.create(request(["1"]), CONTRACT)
     monkeypatch.setattr(runs, "kernel_digest", lambda: "changed")
-    await drain(scheduler(store, FakeSim()), rid)
+    scheduler(store, FakeSim()).tick()
     episode = store.run(rid)["episodes"][0]
     assert episode["status"] == "failed" and "kernel source changed" in episode["error"]
+
+
+async def test_a_stale_worker_leaves_runs_frozen_against_newer_code_queued(store, monkeypatch):
+    stale = scheduler(store, FakeSim())
+    monkeypatch.setattr(runs, "kernel_digest", lambda: "newer")
+    rid = store.create(request(["1"]), CONTRACT)
+    stale.tick()
+    assert stale.lanes[rid] == set() and store.run(rid)["episodes"][0]["status"] == "queued"
 
 
 def test_collection_requires_a_train_dataset(store):

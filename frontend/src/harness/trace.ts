@@ -16,7 +16,12 @@ export type MapInfo = {
   places_px: Record<string, [number, number]>;
   nodes?: Record<string, number[]>;
   transform: { matrix: number[]; ppm: number; residual_px: number; nodes: number } | null;
+  /** "route": a bare observed map; the whole walked route is drawn over it, from `start`. */
+  overlay?: "route";
+  start?: number[];
 };
+/** Evaluation-only geometry, published by the server after the episode ended. */
+export type Reference = { goal: number[] | null; path: number[][] | null };
 export type Item = {
   id: string;
   type: "tool" | "plan" | "memory_write" | "memory_read" | "map" | "motion";
@@ -49,6 +54,7 @@ export class Trace {
   status: Row | null = null;
   session: Row | null = null;
   meta: Row | null = null;
+  reference: Reference | null = null;
   ended = false;
   private version = 0;
   private listeners = new Set<() => void>();
@@ -68,6 +74,7 @@ export class Trace {
     this.entries = [];
     this.session = null;
     this.meta = null;
+    this.reference = null;
     this.ended = false;
     this.changed();
   }
@@ -155,6 +162,7 @@ export class Trace {
         if (patch!.pose) item.poses = [...item.poses, patch!.pose];
         if (patch!.frame) item.frames = [...item.frames, patch!.frame];
         if (patch!.frames) item.frames = patch!.frames; // a whole leg at once: idempotent on replay
+        if (patch!.poses) item.poses = patch!.poses;
         if (patch!.execution) item.execution = patch!.execution;
         if (patch!.map) item.map = patch!.map;
         break;
@@ -163,6 +171,9 @@ export class Trace {
         break;
       case "session.started":
         this.meta = e;
+        break;
+      case "session.reference":
+        this.reference = { goal: e.goal ?? null, path: e.path ?? null };
         break;
       case "session.ended":
         this.session = e;

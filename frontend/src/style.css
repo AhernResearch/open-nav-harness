@@ -667,7 +667,7 @@ body:has(.hx) { background: var(--bg); }
 .plan-card .completed span:last-child { text-decoration: line-through; }
 
 .thread { position: relative; flex: 1; overflow: auto; scroll-behavior: smooth; padding: 18px 0 24px; }
-.thread-col { width: min(760px, calc(100% - 40px)); margin: 0 auto; display: grid; gap: 10px; }
+.thread-col { width: min(760px, calc(100% - 40px)); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
 .user-msg { justify-self: end; max-width: 82%; padding: 12px 16px; border-radius: var(--r-lg) var(--r-lg) 6px var(--r-lg); background: var(--surface-2); line-height: 1.6; animation: rise 0.3s var(--ease); }
 .user-msg p { margin: 0 0 6px; }
 .scene-chip { font-size: 12px; color: var(--muted); }
@@ -708,6 +708,9 @@ body:has(.hx) { background: var(--bg); }
 .map-image { animation: fade 0.5s var(--ease); }
 .map-empty { display: grid; place-items: center; min-height: 160px; color: var(--muted); font-size: 13px; padding: 16px; }
 .overlay .trail { fill: none; stroke: var(--warn); stroke-width: 5; stroke-linejoin: round; stroke-linecap: round; opacity: 0.85; }
+.overlay .reference { fill: none; stroke: var(--info); stroke-width: 4; stroke-dasharray: 10 8; stroke-linecap: round; opacity: 0.9; }
+.overlay .start { fill: var(--info); stroke: white; stroke-width: 3; }
+.overlay .goal circle { fill: none; stroke: var(--err); stroke-width: 4; }
 .overlay .live { fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.2s var(--ease) forwards; }
 .overlay .memory-edge { stroke: var(--warn); stroke-width: 9; stroke-linecap: round; opacity: 0.9; stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 0.9s var(--ease) forwards; }
 .overlay .node-focus { fill: none; stroke: var(--info); stroke-width: 4; transform-box: fill-box; transform-origin: center; animation: ping 1.4s var(--ease) infinite; }
