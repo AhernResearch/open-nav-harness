@@ -32,35 +32,50 @@ function useTheme(): [string, () => void] {
   return [theme, () => setTheme(theme === "dark" ? "light" : "dark")];
 }
 
+const attemptBase = (id: string) => `/api/attempts/${encodeURIComponent(id)}`;
+const runBase = (key: string) => {
+  const [run, episode] = key.split("/").map(encodeURIComponent);
+  return `/api/runs/${run}/episodes/${episode}`;
+};
+/** The selected episode's API base from the address bar: legacy attempts or kernel run episodes. */
+function initialSource(): string | null {
+  const q = new URLSearchParams(location.search);
+  const attempt = q.get("attempt"), run = q.get("run");
+  return attempt ? attemptBase(attempt) : run ? runBase(run) : null;
+}
+
 export function HarnessPage() {
   const [theme, toggleTheme] = useTheme();
   const [attempts, setAttempts] = useState<Row[]>([]);
-  const [attempt, setAttempt] = useState<string | null>(new URLSearchParams(location.search).get("attempt"));
+  const [source, setSource] = useState<string | null>(initialSource);
+  const attempt = source?.startsWith("/api/attempts/") ? decodeURIComponent(source.split("/").at(-1)!) : null;
   const [job, setJob] = useState<string | null>(new URLSearchParams(location.search).get("job"));
   const [cursor, setCursor] = useState<number | null>(null);
   const conversation = useConversation();
   const [datasetMode, setDatasetMode] = useState(false);
-  const navigationTrace = useTrace(attempt);
-  const trace = attempt ? navigationTrace : conversation.trace;
+  const navigationTrace = useTrace(source);
+  const trace = source ? navigationTrace : conversation.trace;
   const refresh = () => api<Row[]>("/harness/attempts").then(setAttempts).catch(() => {});
   useEffect(() => {
     refresh();
     const timer = setInterval(refresh, 5000);
     return () => clearInterval(timer);
   }, []);
-  const open = (id: string | null) => {
+  /** Select an episode row (`run_id` marks a kernel run episode) or clear the selection. */
+  const open = (row: Row | null) => {
     conversation.open(null);
     setDatasetMode(false);
-    setAttempt(id);
+    setSource(row ? row.base : null);
     setJob(null);
     setCursor(null);
-    history.replaceState(null, "", id ? "/harness?attempt=" + encodeURIComponent(id) : "/harness");
+    const query = !row ? "" : row.run_id ? "?run=" + encodeURIComponent(row.id) : "?attempt=" + encodeURIComponent(row.id);
+    history.replaceState(null, "", "/harness" + query);
   };
   const openConversation = (id: string) => {
-    setAttempt(null); setJob(null); setCursor(null); setDatasetMode(false); conversation.open(id);
+    setSource(null); setJob(null); setCursor(null); setDatasetMode(false); conversation.open(id);
   };
   const pending = usePendingJob(job, (id) => {
-    open(id);
+    open({ id, base: attemptBase(id) });
     refresh();
   });
   const enqueue = (id: string) => {
@@ -80,13 +95,17 @@ export function HarnessPage() {
   const last = trace.entries.length - 1;
   const upto = cursor ?? last;
   const s = trace.status;
-  const camera = attempt ? trace.camera(upto, attempt) : [];
+  const camera = source ? trace.camera(upto, source) : [];
   const running = s?.status === "running";
   const recentItems = [...trace.items.values()].reverse();
   const spatialImage = recentItems.find(i => i.name.endsWith("__view_map") && i.images?.length);
   const objectImage = recentItems.find(i => !i.name.endsWith("__view_map") && i.images?.length);
-  const panelImages = attempt ? camera : objectImage ? toolImages(objectImage, "", "物体图片") : [];
+  const panelImages = source ? camera : objectImage ? toolImages(objectImage, "", "物体图片") : [];
   const control = async (action: string) => {
+    if (s?.run_id) {
+      if (confirm("停止整个运行？排队中的 episode 会取消，正在执行的会中断并记录。")) await api(`/runs/${s.run_id}/cancel`, {});
+      return;
+    }
     if (action === "cancel" && !confirm("停止会终止正在执行的 episode，中断后需要在 Workbench 中核验并释放资源。确定停止？")) return;
     await api(`/jobs/${s!.job_id}/action`, { action });
   };
@@ -107,7 +126,7 @@ export function HarnessPage() {
             <span className={"dot " + a.status}/><span className="session-text"><span className="title">{a.title || "新的会话"}</span><span className="sub">{a.spec.model} · {statusText[a.status] ?? a.status}</span></span>
           </button>)}
           {attempts.map((a) => (
-            <button key={a.id} className={"session " + (a.id === attempt ? "active" : "")} onClick={() => open(a.id)}>
+            <button key={a.base} className={"session " + (a.base === source ? "active" : "")} onClick={() => open(a)}>
               <span className={"dot " + a.status} />
               <span className="session-text">
                 <span className="title">{a.meta?.instruction ?? a.name}</span>
@@ -130,7 +149,7 @@ export function HarnessPage() {
       </div>
 
       <main className="hx-main">
-        {!attempt ? (
+        {!source ? (
           job ? (
             <div className="hero">
               <p role="status" className="thinking">{pendingText}</p>
@@ -141,7 +160,7 @@ export function HarnessPage() {
           ) : (
             (datasetMode || (conversation.ready && !conversation.options.models.length)) ? <Composer onStarted={enqueue} /> : conversation.id ? <>
               <header className="run-head"><span className={"status-pill " + conversation.status}><i/>{statusText[conversation.status] ?? conversation.status}</span><span className="spacer"/><span className="muted">{conversation.model}</span></header>
-              <Thread trace={trace} upto={last} live={true} select={() => {}} attempt=""/>
+              <Thread trace={trace} upto={last} live={true} select={() => {}} base=""/>
               <ConversationComposer conversation={conversation}/>
             </> : <ConversationComposer conversation={conversation}/>
           )
@@ -160,9 +179,9 @@ export function HarnessPage() {
               )}
               {running && (
                 <>
-                  <button className="pill-button" onClick={() => control("pause")}>
+                  {s?.job_id && <button className="pill-button" onClick={() => control("pause")}>
                     <Icon name="pause" size={14} /> 完成当前条后暂停
-                  </button>
+                  </button>}
                   <button className="pill-button danger" onClick={() => control("cancel")}>
                     <Icon name="stop" size={14} /> 停止
                   </button>
@@ -172,7 +191,7 @@ export function HarnessPage() {
             <div className="plan-dock">
               <PlanCard tasks={trace.plan(upto)} />
             </div>
-            <Thread trace={trace} upto={upto} live={cursor === null} select={setCursor} attempt={attempt} />
+            <Thread trace={trace} upto={upto} live={cursor === null} select={setCursor} base={source} />
             {last > 0 && (
               <div className="scrubber">
                 <input
@@ -189,17 +208,17 @@ export function HarnessPage() {
         )}
       </main>
 
-      {(attempt || conversation.id) && (
+      {(source || conversation.id) && (
         <aside className="hx-panel" aria-label="环境">
           <section className="card">
             <h3>
               <Icon name="map" /> 地图
             </h3>
-            {attempt ? <MapView trace={trace} upto={upto} attempt={attempt} /> : spatialImage ? <CameraGallery images={toolImages(spatialImage, "", "空间图")}/> : <div className="map-empty">查询空间图后显示</div>}
+            {source ? <MapView trace={trace} upto={upto} base={source} /> : spatialImage ? <CameraGallery images={toolImages(spatialImage, "", "空间图")}/> : <div className="map-empty">查询空间图后显示</div>}
           </section>
           <section className="card">
             <h3>
-              <Icon name="eye" /> {attempt ? "机器人视角" : "物体图片"}
+              <Icon name="eye" /> {source ? "机器人视角" : "物体图片"}
             </h3>
             {panelImages.length ? (
               <CameraGallery images={panelImages} />

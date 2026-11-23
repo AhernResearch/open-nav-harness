@@ -3,16 +3,28 @@
 from hashlib import sha256
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def source_digest(paths) -> str:
+    digest = sha256()
+    for path in sorted(paths):
+        digest.update(path.relative_to(ROOT).as_posix().encode())
+        digest.update(path.read_bytes())
+    return digest.hexdigest()
+
+
+def packages(*names) -> set[Path]:
+    return {path for name in names for path in (ROOT / name).rglob("*.py")}
+
 
 # No cache: freezing and launching must detect edits made while the API is up.
 def implementation_digest() -> str:
-    root = Path(__file__).resolve().parents[2]
-    digest = sha256()
-    paths = set((root / "navgpt").rglob("*.py"))
-    for package in ("core", "providers"):
-        paths.update((root / "open_nav_harness" / package).rglob("*.py"))
-    paths.add(root / "open_nav_harness/platform/episode.py")
-    for path in sorted(paths):
-        digest.update(path.relative_to(root).as_posix().encode())
-        digest.update(path.read_bytes())
-    return digest.hexdigest()
+    return source_digest(packages("navgpt", "open_nav_harness/core", "open_nav_harness/providers")
+                         | {ROOT / "open_nav_harness/platform/episode.py"})
+
+
+def kernel_digest() -> str:
+    """Everything a kernel run executes: tools, prompt, loop, provider and context code."""
+    return source_digest(packages("open_nav_harness/kernel", "open_nav_harness/core",
+                                  "open_nav_harness/providers"))

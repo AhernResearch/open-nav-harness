@@ -24,6 +24,7 @@ class FakeSim:
         path, body = request.url.path, json.loads(request.content or b"{}")
         if path == "/v1/health":
             return httpx.Response(200, json={
+                "workers": 2,
                 "protocol": {"reward_mode": self.reward_mode, "max_actions": 500, "cameras": {"cam": {}}},
                 "capabilities": {"commands": ["velocity", "point_goal", "retrace"], "observe": True}})
         if path == "/v1/sessions":

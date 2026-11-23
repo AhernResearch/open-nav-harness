@@ -7,7 +7,9 @@ with everything recorded so far; the simulator session state is read back, not r
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import io
+import json
 import time
 from pathlib import Path
 
@@ -45,20 +47,30 @@ async def preflight(spec: KernelSpec, sim_transport=None) -> dict:
     ) if failed]
     if problems:
         raise PreflightError("; ".join(problems))
-    return {"max_actions": protocol["max_actions"], "implementation_sha256":
-            protocol.get("implementation_sha256"), "startup_id": health.get("startup_id")}
+    files = json.dumps(protocol.get("implementation_sha256"), sort_keys=True).encode()
+    return {"max_actions": protocol["max_actions"], "workers": health["workers"],
+            "implementation_sha256": hashlib.sha256(files).hexdigest(),
+            "startup_id": health.get("startup_id")}
 
 
 async def run_episode(spec: KernelSpec, episode_id: str, root: Path, max_actions: int, *,
                       sim_transport=None, planner_transport=None) -> dict:
-    recorder = Recorder(root)
-    recorder.write("spec.json", {"spec": spec.model_dump(exclude={"planner": {"credential_env"}}),
-                                 "episode_id": episode_id})
+    """Open failures (including ``SimulatorBusy``) raise before anything is written."""
     env = SimEngineEnvironment(spec.environment, transport=sim_transport)
     started = time.time()
-    result: dict = {"episode_id": episode_id, "started": started}
     try:
         opened = await env.open(episode_id)
+        recorder = Recorder(root)
+        # Written first so an interrupted owner can release the session after a restart.
+        recorder.write("session.json", {"url": spec.environment.url, "session_id": env.session_id,
+                                        "episode_id": episode_id, "instruction": opened["instruction"]})
+    except BaseException:
+        await env.close()
+        raise
+    result: dict = {"episode_id": episode_id, "started": started}
+    try:
+        recorder.write("spec.json", {"spec": spec.model_dump(exclude={"planner": {"credential_env"}}),
+                                     "episode_id": episode_id})
         instruction = opened["instruction"]
         state = EpisodeState(instruction, env, EXECUTORS[spec.executor.kind], spec.budgets, recorder)
         loop = AgentLoop(spec, recorder.journal, transport=planner_transport)

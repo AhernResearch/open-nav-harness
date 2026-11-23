@@ -21,6 +21,10 @@ class SimulatorError(RuntimeError):
     """sim-engine refused or failed a non-motion operation."""
 
 
+class SimulatorBusy(SimulatorError):
+    """No free simulator worker (HTTP 429); nothing was opened, so the caller may requeue."""
+
+
 @dataclass(frozen=True)
 class Observation:
     observation_id: str
@@ -41,6 +45,8 @@ class SimEngineEnvironment:
 
     async def _call(self, method, path, body=None):
         response = await self.http.request(method, path, json=body)
+        if response.status_code == 429:
+            raise SimulatorBusy(f"{method} {path}: {response.text[:200]}")
         if response.is_error:
             raise SimulatorError(f"{method} {path}: HTTP {response.status_code} {response.text[:500]}")
         return response

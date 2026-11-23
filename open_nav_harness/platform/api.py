@@ -1,7 +1,6 @@
 """Open-access management API. No navigation logic here."""
 
 import asyncio
-import hashlib
 import json
 import time
 import zipfile
@@ -17,6 +16,9 @@ from .database import Database, ident
 from .services import ServiceManager
 from .catalog import Catalog
 from .harness import Feed, episode_meta
+from .media import artifact_response, image_file
+from .stream import follow
+from .runs import RunStore, router as runs_router
 from .results import attempt_detail, csv_export, metrics, aggregate, read_jsonl
 
 
@@ -60,6 +62,8 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
 
     app = FastAPI(title="Open Nav Harness", version="0.1.0", lifespan=lifespan)
     app.include_router(router(conversations))
+    runs = RunStore(db)
+    app.include_router(runs_router(runs))
     app.state.conversations = conversations
     app.state.db = db
     app.state.services = manager
@@ -244,34 +248,9 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
     @app.get("/api/attempts/{aid}/artifact/{digest}")
     def artifact(aid: str, digest: str):
         a = get_attempt(aid)
-        if len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
-            raise HTTPException(404)
-        path = Path(a["output"]) / "episode" / "work" / f"ep{a['episode']:04d}" / "trace" / "media" / digest
-        if not path.is_file():
-            raise HTTPException(404)
-        raw = path.read_bytes()
-        if hashlib.sha256(raw).hexdigest() != digest:
-            raise HTTPException(409, "Artifact digest mismatch")
-        return Response(
-            raw,
-            media_type="image/png"
-            if raw.startswith(b"\x89PNG")
-            else "image/webp"
-            if raw.startswith(b"RIFF")
-            else "image/jpeg",
-            # Content-addressed and verified above, so it can never change under this URL.
-            headers={"Cache-Control": "private, max-age=31536000, immutable"},
+        return artifact_response(
+            Path(a["output"]) / "episode" / "work" / f"ep{a['episode']:04d}" / "trace" / "media", digest
         )
-
-    def image_file(directory: Path, relative: str):
-        path = (directory / relative).resolve()
-        if (
-            not path.is_relative_to(directory.resolve())
-            or path.suffix.lower() not in (".png", ".jpg", ".jpeg", ".webp")
-            or not path.is_file()
-        ):
-            raise HTTPException(404)
-        return FileResponse(path)
 
     @app.get("/api/attempts/{aid}/files/{relative:path}")
     def attempt_image(aid: str, relative: str):
@@ -463,7 +442,10 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
         for row in rows:
             row["name"] = json.loads(row.pop("spec"))["name"]
             row["meta"] = episode_meta(Path(row.pop("output")), row["episode"])
-        return rows
+            row["base"] = f"/api/attempts/{row['id']}"
+        rows += runs.recent(20)
+        rows.sort(key=lambda row: (row["status"] != "running", -(row["created"] or 0)))
+        return rows[:20]
 
     catalog = Catalog(root / "catalog")
 
@@ -488,31 +470,7 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
                 id=aid,
             )[0]
 
-        async def stream():
-            yield "retry: 3000\n\n"
-            status, quiet = None, 0
-            while not await request.is_disconnected():
-                events = await asyncio.to_thread(feed.poll)
-                if events is None:
-                    yield "event: reset\ndata: {}\n\n"
-                    return
-                quiet = 0 if events else quiet + 1
-                current = await asyncio.to_thread(attempt_status)
-                if current != status:
-                    status = current
-                    events.append({"type": "attempt.status", **current})
-                if events:
-                    yield f"id: {feed.cursor}\ndata: {json.dumps(events, ensure_ascii=False)}\n\n"
-                elif current["status"] != "running" and quiet >= 2:
-                    yield f"event: end\ndata: {json.dumps(current)}\n\n"
-                    return
-                else:
-                    yield ": heartbeat\n\n"
-                await asyncio.sleep(1)
-
-        return StreamingResponse(
-            stream(), media_type="text/event-stream", headers={"X-Accel-Buffering": "no"}
-        )
+        return follow(request, feed, attempt_status, lambda current: current["status"] != "running")
 
     dist = Path(__file__).resolve().parents[1] / "web"
 

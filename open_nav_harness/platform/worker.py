@@ -13,6 +13,7 @@ from sqlalchemy import text
 from open_nav_harness.core.artifacts import atomic_json
 from open_nav_harness.core.config import PlatformSettings
 from .database import Database
+from .runs import RunScheduler, RunStore
 
 
 def start_ticks(pid):
@@ -42,6 +43,7 @@ class Worker:
         self.children: dict[str, asyncio.subprocess.Process] = {}
         self.terminating: dict[str, float] = {}
         self.lockfile: IO[str] | None = None
+        self.runs = RunScheduler(RunStore(db))
 
     def lock(self):
         self.lockfile = (self.db.root / "worker.lock").open("a")
@@ -152,6 +154,8 @@ class Worker:
     async def run(self):
         self.lock()
         self.reconcile()
+        await self.runs.recover()
         while True:
             await self.tick()
+            self.runs.tick()
             await asyncio.sleep(1)

@@ -95,6 +95,21 @@ def episode_meta(output: Path, episode: int) -> dict | None:
     return {k: meta.get(k) for k in ("instruction", "scene_id", "episode_id", "index")}
 
 
+ERRORS = ("session_error", "model_transport_error", "tool_validation_error")
+
+
+def common_event(r: dict) -> list[dict]:
+    """Journal records shared by every harness: model turns and errors."""
+    if r.get("kind") == "model_response":
+        body = r.get("response") or {}
+        message = (response_message(body) if body.get('object') == 'response' else
+                   (body.get("choices") or [{}])[0].get("message") or {})
+        return [{"type": "turn.completed", "t": r["time"], "text": message.get("content"),
+                 "reasoning": message.get("reasoning") or message.get("reasoning_content"),
+                 "usage": body.get("usage"), "elapsed_s": r.get("elapsed_s")}]
+    return [{"type": "error", "t": r["time"], "kind": r["kind"], "error": r.get("error") or r.get("errors")}]
+
+
 def _lines(content: str) -> tuple[list[str], dict | None]:
     """Tool feedback text lines, with the trailing task-state record split off."""
     lines, state = [], None
@@ -169,13 +184,8 @@ class Feed:
 
     def _journal(self, r: dict) -> list[dict]:
         kind = r.get("kind")
-        if kind == "model_response":
-            body = r.get("response") or {}
-            message = (response_message(body) if body.get('object') == 'response' else
-                       (body.get("choices") or [{}])[0].get("message") or {})
-            return [{"type": "turn.completed", "t": r["time"], "text": message.get("content"),
-                     "reasoning": message.get("reasoning") or message.get("reasoning_content"),
-                     "usage": body.get("usage"), "elapsed_s": r.get("elapsed_s")}]
+        if kind == "model_response" or kind in ERRORS:
+            return common_event(r)
         if kind == "tool_dispatch":
             name = r["name"]
             if name in MOTION:
@@ -200,9 +210,6 @@ class Feed:
                                "size": png_size(self.media / item["images"][0]), "transform": None}
                 self.maps.append(item)
             return [{"type": "item.completed", "t": r["time"], "item": item}]
-        if kind in ("session_error", "model_transport_error", "tool_validation_error"):
-            return [{"type": "error", "t": r["time"], "kind": kind,
-                     "error": r.get("error") or r.get("errors")}]
         if kind == "session_end":
             return [{"type": "session.ended", "t": r["time"], "explicit_stop": r.get("explicit_stop"),
                      "error": r.get("error"), "usage": r.get("usage")}]

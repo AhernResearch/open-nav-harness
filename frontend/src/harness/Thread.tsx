@@ -4,6 +4,12 @@ import { toolImages, type Entry, type Item, type Trace } from "./trace";
 import { CameraGallery } from "./CameraGallery";
 
 /** What a row says in plain words; raw arguments stay behind the expander. */
+const viewNames: Record<string, string> = { front: "前方", right: "右侧", back: "后方", left: "左侧" };
+const legStatus: Record<string, string> = {
+  reached: "已到达", stopped_short: "未完全到达", blocked: "受阻", invalid_target: "目标点无效",
+  unreachable: "无法到达", leg_budget: "本段步数用尽", episode_budget: "总步数用尽",
+};
+
 function describe(item: Item): { icon: string; label: string } {
   const a = item.arguments ?? {};
   switch (item.name) {
@@ -12,7 +18,11 @@ function describe(item: Item): { icon: string; label: string } {
     case "observe_map":
       return { icon: "map", label: "查看地图" };
     case "update_plan":
-      return { icon: "list", label: a.patch ? `更新计划 · 调整 ${a.patch.length} 项状态` : `更新计划 · ${a.subtasks?.length ?? 0} 项` };
+      return { icon: "list", label: a.patch ? `更新计划 · 调整 ${a.patch.length} 项状态` : `更新计划 · ${(a.steps ?? a.subtasks)?.length ?? 0} 项` };
+    case "delegate":
+      return { icon: "route", label: `${a.instruction} · ${viewNames[a.view] ?? a.view}` };
+    case "return_to":
+      return { icon: "route", label: `沿原路返回第 ${a.leg_id} 段终点` };
     case "execute_subtask":
       return { icon: "route", label: `${a.instruction || `执行任务 ${a.task_id}`}${a.stop_at ? ` · Stop: ${a.stop_at}` : ""}${a.max_distance_m ? ` · ≤${a.max_distance_m} 米` : ""}` };
     case "navigate_relative":
@@ -23,6 +33,7 @@ function describe(item: Item): { icon: string; label: string } {
       return { icon: "pencil", label: `记住 ${a.start_node_id} → ${a.end_node_id}` };
     case "read_memory":
       return { icon: "book", label: a.other_node_id == null ? `回忆地点 ${a.node_id}` : `回忆 ${a.node_id} → ${a.other_node_id}` };
+    case "stop":
     case "terminate_episode":
       return { icon: "flag", label: a.status === "abort" ? "放弃任务" : `宣布到达${a.evidence?.length ? ` · ${a.evidence.length} 条证据` : ""}` };
     default:
@@ -62,7 +73,7 @@ export function PlanCard({ tasks }: { tasks: Record<string, any>[] }) {
 }
 
 /** The conversation: the instruction, model messages and one row per tool call. */
-export function Thread({ trace, upto, live, select, attempt }: { trace: Trace; upto: number; live: boolean; select: (i: number) => void; attempt: string }) {
+export function Thread({ trace, upto, live, select, base }: { trace: Trace; upto: number; live: boolean; select: (i: number) => void; base: string }) {
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = box.current;
@@ -81,7 +92,7 @@ export function Thread({ trace, upto, live, select, attempt }: { trace: Trace; u
           </div>
         )}
         {trace.entries.map((e, i) => (
-          <Row key={i} entry={e} trace={trace} attempt={attempt} state={i === upto ? "current" : i > upto ? "future" : ""} onSelect={() => select(i)} />
+          <Row key={i} entry={e} trace={trace} base={base} state={i === upto ? "current" : i > upto ? "future" : ""} onSelect={() => select(i)} />
         ))}
         {working && live && trace.entries.at(-1)?.kind !== "item" && <p className="thinking shimmer">正在思考…</p>}
         {trace.session && (
@@ -92,7 +103,7 @@ export function Thread({ trace, upto, live, select, attempt }: { trace: Trace; u
   );
 }
 
-function Row({ entry, trace, attempt, state, onSelect }: { entry: Entry; trace: Trace; attempt: string; state: string; onSelect: () => void }) {
+function Row({ entry, trace, base, state, onSelect }: { entry: Entry; trace: Trace; base: string; state: string; onSelect: () => void }) {
   const [open, setOpen] = useState(false);
   if (entry.kind === "user") return <div className="user-msg"><p>{entry.text}</p></div>;
   if (entry.kind === "turn") {
@@ -106,7 +117,8 @@ function Row({ entry, trace, attempt, state, onSelect }: { entry: Entry; trace: 
   if (entry.kind === "error") return <div className={"tool-row failed " + state}>出现错误：{String(entry.source)}</div>;
   const item = trace.items.get(entry.id)!;
   const { icon, label } = describe(item);
-  const steps = item.type === "motion" && item.poses.length ? `${item.poses.length} 步` : "";
+  const steps = item.leg ? [legStatus[item.leg.status] ?? item.leg.status, item.frames.length ? `${item.frames.length} 步` : ""].filter(Boolean).join(" · ")
+    : item.type === "motion" && item.poses.length ? `${item.poses.length} 步` : "";
   return (
     <div className={`tool ${item.type} ${state}`}>
       <button
@@ -131,7 +143,7 @@ function Row({ entry, trace, attempt, state, onSelect }: { entry: Entry; trace: 
             <div key={i}>{line}</div>
           ))}
           {!!item.images?.length && (
-            <CameraGallery className="thumbs" images={toolImages(item, attempt, "工具返回的图像")} />
+            <CameraGallery className="thumbs" images={toolImages(item, base, "工具返回的图像")} />
           )}
         </div>
       )}

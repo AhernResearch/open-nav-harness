@@ -4,13 +4,13 @@ import type { Trace } from "./trace";
 type Box = [number, number, number, number];
 
 /** Fit the entire observed map and any movement since that map was recorded. */
-export function MapView({ trace, upto, attempt }: { trace: Trace; upto: number; attempt: string }) {
+export function MapView({ trace, upto, base }: { trace: Trace; upto: number; base: string }) {
   const found = trace.map(upto);
   if (!found?.item.map?.size) return <div className="map-empty">智能体查看地图后会显示在这里</div>;
-  return <MapCanvas key={`${attempt}:${found.item.map.artifact}`} trace={trace} upto={upto} attempt={attempt} />;
+  return <MapCanvas key={`${base}:${found.item.map.artifact}`} trace={trace} upto={upto} base={base} />;
 }
 
-function MapCanvas({ trace, upto, attempt }: { trace: Trace; upto: number; attempt: string }) {
+function MapCanvas({ trace, upto, base }: { trace: Trace; upto: number; base: string }) {
   const [viewport, setViewport] = useState<Box | null>(null);
   const svg = useRef<SVGSVGElement>(null);
   const drag = useRef<{ id: number; x: number; y: number; box: Box } | null>(null);
@@ -58,7 +58,7 @@ function MapCanvas({ trace, upto, attempt }: { trace: Trace; upto: number; attem
       onPointerCancel={() => { drag.current = null; }}
       onLostPointerCapture={() => { drag.current = null; }}>
       <rect className="map-void" x={box[0]} y={box[1]} width={box[2]} height={box[3]} />
-      <image key={map.artifact} className="map-image" href={`/api/attempts/${attempt}/artifact/${map.artifact}`} width={w} height={h} />
+      <image key={map.artifact} className="map-image" href={`${base}/artifact/${map.artifact}`} width={w} height={h} />
       {m && (
         <g className="overlay">
           {focus.edge && at(focus.edge[0]) && at(focus.edge[1]) && (
