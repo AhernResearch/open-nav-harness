@@ -1,7 +1,7 @@
 # Production kernel: interface draft
 
-Status: draft for review (2026-11-23). Nothing here is implemented. Plan:
-`~/.claude/plans/delegated-exploring-ladybug.md`.
+Status: implemented (`open_nav_harness/kernel/`, sim-engine `feat/production-kernel`). Written as the
+interface draft on 2026-11-23; the code is authoritative where they differ.
 
 ## Ownership
 
@@ -12,8 +12,7 @@ Status: draft for review (2026-11-23). Nothing here is implemented. Plan:
 | open-nav-harness platform | Runs, queue, lanes, API, console | Navigation semantics |
 | nav-data | Task construction, submission over HTTP, result filtering, releases | Agent loop, simulator calls |
 
-The harness no longer ships a Habitat environment. `navgpt/` stays in place, unused by the new path,
-until the parity check in phase 4.
+The harness ships no Habitat environment; the inherited `navgpt` package has been removed.
 
 ## 1. sim-engine session extensions
 
@@ -124,8 +123,8 @@ class Tool(ABC):
 ```
 
 `AgentLoop` keeps `providers/compatible.py CompatibleClient`, the Responses client,
-`core/context.py ContextWindow` and `StrictValidator`. It replaces the navgpt-dependent part of
-`providers/runtime.py`.
+`core/context.py ContextWindow` and `StrictValidator`. `providers/runtime.py` `ManagedRuntime` now
+holds only the dialogue loop.
 
 A turn proceeds like this:
 
@@ -144,8 +143,8 @@ The loop handles three cases specially:
 - A response with no tool call at all also gets repair feedback, once; the episode does not end
   silently.
 
-`platform/conversations.py` currently builds on `ManagedRuntime` and navgpt tools. It moves to
-`AgentLoop` with its own tool set in phase 3. Its behavior is unchanged.
+`platform/conversations.py` builds on `ManagedRuntime`; a bound conversation runs the kernel tool set
+through `platform/navigation.py`.
 
 ### Tool set `point_v1`
 

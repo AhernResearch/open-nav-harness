@@ -23,14 +23,14 @@ URL填写实际服务地址；令牌通过Harness进程环境注入。新会话�
 
 ## 服务端迁移
 
-原`navgpt.planner.tools.semantic_map`和`semantic_map_http`已迁至`sementic_map_mcp`同名模块。旧`NAVGPT_MAP_*`本地地图接入已移除；服务端使用`MAP_*`会话参数或命令行参数。Harness无需场景目录、编码器或deep_search配置，也无需地图项目PYTHONPATH。
+地图模块已迁至`sementic_map_mcp`。旧`NAVGPT_MAP_*`本地地图接入已移除；服务端使用`MAP_*`会话参数或命令行参数。Harness无需场景目录、编码器或deep_search配置，也无需地图项目PYTHONPATH。
 
 服务端启动、依赖、授权和历史验证见相邻项目`docs/MCP_MIGRATION_20261116.md`及`docs/DEEP_SEARCH.md`。既有端点和Bearer不因源码迁移改变；实际运行服务切换必须按其拥有者记录执行。
 
 
 ## 整理与验证（2026-11-16）
 
-交互会话复用ManagedRuntime，数据库迁移0003/0004保存会话、事件、输入和冻结配置。前端复用Harness时间线，外部工具显示服务端工具名，不依赖固定的map连接别名或地图工具清单。导航注册器恢复原有职责，地图专用服务扩展已移出。
+交互会话复用ManagedRuntime，数据库迁移0003/0004保存会话、事件、输入和冻结配置。前端复用Harness时间线，外部工具显示服务端工具名，不依赖固定的map连接别名或地图工具清单。地图专用服务扩展已移出。
 
 同时修正禁用reset_context后的工具说明清理：只匹配说明行本身，不依赖Python版本对docstring的缩进处理。未改变导航执行行为。
 
@@ -41,7 +41,6 @@ export UV_PROJECT_ENVIRONMENT=/home/agiuser/lx_workspace/envs/open-nav-harness
 # uv为该环境bin/uv；--no-sync沿用已安装依赖。
 uv run --no-sync pytest -q
 uv run --no-sync ruff check open_nav_harness
-uv run --no-sync ruff check --select F821,F823 navgpt
 uv run --no-sync mypy open_nav_harness
 npm --prefix frontend run build
 ONH_PYTHON="$UV_PROJECT_ENVIRONMENT/bin/python" ONH_CHROME=/usr/bin/google-chrome npm --prefix frontend test
