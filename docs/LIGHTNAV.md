@@ -67,8 +67,7 @@ python -m open_nav_harness.actors.lightnav_engine --config deployment/actor-ligh
 ```
 
 Start it through a trusted template (`owned-lightnav` in `deployment/platform.example.json`)
-or by hand. The platform's service health probe for kind `vla` requests `/info`, which this service
-does not serve (see [OPERATIONS](OPERATIONS.md#services)); check `GET /v1/health` directly. The run spec points at it with
+or by hand; the platform probes a `vla` service at `GET /v1/health`. The run spec points at it with
 `"executor": {"kind": "vla", "url": ACTOR_URL}` and `"tool_set": "vla_v1"`.
 
 ## Preflight and the control period

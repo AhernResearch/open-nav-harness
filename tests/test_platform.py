@@ -212,3 +212,13 @@ def test_api_open_access_and_unknown_templates(tmp_path):
         assert "/api/logout" not in app.openapi()["paths"]
 
 
+
+
+@pytest.mark.parametrize("kind", ["environment", "vla"])
+async def test_sim_engine_and_actor_services_are_probed_at_their_health_route(db, monkeypatch, kind):
+    sid = db.register_service(ServiceSpec(name="svc", kind=kind, url="http://a100:18911/"))
+    get = AsyncMock(return_value=httpx.Response(200, json={"status": "ok"},
+                                                request=httpx.Request("GET", "http://a100:18911/v1/health")))
+    monkeypatch.setattr(httpx.AsyncClient, "get", get)
+    assert (await ServiceManager(db, PlatformSettings()).health(sid))["ok"] is True
+    assert get.await_args.args[0] == "http://a100:18911/v1/health"

@@ -35,11 +35,9 @@ class ServiceManager:
 
     async def health(self, sid):
         spec = self.db.service(sid)
-        if spec.kind == "planner" and spec.planner.runtime != "openai_compatible":
-            return {"ok": None, "status": "SDK login and model access are checked during preflight"}
-        suffix = {"planner": "/models", "environment": "/health", "vla": "/info", "execution": "/info"}[
-            spec.kind
-        ]
+        # sim-engine and actor services answer /v1/health; legacy execution workers answered /info.
+        suffix = {"planner": "/models", "environment": "/v1/health", "vla": "/v1/health",
+                  "execution": "/info"}[spec.kind]
         try:
             headers = {}
             if spec.kind == 'planner' and spec.planner.credential_env:

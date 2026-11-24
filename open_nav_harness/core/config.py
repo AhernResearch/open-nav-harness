@@ -10,7 +10,7 @@ class StrictModel(BaseModel):
 
 
 class PlannerProfile(StrictModel):
-    runtime: Literal["openai_compatible", "codex", "claude"] = "openai_compatible"
+    runtime: Literal["openai_compatible"] = "openai_compatible"
     api_format: Literal["chat_completions", "responses"] = "chat_completions"
     replay_reasoning: bool = True
     token_count_mode: Literal["remote", "estimate"] = "remote"
@@ -43,13 +43,12 @@ class PlannerProfile(StrictModel):
     def budget(self):
         if self.output_tokens + 512 >= self.context_limit:
             raise ValueError("context must reserve input and output space")
-        if self.runtime != "openai_compatible" and self.context_policy != "full":
-            raise ValueError("SDK runtime requires full context; internal context is not observable")
         return self
 
 
 class ServiceSpec(StrictModel):
     name: str = Field(pattern=r"^[a-z][a-z0-9_-]{0,47}$")
+    # "execution" only reads services registered for the removed navgpt pipeline.
     kind: Literal["planner", "environment", "vla", "execution"]
     url: str
     managed: bool = False

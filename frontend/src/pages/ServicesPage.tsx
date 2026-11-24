@@ -14,20 +14,14 @@ export function ServicesPage({
   const [modelName, setModelName] = useState("Qwen3.6-27B-MM"),
     [serviceName, setServiceName] = useState("qwen27b"),
     [serviceUrl, setServiceUrl] = useState("http://127.0.0.1:8001/v1"),
-    [kind, setKind] = useState<"planner" | "environment" | "vla" | "execution">("planner");
+    [kind, setKind] = useState<"planner" | "environment" | "vla">("planner");
   const [managed, setManaged] = useState(false),
     [template, setTemplate] = useState(""),
     [gpuIds, setGpuIds] = useState("3"),
     [reserve, setReserve] = useState(60000);
-  const [runtime, setRuntime] = useState<
-    "openai_compatible" | "codex" | "claude"
-  >("openai_compatible");
   const [contextLimit, setContextLimit] = useState(16384),
     [outputTokens, setOutputTokens] = useState(2048),
-    [concurrency, setConcurrency] = useState(1),
-    [shared, setShared] = useState(false),
-    [environmentUrl, setEnvironmentUrl] = useState(""),
-    [inferenceUrl, setInferenceUrl] = useState("");
+    [concurrency, setConcurrency] = useState(1);
   const [contextPolicy, setContextPolicy] = useState<"bounded" | "full">(
       "bounded",
     ),
@@ -39,8 +33,7 @@ export function ServicesPage({
       url: serviceUrl,
       managed,
       max_concurrency: concurrency,
-      metadata: kind === "execution" ? { environment_url: environmentUrl, inference_url: inferenceUrl }
-        : kind === "vla" ? { shared_inference: shared } : {},
+      metadata: {},
       template: managed ? template : null,
       gpu_ids: managed && gpuIds.trim() ? gpuIds.split(",").map(Number) : [],
       reserve_mib: managed ? reserve : 0,
@@ -49,7 +42,7 @@ export function ServicesPage({
           ? {
               model: modelName,
               base_url: serviceUrl,
-              runtime,
+              runtime: "openai_compatible",
               api_format: "chat_completions",
               omit_unique_items: false,
               replay_reasoning: true,
@@ -57,8 +50,7 @@ export function ServicesPage({
               context_limit: contextLimit,
               output_tokens: outputTokens,
               max_images: 32,
-              context_policy:
-                runtime === "openai_compatible" ? contextPolicy : "full",
+              context_policy: contextPolicy,
               thinking,
               temperature: 0,
               request_timeout_s: 120,
@@ -184,7 +176,6 @@ export function ServicesPage({
               <option value="planner">Planner</option>
               <option value="environment">Environment</option>
               <option value="vla">VLA</option>
-              <option value="execution">Execution</option>
             </select>
           </label>
           <label>
@@ -206,19 +197,6 @@ export function ServicesPage({
           {kind === "planner" && (
             <>
               <label>
-                运行接口
-                <select
-                  value={runtime}
-                  onChange={(e) => setRuntime(e.target.value as typeof runtime)}
-                >
-                  <option value="openai_compatible">
-                    OpenAI compatible API
-                  </option>
-                  <option value="codex">Codex SDK（本机登录）</option>
-                  <option value="claude">Claude SDK</option>
-                </select>
-              </label>
-              <label>
                 上下文窗口
                 <input
                   type="number"
@@ -234,30 +212,26 @@ export function ServicesPage({
                   onChange={(e) => setOutputTokens(Number(e.target.value))}
                 />
               </label>
-              {runtime === "openai_compatible" && (
-                <>
-                  <label>
-                    历史管理
-                    <select
-                      value={contextPolicy}
-                      onChange={(e) =>
-                        setContextPolicy(e.target.value as typeof contextPolicy)
-                      }
-                    >
-                      <option value="bounded">保留任务状态，按预算裁剪</option>
-                      <option value="full">完整历史</option>
-                    </select>
-                  </label>
-                  <label className="checkbox">
-                    <input
-                      type="checkbox"
-                      checked={thinking}
-                      onChange={(e) => setThinking(e.target.checked)}
-                    />
-                    启用 thinking
-                  </label>
-                </>
-              )}
+              <label>
+                历史管理
+                <select
+                  value={contextPolicy}
+                  onChange={(e) =>
+                    setContextPolicy(e.target.value as typeof contextPolicy)
+                  }
+                >
+                  <option value="bounded">保留任务状态，按预算裁剪</option>
+                  <option value="full">完整历史</option>
+                </select>
+              </label>
+              <label className="checkbox">
+                <input
+                  type="checkbox"
+                  checked={thinking}
+                  onChange={(e) => setThinking(e.target.checked)}
+                />
+                启用 thinking
+              </label>
             </>
           )}
           <label className="checkbox">
@@ -301,14 +275,18 @@ export function ServicesPage({
           )}
         </div>
         <div className="form-grid">
-          {(kind === "planner" || kind === "vla") && <label>并发容量
-            <input type="number" min={1} max={32} value={concurrency} onChange={e => setConcurrency(Number(e.target.value))} />
-          </label>}
-          {kind === "vla" && <label><input type="checkbox" checked={shared} onChange={e => setShared(e.target.checked)} />共享推理服务</label>}
-          {kind === "execution" && <>
-            <label>环境地址<input value={environmentUrl} onChange={e => setEnvironmentUrl(e.target.value)} /></label>
-            <label>共享推理地址<input value={inferenceUrl} onChange={e => setInferenceUrl(e.target.value)} /></label>
-          </>}
+          {(kind === "planner" || kind === "vla") && (
+            <label>
+              并发容量
+              <input
+                type="number"
+                min={1}
+                max={32}
+                value={concurrency}
+                onChange={(e) => setConcurrency(Number(e.target.value))}
+              />
+            </label>
+          )}
         </div>
         <button onClick={() => perform(register)}>注册服务</button>
       </section>

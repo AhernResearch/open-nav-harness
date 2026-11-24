@@ -110,7 +110,6 @@ added.
 
 A new model family needs a `PlannerProfile`, not a loop. A different wire protocol belongs in
 `providers/`. A new actor implements the HTTP contract in [LIGHTNAV.md](LIGHTNAV.md) and does not touch
-the loop. `PlannerProfile.runtime` still accepts `codex` and `claude` in the schema, but no runtime
-for them exists.
+the loop. Planners are OpenAI-compatible endpoints (chat completions or Responses).
 
 The full interface design and decisions are in [PRODUCTION_KERNEL.md](PRODUCTION_KERNEL.md).

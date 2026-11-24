@@ -658,9 +658,9 @@ export interface components {
             /**
              * Runtime
              * @default openai_compatible
-             * @enum {string}
+             * @constant
              */
-            runtime: "openai_compatible" | "codex" | "claude";
+            runtime: "openai_compatible";
             /**
              * Api Format
              * @default chat_completions

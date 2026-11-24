@@ -71,8 +71,8 @@ Start requires free GPU memory (`reserve_mib` plus a 1 GiB margin, net of other 
 This is admission from measured memory, not isolation: other users can allocate afterwards.
 
 Health probes are per kind: planner `/models` (all of `metadata.replica_urls` must answer when set),
-environment `/health`, vla and execution `/info`. sim-engine and the LightNav actor serve
-`/v1/health`, so the platform probe does not match them; check those endpoints directly.
+environment and vla `/v1/health` (sim-engine and the LightNav actor), and `/info` for `execution`
+services left from the removed navgpt pipeline.
 
 `deployment/vllm_replicas.py` runs one independent vLLM server per visible GPU as one supervised unit
 (one `--ports` entry per GPU; if any replica exits all stop). Serve a profile's `base_url` from one
