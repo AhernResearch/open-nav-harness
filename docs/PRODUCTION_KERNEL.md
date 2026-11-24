@@ -276,3 +276,24 @@ The first user message is `Begin: observe all four views, then write a plan.`
 
 Pending: whether a response without a tool call gets one repair prompt (§2) instead of failing
 immediately as the current invariant requires.
+
+## Tool set `vla_v1` and the LightNav actor
+
+`vla_v1` pairs with `{"kind": "vla", "url": ACTOR}` (the run spec rejects other pairings).
+`delegate(instruction)` carries language only; `observe`, `return_to`, `update_plan` and `stop`
+are unchanged. The leg ends as `reached` (the policy's STOP or the Habitat low-speed rule),
+`leg_budget`, `episode_budget`, `decode_error`, `command_rejected` or `actor_error`; the last
+also fails the episode after the leg so far is recorded.
+
+- Actor service (`open_nav_harness/actors/lightnav.py`, model in `lightnav_engine.py`, run in the
+  LightNav environment): `POST /v1/sessions`, `POST .../frames {first_index, frames[b64 PNG]}`,
+  `POST .../act {request_id, instruction}`, `DELETE ...`, `GET /v1/health`. Frame `i` is the
+  simulator's event `i`; appends are contiguous and idempotent; history is the whole episode.
+  It receives policy RGB and the instruction only.
+- `VlaActor` appends every frame the actor has not seen before each `act`, so retraces stay in
+  the history. A velocity step is never retried; a lost reply is `MotionUncertain`.
+- The harness numbers legs. `return_to(n)` becomes `retrace {event_index: end of leg n}`, which
+  needs a simulator that lists `event_index` under `capabilities.retrace_targets`.
+- Control period: LightNav's official Habitat configuration uses 0.1 s steps (lin 0 to 2.5 m/s,
+  ang +-300 deg/s). Preflight refuses an actor whose `control.dt_s` differs from the dataset's
+  `physics.velocity.time_step_s`, or whose camera differs from the simulator camera.
