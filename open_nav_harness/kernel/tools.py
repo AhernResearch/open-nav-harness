@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 
 from .environment import VIEWS, Observation, SimEngineEnvironment
 from .evidence import Evidence
-from .executors import Executor, LegRequest
+from .executors import Executor, LegAborted, LegRequest
 from .recorder import Recorder
 from .spec import Budgets
 
@@ -88,7 +88,8 @@ class Motion(Tool):
     """Shared handling after any leg: record it, look around and summarize all legs."""
 
     async def finish_leg(self, state, reply, record):
-        leg = reply["leg"]
+        # The harness numbers legs: a simulator only numbers the legs it ran itself.
+        leg = {**reply["leg"], "leg_id": len(state.legs) + 1}
         state.legs.append({**leg, **record})
         state.recorder.leg({**leg, **record, "start_views": state.recorder.views(state.observation)
                             if state.observation and leg["kind"] != "retrace" else None})
@@ -103,6 +104,14 @@ class Motion(Tool):
         return ToolOutput({"leg": leg, "legs_so_far": legs_summary(state.legs),
                            "control_steps_used": state.env.event_index},
                           views_output(observation, VIEWS))
+
+    async def run_executor(self, state, request, record):
+        try:
+            reply = await state.executor.run_leg(state.env, request)
+        except LegAborted as aborted:
+            await self.finish_leg(state, aborted.reply, record)  # the motion happened: record it
+            raise aborted.cause from None
+        return await self.finish_leg(state, reply, record)
 
 
 def legs_summary(legs):
@@ -131,13 +140,25 @@ class Delegate(Motion):
         observation = state.current()
         if observation is None or args["view"] not in state.shown:
             raise ToolRefused(f"Observe the {args['view']} view at the current position first.")
-        request = LegRequest(observation.observation_id, args["view"], args["point"],
-                             args["instruction"], state.budgets.leg_max_actions)
-        reply = await state.executor.run_leg(state.env, request)
-        return await self.finish_leg(state, reply, {
-            "instruction": args["instruction"], "view": args["view"],
-            "point": args["point"], "observation_id": observation.observation_id,
-            "executor": state.executor.name})
+        request = LegRequest(args["instruction"], state.budgets.leg_max_actions,
+                             observation.observation_id, args["view"], args["point"])
+        record = {"instruction": args["instruction"], "view": args["view"], "point": args["point"],
+                  "observation_id": observation.observation_id, "executor": state.executor.name}
+        return await self.run_executor(state, request, record)
+
+
+class DelegateInstruction(Motion):
+    name = "delegate"
+    description = ("Let the walking policy follow a route instruction from where the robot is, until it "
+                   "decides it has arrived or runs out of steps. Write plain English: an action, a "
+                   "direction if needed, a landmark it can see and where to stop.")
+    parameters = {"type": "object", "additionalProperties": False, "required": ["instruction"],
+                  "properties": {"instruction": {"type": "string", "minLength": 1, "maxLength": 400}}}
+
+    async def run(self, state, args):
+        request = LegRequest(args["instruction"], state.budgets.leg_max_actions)
+        return await self.run_executor(state, request, {
+            "instruction": args["instruction"], "executor": state.executor.name})
 
 
 class ReturnTo(Motion):
@@ -147,7 +168,10 @@ class ReturnTo(Motion):
                   "properties": {"leg_id": {"type": "integer", "minimum": 1}}}
 
     async def run(self, state, args):
-        reply = await state.env.command({"kind": "retrace", "leg_id": args["leg_id"],
+        if not 1 <= args["leg_id"] <= len(state.legs):
+            raise ToolRefused("There is no leg with that id.")
+        end = state.legs[args["leg_id"] - 1]["end_event_index"]
+        reply = await state.env.command({"kind": "retrace", "event_index": end,
                                          "max_actions": state.budgets.leg_max_actions})
         return await self.finish_leg(state, reply, {"retrace_of": args["leg_id"]})
 
@@ -182,6 +206,7 @@ class Stop(Tool):
 
 TOOL_SETS: dict[str, tuple[Tool, ...]] = {
     "point_v1": (Observe(), Delegate(), ReturnTo(), UpdatePlan(), Stop()),
+    "vla_v1": (Observe(), DelegateInstruction(), ReturnTo(), UpdatePlan(), Stop()),
 }
 
 

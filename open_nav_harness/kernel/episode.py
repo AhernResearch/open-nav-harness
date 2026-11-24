@@ -15,7 +15,7 @@ from pathlib import Path
 
 from .environment import MotionUncertain, SimEngineEnvironment
 from .evidence import Evidence
-from .executors import EXECUTORS
+from .executors import build_executor
 from .loop import AgentLoop
 from .prompt import FIRST, briefing
 from .recorder import Recorder
@@ -29,18 +29,25 @@ class PreflightError(RuntimeError):
     pass
 
 
-async def preflight(spec: KernelSpec, sim_transport=None) -> dict:
-    """Once per run: the simulator must offer legs and must not leak training rewards."""
+async def preflight(spec: KernelSpec, sim_transport=None, actor_transport=None) -> dict:
+    """Once per run: the simulator must offer the executor's commands and must not leak rewards."""
     env = SimEngineEnvironment(spec.environment, transport=sim_transport)
+    executor = build_executor(spec.executor, actor_transport)
     try:
         health = await env.health()
+        protocol, capabilities = health["protocol"], health["capabilities"]
+        executor_problems, actor = await executor.preflight(
+            protocol, spec.environment.dataset, spec.environment.camera)
     finally:
+        await executor.close()
         await env.close()
-    protocol, capabilities = health["protocol"], health["capabilities"]
-    problems = [message for failed, message in (
+    needed = {"retrace", *executor.commands}
+    problems = executor_problems + [message for failed, message in (
         (protocol.get("reward_mode") != "none", "simulator reward_mode must be none"),
-        (not {"point_goal", "retrace"} <= set(capabilities.get("commands", [])),
-         "simulator lacks point_goal/retrace commands"),
+        (not needed <= set(capabilities.get("commands", [])),
+         f"simulator lacks commands {sorted(needed - set(capabilities.get('commands', [])))}"),
+        ("event_index" not in capabilities.get("retrace_targets", []),
+         "simulator cannot retrace to an event"),
         (not capabilities.get("observe"), "simulator lacks observe"),
         (spec.environment.camera not in protocol.get("cameras", {}), "unknown simulator camera"),
     ) if failed]
@@ -49,11 +56,11 @@ async def preflight(spec: KernelSpec, sim_transport=None) -> dict:
     files = json.dumps(protocol.get("implementation_sha256"), sort_keys=True).encode()
     return {"max_actions": protocol["max_actions"], "workers": health["workers"],
             "implementation_sha256": hashlib.sha256(files).hexdigest(),
-            "startup_id": health.get("startup_id")}
+            "startup_id": health.get("startup_id"), "actor": actor}
 
 
 async def run_episode(spec: KernelSpec, episode_id: str, root: Path, max_actions: int, *,
-                      sim_transport=None, planner_transport=None) -> dict:
+                      sim_transport=None, planner_transport=None, actor_transport=None) -> dict:
     """Open failures (including ``SimulatorBusy``) raise before anything is written."""
     env = SimEngineEnvironment(spec.environment, transport=sim_transport)
     started = time.time()
@@ -67,16 +74,17 @@ async def run_episode(spec: KernelSpec, episode_id: str, root: Path, max_actions
         await env.close()
         raise
     result: dict = {"episode_id": episode_id, "started": started}
+    executor = build_executor(spec.executor, actor_transport)
     try:
         recorder.write("spec.json", {"spec": spec.model_dump(exclude={"planner": {"credential_env"}}),
                                      "episode_id": episode_id})
         instruction = opened["instruction"]
         evidence = Evidence(env, recorder, spec.map)
+        await executor.start(env, evidence)
         await evidence.start()
-        state = EpisodeState(instruction, env, EXECUTORS[spec.executor.kind], spec.budgets, recorder,
-                             evidence)
+        state = EpisodeState(instruction, env, executor, spec.budgets, recorder, evidence)
         loop = AgentLoop(spec, recorder.journal, transport=planner_transport)
-        system = briefing(instruction, spec.budgets.max_turns, max_actions)
+        system = briefing(instruction, spec.budgets.max_turns, max_actions, spec.tool_set)
         try:
             error = await asyncio.wait_for(loop.run(state, system, FIRST), spec.budgets.timeout_s)
         except asyncio.TimeoutError:
@@ -105,7 +113,10 @@ async def run_episode(spec: KernelSpec, episode_id: str, root: Path, max_actions
                       elapsed_s=time.time() - started)
         recorder.write("failure.json", result)
     finally:
-        await env.close()
+        try:
+            await executor.close()
+        finally:
+            await env.close()
     return result
 
 

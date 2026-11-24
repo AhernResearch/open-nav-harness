@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import io
 import math
+from dataclasses import dataclass
 
 import httpx
 import numpy as np
@@ -38,9 +39,49 @@ def pose_record(event_index: int, pose: dict) -> dict:
             "heading_rad": heading(pose["rotation_xyzw"])}
 
 
+@dataclass(frozen=True)
+class Frame:
+    index: int
+    png: bytes
+    meta: dict
+
+
+class FrameCache:
+    """Each step frame is read from the simulator once for every consumer.
+
+    Evidence records every frame; an executor that feeds a model also needs them. A frame is
+    dropped after all consumers released it. Poses stay (three floats per step) so an executor
+    can report distances without a second read.
+    """
+
+    def __init__(self, env: SimEngineEnvironment):
+        self.env, self.consumers = env, 1
+        self.entries: dict[int, list] = {}  # index -> [Frame, consumers still to release]
+        self.positions: dict[int, list[float]] = {}
+
+    def subscribe(self):
+        self.consumers += 1
+
+    async def get(self, index: int) -> Frame:
+        if index not in self.entries:
+            raw, meta = await self.env.frame(index)
+            stream = io.BytesIO()
+            Image.frombytes("RGB", (meta["width"], meta["height"]), raw).save(stream, format="PNG")
+            self.entries.setdefault(index, [Frame(index, stream.getvalue(), meta), self.consumers])
+            self.positions[index] = meta["pose"]["position"]
+        return self.entries[index][0]
+
+    def release(self, index: int):
+        entry = self.entries[index]
+        entry[1] -= 1
+        if entry[1] <= 0:
+            del self.entries[index]
+
+
 class Evidence:
     def __init__(self, env: SimEngineEnvironment, recorder: Recorder, spec: MapSpec):
         self.env, self.recorder = env, recorder
+        self.frames = FrameCache(env)
         self.map = ObservedMap(spec) if spec.enabled else None
         self.route: list[dict] = []
         self.call: str | None = None  # the tool call whose effect is being recorded
@@ -62,21 +103,20 @@ class Evidence:
             raise EvidenceError(f"recording failed: {type(error).__name__}: {error}") from error
 
     async def _start(self):
-        _, meta = await self.env.frame(self.env.event_index)
-        self.route.append(pose_record(self.env.event_index, meta["pose"]))
+        frame = await self.frames.get(self.env.event_index)
+        self.frames.release(frame.index)
+        self.route.append(pose_record(frame.index, frame.meta["pose"]))
 
     async def _leg(self, leg: dict):
         indices = range(leg["start_event_index"] + 1, leg["end_event_index"] + 1)
         if not indices:
             return
         frames, poses = [], []
-        for index, (raw, meta) in zip(indices, await asyncio.gather(*map(self.env.frame, indices))):
-            stream = io.BytesIO()
-            Image.frombytes("RGB", (meta["width"], meta["height"]), raw).save(stream, format="PNG")
-            pose = pose_record(index, meta["pose"])
-            frames.append({**pose, "rgb": self.recorder.image(stream.getvalue()),
-                           "raw_sha256": meta["sha256"]})
+        for frame in await asyncio.gather(*map(self.frames.get, indices)):
+            pose = pose_record(frame.index, frame.meta["pose"])
+            frames.append({**pose, "rgb": self.recorder.image(frame.png), "raw_sha256": frame.meta["sha256"]})
             poses.append(pose)
+            self.frames.release(frame.index)
         self.route += poses
         self.recorder.write(f"legs/{leg['leg_id']:04d}-frames.json", frames)
         self.recorder.journal.emit("leg_evidence", call_id=self.call, leg_id=leg["leg_id"],
