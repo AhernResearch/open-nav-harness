@@ -20,7 +20,7 @@ from open_nav_harness.kernel.environment import MotionUncertain, SimEngineEnviro
 from open_nav_harness.kernel.evidence import Evidence, EvidenceError
 from open_nav_harness.kernel.executors import EXECUTORS
 from open_nav_harness.kernel.recorder import Recorder
-from open_nav_harness.kernel.spec import Budgets, EnvironmentSpec
+from open_nav_harness.kernel.spec import Budgets, EnvironmentSpec, KernelSpec
 from open_nav_harness.kernel.tools import TOOL_SETS, EpisodeState, ToolRefused, tool_message
 from open_nav_harness.mapping.observed import MapSpec
 
@@ -41,6 +41,14 @@ class NavigationTarget(StrictModel):
 
     _endpoint = field_validator("url")(PlannerProfile.endpoint.__func__)
 
+    def environment(self) -> EnvironmentSpec:
+        return EnvironmentSpec(url=self.url, dataset=self.dataset, camera=self.camera, seed=self.seed)
+
+    def kernel_spec(self, planner: PlannerProfile) -> KernelSpec:
+        """The frozen spec of a run on this environment; conversations bind the same settings."""
+        return KernelSpec(planner=planner, environment=self.environment(), budgets=self.budgets,
+                          map=self.map)
+
 
 class NavigationEnded(RuntimeError):
     """The bound session ended; further navigation needs a new binding."""
@@ -60,9 +68,7 @@ class KernelNavigation:
 
     async def start(self, episode: str) -> dict:
         """Open the episode and record its receipt before the first tool call."""
-        env = SimEngineEnvironment(EnvironmentSpec(url=self.target.url, dataset=self.target.dataset,
-                                                   camera=self.target.camera, seed=self.target.seed),
-                                   transport=self.transport)
+        env = SimEngineEnvironment(self.target.environment(), transport=self.transport)
         try:
             opened = await env.open(episode)
         except BaseException:

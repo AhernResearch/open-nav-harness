@@ -54,7 +54,6 @@ export function ServicesPage({
               omit_unique_items: false,
               replay_reasoning: true,
               token_count_mode: "remote",
-              image_token_estimate: 4096,
               context_limit: contextLimit,
               output_tokens: outputTokens,
               max_images: 32,

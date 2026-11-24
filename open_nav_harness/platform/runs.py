@@ -56,6 +56,26 @@ class RunRequest(StrictModel):
         return value
 
 
+class ComposeRun(StrictModel):
+    """A run chosen by name from trusted settings; clients never supply endpoints."""
+
+    name: str = Field(min_length=1, max_length=200)
+    purpose: Literal["evaluation", "collection"] = "evaluation"
+    planner: str
+    environment: str
+    episodes: list[str] = Field(min_length=1, max_length=20000)
+    lanes: int = Field(default=1, ge=1, le=64)
+
+    def request(self, settings) -> RunRequest:
+        if settings is None or self.planner not in settings.profiles:
+            raise ValueError("Unknown planner " + self.planner)
+        if self.environment not in settings.navigation:
+            raise ValueError("Unknown environment " + self.environment)
+        spec = settings.navigation[self.environment].kernel_spec(settings.profiles[self.planner])
+        return RunRequest(name=self.name, purpose=self.purpose, spec=spec, episodes=self.episodes,
+                          lanes=self.lanes)
+
+
 def summarize(result: dict, evaluation: dict | None) -> dict:
     summary = {key: result.get(key) for key in SUMMARY}
     summary["metrics"] = (evaluation or {}).get("metrics")
@@ -303,13 +323,21 @@ def bundle(folder: Path) -> tuple[Path, str]:
     return Path(handle.name), digest
 
 
-def router(store: RunStore) -> APIRouter:
+def router(store: RunStore, settings=None) -> APIRouter:
+    """``settings`` holds the named planner profiles and environments that ``/compose`` may use."""
     api = APIRouter(prefix="/api/runs")
+
+    async def submit(request: RunRequest) -> dict:
+        contract = await preflight(request.spec)
+        return {"id": store.create(request, contract)}
 
     @api.post("", status_code=201)
     async def create(body: RunRequest):
-        contract = await preflight(body.spec)
-        return {"id": store.create(body, contract)}
+        return await submit(body)
+
+    @api.post("/compose", status_code=201)
+    async def compose(body: ComposeRun):
+        return await submit(body.request(settings))
 
     @api.get("")
     def listing():

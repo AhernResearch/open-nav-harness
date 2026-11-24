@@ -35,5 +35,5 @@ test('free instructions continue inside the existing Harness layout and survive 
   await page.getByRole('button',{name:'新的运行',exact:true}).click();
   await expect(page.getByRole('heading',{name:'今天让机器人去哪里？'})).toBeVisible();
   await page.getByRole('button',{name:'从数据集运行'}).click();
-  await expect(page.getByPlaceholder('搜索这个场景里的指令，例如 “stairs” 或 “kitchen”…')).toBeVisible();
+  await expect(page.getByRole('heading',{name:'新建运行'})).toBeVisible();
 });

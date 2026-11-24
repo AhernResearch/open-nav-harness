@@ -16,7 +16,7 @@ function bindings(services: Row[], vla: string) {
     });
 }
 
-function Pill({ label, value, options, onChange }: { label: string; value: string; options: [string, string, boolean?][]; onChange: (v: string) => void }) {
+export function Pill({ label, value, options, onChange }: { label: string; value: string; options: [string, string, boolean?][]; onChange: (v: string) => void }) {
   return (
     <label className="pill">
       <span>{label}</span>

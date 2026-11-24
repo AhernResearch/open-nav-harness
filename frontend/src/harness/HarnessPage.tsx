@@ -9,6 +9,7 @@ import { useConversation } from "./useConversation";
 import { toolImages } from "./trace";
 import { useTrace } from "./useTrace";
 import { CameraGallery } from "./CameraGallery";
+import { RunComposer } from "./RunComposer";
 
 const statusText: Record<string, string> = {
   idle: "就绪",
@@ -78,6 +79,12 @@ export function HarnessPage() {
     open({ id, base: attemptBase(id) });
     refresh();
   });
+  /** A submitted kernel run opens on its first episode; it joins the sidebar once it starts. */
+  const started = (run: string, episode: string) => {
+    const key = `${run}/${episode}`;
+    open({ id: key, base: runBase(key), run_id: run });
+    refresh();
+  };
   const enqueue = (id: string) => {
     setJob(id);
     history.replaceState(null, "", "/harness?job=" + encodeURIComponent(id));
@@ -158,7 +165,7 @@ export function HarnessPage() {
               </a>
             </div>
           ) : (
-            (datasetMode || (conversation.ready && !conversation.options.models.length)) ? <Composer onStarted={enqueue} /> : conversation.id ? <>
+            datasetMode ? <RunComposer onStarted={started} /> : (conversation.ready && !conversation.options.models.length) ? <Composer onStarted={enqueue} /> : conversation.id ? <>
               <header className="run-head"><span className={"status-pill " + conversation.status}><i/>{statusText[conversation.status] ?? conversation.status}</span><span className="spacer"/><span className="muted">{conversation.model}</span></header>
               <Thread trace={trace} upto={last} live={true} select={() => {}} base=""/>
               <ConversationComposer conversation={conversation}/>

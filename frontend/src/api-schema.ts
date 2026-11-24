@@ -159,6 +159,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/runs/compose": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Compose */
+        post: operations["compose_api_runs_compose_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/runs/{rid}": {
         parameters: {
             query?: never;
@@ -816,6 +833,31 @@ export interface components {
              */
             max_malformed: number;
         };
+        /**
+         * ComposeRun
+         * @description A run chosen by name from trusted settings; clients never supply endpoints.
+         */
+        ComposeRun: {
+            /** Name */
+            name: string;
+            /**
+             * Purpose
+             * @default evaluation
+             * @enum {string}
+             */
+            purpose: "evaluation" | "collection";
+            /** Planner */
+            planner: string;
+            /** Environment */
+            environment: string;
+            /** Episodes */
+            episodes: string[];
+            /**
+             * Lanes
+             * @default 1
+             */
+            lanes: number;
+        };
         /** CreateConversation */
         CreateConversation: {
             /** Model */
@@ -1004,11 +1046,6 @@ export interface components {
              * @enum {string}
              */
             token_count_mode: "remote" | "estimate";
-            /**
-             * Image Token Estimate
-             * @default 4096
-             */
-            image_token_estimate: number;
             /** Model */
             model: string;
             /**
@@ -1448,6 +1485,39 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["RunRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    compose_api_runs_compose_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ComposeRun"];
             };
         };
         responses: {

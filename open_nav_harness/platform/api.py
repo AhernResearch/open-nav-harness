@@ -63,7 +63,7 @@ def create_app(root: Path, settings: PlatformSettings | None = None):
     app = FastAPI(title="Open Nav Harness", version="0.1.0", lifespan=lifespan)
     app.include_router(router(conversations))
     runs = RunStore(db)
-    app.include_router(runs_router(runs))
+    app.include_router(runs_router(runs, conversations.settings))
     app.state.conversations = conversations
     app.state.db = db
     app.state.services = manager

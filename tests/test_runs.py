@@ -10,6 +10,7 @@ import httpx
 import pytest
 from test_kernel import FakeSim, call, reply
 
+from open_nav_harness.core.config import PlatformSettings
 from open_nav_harness.platform import runs
 from open_nav_harness.platform.api import create_app
 from open_nav_harness.platform.database import Database
@@ -161,3 +162,34 @@ def test_plan_state_marks_the_first_unfinished_step_in_progress():
     state = plan_state([{"text": "a", "done": True}, {"text": "b", "done": False},
                         {"text": "c", "done": False}])
     assert [t["status"] for t in state["tasks"]] == ["completed", "in_progress", "pending"]
+
+
+async def test_compose_builds_the_frozen_spec_from_trusted_settings_only(tmp_path, monkeypatch):
+    config = tmp_path / "dialogue.json"
+    config.write_text(json.dumps({
+        "profiles": {"m": {"model": "m", "base_url": "http://planner/v1", "context_limit": 32768}},
+        "default_model": "m",
+        "navigation": {"sim": {"url": "http://sim", "dataset": "r2r_train", "camera": "cam",
+                               "budgets": {"max_turns": 12}}}}))
+    frozen = []
+
+    async def fake_preflight(spec):
+        frozen.append(spec)
+        return CONTRACT
+
+    monkeypatch.setattr(runs, "preflight", fake_preflight)
+    app = create_app(tmp_path / "state", PlatformSettings(conversations_config=str(config)))
+    body = {"name": "ui", "planner": "m", "environment": "sim", "episodes": ["1", "2"], "lanes": 2}
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://t") as http:
+        created = await http.post("/api/runs/compose", json=body)
+        assert created.status_code == 201, created.text
+        run = (await http.get(f"/api/runs/{created.json()['id']}")).json()
+        # The browser names choices; endpoints and budgets come from the settings file.
+        assert run["spec"]["environment"]["url"] == "http://sim"
+        assert run["spec"]["planner"]["base_url"] == "http://planner/v1"
+        assert run["spec"]["budgets"]["max_turns"] == 12
+        assert [e["episode"] for e in run["episodes"]] == ["1", "2"] and run["lanes"] == 2
+        unknown = await http.post("/api/runs/compose", json={**body, "planner": "other"})
+        smuggled = await http.post("/api/runs/compose", json={**body, "url": "http://elsewhere"})
+    assert unknown.status_code == 422 and "Unknown planner" in unknown.text
+    assert smuggled.status_code == 422 and len(frozen) == 1
