@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, type Row } from "../api";
-import { Composer, ConversationComposer, usePendingJob } from "./Composer";
+import { ConversationComposer } from "./Composer";
 import { Logo } from "../Logo";
 import { Icon } from "./icons";
 import { MapView } from "./MapPanel";
@@ -33,72 +33,48 @@ function useTheme(): [string, () => void] {
   return [theme, () => setTheme(theme === "dark" ? "light" : "dark")];
 }
 
-const attemptBase = (id: string) => `/api/attempts/${encodeURIComponent(id)}`;
 const runBase = (key: string) => {
   const [run, episode] = key.split("/").map(encodeURIComponent);
   return `/api/runs/${run}/episodes/${episode}`;
 };
-/** The selected episode's API base from the address bar: legacy attempts or kernel run episodes. */
+/** The selected run episode's API base from the address bar. */
 function initialSource(): string | null {
-  const q = new URLSearchParams(location.search);
-  const attempt = q.get("attempt"), run = q.get("run");
-  return attempt ? attemptBase(attempt) : run ? runBase(run) : null;
+  const run = new URLSearchParams(location.search).get("run");
+  return run ? runBase(run) : null;
 }
 
 export function HarnessPage() {
   const [theme, toggleTheme] = useTheme();
-  const [attempts, setAttempts] = useState<Row[]>([]);
+  const [episodes, setEpisodes] = useState<Row[]>([]);
   const [source, setSource] = useState<string | null>(initialSource);
-  const attempt = source?.startsWith("/api/attempts/") ? decodeURIComponent(source.split("/").at(-1)!) : null;
-  const [job, setJob] = useState<string | null>(new URLSearchParams(location.search).get("job"));
   const [cursor, setCursor] = useState<number | null>(null);
   const conversation = useConversation();
   const [datasetMode, setDatasetMode] = useState(false);
   const navigationTrace = useTrace(source);
   const trace = source ? navigationTrace : conversation.trace;
-  const refresh = () => api<Row[]>("/harness/attempts").then(setAttempts).catch(() => {});
+  const refresh = () => api<Row[]>("/runs/episodes/recent").then(setEpisodes).catch(() => {});
   useEffect(() => {
     refresh();
     const timer = setInterval(refresh, 5000);
     return () => clearInterval(timer);
   }, []);
-  /** Select an episode row (`run_id` marks a kernel run episode) or clear the selection. */
+  /** Select a run episode or clear the selection. */
   const open = (row: Row | null) => {
     conversation.open(null);
     setDatasetMode(false);
     setSource(row ? row.base : null);
-    setJob(null);
     setCursor(null);
-    const query = !row ? "" : row.run_id ? "?run=" + encodeURIComponent(row.id) : "?attempt=" + encodeURIComponent(row.id);
-    history.replaceState(null, "", "/harness" + query);
+    history.replaceState(null, "", "/harness" + (row ? "?run=" + encodeURIComponent(row.id) : ""));
   };
   const openConversation = (id: string) => {
-    setSource(null); setJob(null); setCursor(null); setDatasetMode(false); conversation.open(id);
+    setSource(null); setCursor(null); setDatasetMode(false); conversation.open(id);
   };
-  const pending = usePendingJob(job, (id) => {
-    open({ id, base: attemptBase(id) });
-    refresh();
-  });
   /** A submitted kernel run opens on its first episode; it joins the sidebar once it starts. */
   const started = (run: string, episode: string) => {
     const key = `${run}/${episode}`;
-    open({ id: key, base: runBase(key), run_id: run });
+    open({ id: key, base: runBase(key) });
     refresh();
   };
-  const enqueue = (id: string) => {
-    setJob(id);
-    history.replaceState(null, "", "/harness?job=" + encodeURIComponent(id));
-  };
-  const waitingText: Record<string, string> = {
-    needs_reconciliation: "上次运行已中断，资源仍被锁定，需核验后释放。",
-    services_unavailable: "等待环境、VLA 或执行器服务就绪。",
-    resources_busy: "其他运行正在使用环境和执行器，释放后会自动开始。",
-    queued: "已加入队列，等待环境和 VLA 资源…",
-  };
-  const pendingText = pending?.connection_error ? "暂时无法读取运行状态，正在重新连接…"
-    : pending && !["queued", "running"].includes(pending.status) ? `运行${statusText[pending.status] ?? pending.status}。${pending.error ?? ""}`
-    : pending?.status === "running" ? "已开始调度，正在打开运行记录…"
-    : waitingText[pending?.waiting_reason ?? "queued"] ?? waitingText.queued;
   const last = trace.entries.length - 1;
   const upto = cursor ?? last;
   const s = trace.status;
@@ -108,13 +84,8 @@ export function HarnessPage() {
   const spatialImage = recentItems.find(i => i.name.endsWith("__view_map") && i.images?.length);
   const objectImage = recentItems.find(i => !i.name.endsWith("__view_map") && i.images?.length);
   const panelImages = source ? camera : objectImage ? toolImages(objectImage, "", "物体图片") : [];
-  const control = async (action: string) => {
-    if (s?.run_id) {
-      if (confirm("停止整个运行？排队中的 episode 会取消，正在执行的会中断并记录。")) await api(`/runs/${s.run_id}/cancel`, {});
-      return;
-    }
-    if (action === "cancel" && !confirm("停止会终止正在执行的 episode，中断后需要在 Workbench 中核验并释放资源。确定停止？")) return;
-    await api(`/jobs/${s!.job_id}/action`, { action });
+  const cancel = async () => {
+    if (s?.run_id && confirm("停止整个运行？排队中的 episode 会取消，正在执行的会中断并记录。")) await api(`/runs/${s.run_id}/cancel`, {});
   };
 
   return (
@@ -132,7 +103,7 @@ export function HarnessPage() {
           {conversation.sessions.map(a => <button key={"conversation-" + a.id} className={"session " + (a.id === conversation.id ? "active" : "")} onClick={() => openConversation(a.id)}>
             <span className={"dot " + a.status}/><span className="session-text"><span className="title">{a.title || "新的会话"}</span><span className="sub">{a.spec.model} · {statusText[a.status] ?? a.status}</span></span>
           </button>)}
-          {attempts.map((a) => (
+          {episodes.map((a) => (
             <button key={a.base} className={"session " + (a.base === source ? "active" : "")} onClick={() => open(a)}>
               <span className={"dot " + a.status} />
               <span className="session-text">
@@ -149,7 +120,7 @@ export function HarnessPage() {
           <button className="ghost" onClick={toggleTheme} aria-label="切换主题">
             <Icon name={theme === "dark" ? "sun" : "moon"} />
           </button>
-          <a className="ghost-link" href={attempt ? `/workbench?attempt=${encodeURIComponent(attempt)}` : "/workbench"}>
+          <a className="ghost-link" href="/workbench">
             <Icon name="grid" /> Workbench
           </a>
         </div>
@@ -157,20 +128,11 @@ export function HarnessPage() {
 
       <main className="hx-main">
         {!source ? (
-          job ? (
-            <div className="hero">
-              <p role="status" className="thinking">{pendingText}</p>
-              <a className="ghost-link" href={pending?.blocked_attempt_id ? `/workbench?attempt=${encodeURIComponent(pending.blocked_attempt_id)}` : "/workbench"}>
-                {pending?.blocked_attempt_id ? "查看中断运行" : "查看工作台"}
-              </a>
-            </div>
-          ) : (
-            datasetMode ? <RunComposer onStarted={started} /> : (conversation.ready && !conversation.options.models.length) ? <Composer onStarted={enqueue} /> : conversation.id ? <>
-              <header className="run-head"><span className={"status-pill " + conversation.status}><i/>{statusText[conversation.status] ?? conversation.status}</span><span className="spacer"/><span className="muted">{conversation.model}</span></header>
-              <Thread trace={trace} upto={last} live={true} select={() => {}} base=""/>
-              <ConversationComposer conversation={conversation}/>
-            </> : <ConversationComposer conversation={conversation}/>
-          )
+          datasetMode ? <RunComposer onStarted={started} /> : conversation.id ? <>
+            <header className="run-head"><span className={"status-pill " + conversation.status}><i/>{statusText[conversation.status] ?? conversation.status}</span><span className="spacer"/><span className="muted">{conversation.model}</span></header>
+            <Thread trace={trace} upto={last} live={true} select={() => {}} base=""/>
+            <ConversationComposer conversation={conversation}/>
+          </> : <ConversationComposer conversation={conversation}/>
         ) : (
           <>
             <header className="run-head">
@@ -185,14 +147,9 @@ export function HarnessPage() {
                 </button>
               )}
               {running && (
-                <>
-                  {s?.job_id && <button className="pill-button" onClick={() => control("pause")}>
-                    <Icon name="pause" size={14} /> 完成当前条后暂停
-                  </button>}
-                  <button className="pill-button danger" onClick={() => control("cancel")}>
-                    <Icon name="stop" size={14} /> 停止
-                  </button>
-                </>
+                <button className="pill-button danger" onClick={cancel}>
+                  <Icon name="stop" size={14} /> 停止
+                </button>
               )}
             </header>
             <div className="plan-dock">

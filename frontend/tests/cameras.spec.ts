@@ -15,31 +15,31 @@ test('camera panel follows observe results, preserves camera identity and opens 
   {type:'item.completed',item:{id:'look-2',status:'completed',images:[artifacts[3]],image_views:[{artifact:artifacts[3],caption:'Tool look-2: left — clearance 2 m'}]}},
  ];
  const body=`id: 10.4\ndata: ${JSON.stringify(events)}\n\nevent: end\ndata: {"status":"completed"}\n\n`;
- await page.route('**/api/attempts/cameras/stream**',r=>r.fulfill({headers:{'content-type':'text/event-stream'},body}));
- await page.route('**/api/attempts/cameras/artifact/**',r=>{
+ await page.route('**/api/runs/r/episodes/cameras/stream**',r=>r.fulfill({headers:{'content-type':'text/event-stream'},body}));
+ await page.route('**/api/runs/r/episodes/cameras/artifact/**',r=>{
   const small=r.request().url().endsWith(artifacts[1]);const size=small?128:512;
   return r.fulfill({contentType:'image/svg+xml',body:`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}"><rect width="100%" height="100%" fill="#9bc"/></svg>`});
  });
- await page.route('**/api/attempts/cameras/files/motion.png',r=>r.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270"/>'}));
+ await page.route('**/api/runs/r/episodes/cameras/files/motion.png',r=>r.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270"/>'}));
  await page.setViewportSize({width:1440,height:900});
- await page.goto('/harness?attempt=cameras');
+ await page.goto('/harness?run=r/cameras');
  const panel=page.getByRole('complementary',{name:'环境'});
  await expect(panel.locator('.camera img')).toHaveCount(1);
- await expect(panel.getByRole('img',{name:'左方视角',exact:true})).toHaveAttribute('src',`/api/attempts/cameras/artifact/${artifacts[3]}`);
+ await expect(panel.getByRole('img',{name:'左方视角',exact:true})).toHaveAttribute('src',`/api/runs/r/episodes/cameras/artifact/${artifacts[3]}`);
  await page.getByRole('button',{name:'观察四周',exact:true}).first().click();
  await expect(panel.locator('.camera img')).toHaveCount(4);
- for(let i=0;i<4;i++)await expect(panel.locator('.camera img').nth(i)).toHaveAttribute('src',`/api/attempts/cameras/artifact/${artifacts[i]}`);
+ for(let i=0;i<4;i++)await expect(panel.locator('.camera img').nth(i)).toHaveAttribute('src',`/api/runs/r/episodes/cameras/artifact/${artifacts[i]}`);
  await panel.getByRole('button',{name:'放大前方图像',exact:true}).click();
  const dialog=page.getByRole('dialog',{name:'相机图像'});
  await expect(dialog).toBeVisible();
- await expect(dialog.getByRole('img')).toHaveAttribute('src',`/api/attempts/cameras/artifact/${artifacts[0]}`);
+ await expect(dialog.getByRole('img')).toHaveAttribute('src',`/api/runs/r/episodes/cameras/artifact/${artifacts[0]}`);
  await expect(dialog.getByRole('img')).toHaveJSProperty('naturalWidth',512);
  await page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();
  await panel.getByRole('button',{name:'放大右方图像',exact:true}).click();
  await expect(dialog.getByText('这张历史图像分辨率较低，放大无法恢复被标签遮挡的场景。')).toBeVisible();
  await dialog.getByRole('button',{name:'关闭图像'}).click();
  await page.getByRole('button',{name:'Move forward',exact:true}).click();
- await expect(panel.getByRole('img',{name:'前方（动作相机）视角',exact:true})).toHaveAttribute('src','/api/attempts/cameras/files/motion.png');
+ await expect(panel.getByRole('img',{name:'前方（动作相机）视角',exact:true})).toHaveAttribute('src','/api/runs/r/episodes/cameras/files/motion.png');
  await panel.getByRole('button',{name:'放大前方（动作相机）图像',exact:true}).click();
  await expect(dialog.getByRole('img')).toHaveJSProperty('naturalWidth',480);
  const ratio=await dialog.getByRole('img').evaluate(im=>{const r=im.getBoundingClientRect();return r.width/r.height;});
@@ -54,7 +54,7 @@ test('structured route displays the final stop location in the movement row',asy
   {type:'item.completed',item:{id:'route',status:'completed'}},
  ];
  const body=`id: 10.4\ndata: ${JSON.stringify(events)}\n\nevent: end\ndata: {"status":"completed"}\n\n`;
- await page.route('**/api/attempts/r2r-stop/stream**',r=>r.fulfill({headers:{'content-type':'text/event-stream'},body}));
- await page.goto('/harness?attempt=r2r-stop');
+ await page.route('**/api/runs/r/episodes/r2r-stop/stream**',r=>r.fulfill({headers:{'content-type':'text/event-stream'},body}));
+ await page.goto('/harness?run=r/r2r-stop');
  await expect(page.getByRole('button',{name:/Follow the hall.*Stop: inside the room beside the table/})).toBeVisible();
 });

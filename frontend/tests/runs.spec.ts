@@ -21,7 +21,7 @@ test('a kernel run episode replays legs, plan, views and frames, and cancels the
   ];
   let cancelled = false;
   const base = '**/api/runs/r1/episodes/7';
-  await page.route('**/api/harness/attempts', route => route.fulfill({ json: [
+  await page.route('**/api/runs/episodes/recent', route => route.fulfill({ json: [
     { id: 'r1/7', run_id: 'r1', episode: '7', status: 'running', name: 'kernel', created: 1, base: '/api/runs/r1/episodes/7', meta: { instruction: 'Walk to the sofa and stop.' } }] }));
   await page.route(base + '/stream**', route => route.fulfill({ headers: { 'content-type': 'text/event-stream' },
     body: `id: 9\ndata: ${JSON.stringify(events)}\n\nevent: end\ndata: {"status":"running","run_id":"r1"}\n\n` }));

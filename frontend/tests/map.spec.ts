@@ -15,10 +15,10 @@ test('whole map and live overlays fit; zoom and drag can be reset on short and m
   ];
   const body = `id: 10.4\ndata: ${JSON.stringify(events)}\n\nevent: end\ndata: {"status":"completed"}\n\n`;
   const map = '<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="600"><rect width="1600" height="600" fill="#e4e2db"/><path d="M0 0H1600V600H0Z" fill="none" stroke="#5656d9" stroke-width="40"/><text x="80" y="100" font-size="64">Full map</text></svg>';
-  await page.route('**/api/attempts/map-fit/stream**', route => route.fulfill({ headers: { 'content-type': 'text/event-stream' }, body }));
-  await page.route('**/api/attempts/map-fit/artifact/**', route => route.fulfill({ contentType: 'image/svg+xml', body: map }));
-  await page.route('**/api/attempts/map-fit/files/camera.png', route => route.fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800"><rect width="800" height="800" fill="#e0ddf8"/></svg>' }));
-  await page.goto('/harness?attempt=map-fit');
+  await page.route('**/api/runs/r/episodes/map-fit/stream**', route => route.fulfill({ headers: { 'content-type': 'text/event-stream' }, body }));
+  await page.route('**/api/runs/r/episodes/map-fit/artifact/**', route => route.fulfill({ contentType: 'image/svg+xml', body: map }));
+  await page.route('**/api/runs/r/episodes/map-fit/files/camera.png', route => route.fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800"><rect width="800" height="800" fill="#e0ddf8"/></svg>' }));
+  await page.goto('/harness?run=r/map-fit');
   const svg = page.getByRole('img', { name: '记忆地图' });
   await expect(svg).toBeVisible();
   const viewBox = () => svg.evaluate((element: SVGSVGElement) => {

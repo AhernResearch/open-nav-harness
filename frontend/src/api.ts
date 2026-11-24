@@ -1,6 +1,5 @@
 import type { components } from "./api-schema";
 export type ServiceSpec = components["schemas"]["ServiceSpec"];
-export type ExperimentSpec = components["schemas"]["ExperimentSpec"];
 export type Row = Record<string, any>;
 export async function api<T = Row>(path: string, body?: unknown): Promise<T> {
   const response = await fetch("/api" + path, {
