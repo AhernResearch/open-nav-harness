@@ -5,10 +5,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "open-nav-harness"
 version = "0.1.0"
-description = "NavGPT-3 simulator harness with Planner, Environment, and NavGPT3 VLA"
+description = "Navigation experiment platform: Planner kernel over sim-engine sessions, runs and dialogue"
 readme = "README.md"
 license = "Apache-2.0 AND MIT"
-license-files = ["LICENSE", "NOTICE", "navgpt/vla/LICENSE"]
+license-files = ["LICENSE", "NOTICE", "licenses/*"]
 requires-python = ">=3.11"
 dependencies = [
     "fastapi==0.162.0",
@@ -17,32 +17,25 @@ dependencies = [
     "alembic==1.20.1",
     "httpx==0.28.1",
     "jsonschema==4.26.0",
-    "tomli>=2; python_version < '3.11'",
     "pydantic>=2.14,<3",
     "pillow>=10.0.0",
-    "pyyaml>=6.0",
-    "requests>=2.28.0",
     "numpy>=1.26",
 ]
 
-# One source distribution, three runtime environments: these are the Planner's
-# dependencies; the Environment uses the Habitat environment and the VLA uses
-# requirements-vla.txt.
+# The control plane's dependencies; the LightNav actor service runs in its own CUDA environment.
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["navgpt*", "open_nav_harness*"]
+include = ["open_nav_harness*"]
 
 [tool.setuptools.package-data]
 "open_nav_harness" = ["web/**/*"]
 "open_nav_harness.platform" = ["migrations/*.py", "migrations/versions/*.py"]
-"navgpt.vla" = ["LICENSE"]
 
 [project.scripts]
 open-nav-harness = "open_nav_harness.cli:main"
-navgpt = "navgpt.cli:main"
 
 [project.optional-dependencies]
-sdk = ["claude-agent-sdk==0.2.179", "mcp==1.30.0", "openai-codex==0.147.0"]
+sdk = ["mcp==1.30.0"]
 dev = ["pytest==9.2.0", "pytest-asyncio==1.4.1.post1", "ruff==0.17.4", "mypy==2.4.1", "mcp==1.30.0"]
 
 [tool.pytest.ini_options]

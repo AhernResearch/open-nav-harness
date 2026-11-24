@@ -150,7 +150,7 @@ async def test_binding_requires_a_known_environment_and_an_episode():
 @pytest.mark.asyncio
 async def test_new_message_supersedes_undispatched_actions():
     import json
-    from navgpt.planner.tools.registry import ToolDefinition, ToolResult, TextContent
+    from open_nav_harness.providers.tools import ToolDefinition, ToolResult, TextContent
 
     entered, release = asyncio.Event(), asyncio.Event()
     executed, generated = [], []
@@ -277,7 +277,7 @@ async def test_stop_cancels_inference_and_restores_history():
 async def test_namespaced_mcp_coexists_with_navigation():
     from contextlib import asynccontextmanager
     from types import SimpleNamespace
-    from navgpt.planner.tools.registry import ToolDefinition, ToolResult, TextContent
+    from open_nav_harness.providers.tools import ToolDefinition, ToolResult, TextContent
     from open_nav_harness.platform.conversations import CombinedTools, DialogueSettings
 
     calls = []

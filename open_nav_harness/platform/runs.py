@@ -343,6 +343,10 @@ def router(store: RunStore, settings=None) -> APIRouter:
     def listing():
         return store.runs()
 
+    @api.get("/episodes/recent")
+    def recent():
+        return store.recent(20)
+
     @api.get("/{rid}")
     def detail(rid: str):
         return store.run(rid)

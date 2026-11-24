@@ -1,9 +1,7 @@
 {
   "host": "127.0.0.1",
   "port": 8878,
-  "max_workers": 2,
   "ssh_config": null,
-  "import_roots": [],
   "service_templates": {
     "qwen27b": {
       "host": "a100",
@@ -46,25 +44,9 @@
       "argv": [
         "/srv/venvs/lightnav/bin/python",
         "-m",
-        "navgpt.vla.worker",
+        "open_nav_harness.actors.lightnav_engine",
         "--config",
         "/srv/open-nav-harness/deployment/actor-lightnav.json"
-      ],
-      "environment": {
-        "HF_HUB_OFFLINE": "1",
-        "TRANSFORMERS_OFFLINE": "1"
-      },
-      "startup_timeout_s": 900
-    },
-    "owned-navgpt": {
-      "host": "a100",
-      "working_directory": "/srv/open-nav-harness/releases/RELEASE",
-      "argv": [
-        "/srv/venvs/navgpt/bin/python",
-        "-m",
-        "navgpt.vla.worker",
-        "--config",
-        "/srv/open-nav-harness/deployment/actor-navgpt.json"
       ],
       "environment": {
         "HF_HUB_OFFLINE": "1",

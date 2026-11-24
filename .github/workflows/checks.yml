@@ -17,7 +17,6 @@ jobs:
       - run: uv sync --locked --extra dev
       - run: uv run pytest -q
       - run: uv run ruff check open_nav_harness
-      - run: uv run ruff check --select F821,F823 navgpt
       - run: uv run mypy open_nav_harness
       - run: npm --prefix frontend ci
       - run: uv run open-nav-harness --state /tmp/onh-schema openapi > frontend/openapi.json

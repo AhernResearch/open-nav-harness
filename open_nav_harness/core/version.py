@@ -19,11 +19,6 @@ def packages(*names) -> set[Path]:
 
 
 # No cache: freezing and launching must detect edits made while the API is up.
-def implementation_digest() -> str:
-    return source_digest(packages("navgpt", "open_nav_harness/core", "open_nav_harness/providers")
-                         | {ROOT / "open_nav_harness/platform/episode.py"})
-
-
 def kernel_digest() -> str:
     """Everything a kernel run executes: tools, prompt, loop, provider and context code."""
     return source_digest(packages("open_nav_harness/kernel", "open_nav_harness/core",

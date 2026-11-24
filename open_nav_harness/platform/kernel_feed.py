@@ -11,11 +11,65 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from .harness import ERRORS, JsonlTail, _image_views, common_event
+from open_nav_harness.providers.responses import response_message
 
 MOTION = ("delegate", "return_to")
 ITEM_TYPES = {"update_plan": "plan", **{name: "motion" for name in MOTION}}
 ENDINGS = ("result.json", "failed_or_uncertain.json", "failure.json")
+READ_CAP = 8 << 20
+
+
+class JsonlTail:
+    """Byte-offset reader of an append-only JSONL file; an unterminated last line waits."""
+
+    def __init__(self, path: Path):
+        self.path, self.offset = path, 0
+
+    def read(self) -> list[tuple[int, dict]] | None:
+        """Complete new records with their end offsets, or None when the file shrank."""
+        try:
+            size = self.path.stat().st_size
+        except FileNotFoundError:
+            return []
+        if size < self.offset:
+            return None
+        with self.path.open("rb") as f:
+            f.seek(self.offset)
+            chunk = f.read(min(size - self.offset, READ_CAP))
+        records = []
+        for line in chunk.split(b"\n")[:-1]:
+            self.offset += len(line) + 1
+            if line.strip():
+                records.append((self.offset, json.loads(line)))
+        return records
+
+
+ERRORS = ("session_error", "model_transport_error", "tool_validation_error")
+
+
+def common_event(r: dict) -> list[dict]:
+    """Journal records shared by every harness: model turns and errors."""
+    if r.get("kind") == "model_response":
+        body = r.get("response") or {}
+        message = (response_message(body) if body.get('object') == 'response' else
+                   (body.get("choices") or [{}])[0].get("message") or {})
+        return [{"type": "turn.completed", "t": r["time"], "text": message.get("content"),
+                 "reasoning": message.get("reasoning") or message.get("reasoning_content"),
+                 "usage": body.get("usage"), "elapsed_s": r.get("elapsed_s")}]
+    return [{"type": "error", "t": r["time"], "kind": r["kind"], "error": r.get("error") or r.get("errors")}]
+
+
+def _image_views(blocks: list[dict]) -> list[dict]:
+    """Keep each recorded camera caption paired with its own image artifact."""
+    out, caption = [], ""
+    for block in blocks:
+        if block.get("type") == "text":
+            caption = block.get("text", "")
+        url = (block.get("image_url") or {}).get("url")
+        if isinstance(url, dict) and url.get("artifact"):
+            out.append({"artifact": url["artifact"], "caption": caption})
+            caption = ""
+    return out
 
 
 def plan_state(steps: list[dict]) -> dict:

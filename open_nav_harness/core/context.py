@@ -3,12 +3,6 @@
 import copy
 import json
 
-# Contracts whose persisted state is projected rather than sent raw (v2 predates projection).
-PROJECTED_CONTRACTS = frozenset({"topology_memory_v3", "topology_memory_v4", "topology_memory_v5",
-                                 "topology_memory_v6", "topology_memory_v7"})
-TOPOLOGY_CONTRACTS = PROJECTED_CONTRACTS | {"topology_memory_v2"}
-
-
 class ContextOverflow(RuntimeError):
     pass
 
@@ -46,78 +40,25 @@ class ContextWindow:
         if state is not None:
             self.state = copy.deepcopy(state)
 
-    def _projection(self):
-        state: dict = self.state or {}
-        if state.get("tool_contract") not in PROJECTED_CONTRACTS:
-            return state
-        memory = state.get("memory_context", {})
-        candidates = [memory.get("current_execution")] + list(reversed(memory.get("recent", [])))
-        latest = state.get("latest_memory") or next((r for r in candidates if r and r.get("caption")), None)
-        current = memory.get("current_execution")
-        return {"plan": state.get("tasks"), "active_task_id": state.get("active_id"),
-                "current_node_id": memory.get("current_node_id"),
-                "pending_segment": {k: v for k, v in (current or {}).items() if k != "caption"},
-                "latest_memory": latest, "map_read_valid": state.get("map_read_valid", False),
-                "steps_remaining": state.get("steps_remaining"),
-                "completion_claim": state.get("completion_claim")}
-
     async def build(self, counter, tools, journal):
         start = self.start
         stride = 1
         budget = self.limit - self.reserve - 256
         while True:
             messages = list(self.prefix)
-            topology = bool(self.state and self.state.get("tool_contract") in TOPOLOGY_CONTRACTS)
-            state_message = None
-            if self.state and (start or topology):
-                label = "Current persisted state"
-                state_message = {
-                    "role": "user",
-                    "content": label + ":\n" + json.dumps(self._projection(), ensure_ascii=False),
-                }
-                if not topology:
-                    messages.append(state_message)
-            map_snapshots = []
+            if self.state and start:
+                # Pruned history is replaced by the latest persisted state, after the prefix.
+                messages.append({"role": "user", "content": "Current persisted state:\n"
+                                 + json.dumps(self.state, ensure_ascii=False)})
             floor = self._image_floor(start)
             index = sum(self._images(m) for block in self.blocks[:start] for m in block)
             for block in self.blocks[start:]:
-                for original in block:
-                    message = original
-                    count = self._images(original)
+                for message in block:
+                    count = self._images(message)
                     if count and index < floor:
-                        message = self._omit_images(original, floor - index)
+                        message = self._omit_images(message, floor - index)
                     index += count
-                    if topology and original.get("role") == "tool":
-                        # The wire journal keeps the full response. Model input has
-                        # one authoritative current state, not repeated map summaries.
-                        message = copy.deepcopy(original)
-                        lines: list[str] = []
-                        for line in message.get("content", "").splitlines():
-                            try:
-                                value = json.loads(line)
-                            except ValueError:
-                                value = None
-                            if isinstance(value, dict) and "subtask_state" in value:
-                                pass
-                            else:
-                                if isinstance(value, dict) and "memory_context" in value:
-                                    map_snapshots.append((message, len(lines), value))
-                                lines.append(line)
-                        message["content"] = "\n".join(lines)
                     messages.append(message)
-            # Keep the newest requested map summary. Older map images/geometry remain
-            # historical evidence; omitted memories can still be read from the store.
-            # Only edit copied messages, preserving the complete audit history.
-            for message, index, value in map_snapshots[:-1]:
-                del value["memory_context"]
-                value["historical_map"] = True
-                lines = message["content"].splitlines()
-                lines[index] = json.dumps(value, ensure_ascii=False)
-                message["content"] = "\n".join(lines)
-            if topology and state_message:
-                # Latest state follows historical claims and observations, without
-                # splitting assistant/tool pairs or duplicating the snapshot.
-                messages.append(state_message)
             try:
                 n = await counter(messages, tools)
             except CounterLimit:

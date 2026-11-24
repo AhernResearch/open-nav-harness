@@ -1,13 +1,10 @@
-"""Managed model/tool loop, using transport-neutral navigation tools."""
+"""The dialogue model/tool loop: one operator turn runs until the model replies without tools."""
 
 import json
 import traceback
-from contextlib import asynccontextmanager
+from dataclasses import dataclass, field
 
 import jsonschema
-from navgpt.planner.contracts import SessionOutcome
-from navgpt.planner.runner import expected_tools_from_env
-from navgpt.planner.tools.transport import open_tools
 from open_nav_harness.core.artifacts import Journal
 from open_nav_harness.core.config import PlannerProfile
 from open_nav_harness.core.context import ContextWindow
@@ -15,13 +12,11 @@ from .compatible import CompatibleClient, ModelProtocolError
 from .validation import StrictValidator
 
 
-@asynccontextmanager
-async def existing_session(session):
-    yield session
-
-# Tools whose result carries a map and grants the memory-write credential.
-MAP_TOOLS = frozenset(("observe_map", "execute_subtask", "navigate_relative", "navigate_to_node"))
-
+@dataclass
+class Outcome:
+    turns: int = 0
+    usage: dict = field(default_factory=dict)
+    error: str | None = None
 
 
 def tool_feedback(result, call_id):
@@ -55,217 +50,114 @@ def tool_feedback(result, call_id):
 
 
 class ManagedRuntime:
-    name = "openai-compatible"
+    """Runs until the model answers without tool calls; a newer operator message skips the rest
+    of an unexecuted batch. A motion call is never retried: a lost response has unknown effects."""
 
     def __init__(self, profile: PlannerProfile):
         self.profile = profile
 
-    def prepare(self, cfg):
-        if cfg.max_budget_usd is not None:
-            raise ValueError("Unknown billing: use request/time budgets, not a USD ceiling")
-
-    def describe(self, ctx):
-        return {
-            "planner_runtime": self.name,
-            "input_visibility": "exact_wire_requests",
-            "profile": self.profile.model_dump(exclude={"credential_env"}),
-        }
-
-    async def run(self, ctx, sink, *, window=None, session=None, interactive=False):
+    async def run(self, ctx, sink, session, window: ContextWindow | None = None) -> Outcome:
         journal = Journal(ctx.workdir / "trace")
-        window = window or ContextWindow(
-            ctx.briefing,
-            ctx.first_prompt,
-            self.profile.context_policy,
-            self.profile.context_limit,
-            self.profile.output_tokens,
-            self.profile.max_images,
-        )
+        window = window or ContextWindow(ctx.briefing, ctx.first_prompt, self.profile.context_policy,
+                                         self.profile.context_limit, self.profile.output_tokens,
+                                         self.profile.max_images)
         client = CompatibleClient(self.profile, journal=journal)
         usage = {"input_tokens": 0, "cached_input_tokens": 0, "output_tokens": 0}
-        seen_ids = {c['id'] for block in window.blocks for m in block for c in (m.get('tool_calls') or [])} if interactive else set()
-        error = None
-        stopped = False
-        terminal_reason = None
+        seen_ids = {c["id"] for block in window.blocks for m in block for c in (m.get("tool_calls") or [])}
+        outcome = Outcome(usage=usage, error="planner_turn_budget_exhausted")
         try:
-            async with (existing_session(session) if session is not None else open_tools(ctx.mcp_env)) as session:
-                listed = await session.list_tools()
-                definitions = {t.name: t.inputSchema for t in listed}
-                want = expected_tools_from_env(ctx.mcp_env) if not interactive else definitions
-                if not interactive and set(definitions) != set(want):
-                    raise ModelProtocolError("Navigation tool set differs from the configured contract")
-                tools = [
-                    {
-                        "type": "function",
-                        "function": {
-                            "name": t.name,
-                            "description": t.description,
-                            "parameters": t.inputSchema,
-                        },
-                    }
-                    for t in listed
-                ]
-                journal.emit(
-                    "session_start",
-                    model=self.profile.model,
-                    tools=tools,
-                    input_visibility="exact_wire_requests",
-                )
-                for _ in range(ctx.max_turns):
-                    if interactive:
-                        sink.receive(window)
-                    messages = await window.build(client.count, tools, journal)
-                    response = await client.generate(messages, tools, journal)
-                    u = response.get("usage") or {}
-                    usage["input_tokens"] += u.get("prompt_tokens", 0)
-                    usage["cached_input_tokens"] += (u.get("prompt_tokens_details") or {}).get(
-                        "cached_tokens", 0
-                    )
-                    usage["output_tokens"] += u.get("completion_tokens", 0)
-                    message = response["choices"][0]["message"]
-                    calls = message.get("tool_calls") or []
-                    if message.get("content"):
-                        sink.emit("assistant_text", {"text": message["content"]})
-                    if not calls and interactive:
-                        window.append([message])
-                        terminal_reason = 'reply_complete'
-                        break
-                    if not calls:
-                        raise ModelProtocolError("Planner ended without an explicit successful STOP tool")
-                    prepared = []
-                    validation_errors = []
-                    for call in calls:
-                        ident, fn = call["id"], call["function"]
-                        name = fn["name"]
-                        if ident in seen_ids:
-                            raise ModelProtocolError("Repeated tool call id; refusing duplicate execution")
-                        seen_ids.add(ident)
-                        try:
-                            arguments = json.loads(fn["arguments"])
-                            if name not in definitions:
-                                raise ValueError("Unknown navigation tool: " + name)
-                            StrictValidator(definitions[name]).validate(arguments)
-                            prepared.append((ident, name, arguments))
-                        except (ValueError, jsonschema.ValidationError) as exc:
-                            validation_errors.append(name + ": " + getattr(exc, "message", str(exc)))
-                    if any(name == "terminate_episode" for _, name, _ in prepared[:-1]):
-                        validation_errors.append("STOP must be the last tool in a response")
-                    # A map returned in this response is unseen by the model, so a caption
-                    # may only follow maps from earlier turns.
-                    names = [name for _, name, _ in prepared]
-                    last_caption = max((i for i, n in enumerate(names) if n == "update_memory"), default=0)
-                    if MAP_TOOLS & set(names[:last_caption]):
-                        validation_errors.append(
-                            "update_memory must come before observe_map or movement in a response: "
-                            "caption only a map you have already read"
-                        )
-                    block = [{"role": "assistant", "content": message.get("content"), "tool_calls": calls}]
-                    if 'provider_items' in message:
-                        block[0]['provider_items'] = message['provider_items']
-                    if validation_errors:
-                        # Reject the ENTIRE batch before any movement, then let the model
-                        # repair its arguments in a new call. Never replay an executed call.
-                        text = "No tools in this batch were executed. Correct the request: " + "; ".join(
-                            validation_errors
-                        )
-                        journal.emit("tool_validation_error", errors=validation_errors)
-                        for call in calls:
-                            sink.emit(
-                                "tool_use",
-                                {
-                                    "id": call["id"],
-                                    "name": call["function"]["name"],
-                                    "input": call["function"]["arguments"],
-                                },
-                            )
-                        for call in calls:
-                            ident, fn = call["id"], call["function"]
-                            feedback = {"role": "tool", "tool_call_id": ident, "content": text}
-                            block.append(feedback)
-                            journal.emit(
-                                "tool_result",
-                                call_id=ident,
-                                name=fn["name"],
-                                is_error=True,
-                                executed=False,
-                                feedback=feedback,
-                                images=[],
-                            )
-                            sink.emit(
-                                "tool_result", {"tool_use_id": ident, "texts": [text], "is_error": True}
-                            )
-                        window.append(block)
-                        continue
-                    observations = []
-                    state = None
-                    for ident, name, arguments in prepared:
-                        sink.emit("tool_use", {"id": ident, "name": name, "input": arguments})
-                    for ident, name, arguments in prepared:
-                        journal.emit("tool_dispatch", call_id=ident, name=name, arguments=arguments)
-                        # A motion call is never retried: a lost response has unknown effects.
-                        if interactive and sink.pending():
-                            result = sink.skipped()
-                        else:
-                            result = await session.call_tool(name, arguments)
-                        feedback, images, texts = tool_feedback(result, ident)
-                        journal.emit(
-                            "tool_result",
-                            call_id=ident,
-                            name=name,
-                            is_error=bool(result.isError),
-                            feedback=feedback,
-                            images=images,
-                        )
-                        sink.emit(
-                            "tool_result",
-                            {"tool_use_id": ident, "texts": texts, "images": images, "is_error": bool(result.isError)},
-                        )
-                        block.append(feedback)
-                        observations.extend(images)
-                        for text in texts:
-                            try:
-                                value = json.loads(text)
-                                if isinstance(value, dict):
-                                    state = value.get("subtask_state", state)
-                            except ValueError:
-                                pass
-                        # Only this call's own status can end the episode; the sink keeps
-                        # the last status of any earlier call.
-                        last = sink.parse_step_result(texts) or {}
-                        if not interactive and last.get("episode_over") is True:
-                            terminal_reason = last.get("end_reason") or "environment_ended"
-                            stopped = terminal_reason == "stop_called"
-                            journal.emit(
-                                "environment_end", end_reason=terminal_reason,
-                                explicit_stop=stopped, source_tool=name, call_id=ident,
-                                steps_taken_total=last.get("steps_taken_total"),
-                            )
-                            break
-                    if observations:
-                        block.append({"role": "user", "content": observations})
-                    window.append(block, state)
-                    if terminal_reason is not None:
-                        break
-                if terminal_reason is None:
-                    error = "planner_turn_budget_exhausted"
+            listed = await session.list_tools()
+            definitions = {t.name: t.inputSchema for t in listed}
+            tools = [{"type": "function", "function": {"name": t.name, "description": t.description,
+                                                       "parameters": t.inputSchema}} for t in listed]
+            journal.emit("session_start", model=self.profile.model, tools=tools,
+                         input_visibility="exact_wire_requests")
+            for _ in range(ctx.max_turns):
+                sink.receive(window)
+                messages = await window.build(client.count, tools, journal)
+                response = await client.generate(messages, tools, journal)
+                outcome.turns += 1
+                u = response.get("usage") or {}
+                usage["input_tokens"] += u.get("prompt_tokens", 0)
+                usage["cached_input_tokens"] += (u.get("prompt_tokens_details") or {}).get("cached_tokens", 0)
+                usage["output_tokens"] += u.get("completion_tokens", 0)
+                message = response["choices"][0]["message"]
+                calls = message.get("tool_calls") or []
+                if message.get("content"):
+                    sink.emit("assistant_text", {"text": message["content"]})
+                if not calls:
+                    window.append([message])
+                    outcome.error = None
+                    break
+                block = [{"role": "assistant", "content": message.get("content"), "tool_calls": calls}]
+                if "provider_items" in message:
+                    block[0]["provider_items"] = message["provider_items"]
+                prepared, errors = self._validate(calls, definitions, seen_ids)
+                if errors:
+                    self._reject(calls, errors, block, journal, sink)
+                else:
+                    await self._execute(prepared, block, session, journal, sink)
+                window.append(block)
         except Exception as exc:
-
-            def describe(error):
-                nested = getattr(error, "exceptions", None)
-                return (
-                    "; ".join(describe(e) for e in nested) if nested else f"{type(error).__name__}: {error}"
-                )
-
-            error = describe(exc)
-            journal.emit("session_error", error=error, traceback="".join(traceback.format_exception(exc)))
+            outcome.error = describe(exc)
+            journal.emit("session_error", error=outcome.error, traceback="".join(traceback.format_exception(exc)))
         finally:
             await client.close()
-        journal.emit("session_end", error=error, explicit_stop=stopped,
-                     environment_end_reason=terminal_reason, usage=usage)
-        return SessionOutcome(
-            turns=sink.planner_turns.count,
-            usage=usage,
-            error=error,
-            extra={"input_visibility": "exact_wire_requests", "trace": str(journal.path),
-                   "environment_end_reason": terminal_reason, "explicit_stop": stopped},
-        )
+        journal.emit("session_end", error=outcome.error, usage=usage)
+        return outcome
+
+    @staticmethod
+    def _validate(calls, definitions, seen_ids):
+        prepared, errors = [], []
+        for call in calls:
+            ident, name = call["id"], call["function"]["name"]
+            if ident in seen_ids:
+                raise ModelProtocolError("Repeated tool call id; refusing duplicate execution")
+            seen_ids.add(ident)
+            try:
+                arguments = json.loads(call["function"]["arguments"])
+                if name not in definitions:
+                    raise ValueError("Unknown tool: " + name)
+                StrictValidator(definitions[name]).validate(arguments)
+                prepared.append((ident, name, arguments))
+            except (ValueError, jsonschema.ValidationError) as exc:
+                errors.append(name + ": " + getattr(exc, "message", str(exc)))
+        return prepared, errors
+
+    @staticmethod
+    def _reject(calls, errors, block, journal, sink):
+        """Reject the entire batch before any motion; the model repairs it in a new call."""
+        text = "No tools in this batch were executed. Correct the request: " + "; ".join(errors)
+        journal.emit("tool_validation_error", errors=errors)
+        for call in calls:
+            sink.emit("tool_use", {"id": call["id"], "name": call["function"]["name"],
+                                   "input": call["function"]["arguments"]})
+        for call in calls:
+            feedback = {"role": "tool", "tool_call_id": call["id"], "content": text}
+            block.append(feedback)
+            journal.emit("tool_result", call_id=call["id"], name=call["function"]["name"], is_error=True,
+                         executed=False, feedback=feedback, images=[])
+            sink.emit("tool_result", {"tool_use_id": call["id"], "texts": [text], "is_error": True})
+
+    @staticmethod
+    async def _execute(prepared, block, session, journal, sink):
+        observations = []
+        for ident, name, arguments in prepared:
+            sink.emit("tool_use", {"id": ident, "name": name, "input": arguments})
+        for ident, name, arguments in prepared:
+            journal.emit("tool_dispatch", call_id=ident, name=name, arguments=arguments)
+            result = sink.skipped() if sink.pending() else await session.call_tool(name, arguments)
+            feedback, images, texts = tool_feedback(result, ident)
+            journal.emit("tool_result", call_id=ident, name=name, is_error=bool(result.isError),
+                         feedback=feedback, images=images)
+            sink.emit("tool_result", {"tool_use_id": ident, "texts": texts, "images": images,
+                                      "is_error": bool(result.isError)})
+            block.append(feedback)
+            observations.extend(images)
+        if observations:
+            block.append({"role": "user", "content": observations})
+
+
+def describe(error) -> str:
+    nested = getattr(error, "exceptions", None)
+    return "; ".join(describe(e) for e in nested) if nested else f"{type(error).__name__}: {error}"

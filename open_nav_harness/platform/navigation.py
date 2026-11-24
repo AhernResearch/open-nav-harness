@@ -25,7 +25,7 @@ from open_nav_harness.kernel.spec import (Budgets, EnvironmentSpec, ExecutorSpec
 from open_nav_harness.kernel.tools import TOOL_SETS, EpisodeState, ToolRefused, tool_message
 from open_nav_harness.mapping.observed import MapSpec
 
-from navgpt.planner.tools.registry import ImageContent, TextContent, ToolDefinition, ToolResult
+from open_nav_harness.providers.tools import ImageContent, TextContent, ToolDefinition, ToolResult
 
 from .database import ident
 

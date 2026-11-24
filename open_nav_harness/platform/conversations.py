@@ -17,7 +17,7 @@ from open_nav_harness.core.context import ContextWindow
 from open_nav_harness.core.artifacts import ArtifactStore
 from open_nav_harness.kernel.prompt import briefing as navigation_briefing
 from open_nav_harness.providers.runtime import ManagedRuntime
-from navgpt.planner.tools.registry import ToolDefinition, ToolResult, TextContent
+from open_nav_harness.providers.tools import ToolDefinition, ToolResult, TextContent
 from .database import ident
 from .navigation import KernelNavigation, NavigationTarget
 
@@ -184,7 +184,6 @@ class CombinedTools:
 class DialogueSink:
     def __init__(self, manager, cid):
         self.manager, self.cid = manager, cid
-        self.planner_turns = SimpleNamespace(count=0)
 
     def emit(self, kind, payload):
         self.manager.emit(self.cid, kind, payload)
@@ -208,10 +207,6 @@ class DialogueSink:
             content=[TextContent(text="Not executed: a newer user message superseded this tool call.")],
             isError=True,
         )
-
-    @staticmethod
-    def parse_step_result(texts):
-        return {}
 
 
 class Conversations:
@@ -377,12 +372,8 @@ class Conversations:
                     await self.wake[cid].wait()
                 with self.db.transaction() as c:
                     c.execute(text("UPDATE conversations SET status='running' WHERE id=:id"), dict(id=cid))
-                ctx = SimpleNamespace(
-                    workdir=folder / ident(), briefing=PROMPT, first_prompt="", mcp_env={}, max_turns=32
-                )
-                outcome = await ManagedRuntime(profile).run(
-                    ctx, DialogueSink(self, cid), window=window, session=tools, interactive=True
-                )
+                ctx = SimpleNamespace(workdir=folder / ident(), briefing=PROMPT, first_prompt="", max_turns=32)
+                outcome = await ManagedRuntime(profile).run(ctx, DialogueSink(self, cid), tools, window)
                 with self.db.transaction() as c:
                     c.execute(
                         text("UPDATE conversations SET history=:history WHERE id=:id"),

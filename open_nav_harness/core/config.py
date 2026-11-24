@@ -81,45 +81,6 @@ class ServiceSpec(StrictModel):
         return self
 
 
-class ExecutionBinding(StrictModel):
-    environment_service: str
-    execution_service: str
-
-
-class ExperimentSpec(StrictModel):
-    name: str = Field(min_length=1, max_length=100)
-    planner_service: str | None = None
-    environment_service: str | None = None
-    execution_pool: list[ExecutionBinding] = Field(default_factory=list, max_length=16)
-    vla_service: str | None = None
-    config: dict
-    episodes: list[int] = Field(min_length=1, max_length=10000)
-    purpose: Literal["development", "evaluation", "collection"] = "development"
-
-    @model_validator(mode="after")
-    def execution(self):
-        if (self.config.get("dataset", {}).get("name") == "scan"
-                and self.purpose != "development"):
-            raise ValueError("Scan integration currently supports development attempts only")
-        if bool(self.environment_service) == bool(self.execution_pool):
-            raise ValueError("Choose one environment_service or an execution_pool")
-        if self.execution_pool:
-            if not self.vla_service:
-                raise ValueError("Execution pool requires shared VLA inference")
-            for key in ("environment_service", "execution_service"):
-                values = [getattr(binding, key) for binding in self.execution_pool]
-                if len(set(values)) != len(values):
-                    raise ValueError("Execution pool must contain independent environments and workers")
-        return self
-
-    @field_validator("episodes")
-    @classmethod
-    def unique_episodes(cls, v):
-        if len(set(v)) != len(v) or any(x < 0 for x in v):
-            raise ValueError("Episode indices must be unique and nonnegative")
-        return v
-
-
 class ServiceTemplate(StrictModel):
     """Trusted administrator configuration, never accepted through the browser."""
 
@@ -134,7 +95,5 @@ class PlatformSettings(StrictModel):
     conversations_config: str | None = None
     host: str = "127.0.0.1"
     port: int = 8878
-    max_workers: int = Field(default=4, ge=1, le=16)
     ssh_config: str | None = None
     service_templates: dict[str, ServiceTemplate] = Field(default_factory=dict)
-    import_roots: list[str] = Field(default_factory=list)

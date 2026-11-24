@@ -1,10 +1,17 @@
 {
-  "backend": "lightnav",
-  "port": 18271,
-  "environment_url": "http://127.0.0.1:19450",
   "model_path": "/srv/models/LightNav-0",
-  "artifact_dir": "/srv/open-nav-harness/state/actor-artifacts/lightnav",
-  "model_options": {
-    "gpu_memory_utilization": 0.35
+  "host": "127.0.0.1",
+  "port": 18271,
+  "max_sessions": 4,
+  "model": {
+    "gpu_memory_utilization": 0.3,
+    "max_num_seqs": 4,
+    "max_batch_size": 4,
+    "max_wait_ms": 8
+  },
+  "control": {
+    "dt_s": 0.1,
+    "max_linear_mps": 2.5,
+    "max_angular_dps": 300.0
   }
 }

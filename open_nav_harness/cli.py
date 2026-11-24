@@ -32,7 +32,7 @@ def main():
 
         db = Database(root)
         db.migrate()
-        asyncio.run(Worker(db, settings).run())
+        asyncio.run(Worker(db).run())
     elif a.command == "backup":
         import sqlite3
 

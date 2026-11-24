@@ -1,3 +1,0 @@
-# The bridge uses stdlib HTTP and an existing external lightnav-serve process.
-# JSON experiment/path files do not require PyYAML in the Habitat/bridge envs.
-websockets>=14,<18

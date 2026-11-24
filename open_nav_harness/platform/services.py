@@ -5,7 +5,6 @@ import shlex
 import json
 import time
 import os
-from pathlib import Path
 import httpx
 from sqlalchemy import text
 from open_nav_harness.core.config import PlatformSettings
@@ -96,57 +95,12 @@ class ServiceManager:
             raise ValueError("Remote unit ownership could not be verified")
         return state
 
-    async def reconcile_attempt(self, aid):
-        # Validate motion services are stopped before touching shared actor state.
-        attempt = self.db.release_reconciled(aid, check_only=True)
-        if attempt["binding"]:
-            spec = json.loads(attempt["spec"])
-            vla = self.db.service(spec["vla_service"])
-            status = self.db.rows("SELECT status FROM services WHERE id=:id", id=spec["vla_service"])[0][
-                "status"
-            ]
-            if not (vla.managed and status == "stopped"):
-                receipts = list(Path(attempt["output"]).rglob("execution_session.json"))
-                if len(receipts) > 1:
-                    raise ValueError("Ambiguous execution session receipts")
-                if receipts:
-                    ident = json.loads(receipts[0].read_text())["session_id"]
-                    if len(ident) != 32 or any(c not in "0123456789abcdef" for c in ident):
-                        raise ValueError("Invalid session receipt")
-                    async with httpx.AsyncClient(trust_env=False, timeout=10) as client:
-                        url = vla.url.rstrip("/") + "/sessions/" + ident
-                        response = await client.get(url)
-                        if response.status_code != 404:
-                            response.raise_for_status()
-                            (await client.post(url + "/cancel")).raise_for_status()
-                            # A 409 means CUDA work is still in flight; retain all leases.
-                            response = await client.post(url + "/close")
-                            if response.status_code == 409:
-                                raise ValueError(
-                                    "Inference is still running; retain the lease until it drains"
-                                )
-                            response.raise_for_status()
-        self.db.release_reconciled(aid, inference_reconciled=True)
-
     async def operate(self, sid, action):
         if action not in ("start", "stop"):
             raise ValueError("Unknown service action")
         async with self.lock:
             spec, template, unit = self.owned(sid)
-            # Fence the scheduler in the same database transaction as the lease check.
             with self.db.transaction() as c:
-                leases = (
-                    c.execute(
-                        text(
-                            "SELECT a.status FROM leases l JOIN attempts a ON a.id=l.attempt_id WHERE l.resource=:r OR l.resource LIKE :p"
-                        ),
-                        {"r": sid, "p": sid + ":%"},
-                    )
-                    .scalars()
-                    .all()
-                )
-                if leases and (action != "stop" or any(x != "blocked" for x in leases)):
-                    raise ValueError("Service is leased by a running attempt")
                 current = c.execute(
                     text("SELECT status FROM services WHERE id=:id"), {"id": sid}
                 ).scalar_one()
