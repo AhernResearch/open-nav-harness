@@ -201,8 +201,10 @@ POST /api/runs/{id}/action              pause | resume | cancel
   lane waits. A lane whose motion reply is missing or errored is quarantined, and its episode becomes
   `failed_or_uncertain`. Other lanes continue. A quarantined lane is released only by an operator
   reconcile.
-- `PlannerPool` gives each replica a semaphore of size `max_concurrency` and pins each episode to one
-  replica for prefix caching. A request queues instead of failing when the pool is full.
+- `ReplicaPool` (`kernel/replicas.py`) counts episodes per server listed in `base_url` plus the
+  profile's `replicas`, allows `max_concurrency` on each, and pins each episode to the least busy one
+  for prefix caching; `planner_url` in the result records it. An episode queues instead of failing
+  when every replica is full. A failing replica is not skipped and its episodes are not replayed.
 - Restart: running episodes without `result.json` become `failed_or_uncertain`. They are never resumed
   or replayed.
 

@@ -739,6 +739,8 @@ export interface components {
              * @default 1
              */
             max_concurrency: number;
+            /** Replicas */
+            replicas?: string[];
         };
         /** PointExpertSpec */
         PointExpertSpec: {

@@ -29,6 +29,7 @@ from open_nav_harness.core.config import StrictModel
 from open_nav_harness.core.version import kernel_digest
 from open_nav_harness.kernel.environment import SimulatorBusy
 from open_nav_harness.kernel.episode import preflight, run_episode
+from open_nav_harness.kernel.replicas import ReplicaPool
 from open_nav_harness.kernel.spec import KernelSpec
 
 from .database import Database, ident
@@ -37,7 +38,8 @@ from .media import artifact_response, image_file
 from .stream import follow
 
 TERMINAL = ("completed", "failed", "failed_or_uncertain", "cancelled")
-SUMMARY = ("end_reason", "error", "stop", "turns", "malformed_replies", "legs", "actions", "elapsed_s")
+SUMMARY = ("planner_url", "end_reason", "error", "stop", "turns", "malformed_replies", "legs", "actions",
+           "elapsed_s")
 BUSY_BACKOFF_S = 5.0
 
 
@@ -225,13 +227,14 @@ class RunStore:
 
 
 class RunScheduler:
-    """Fills each active run up to its lanes, bounded by shared simulator and planner slots."""
+    """Fills each active run up to its lanes, bounded by shared simulator slots and planner replicas."""
 
     def __init__(self, store: RunStore, *, sim_transport=None, planner_transport=None):
         self.store = store
         self.sim_transport, self.planner_transport = sim_transport, planner_transport
         self.lanes: dict[str, set[asyncio.Task]] = {}
         self.slots: dict[tuple, asyncio.Semaphore] = {}
+        self.planners = ReplicaPool()
         # The code this process imported; the disk may change under a running worker.
         self.loaded = kernel_digest()
 
@@ -285,12 +288,12 @@ class RunScheduler:
             await self.execute(run, spec, episode)
 
     async def execute(self, run: dict, spec: KernelSpec, episode: str):
-        rid, planner = run["id"], spec.planner
+        rid = run["id"]
         environment = self.slot(("sim", spec.environment.url), run["contract"]["workers"])
-        model = self.slot(("planner", planner.base_url, planner.model), planner.max_concurrency)
         try:
-            async with environment, model:
-                result = await run_episode(spec, episode, self.store.folder(rid, episode),
+            async with environment, self.planners.pin(spec.planner) as planner:
+                result = await run_episode(spec.model_copy(update={"planner": planner}), episode,
+                                           self.store.folder(rid, episode),
                                            run["contract"]["max_actions"],
                                            sim_transport=self.sim_transport,
                                            planner_transport=self.planner_transport)

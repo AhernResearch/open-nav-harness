@@ -9,6 +9,13 @@ class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+def http_endpoint(v: str) -> str:
+    p = urlsplit(v)
+    if p.scheme not in ("http", "https") or not p.hostname or p.username or p.password:
+        raise ValueError("endpoint must be HTTP(S), without inline credentials")
+    return v
+
+
 class PlannerProfile(StrictModel):
     runtime: Literal["openai_compatible"] = "openai_compatible"
     api_format: Literal["chat_completions", "responses"] = "chat_completions"
@@ -28,16 +35,22 @@ class PlannerProfile(StrictModel):
     request_timeout_s: int = Field(default=120, ge=5, le=1200)
     tokenizer_path: None = None  # Legacy null field; counting uses the serving processor.
     token_count_url: str | None = None
-    max_concurrency: int = Field(default=1, ge=1, le=32)
+    max_concurrency: int = Field(default=1, ge=1, le=32)  # per replica
+    # More servers of the same model and weights; a batch episode is pinned to one of them.
+    replicas: list[str] = Field(default_factory=list, max_length=16)
 
     @field_validator("base_url", "token_count_url")
     @classmethod
     def endpoint(cls, v):
-        if v is not None:
-            p = urlsplit(v)
-            if p.scheme not in ("http", "https") or not p.hostname or p.username or p.password:
-                raise ValueError("endpoint must be HTTP(S), without inline credentials")
-        return v
+        return v if v is None else http_endpoint(v)
+
+    @field_validator("replicas")
+    @classmethod
+    def replica_endpoints(cls, v):
+        return [http_endpoint(url) for url in v]
+
+    def endpoints(self) -> list[str]:
+        return list(dict.fromkeys([self.base_url, *self.replicas]))
 
     @model_validator(mode="after")
     def budget(self):

@@ -19,6 +19,7 @@ from .executors import build_executor
 from .loop import AgentLoop
 from .prompt import FIRST, briefing
 from .recorder import Recorder
+from .replicas import ReplicaPool
 from .spec import KernelSpec
 from .tools import EpisodeState
 
@@ -76,7 +77,7 @@ async def run_episode(spec: KernelSpec, episode_id: str, root: Path, max_actions
     except BaseException:
         await env.close()
         raise
-    result: dict = {"episode_id": episode_id, "started": started}
+    result: dict = {"episode_id": episode_id, "started": started, "planner_url": spec.planner.base_url}
     executor = build_executor(spec.executor, actor_transport)
     try:
         recorder.write("spec.json", {"spec": spec.model_dump(exclude={"planner": {"credential_env"}}),
@@ -124,18 +125,22 @@ async def run_episode(spec: KernelSpec, episode_id: str, root: Path, max_actions
 
 
 async def run_batch(spec: KernelSpec, episodes: list[str], output: Path, lanes: int) -> list[dict]:
-    """At most ``lanes`` concurrent episodes; an uncertain episode stops its lane."""
+    """At most ``lanes`` concurrent episodes, each pinned to one planner replica; an uncertain
+    episode stops its lane."""
     output.mkdir(parents=True, exist_ok=False)
     contract = await preflight(spec)
     queue: asyncio.Queue[str] = asyncio.Queue()
     for episode in episodes:
         queue.put_nowait(episode)
     results: list[dict] = []
+    planners = ReplicaPool()
 
     async def lane():
         while not queue.empty():
             episode = queue.get_nowait()
-            result = await run_episode(spec, episode, output / episode, contract["max_actions"])
+            async with planners.pin(spec.planner) as planner:
+                result = await run_episode(spec.model_copy(update={"planner": planner}), episode,
+                                           output / episode, contract["max_actions"])
             results.append(result)
             print(episode, result["status"], result.get("end_reason"), result.get("error"), flush=True)
             if result["status"] != "completed":

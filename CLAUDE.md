@@ -50,7 +50,7 @@ One package, `open_nav_harness/`, plus `frontend/`:
 - `kernel/`: `loop.py` (one agent loop), `tools.py` (tool sets `point_v1`, `vla_v1`; a tool set is the
   permission boundary), `executors.py` (`PointExpert`, `VlaActor`), `environment.py` (sim-engine
   client), `evidence.py`, `recorder.py` (episode bundle), `episode.py` (preflight, `run_episode`,
-  `run_batch`), `spec.py` (`KernelSpec`).
+  `run_batch`), `replicas.py` (`ReplicaPool`, planner replica pinning), `spec.py` (`KernelSpec`).
 - `platform/`: `api.py`, `runs.py` (`RunStore`, `RunScheduler`, runs API), `worker.py` (runs only the
   scheduler), `conversations.py` and `navigation.py` (dialogue, MCP, binding an episode), `services.py`
   (templates, SSH start/stop, health), `kernel_feed.py`, `catalog.py`, `database.py` and Alembic
