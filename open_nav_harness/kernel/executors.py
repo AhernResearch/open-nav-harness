@@ -184,8 +184,5 @@ class VlaActor(Executor):
 
 EXECUTOR_TYPES: dict[str, type[Executor]] = {cls.name: cls for cls in (PointExpert, VlaActor)}
 # Stateless executors are shared; the conversation adapter binds one without a run spec.
-EXECUTORS = {"point_expert": PointExpert()}
-
-
 def build_executor(spec: ExecutorSpec, transport=None) -> Executor:
     return EXECUTOR_TYPES[spec.kind].create(spec, transport)

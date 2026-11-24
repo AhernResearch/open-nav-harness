@@ -54,7 +54,10 @@ async def preflight(spec: KernelSpec, sim_transport=None, actor_transport=None) 
     if problems:
         raise PreflightError("; ".join(problems))
     files = json.dumps(protocol.get("implementation_sha256"), sort_keys=True).encode()
-    return {"max_actions": protocol["max_actions"], "workers": health["workers"],
+    # A dataset may set its own budget (a shorter time step keeps the same simulated time).
+    max_actions = protocol.get("dataset_max_actions", {}).get(spec.environment.dataset,
+                                                               protocol["max_actions"])
+    return {"max_actions": max_actions, "workers": health["workers"],
             "implementation_sha256": hashlib.sha256(files).hexdigest(),
             "startup_id": health.get("startup_id"), "actor": actor}
 

@@ -344,3 +344,40 @@ async def test_namespaced_mcp_coexists_with_navigation():
             await tools.call_tool("map__move", {})
             assert calls == ["nav", "mcp"]
             await tools.close()
+
+
+@pytest.mark.asyncio
+async def test_a_vla_environment_binds_the_vla_tool_set_and_releases_the_actor():
+    from open_nav_harness.platform.conversations import (CombinedTools, CreateConversation, DialogueSettings,
+                                                         prompt_for)
+    from test_vla import FakeModel, actor, forward
+
+    model = FakeModel(forward(), forward(stop=True))
+    service, actor_transport = actor(model)
+    target = {**TARGET, "tool_set": "vla_v1", "executor": {"kind": "vla", "url": "http://actor"}}
+    settings = DialogueSettings(profiles={}, default_model="test", navigation={"vla": target})
+    spec = CreateConversation(navigation="vla", episode="898")
+    with tempfile.TemporaryDirectory() as tmp:
+        tools = CombinedTools(settings, spec, Path(tmp), transport=httpx.MockTransport(FakeSim()),
+                              actor_transport=actor_transport)
+        await tools.start()
+        delegate = next(t for t in await tools.list_tools() if t.name == "delegate")
+        assert set(delegate.inputSchema["properties"]) == {"instruction"}
+        assert "delegate(instruction)" in prompt_for(settings, spec, tools.session)
+        result = await tools.call_tool("delegate", {"instruction": "walk to the sofa"})
+        assert not result.isError and '"reached"' in result.content[0].text
+        assert model.opened == 1 and len(service.sessions) == 1
+        await tools.close()
+        assert service.sessions == {}
+
+
+def test_a_navigation_target_needs_the_executor_its_tool_set_was_written_for():
+    from open_nav_harness.core.config import PlannerProfile
+    from open_nav_harness.platform.navigation import NavigationTarget
+
+    with pytest.raises(ValueError, match="needs executor vla"):
+        NavigationTarget.model_validate({**TARGET, "tool_set": "vla_v1"})
+    target = NavigationTarget.model_validate(
+        {**TARGET, "tool_set": "vla_v1", "executor": {"kind": "vla", "url": "http://actor"}})
+    spec = target.kernel_spec(PlannerProfile(model="m"))
+    assert spec.tool_set == "vla_v1" and spec.executor.url == "http://actor"

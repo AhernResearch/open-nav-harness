@@ -31,19 +31,25 @@ class VlaSpec(StrictModel):
 ExecutorSpec = Annotated[PointExpertSpec | VlaSpec, Field(discriminator="kind")]
 # Each tool set is written for one kind of executor: it decides what a delegate call carries.
 EXECUTOR_OF_TOOL_SET = {"point_v1": "point_expert", "vla_v1": "vla"}
+ToolSet = Literal["point_v1", "vla_v1"]
+
+
+def check_executor(tool_set: str, executor: PointExpertSpec | VlaSpec):
+    if executor.kind != EXECUTOR_OF_TOOL_SET[tool_set]:
+        raise ValueError(f"tool set {tool_set} needs executor {EXECUTOR_OF_TOOL_SET[tool_set]}")
 
 
 class Budgets(StrictModel):
     max_turns: int = Field(default=40, ge=1, le=500)
     timeout_s: int = Field(default=1200, ge=10, le=7200)
-    leg_max_actions: int = Field(default=200, ge=1, le=400)
+    leg_max_actions: int = Field(default=200, ge=1, le=1000)
     max_malformed: int = Field(default=3, ge=1, le=10)
 
 
 class KernelSpec(StrictModel):
     """Everything an episode needs besides its episode id; frozen per run."""
 
-    tool_set: Literal["point_v1", "vla_v1"] = "point_v1"
+    tool_set: ToolSet = "point_v1"
     planner: PlannerProfile
     environment: EnvironmentSpec
     executor: ExecutorSpec = Field(default_factory=PointExpertSpec)
@@ -52,6 +58,5 @@ class KernelSpec(StrictModel):
 
     @model_validator(mode="after")
     def executor_fits_tool_set(self):
-        if self.executor.kind != EXECUTOR_OF_TOOL_SET[self.tool_set]:
-            raise ValueError(f"tool set {self.tool_set} needs executor {EXECUTOR_OF_TOOL_SET[self.tool_set]}")
+        check_executor(self.tool_set, self.executor)
         return self

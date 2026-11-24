@@ -24,9 +24,10 @@ PROJECTION = [[0.5, 0, 0, 0], [0, 0.6, 0, 0], [0, 0, -1, -0.02], [0, 0, -1, 0]]
 
 
 class FakeSim:
-    def __init__(self, lose_step=False, reward_mode="none"):
+    def __init__(self, lose_step=False, reward_mode="none", dataset_max_actions=None):
         self.events, self.observations, self.steps, self.finished = 0, 0, [], None
         self.lose_step, self.reward_mode, self.legs = lose_step, reward_mode, []
+        self.dataset_max_actions = dataset_max_actions or {}
 
     def __call__(self, request: httpx.Request):
         path, body = request.url.path, json.loads(request.content or b"{}")
@@ -34,7 +35,8 @@ class FakeSim:
             return httpx.Response(200, json={
                 "workers": 2,
                 "protocol": {"reward_mode": self.reward_mode, "max_actions": 500, "cameras": {"cam": CAMERA},
-                             "dataset_physics": {"r2r_train": {"velocity": {"time_step_s": 0.1}}}},
+                             "dataset_physics": {"r2r_train": {"velocity": {"time_step_s": 0.1}}},
+                             "dataset_max_actions": self.dataset_max_actions},
                 "capabilities": {"commands": ["velocity", "point_goal", "retrace"], "observe": True,
                                  "retrace_targets": ["leg_id", "event_index"]}})
         if path == "/v1/sessions":
@@ -208,6 +210,11 @@ async def test_preflight_refuses_a_simulator_that_reports_training_rewards():
     with pytest.raises(PreflightError, match="reward_mode"):
         await preflight(spec(), httpx.MockTransport(FakeSim(reward_mode="progress_v1")))
     assert (await preflight(spec(), httpx.MockTransport(FakeSim())))["max_actions"] == 500
+
+
+async def test_preflight_takes_the_episode_budget_of_the_run_dataset():
+    sim = FakeSim(dataset_max_actions={"r2r_train": 1250, "other": 300})
+    assert (await preflight(spec(), httpx.MockTransport(sim)))["max_actions"] == 1250
 
 
 async def test_an_episode_keeps_its_simulator_reads_within_the_shared_queue():

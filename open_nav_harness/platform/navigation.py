@@ -13,14 +13,15 @@ import base64
 import json
 from pathlib import Path
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
 from open_nav_harness.core.config import PlannerProfile, StrictModel
 from open_nav_harness.kernel.environment import MotionUncertain, SimEngineEnvironment, SimulatorError
 from open_nav_harness.kernel.evidence import Evidence, EvidenceError
-from open_nav_harness.kernel.executors import EXECUTORS
+from open_nav_harness.kernel.executors import build_executor
 from open_nav_harness.kernel.recorder import Recorder
-from open_nav_harness.kernel.spec import Budgets, EnvironmentSpec, KernelSpec
+from open_nav_harness.kernel.spec import (Budgets, EnvironmentSpec, ExecutorSpec, KernelSpec, PointExpertSpec,
+                                          ToolSet, check_executor)
 from open_nav_harness.kernel.tools import TOOL_SETS, EpisodeState, ToolRefused, tool_message
 from open_nav_harness.mapping.observed import MapSpec
 
@@ -36,18 +37,25 @@ class NavigationTarget(StrictModel):
     dataset: str = Field(min_length=1)
     camera: str = Field(min_length=1)
     seed: int = 0
+    tool_set: ToolSet = "point_v1"
+    executor: ExecutorSpec = Field(default_factory=PointExpertSpec)
     budgets: Budgets = Field(default_factory=Budgets)
     map: MapSpec = Field(default_factory=MapSpec)
 
     _endpoint = field_validator("url")(PlannerProfile.endpoint.__func__)
+
+    @model_validator(mode="after")
+    def executor_fits_tool_set(self):
+        check_executor(self.tool_set, self.executor)
+        return self
 
     def environment(self) -> EnvironmentSpec:
         return EnvironmentSpec(url=self.url, dataset=self.dataset, camera=self.camera, seed=self.seed)
 
     def kernel_spec(self, planner: PlannerProfile) -> KernelSpec:
         """The frozen spec of a run on this environment; conversations bind the same settings."""
-        return KernelSpec(planner=planner, environment=self.environment(), budgets=self.budgets,
-                          map=self.map)
+        return KernelSpec(tool_set=self.tool_set, planner=planner, environment=self.environment(),
+                          executor=self.executor, budgets=self.budgets, map=self.map)
 
 
 class NavigationEnded(RuntimeError):
@@ -59,9 +67,10 @@ def refusal(text: str) -> ToolResult:
 
 
 class KernelNavigation:
-    def __init__(self, target: NavigationTarget, folder: Path, transport=None):
+    def __init__(self, target: NavigationTarget, folder: Path, transport=None, actor_transport=None):
         self.target, self.folder, self.transport = target, folder, transport
-        self.tools = {tool.name: tool for tool in TOOL_SETS["point_v1"]}
+        self.tools = {tool.name: tool for tool in TOOL_SETS[target.tool_set]}
+        self.executor = build_executor(target.executor, actor_transport)
         self.env: SimEngineEnvironment | None = None
         self.state: EpisodeState | None = None
         self.ended: str | None = None
@@ -78,10 +87,11 @@ class KernelNavigation:
         recorder.write("session.json", {"url": self.target.url, "session_id": env.session_id,
                                         "episode_id": episode, "instruction": opened["instruction"]})
         recorder.write("spec.json", {"navigation": self.target.model_dump(mode="json"), "episode": episode})
+        self.env = env  # from here on, close() releases the session and the executor
         evidence = Evidence(env, recorder, self.target.map)
+        await self.executor.start(env, evidence)
         await evidence.start()
-        self.env = env
-        self.state = EpisodeState(opened["instruction"], env, EXECUTORS["point_expert"],
+        self.state = EpisodeState(opened["instruction"], env, self.executor,
                                   self.target.budgets, recorder, evidence)
         return opened
 
@@ -127,4 +137,7 @@ class KernelNavigation:
     async def close(self):
         if self.env is not None:
             env, self.env = self.env, None
-            await env.close()
+            try:
+                await self.executor.close()
+            finally:
+                await env.close()

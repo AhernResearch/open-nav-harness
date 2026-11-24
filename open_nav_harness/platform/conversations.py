@@ -36,12 +36,12 @@ but follow any correction to how you navigate. Reply in the operator's language.
 
 
 def prompt_for(settings: "DialogueSettings", spec: "CreateConversation", session: dict | None) -> str:
-    """A bound dialogue runs the point_v1 kernel prompt for its episode; an unbound one chats."""
+    """A bound dialogue runs its tool set's kernel prompt for the episode; an unbound one chats."""
     if session is None or spec.navigation is None:
         return PROMPT
-    budgets = settings.navigation[spec.navigation].budgets
-    return navigation_briefing(session.get("instruction") or "", budgets.max_turns,
-                               budgets.leg_max_actions) + BOUND
+    target = settings.navigation[spec.navigation]
+    return navigation_briefing(session.get("instruction") or "", target.budgets.max_turns,
+                               target.budgets.leg_max_actions, target.tool_set) + BOUND
 
 
 class MCPConnection(StrictModel):
@@ -88,9 +88,10 @@ class Message(StrictModel):
 class CombinedTools:
     """Everything one dialogue turn may call: the bound navigation session and the MCP servers."""
 
-    def __init__(self, settings, spec, folder, transport=None):
+    def __init__(self, settings, spec, folder, transport=None, actor_transport=None):
         self.settings, self.spec, self.folder = settings, spec, folder
-        self.transport = transport  # tests script the simulator; production dials it directly
+        # Tests script the simulator and the actor; production dials them directly.
+        self.transport, self.actor_transport = transport, actor_transport
         self.stack = AsyncExitStack()
         self.definitions = {}
         self.routes = {}  # tool name -> (navigation or MCP client, the tool's own name)
@@ -103,7 +104,8 @@ class CombinedTools:
         if self.spec.navigation:
             target = self.settings.navigation[self.spec.navigation]
             self.navigation = KernelNavigation(target, self.folder / "navigation" / ident(),
-                                               transport=self.transport)
+                                               transport=self.transport,
+                                               actor_transport=self.actor_transport)
             self.session = await self.navigation.start(self.spec.episode)
             for definition in self.navigation.definitions():
                 self.definitions[definition.name] = definition
@@ -435,7 +437,8 @@ def router(manager):
             models=list(s.profiles) if s else [],
             default_model=s.default_model if s else None,
             mcp=list(s.mcp) if s else [],
-            navigation=[dict(name=name, dataset=target.dataset, camera=target.camera)
+            navigation=[dict(name=name, dataset=target.dataset, camera=target.camera,
+                             tool_set=target.tool_set)
                         for name, target in (s.navigation.items() if s else [])],
         )
 
