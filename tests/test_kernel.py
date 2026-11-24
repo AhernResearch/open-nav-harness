@@ -19,6 +19,7 @@ PNG = PNG.getvalue()
 DEPTH = io.BytesIO()
 np.savez_compressed(DEPTH, depth_m=np.full((24, 32), 2.0, np.float32))
 DEPTH = DEPTH.getvalue()
+CAMERA = {"width": 480, "height": 270, "hfov": 120.0, "height_m": 0.88, "pitch_down_rad": 0.0}
 PROJECTION = [[0.5, 0, 0, 0], [0, 0.6, 0, 0], [0, 0, -1, -0.02], [0, 0, -1, 0]]
 
 
@@ -32,8 +33,10 @@ class FakeSim:
         if path == "/v1/health":
             return httpx.Response(200, json={
                 "workers": 2,
-                "protocol": {"reward_mode": self.reward_mode, "max_actions": 500, "cameras": {"cam": {}}},
-                "capabilities": {"commands": ["velocity", "point_goal", "retrace"], "observe": True}})
+                "protocol": {"reward_mode": self.reward_mode, "max_actions": 500, "cameras": {"cam": CAMERA},
+                             "dataset_physics": {"r2r_train": {"velocity": {"time_step_s": 0.1}}}},
+                "capabilities": {"commands": ["velocity", "point_goal", "retrace"], "observe": True,
+                                 "retrace_targets": ["leg_id", "event_index"]}})
         if path == "/v1/sessions":
             return httpx.Response(200, json={"session_id": "s1", "event_index": 0,
                                              "instruction": "Walk to the sofa and stop."})
@@ -52,13 +55,16 @@ class FakeSim:
             if self.lose_step:
                 raise httpx.ReadTimeout("reply lost")
             assert body["expected_event_index"] == self.events
-            start = self.events
-            self.events += 3
-            leg = {"leg_id": len(self.legs) + 1, "kind": body["command"]["kind"], "status": "reached",
+            start, kind = self.events, body["command"]["kind"]
+            self.events += 1 if kind == "velocity" else 3
+            if kind == "velocity":
+                return httpx.Response(200, json={"event_index": self.events, "done": False,
+                                                 "termination": None, "collisions": 0})
+            leg = {"leg_id": len(self.legs) + 1, "kind": kind, "status": "reached",
                    "reason": None, "start_event_index": start, "end_event_index": self.events}
             self.legs.append(leg)
             return httpx.Response(200, json={"event_index": self.events, "done": False,
-                                             "termination": None, "leg": leg})
+                                             "termination": None, "collisions": 0, "leg": leg})
         if "/frames/" in path:
             index = int(path.rsplit("/", 1)[1])
             return httpx.Response(200, content=bytes(8 * 6 * 3), headers={
