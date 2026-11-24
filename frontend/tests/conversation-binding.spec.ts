@@ -3,7 +3,7 @@ import {test, expect} from '@playwright/test';
 test('a conversation binds one dataset episode and keeps it in the created spec', async ({page}) => {
   let created: any = null;
   await page.route('**/api/conversations/options', route => route.fulfill({json:{models:['Sonnet'],default_model:'Sonnet',mcp:[],
-    navigation:[{name:'sim',dataset:'r2r_train',camera:'visible_88cm_hfov120'}]}}));
+    navigation:[{name:'sim',dataset:'r2r_train',catalog:'r2r_train',camera:'visible_88cm_hfov120'}]}}));
   await page.route('**/api/catalog', route => route.fulfill({json:[{name:'r2r_train',dataset:'r2r',split:'train',scenes:[{scene:'S1',count:2}]}]}));
   await page.route('**/api/catalog/r2r_train/episodes?**', route => route.fulfill({json:[
     {index:898,episode_id:898,scene:'S1',instruction:'Exit the bathroom and enter the hall.'},

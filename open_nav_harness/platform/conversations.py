@@ -438,7 +438,7 @@ def router(manager):
             default_model=s.default_model if s else None,
             mcp=list(s.mcp) if s else [],
             navigation=[dict(name=name, dataset=target.dataset, camera=target.camera,
-                             tool_set=target.tool_set)
+                             catalog=target.catalog or target.dataset, tool_set=target.tool_set)
                         for name, target in (s.navigation.items() if s else [])],
         )
 

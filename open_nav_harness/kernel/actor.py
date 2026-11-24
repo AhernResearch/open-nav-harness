@@ -6,6 +6,8 @@ import base64
 
 import httpx
 
+from .environment import SERVICE_LIMITS
+
 FRAMES_PER_REQUEST = 32
 
 
@@ -16,7 +18,7 @@ class ActorError(RuntimeError):
 class ActorClient:
     def __init__(self, url: str, transport=None, timeout_s: float = 300):
         self.http = httpx.AsyncClient(base_url=url.rstrip("/"), timeout=timeout_s, trust_env=False,
-                                      transport=transport)
+                                      transport=transport, limits=SERVICE_LIMITS)
         self.session_id: str | None = None
 
     async def _call(self, method: str, path: str, body=None) -> dict:

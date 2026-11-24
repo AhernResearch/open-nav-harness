@@ -217,6 +217,15 @@ async def test_preflight_takes_the_episode_budget_of_the_run_dataset():
     assert (await preflight(spec(), httpx.MockTransport(sim)))["max_actions"] == 1250
 
 
+async def test_service_connections_are_not_reused_near_the_server_idle_close():
+    """uvicorn closes idle keep-alive connections at 5 s; reusing one that old fails the request."""
+    from open_nav_harness.kernel.actor import ActorClient
+
+    for client in (SimEngineEnvironment(spec().environment), ActorClient("http://actor")):
+        assert client.http._transport._pool._keepalive_expiry < 5
+        await client.http.aclose()
+
+
 async def test_an_episode_keeps_its_simulator_reads_within_the_shared_queue():
     """A long leg's frames are fetched in parallel, but never more than READS_IN_FLIGHT at once."""
     sim, active, peak = FakeSim(), [0], [0]

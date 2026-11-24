@@ -37,6 +37,8 @@ class NavigationTarget(StrictModel):
     dataset: str = Field(min_length=1)
     camera: str = Field(min_length=1)
     seed: int = 0
+    # Episode list shown to the operator; a variant dataset (e.g. another time step) reuses its source's.
+    catalog: str | None = None
     tool_set: ToolSet = "point_v1"
     executor: ExecutorSpec = Field(default_factory=PointExpertSpec)
     budgets: Budgets = Field(default_factory=Budgets)

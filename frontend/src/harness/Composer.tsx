@@ -286,11 +286,11 @@ function EnvironmentPicker({ conversation: c }: { conversation: Conversation }) 
     setCatalog(null); setScene(""); setEpisodes([]);
     if (!target) return;
     api<Row[]>("/catalog").then(rows => {
-      const found = rows.find((row) => row.name === target.dataset);
+      const found = rows.find((row) => row.name === target.catalog);
       setCatalog(found ?? null);
       setScene(found?.scenes?.[0]?.scene ?? "");
     }).catch(e => c.setError(String(e)));
-  }, [target?.dataset]);
+  }, [target?.catalog]);
   useEffect(() => {
     if (!catalog || !scene) return;
     api<Row[]>(`/catalog/${catalog.name}/episodes?scene=${encodeURIComponent(scene)}&limit=200`)

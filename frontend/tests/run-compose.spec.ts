@@ -3,7 +3,7 @@ import {test, expect} from '@playwright/test';
 test('a run is composed from server-side names and opens on its first episode', async ({page}) => {
   let composed: any = null;
   await page.route('**/api/conversations/options', route => route.fulfill({json:{models:['sol','27b'],default_model:'sol',mcp:[],
-    navigation:[{name:'sim',dataset:'r2r_train',camera:'visible_88cm_hfov120'}]}}));
+    navigation:[{name:'sim',dataset:'r2r_train_vla',catalog:'r2r_train',camera:'visible_88cm_hfov120'}]}}));
   await page.route('**/api/catalog', route => route.fulfill({json:[{name:'r2r_train',dataset:'r2r',split:'train',
     scenes:[{scene:'S1',count:2},{scene:'S2',count:1}]}]}));
   await page.route('**/api/catalog/r2r_train/episodes?**', route => {

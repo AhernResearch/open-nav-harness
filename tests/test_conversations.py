@@ -381,3 +381,18 @@ def test_a_navigation_target_needs_the_executor_its_tool_set_was_written_for():
         {**TARGET, "tool_set": "vla_v1", "executor": {"kind": "vla", "url": "http://actor"}})
     spec = target.kernel_spec(PlannerProfile(model="m"))
     assert spec.tool_set == "vla_v1" and spec.executor.url == "http://actor"
+
+
+def test_options_name_the_catalog_a_variant_dataset_reuses():
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from types import SimpleNamespace
+    from open_nav_harness.platform.conversations import DialogueSettings, router
+
+    settings = DialogueSettings(profiles={}, default_model="test", navigation={
+        "sim": TARGET, "vla": {**TARGET, "dataset": "r2r_train_vla", "catalog": "r2r_train"}})
+    app = FastAPI()
+    app.include_router(router(SimpleNamespace(settings=settings)))
+    navigation = TestClient(app).get("/api/conversations/options").json()["navigation"]
+    assert [(n["dataset"], n["catalog"]) for n in navigation] == [
+        ("r2r_train", "r2r_train"), ("r2r_train_vla", "r2r_train")]

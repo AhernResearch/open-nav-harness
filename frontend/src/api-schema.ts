@@ -895,15 +895,6 @@ export interface components {
             /** Execution Service */
             execution_service: string;
         };
-        /** ExecutorSpec */
-        ExecutorSpec: {
-            /**
-             * Kind
-             * @default point_expert
-             * @constant
-             */
-            kind: "point_expert";
-        };
         /** ExperimentSpec */
         ExperimentSpec: {
             /** Name */
@@ -947,12 +938,13 @@ export interface components {
             /**
              * Tool Set
              * @default point_v1
-             * @constant
+             * @enum {string}
              */
-            tool_set: "point_v1";
+            tool_set: "point_v1" | "vla_v1";
             planner: components["schemas"]["PlannerProfile"];
             environment: components["schemas"]["EnvironmentSpec"];
-            executor?: components["schemas"]["ExecutorSpec"];
+            /** Executor */
+            executor?: components["schemas"]["PointExpertSpec"] | components["schemas"]["VlaSpec"];
             budgets?: components["schemas"]["Budgets"];
             map?: components["schemas"]["MapSpec"];
         };
@@ -1108,6 +1100,14 @@ export interface components {
              */
             max_concurrency: number;
         };
+        /** PointExpertSpec */
+        PointExpertSpec: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "point_expert";
+        };
         /** RunRequest */
         RunRequest: {
             /** Name */
@@ -1175,6 +1175,16 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** VlaSpec */
+        VlaSpec: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "vla";
+            /** Url */
+            url: string;
         };
     };
     responses: never;

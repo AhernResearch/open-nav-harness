@@ -17,6 +17,9 @@ VIEWS = ("front", "right", "back", "left")
 # sim-engine admits every session's calls into one bounded queue (32 by default). An episode
 # keeps at most this many reads in flight, so eight lanes stay within it.
 READS_IN_FLIGHT = 4
+# uvicorn closes a connection idle for 5 s. Reusing one that old races its close and fails the
+# request before it is sent, which for motion would read as uncertain; never reuse past 2 s.
+SERVICE_LIMITS = httpx.Limits(keepalive_expiry=2.0)
 
 
 class MotionUncertain(RuntimeError):
@@ -44,7 +47,7 @@ class SimEngineEnvironment:
     def __init__(self, spec: EnvironmentSpec, transport=None, timeout_s: float = 120):
         self.spec = spec
         self.http = httpx.AsyncClient(base_url=spec.url.rstrip("/"), timeout=timeout_s,
-                                      trust_env=False, transport=transport)
+                                      trust_env=False, transport=transport, limits=SERVICE_LIMITS)
         self.session_id: str | None = None
         self.event_index = 0
         self.done = False
