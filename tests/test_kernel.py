@@ -1,5 +1,6 @@
 """Kernel episodes against a fake sim-engine session and a scripted planner."""
 
+import asyncio
 import io
 import json
 
@@ -8,8 +9,9 @@ import numpy as np
 import pytest
 from PIL import Image
 
+from open_nav_harness.kernel.environment import READS_IN_FLIGHT, SimEngineEnvironment
 from open_nav_harness.kernel.episode import PreflightError, preflight, run_episode
-from open_nav_harness.kernel.spec import KernelSpec
+from open_nav_harness.kernel.spec import EnvironmentSpec, KernelSpec
 
 PNG = io.BytesIO()
 Image.new("RGB", (32, 24), (90, 90, 90)).save(PNG, format="PNG")
@@ -200,3 +202,22 @@ async def test_preflight_refuses_a_simulator_that_reports_training_rewards():
     with pytest.raises(PreflightError, match="reward_mode"):
         await preflight(spec(), httpx.MockTransport(FakeSim(reward_mode="progress_v1")))
     assert (await preflight(spec(), httpx.MockTransport(FakeSim())))["max_actions"] == 500
+
+
+async def test_an_episode_keeps_its_simulator_reads_within_the_shared_queue():
+    """A long leg's frames are fetched in parallel, but never more than READS_IN_FLIGHT at once."""
+    sim, active, peak = FakeSim(), [0], [0]
+
+    async def handler(request):
+        active[0] += 1
+        peak[0] = max(peak[0], active[0])
+        await asyncio.sleep(0.001)
+        active[0] -= 1
+        return sim(request)
+
+    env = SimEngineEnvironment(EnvironmentSpec(url="http://sim", dataset="r2r_train", camera="cam"),
+                               transport=httpx.MockTransport(handler))
+    await env.open("1")
+    await asyncio.gather(*map(env.frame, range(1, 60)))
+    await env.close()
+    assert peak[0] == READS_IN_FLIGHT

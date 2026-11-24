@@ -8,6 +8,7 @@ import httpx
 from open_nav_harness.core.config import PlannerProfile
 from open_nav_harness.core.context import CounterLimit
 from .responses import request_input, normalize_response
+from .vision import image_size, vision_tokens
 
 
 class ModelProtocolError(RuntimeError):
@@ -72,25 +73,30 @@ class CompatibleClient:
     async def count(self, messages: list, tools: list) -> int:
         p = self.profile
         if p.token_count_mode == 'estimate':
-            # Explicit opt-in for gateways without counting. Never tokenize base64 as text.
-            images = 0
+            # Explicit opt-in for gateways without counting. Measure the body actually sent
+            # (Responses drops unreplayed reasoning), never tokenize base64 as text, and
+            # budget each image from its own resolution.
+            wire = (request_input(messages, tools, replay_reasoning=p.replay_reasoning)
+                    if p.api_format == 'responses' else [messages, tools])
+            sizes: list[tuple[int, int]] = []
 
             def without_images(value):
-                nonlocal images
                 if isinstance(value, dict):
-                    if value.get('type') == 'image_url':
-                        images += 1
+                    if value.get('type') in ('image_url', 'input_image'):
+                        url = value['image_url']
+                        sizes.append(image_size(url['url'] if isinstance(url, dict) else url))
                         return {'type': 'image'}
                     return {k: without_images(v) for k, v in value.items()}
                 if isinstance(value, list):
                     return [without_images(v) for v in value]
                 return value
 
-            size = len(json.dumps(without_images([messages, tools]), ensure_ascii=False).encode())
-            estimated = size + images * p.image_token_estimate + 256
+            size = len(json.dumps(without_images(wire), ensure_ascii=False).encode())
+            images = sum(vision_tokens(width, height) for width, height in sizes)
+            estimated = size + images + 256
             if self.journal:
                 self.journal.emit('token_count', count=estimated, method='estimate',
-                                  text_bytes=size, images=images, image_budget=p.image_token_estimate)
+                                  text_bytes=size, images=len(sizes), image_tokens=images)
             return estimated
         if p.api_format == 'responses':
             payload = {'model': p.model, **request_input(messages, tools, replay_reasoning=p.replay_reasoning)}

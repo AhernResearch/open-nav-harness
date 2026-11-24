@@ -14,7 +14,6 @@ class PlannerProfile(StrictModel):
     api_format: Literal["chat_completions", "responses"] = "chat_completions"
     replay_reasoning: bool = True
     token_count_mode: Literal["remote", "estimate"] = "remote"
-    image_token_estimate: int = Field(default=4096, ge=256, le=32768)
     model: str = Field(min_length=1)
     base_url: str = "http://127.0.0.1:8001/v1"
     credential_env: str | None = None

@@ -14,6 +14,9 @@ import numpy as np
 from .spec import EnvironmentSpec
 
 VIEWS = ("front", "right", "back", "left")
+# sim-engine admits every session's calls into one bounded queue (32 by default). An episode
+# keeps at most this many reads in flight, so eight lanes stay within it.
+READS_IN_FLIGHT = 4
 
 
 class MotionUncertain(RuntimeError):
@@ -45,9 +48,14 @@ class SimEngineEnvironment:
         self.session_id: str | None = None
         self.event_index = 0
         self.done = False
+        self.reads = asyncio.Semaphore(READS_IN_FLIGHT)
 
     async def _call(self, method, path, body=None, params=None):
-        response = await self.http.request(method, path, json=body, params=params)
+        if method == "GET":
+            async with self.reads:
+                response = await self.http.request(method, path, params=params)
+        else:
+            response = await self.http.request(method, path, json=body, params=params)
         if response.status_code == 429:
             raise SimulatorBusy(f"{method} {path}: {response.text[:200]}")
         if response.is_error:

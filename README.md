@@ -105,9 +105,9 @@ variable name. Register the profile with `POST /api/services` after deploying th
 code. The existing model picker uses registered Planner profiles unchanged.
 
 For gateways without a token-count API, explicitly set `token_count_mode: "estimate"`.
-This uses UTF-8 byte length plus `image_token_estimate` (default 4096) per image,
-excluding image base64. It is a conservative budget heuristic, not an exact count
-or a guaranteed upper bound for arbitrary images; it can prune history earlier.
+This uses UTF-8 byte length, excluding image base64, plus a per-image count from each
+image's resolution (the Qwen-VL `smart_resize` grid of 32-pixel cells, see
+`providers/vision.py`). It is a resolution-aware budget, not the gateway's exact count.
 Actual usage still comes from the generation response. Remote counting failures
 never silently fall back to estimation. Use `temperature: null` for models that
 do not accept temperature and `effort` for Responses reasoning effort.

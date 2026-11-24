@@ -1,13 +1,17 @@
+import base64
+import io
 import json
 from unittest.mock import AsyncMock
 
 import httpx
 import pytest
+from PIL import Image
 
 from open_nav_harness.core.artifacts import Journal
 from open_nav_harness.core.config import PlannerProfile
 from open_nav_harness.providers.compatible import CompatibleClient, ModelProtocolError
 from open_nav_harness.providers.responses import request_input, normalize_response
+from open_nav_harness.providers.vision import vision_tokens
 
 
 TOOLS = [{'type': 'function', 'function': {'name': 'observe', 'description': 'Look',
@@ -78,16 +82,35 @@ def test_gateway_can_omit_reasoning_without_dropping_calls_or_mutating_trace():
     assert message['provider_items'] == OUTPUT
 
 
-async def test_explicit_estimate_omits_image_bytes_and_never_calls_server(tmp_path):
+def png(width, height):
+    stream = io.BytesIO()
+    Image.new('RGB', (width, height)).save(stream, format='PNG')
+    return 'data:image/png;base64,' + base64.b64encode(stream.getvalue()).decode()
+
+
+@pytest.mark.parametrize('size,tokens', [((480, 270), 122), ((640, 480), 302), ((1280, 720), 882),
+                                          ((128, 96), 72), ((1920, 1080), 2042), ((4000, 3000), 11752)])
+def test_vision_tokens_match_the_qwen_processor_measured_through_vllm(size, tokens):
+    # Measured with the 27B vLLM /tokenize: the per-image increase over a text-only message.
+    assert vision_tokens(*size) == tokens
+
+
+async def test_explicit_estimate_budgets_images_by_resolution_and_never_calls_server(tmp_path):
     client = CompatibleClient(PlannerProfile(model='test', token_count_mode='estimate'))
     client._post_inference = AsyncMock()
     try:
-        def messages(data):
-            return [{'role': 'user', 'content': [{'type': 'image_url', 'image_url': {'url': data}}]}]
-        small = await client.count(messages('data:image/png;base64,a'), TOOLS)
-        large = await client.count(messages('data:image/png;base64,' + 'a' * 100000), TOOLS)
-        assert small == large and small > 4096
-        assert await client.count(messages('data:image/png;base64,a') * 2, TOOLS) > small + 4096
+        def messages(*urls):
+            return [{'role': 'user', 'content': [{'type': 'image_url', 'image_url': {'url': u}}
+                                                 for u in urls]}]
+        async def text(n):  # the same request with each image replaced by its placeholder
+            return await client.count([{'role': 'user', 'content': [{'type': 'image'}] * n}], TOOLS)
+        small = await client.count(messages(png(480, 270)), TOOLS)
+        large = await client.count(messages(png(1920, 1080)), TOOLS)
+        # Base64 length never counts as text; only the resolution does.
+        assert small - await text(1) == 122 and large - await text(1) == 2042
+        assert await client.count(messages(png(480, 270), png(480, 270)), TOOLS) - await text(2) == 2 * 122
+        with pytest.raises(ValueError, match='inline'):
+            await client.count(messages('https://example.com/a.png'), TOOLS)
         client._post_inference.assert_not_called()
     finally:
         await client.close()
@@ -113,3 +136,31 @@ async def test_remote_count_failure_does_not_silently_estimate():
             await client.count([], [])
     finally:
         await client.close()
+
+
+async def test_estimate_counts_the_responses_body_actually_sent():
+    """Unreplayed reasoning is never sent, so it is never counted; images count by resolution."""
+    reasoning = {'type': 'reasoning', 'id': 'rs', 'summary': [], 'encrypted_content': 'e' * 20000}
+    call = {'type': 'function_call', 'id': 'fc', 'call_id': 'c1', 'name': 'observe', 'arguments': '{}'}
+
+    def history(items):
+        return [{'role': 'user', 'content': 'go'},
+                {'role': 'assistant', 'content': None, 'provider_items': items,
+                 'tool_calls': [{'id': 'c1', 'type': 'function',
+                                 'function': {'name': 'observe', 'arguments': '{}'}}]},
+                {'role': 'tool', 'tool_call_id': 'c1', 'content': 'ok'},
+                {'role': 'user', 'content': [{'type': 'image_url', 'image_url': {'url': png(480, 270)}}]}]
+
+    counts = {}
+    for replay in (False, True):
+        client = CompatibleClient(PlannerProfile(model='test', token_count_mode='estimate',
+                                                 api_format='responses', replay_reasoning=replay))
+        try:
+            counts[replay] = (await client.count(history([reasoning, call]), TOOLS),
+                              await client.count(history([call]), TOOLS))
+        finally:
+            await client.close()
+    assert counts[False][0] == counts[False][1]          # dropped reasoning costs nothing
+    assert counts[True][0] > counts[True][1] + 20000     # replayed reasoning is counted
+    image_free = counts[False][1] - 122
+    assert 0 < image_free < 2000                         # the image is 122, not its base64
